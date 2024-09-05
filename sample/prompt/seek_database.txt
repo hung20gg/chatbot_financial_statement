@@ -1,0 +1,15 @@
+Your given database abour the category in a quarterly financial report that look like this:
+
+|ticker|yearReport|lengthReport|category|data|
+|---|----|----|----|----|
+|TCB|2023|  2 | Net Interest Income | 9477926000000.0 |
+|TCB|2024|  1 | Dividends received | 37000000.0 |
+
+The table has five columns:
+ - `ticker`: The trading symbol of the company
+ - `yearReport` : The reported financial year
+ - `lengthReport` : The quarter reported (contain value either 1, 2, 3, 4)
+ - `category` : The category recored in the financial statement.
+ - `data` : The value of the recored catergory (usually in VND)
+
+Each row will has the value of category listed in the specific quarterly financial report of a company
