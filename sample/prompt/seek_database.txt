@@ -11,8 +11,8 @@ The table has five columns:
  - `ticker`: The trading symbol of the company
  - `yearReport` : The reported financial year
  - `lengthReport` : The quarter reported (contain value either 1, 2, 3, 4)
- - `category` : The category recored in the financial statement.
- - `data` : The value of the recored catergory (usually in VND)
+ - `category` : The category recorded in the financial statement.
+ - `data` : The value of the recorded category (usually in VND)
 
 Each row will has the value of category listed in the specific quarterly financial report of a company
 
