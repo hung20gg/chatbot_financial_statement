@@ -11,6 +11,8 @@ cd group_2_chatbot_financial_statement/sample
 git clone https://github.com/hung20gg/llm.git
 ```
 
+Create a `.env` file in folder `sample` and add `OPENAI_API_KEY = sk-...`
+
 ## Database setup (run only the first time)
 
 First, you need to create the environment
@@ -42,3 +44,5 @@ Then run the python scripts to connect and add data to the database
 ```
 cd group_2_chatbot_financial_statement/sample && python setup_db.py
 ```
+
+You can test the chat ability in `chatbot.ipynb`

@@ -15,3 +15,12 @@ venv.bak/
 llm/
 /llm/
 llm/*
+/test_chroma_db/
+
+/data/
+/__pycache__/
+*.pyc
+*.bin
+data/
+data
+test_chroma_db

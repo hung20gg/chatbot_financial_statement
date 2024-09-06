@@ -1,6 +1,6 @@
 Your given database about the category in a quarterly financial report that look like this:
 
-Table: `financial_report`
+Table: `financial_statement`
 
 |ticker|yearReport|lengthReport|category|data|
 |---|----|----|----|----|
@@ -19,5 +19,6 @@ Each row will has the value of category listed in the specific quarterly financi
 You can access the database by using
 
 ```sql 
-SELECT * FROM financial_report fs;
+SELECT * FROM financial_statement fs;
 ```
+You should `SELECT *` if the query as for `multiple tickers`, `yearReport`, `lengthReport` or `category`.
