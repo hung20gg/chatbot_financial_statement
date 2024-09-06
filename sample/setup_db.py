@@ -22,6 +22,7 @@ def create_table_if_not_exists(conn, table_name, columns):
                 {column_definitions}
             );
         """)
+        print(f'Table {table_name} created successfully.')
         conn.commit()
 
 # Step 3: Insert data into table (upsert logic)
@@ -40,6 +41,7 @@ def upsert_data(conn, table_name, df):
 
             """
             cur.execute(upsert_query, row)
+            print(f'Upserted row: {row}')
         
         conn.commit()
 
@@ -53,11 +55,14 @@ def load_csv_to_postgres(csv_path, db_name, user, password, table_name, port):
     
     try:
         # Create the table if it doesn't exist
+        print('Creating table in database...')
         create_table_if_not_exists(conn, table_name, df.columns)
         
         # Upsert the data into the table
+        print('Upserting data into the table...')
         upsert_data(conn, table_name, df)
     finally:
+        print('Closing connection to database...')
         conn.close()
 
 # Example usage

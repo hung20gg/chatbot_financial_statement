@@ -1,4 +1,6 @@
-Your given database abour the category in a quarterly financial report that look like this:
+Your given database about the category in a quarterly financial report that look like this:
+
+Table: `financial_report`
 
 |ticker|yearReport|lengthReport|category|data|
 |---|----|----|----|----|
@@ -13,3 +15,9 @@ The table has five columns:
  - `data` : The value of the recored catergory (usually in VND)
 
 Each row will has the value of category listed in the specific quarterly financial report of a company
+
+You can access the database by using
+
+```sql 
+SELECT * FROM financial_report fs;
+```
