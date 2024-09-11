@@ -139,8 +139,8 @@ if __name__ == '__main__':
     persist_directory = 'data/test_chroma_db'
 
     # Load csv data to PostgreSQL
-    load_csv_to_postgres(csv_path, db_name, user, password, table_name, port)
+    #load_csv_to_postgres(csv_path, db_name, user, password, table_name, port)
 
     # Generate embeddings for the data
-    # setup_chroma_db(db_name, user, password, host, port, collection_chromadb, persist_directory)
+    setup_chroma_db(db_name, user, password, host, port, collection_chromadb, persist_directory)
         
