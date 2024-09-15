@@ -1,0 +1,89 @@
+map_24hmoney,category_code,vi_caption,en_caption,report_type
+Doanh thu,IS_001,Doanh thu bán hàng và cung cấp dịch vụ,Revenue from Sales of Goods and Services,income_statement
+Các khoản giảm trừ,IS_002,Các khoản giảm trừ doanh thu,Deductions from Revenue,income_statement
+Doanh thu thuần,IS_010,Doanh thu thuần về bán hàng và cung cấp dịch vụ ,Net Revenue from Sales of Goods and Services,income_statement
+Giá vốn hàng bán,IS_011,Giá vốn hàng bán,Cost of Goods Sold,income_statement
+Lợi nhuận gộp,IS_020,Lợi nhuận gộp về bán hàng và cung cấp dịch vụ,Gross Profit from Sales of Goods and Services,income_statement
+Thu nhập tài chính,IS_021,Doanh thu hoạt động tài chính,Financial Income,income_statement
+Chi phí tài chính,IS_022,Chi phí tài chính,Financial Expenses,income_statement
+Chi phí tiền lãi,IS_023,Trong đó: Chi phí lãi vay,Including: Interest Expenses,income_statement
+Lãi/lỗ từ công ty liên doanh,IS_024,"Phần lãi lỗ trong công ty liên doanh, liên kết",Share of Profit/Loss in Joint Ventures and Associates,income_statement
+Chi phí bán hàng,IS_025,Chi phí bán hàng,Selling Expenses,income_statement
+Chi phí quản lý doanh nghiệp,IS_026,Chi phí quản lý doanh nghiệp,General and Administrative Expenses,income_statement
+Lãi/lỗ từ hoạt động kinh doanh,IS_030,Lợi nhuận thuần từ hoạt động kinh doanh,Net Operating Profit,income_statement
+Thu nhập khác,IS_031,Thu nhập khác,Other Income,income_statement
+Chi phí khác,IS_032,Chi phí khác,Other Expenses,income_statement
+"Thu nhập khác, ròng",IS_040,Lợi nhuận khác,Other Profit,income_statement
+LỢI NHUẬN TRƯỚC THUẾ,IS_050,Tổng lợi nhuận kế toán trước thuế,Total Accounting Profit before Tax,income_statement
+Thuế thu nhập doanh nghiệp – hiện thời,IS_051,Chi phí thuế TNDN hiện hành,Current Corporate Income Tax Expense,income_statement
+Thuế thu nhập doanh nghiệp – hoãn lại,IS_052,Chi phí thuế TNDN hoãn lại,Deferred Corporate Income Tax Expense,income_statement
+LỢI NHUẬN SAU THUẾ TNDN,IS_060,Lợi nhuận sau thuế thu nhập doanh nghiệp,Profit after Corporate Income Tax,income_statement
+Lợi ích của cổ đông thiểu số,IS_062, Lợi nhuận sau thuế công ty mẹ không kiểm soát,Profit After Tax Attributable to Non-controlling Interests,income_statement
+Lợi nhuận của Cổ đông của Công ty mẹ,IS_061, Lợi nhuận sau thuế công ty mẹ,Profit After Tax Attributable to the Parent Company,income_statement
+EPS Quý,IS_070,Lãi cơ bản trên cổ phiếu,Basic Earnings per Share (EPS),income_statement
+TỔNG TÀI SẢN,BS_270,TỔNG CỘNG TÀI SẢN,Total Assets,balance_sheet
+TÀI SẢN NGẮN HẠN,BS_100,TÀI SẢN NGẮN HẠN,Current Assets,balance_sheet
+Tiền và tương đương tiền,BS_110,Tiền và các khoản tương đương tiền,Cash and Cash Equivalents,balance_sheet
+Giá trị thuần đầu tư ngắn hạn,BS_120,Các khoản đầu tư tài chính ngắn hạn,Short-term Financial Investments,balance_sheet
+Các khoản phải thu,BS_130,Các khoản phải thu ngắn hạn,Short-term Receivables,balance_sheet
+"Hàng tồn kho, ròng",BS_140,Hàng tồn kho,Inventories,balance_sheet
+Tài sản lưu động khác,BS_150,Tài sản ngắn hạn khác,Other Current Assets,balance_sheet
+TÀI SẢN DÀI HẠN,BS_200,TÀI SẢN DÀI HẠN,Non-current Assets,balance_sheet
+Phải thu dài hạn,BS_210,Các khoản phải thu dài hạn,Long-term Receivables,balance_sheet
+Phải thu khách hang dài hạn,BS_211,Phải thu dài hạn của khách hàng,Long-term Trade Receivables,balance_sheet
+Trả trước người bán dài hạn,BS_212,Trả trước cho người bán dài hạn,Long-term Prepayments to Suppliers,balance_sheet
+Vốn kinh doanh ở các đơn vị trực thuộc,BS_213,Vốn kinh doanh ở đơn vị trực thuộc,Operating Capital in Subsidiaries,balance_sheet
+Phải thu nội bộ dài hạn,BS_214,Phải thu nội bộ dài hạn,Long-term Internal Receivables,balance_sheet
+Phải thu về cho vay dài hạn,BS_215,Phải thu về cho vay dài hạn,Long-term Loan Receivables,balance_sheet
+Phải thu dài hạn khác,BS_216,Phải thu dài hạn khác,Other Long-term Receivables,balance_sheet
+Dự phòng phải thu dài hạn,BS_219,Dự phòng phải thu dài hạn khó đòi,Provision for Doubtful Long-term Receivables,balance_sheet
+Tài sản cố định,BS_220,Tài sản cố định,Fixed Assets,balance_sheet
+Tài sản dở dang dài hạn,BS_240,Tài sản dở dang dài hạn,Long-term Work in Progress,balance_sheet
+Đầu tư dài hạn,BS_250,Đầu tư tài chính dài hạn,Long-term Financial Investments,balance_sheet
+Lợi thế thương mại,BS_269,Lợi thế thương mại,Goodwill,balance_sheet
+Tài sản dài hạn khác,BS_260,Tài sản dài hạn khác,Other Non-current Assets,balance_sheet
+TỔNG NGUỒN VỐN,BS_440,TỔNG CỘNG NGUỒN VỐN,Total Liabilities and Equity,balance_sheet
+NỢ PHẢI TRẢ,BS_300,NỢ PHẢI TRẢ,Liabilities,balance_sheet
+Nợ ngắn hạn,BS_310,Nợ ngắn hạn,Current Liabilities,balance_sheet
+Nợ dài hạn,BS_330,Nợ dài hạn,Non-current Liabilities,balance_sheet
+VỐN CHỦ SỞ HỮU,BS_400,VỐN CHỦ SỞ HỮU,Equity,balance_sheet
+Vốn và các quỹ,BS_410,Vốn chủ sở hữu,Owner’s Equity,balance_sheet
+LỢI ÍCH CỦA CỔ ĐÔNG THIỂU SỐ,BS_439,LỢI ÍCH CỦA CỔ ĐÔNG THIỂU SỐ,Minority Interests,balance_sheet
+Lãi trước thuế,CF_001,Lợi nhuận trước thuế,Profit before Tax,cash_flow_statement
+Khấu hao TSCĐ,CF_002,Khấu hao TSCĐ và BĐSĐT,Depreciation of Fixed Assets and Investment Properties,cash_flow_statement
+Chi phí dự phòng,CF_003,Các khoản dự phòng,Provisions,cash_flow_statement
+Các khoản điều chỉnh khác,CF_007,Các khoản điều chỉnh khác,Other Adjustments,cash_flow_statement
+Lãi/lỗ chênh lệch tỷ giá chưa thực hiện,CF_004,"Lãi, lỗ chênh lệch tỷ giá hối đoái do đánh giá lại các khoản mục tiền tệ có gốc ngoại tệ	",Gain/Loss from Exchange Rate Differences due to Revaluation of Foreign Currency Monetary Items,cash_flow_statement
+Lãi/lỗ từ hoạt động đầu tư,CF_005,"Lãi, lỗ từ hoạt động đầu tư",Gain/Loss from Investment Activities,cash_flow_statement
+Chi phí lãi vay,CF_006,Chi phí lãi vay,Interest Expense,cash_flow_statement
+Lãi/lỗ trước những thay đổi vốn lưu động,CF_008, Lợi nhuận từ hoạt động kinh doanh trước thay đổi vốn lưu động,Profit from Business Activities before Changes in Working Capital,cash_flow_statement
+(Tăng)/giảm chứng khoán kinh doanh,CF_013,"Tăng, giảm chứng khoán kinh doanh",Increase/Decrease in Trading Securities,cash_flow_statement
+Tăng/giảm các khoản phải thu,CF_009,"Tăng, giảm các khoản phải thu",Increase/Decrease in Receivables,cash_flow_statement
+Tăng/giảm hàng tồn kho,CF_010,"Tăng, giảm hàng tồn kho",Increase/Decrease in Inventories,cash_flow_statement
+Tăng/giảm các khoản phải trả,CF_011,"Tăng, giảm các khoản phải trả (Không kể lãi vay phải trả, thuế thu nhập doanh nghiệp phải nộp)",Increase/Decrease in Payables (Excluding Interest Payable and Corporate Income Tax Payable),cash_flow_statement
+Tăng/giảm chi phí trả trước,CF_012,"Tăng, giảm chi phí trả trước",Increase/Decrease in Prepaid Expenses,cash_flow_statement
+Chi phí lãi vay đã trả,CF_014,Tiền lãi vay đã trả,Interest Paid,cash_flow_statement
+Thuế thu nhập doanh nghiệp đã trả,CF_015,Thuế thu nhập doanh nghiệp đã nộp,Corporate Income Tax Paid,cash_flow_statement
+Tiền thu khác từ các hoạt động kinh doanh,CF_016,Tiền thu khác từ hoạt động kinh doanh,Other Cash Inflows from Business Activities,cash_flow_statement
+Tiền chi khác từ các hoạt động kinh doanh,CF_017,Tiền chi khác cho hoạt động kinh doanh,Other Cash Outflows for Business Activities,cash_flow_statement
+LƯU CHUYỂN TIỀN TỆ RÒNG TỪ CÁC HOẠT ĐỘNG SẢN XUẤT KINH DOANH,CF_020,Lưu chuyển tiền thuần từ hoạt động kinh doanh,Net Cash Flow from Operating Activities,cash_flow_statement
+Tiền mua tài sản cố định và các tài sản dài hạn khác,CF_021,"Tiền chi để mua sắm, xây dựng TSCĐ và các tài sản dài hạn khác","Cash Paid for Purchase, Construction of Fixed Assets and Other Long-term Assets",cash_flow_statement
+Tiền thu được từ thanh lý tài sản cố định,CF_022,"Tiền thu từ thanh lý, nhượng bán TSCĐ và các tài sản dài hạn khác",Cash Received from Disposal of Fixed Assets and Other Long-term Assets,cash_flow_statement
+Tiền cho vay hoặc mua công cụ nợ,CF_023,"Tiền chi cho vay, mua các công cụ nợ của đơn vị khác","Cash Paid for Lending, Purchase of Debt Instruments of Other Entities",cash_flow_statement
+Tiền thu từ cho vay hoặc thu từ phát hành công cụ nợ,CF_024,".Tiền thu hồi cho vay, bán lại các công cụ nợ của đơn vị khác","Cash Received from Loan Recovery, Resale of Debt Instruments of Other Entities",cash_flow_statement
+Đầu tư vào các doanh nghiệp khác,CF_025,Tiền chi đầu tư góp vốn vào đơn vị khác,Cash Paid for Equity Investments in Other Entities,cash_flow_statement
+Tiền thu từ việc bán các khoản đầu tư vào các doanh nghiệp khác,CF_026,Tiền thu hồi đầu tư góp vốn vào đơn vị khác,Cash Recovered from Equity Investments in Other Entities,cash_flow_statement
+Cổ tức và tiền lãi nhận được,CF_027,"Tiền thu lãi cho vay, cổ tức và lợi nhuận được chia","Interest, Dividends, and Profit Received from Investments",cash_flow_statement
+LƯU CHUYỂN TIỀN TỆ RÒNG TỪ HOẠT ĐỘNG ĐẦU TƯ,CF_030,Lưu chuyển tiền thuần từ hoạt động đầu tư,Net Cash Flow from Investing Activities,cash_flow_statement
+Tiền thu từ phát hành cổ phiếu và vốn góp,CF_031,"Tiền thu từ phát hành cổ phiếu, nhận vốn góp của chủ sở hữu","Cash Received from Issuance of Shares, Capital Contributions from Owners",cash_flow_statement
+"Chi trả cho việc mua lại, trả lại cổ phiếu",CF_032,"Tiền trả lại vón góp cho các chủ sở hữu, mua lại cổ phiếu của doanh nghiệp đã phát hành","Cash Paid to Return Capital Contributions to Owners, Repurchase of Issued Shares",cash_flow_statement
+Tiền thu được các khoản đi vay,CF_033,Tiền thu từ đi vay,Cash Received from Borrowings,cash_flow_statement
+Tiển trả các khoản đi vay,CF_034,Tiền chi trả nợ gốc vay,Cash Paid for Repayment of Principal Borrowings,cash_flow_statement
+Tiền thanh toán vốn gốc đi thuê tài chính,CF_035,Tiền chi trả nợ gốc thuê tài chính,Cash Paid for Repayment of Principal Finance Leases,cash_flow_statement
+Cổ tức đã trả,CF_036,"Cổ tức, lợi nhuận đã trả cho chủ sở hữu",Dividends and Profits Paid to Owners,cash_flow_statement
+Tiền lãi đã nhận,CF_037,Tiền thu từ vốn góp của cổ đông không kiểm soát,Cash Received from Non-controlling Shareholders' Contributions,cash_flow_statement
+LƯU CHUYỂN TIỀN TỆ RÒNG TỪ HOẠT ĐỘNG TÀI CHÍNH,CF_040,Lưu chuyển tiền thuần từ hoạt động tài chính,Net Cash Flow from Financing Activities,cash_flow_statement
+Lưu chuyển tiền thuần trong kỳ,CF_050,Lưu chuyển tiền thuần trong kỳ,Net Cash Flow for the Period,cash_flow_statement
+TIỀN VÀ TƯƠNG ĐƯƠNG TIỀN ĐẦU KỲ,CF_060,Tiền và tương đương tiền đầu kỳ,Cash and Cash Equivalents at the Beginning of the Period,cash_flow_statement
+Ảnh hưởng của chênh lệch tỷ giá,CF_061,Ảnh hưởng của thay đổi tỷ giá hối đoái quy đổi ngoại tệ,Impact of Exchange Rate Changes on Foreign Currency Translation,cash_flow_statement
+TIỀN VÀ TƯƠNG ĐƯƠNG TIỀN CUỐI KỲ,CF_070,Tiền và tương đương tiền cuối kỳ,Cash and Cash Equivalents at the End of the Period,cash_flow_statement

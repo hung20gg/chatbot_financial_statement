@@ -1,0 +1,96 @@
+map_24hmoney,category_code,vi_caption,en_caption,report_type
+Thu nhập lãi thuần,IS_003,Thu nhập lãi thuần,Net Interest Income,income_statement
+Thu nhập lãi và các khoản thu nhập tương tự,IS_001,Thu nhập lãi và các khoản thu nhập tương tự,Interest Income and Similar Income,income_statement
+Chi phí lãi và các chi phí tương tự,IS_002,Chi phí lãi và các chi phí tương tự,Interest Expenses and Similar Charges,income_statement
+Lãi thuần từ hoạt động dịch vụ,IS_006,Lãi/lỗ thuần từ hoạt động dịch vụ,Net Gain/Loss from Service Activities,income_statement
+Thu nhập từ hoạt động dịch vụ,IS_004,Thu nhập từ hoạt động dịch vụ,Service Income,income_statement
+chi phí hoạt động dịch vụ,IS_005,Chi phí hoạt động dịch vụ,Service Expenses,income_statement
+Lãi/lỗ thuần từ hoạt động kinh doanh ngoại hối và vàng,IS_007,Lãi/lỗ thuần từ hoạt động kinh doanh ngoại hối,Net Gain/Loss from Foreign Exchange Trading,income_statement
+Lãi/lỗ thuần từ mua bán chứng khoán kinh doanh,IS_008,Lãi /lỗ thuần từ mua bán chứng khoán kinh doanh,Net Gain/Loss from Trading Securities,income_statement
+Lãi/lỗ thuần từ mua bán chứng khoán đầu tư,IS_009,Lãi/lỗ thuần từ mua bán chứng khoán đầu tư,Net Gain/Loss from Investment Securities,income_statement
+Lãi/lỗ thuần từ hoạt động khác,IS_012,Lãi/lỗ thuần từ hoạt động khác,Net Gain/Loss from Other Activities,income_statement
+Thu nhập từ hoạt động khác,IS_010,Thu nhập từ hoạt động khác,Other Income,income_statement
+Chi phí hoạt động khác,IS_011,Chi phí hoạt động khác,Other Expenses,income_statement
+"Thu nhập từ góp vốn, mua cổ phần",IS_013,"Thu nhập từ góp vốn, mua cổ phần",Income from Equity Investments and Share Purchases,income_statement
+Chi phí hoạt động,IS_014,Chi phí hoạt động,Operating Expenses,income_statement
+Lợi nhuận từ HDKD trước chi phí dự phòng rủi ro tín dụng,IS_015,Lợi nhuận thuần từ hoạt động kinh doanh trước chi phí dự phòng rủi ro tín dụng,Profit before Provision for Credit Risk,income_statement
+Chi phí dự phòng rủi ro tín dụng,IS_016,Chi phí dự phòng rủi ro tín dụng,Credit Risk Provision Expenses,income_statement
+Tổng lợi nhuận trước thuế,IS_017,Tổng lợi nhuận trước thuế,Total Profit before Tax,income_statement
+Chi phí thuế thu nhập doanh nghiệp,IS_020,Chi phí thuế TNDN,Corporate Income Tax Expenses,income_statement
+Chi phí thuế TNDN hiện hành,IS_018,Chi phí thuế TNDN hiện hành,Current Corporate Income Tax Expenses,income_statement
+Chi phí thuế TNDN hoãn lại,IS_019,Chi phí thuế TNDN hoãn lại,Deferred Corporate Income Tax Expenses,income_statement
+Lợi nhuận sau thuế,IS_021,Lợi nhuận sau thuế,Profit after Tax,income_statement
+Lợi ích của cổ đông thiểu số,IS_022,Lợi ích của cổ đông thiểu số,Minority Interests,income_statement
+EPS (đ),IS_023,Lãi cơ bản trên cổ phiếu,Basic Earnings per Share (EPS),income_statement
+TỔNG TÀI SẢN,BS_300,TỔNG TÀI SẢN CÓ,Total Assets,balance_sheet
+"Tiền mặt, vàng bạc, đá quý",BS_110,"Tiền mặt, vàng bạc, đá quý","Cash, Gold, and Precious Stones",balance_sheet
+Tiền gửi tại ngân hàng nhà nước Việt Nam,BS_120,Tiền gửi tại ngân hàng nhà nước Việt Nam,Deposits at the State Bank of Vietnam,balance_sheet
+Tiền gửi tại các TCTD khác và cho vay các TCTD khác,BS_130,Tiền gửi và cho vay các tổ chức tín dụng khác,Deposits and Loans to Other Credit Institutions,balance_sheet
+Chứng khoán kinh doanh,BS_140,Chứng khoán kinh doanh,Trading Securities,balance_sheet
+Các công cụ tài chính phái sinh và các tài sản tài chính khác,BS_150,Các công cụ tài chính phái sinh và các tài sản tài chính khác,Derivative Financial Instruments and Other Financial Assets,balance_sheet
+Cho vay khách hàng,BS_160,Cho vay khách hàng,Loans to Customers,balance_sheet
+Chứng khoán đầu tư,BS_170,Chứng khoán đầu tư,Investment Securities,balance_sheet
+"Góp vốn, đầu tư dài hạn",BS_210,Góp vốn đầu tư dài hạn,Long-term Equity Investments,balance_sheet
+Tiền gửi của khách hàng,BS_330,Tiền gửi của khách hàng,Customer Deposits,balance_sheet
+Tài sản cố định,BS_220,Tài sản cố định,Fixed Assets,balance_sheet
+Tài sản Có khác,BS_250,Tài sản có khác,Other Assets,balance_sheet
+NỢ PHẢI TRẢ VÀ VỐN CHỦ SỞ HỮU,BS_800,NỢ PHẢI TRẢ VÀ VỐN CHỦ SỞ HỮU,Liabilities and Equity,balance_sheet
+Tổng nợ phải trả,BS_400,TỔNG NỢ PHẢI TRẢ,Total Liabilities,balance_sheet
+Các khoản nợ chính phủ và NHNN Việt Nam,BS_310,Các khoản nợ chính phủ và Ngân hàng Nhà nước,Government and State Bank Borrowings,balance_sheet
+Tiền gửi và vay các Tổ chức tín dụng khác,BS_320,Tiền gửi và vay các tổ chức tín dụng khác,Deposits and Borrowings from Other Credit Institutions,balance_sheet
+Các công cụ tài chính phái sinh và các khoản nợ tài chính khác,BS_340,Các công cụ tài chính phái sinh và các khoản nợ tài chính khác,Derivative Financial Instruments and Other Financial Liabilities,balance_sheet
+"Vốn tài trợ, uỷ thác đầu tư của Chính phủ và các tổ chức tín dụng khác",BS_350,"Vốn tài trợ, ủy thác đầu tư, cho vay tổ chức tín dụng chịu rủi ro","Sponsored Capital, Entrusted Investments, Loans to Risk-bearing Credit Institutions",balance_sheet
+Phát hành giấy tờ có giá,BS_360,Phát hành giấy tờ có giá,Issued Debt Securities,balance_sheet
+Các khoản nợ khác,BS_370,Các khoản nợ khác,Other Liabilities,balance_sheet
+Vốn chủ sở hữu,BS_500,Vốn chủ sở hữu,Equity,balance_sheet
+Vốn của tổ chức tín dụng,BS_410,Vốn của tổ chức tín dụng,Equity of Credit Institution,balance_sheet
+Quỹ của tổ chức tín dụng,BS_420,Quỹ của Tổ chức tín dụng,Reserves of Credit Institution,balance_sheet
+Chênh lệch tỷ giá hối đoái,BS_430,Chênh lệch tỷ giá hối đoái,Foreign Exchange Differences,balance_sheet
+Chênh lệch đánh giá lại tài sản,BS_440,Chênh lệch đánh giá lại tài sản,Asset Revaluation Differences,balance_sheet
+Lợi nhuận chưa phân phối,BS_450,Lợi nhuận để lại chưa phân phối/Lỗ lũy kế,Retained Earnings/Accumulated Losses,balance_sheet
+Lợi ích của cổ đông thiểu số,BS_700,Lợi ích của cổ đông thiểu số,Minority Interest,balance_sheet
+Thu nhập lãi và các khoản tương đương (Trực tiếp),CF_001,Thu nhập lãi và các khoản thu nhập tương tự nhận được,Interest Income and Similar Income Received,cash_flow_statement
+Chi phí lãi và các khoản tương đương (Trực tiếp),CF_002,Chi phí lãi và các chi phí tương tự đã trả,Interest Expenses and Similar Charges Paid,cash_flow_statement
+Thu nhập từ hoạt động dịch vụ nhận được (Trực tiếp),CF_003,Thu nhập từ hoạt động dịch vụ nhận được,Service Income Received,cash_flow_statement
+Thu nhập từ hoạt động kinh doanh chứng khoán (Trực tiếp),CF_004,"Chênh lệch số tiền thực thu/thực chi từ hoạt động kinh doanh(ngoại tệ,vàng bạc,chứng khoán)","Net Cash Inflows/Outflows from Trading Activities (Foreign Exchange, Gold, Securities)",cash_flow_statement
+Thu nhập khác (Trực tiếp),CF_005,Thu nhập khác,Other Income,cash_flow_statement
+"Tiền thu các khoản nợ đã được xử lý, xóa, bù đắp bằng nguồn rủi ro",CF_006,"Tiền thu các khoản nợ đã được xử lý, xóa, bù đắp bằng nguồn rủi ro","Cash Collected from Bad Debts Written Off, Recovered or Offset by Risk Provisions",cash_flow_statement
+Thanh toán cho nhân viên và nhà cung cấp (Trực tiếp),CF_007,"Tiền chi trả cho nhân viên và hoạt động quản lý, công vụ(*)",Cash Paid for Employees and Administrative Expenses(*),cash_flow_statement
+Tiền chi nộp thuế thu nhập doanh nghiệp (Trực tiếp),CF_008,Tiền thuế thu nhập thực nộp trong kỳ(*),Corporate Income Tax Paid During the Period(*),cash_flow_statement
+Lãi/lỗ trước những thay đổi vốn lưu động (Trực tiếp),CF_009,Lưu chuyển tiền thuần từ hoạt động kinh doanh trước những thay đổi về tài sản và vốn lưu động,Net Cash Flow from Operating Activities Before Changes in Assets and Working Capital,cash_flow_statement
+Tăng/Giảm các khoản tiền gửi và cho vay các tổ chức tín dụng khác (Trực tiếp),CF_010,(Tăng)/Giảm các khoản tiền gửi và cho vay các TCTD khác,(Increase)/Decrease in Deposits and Loans to Other Credit Institutions,cash_flow_statement
+Tăng/giảm các khoản về kinh doanh chứng khoán (Trực tiếp),CF_011,(Tăng)/Giảm các khoản về kinh doanh chứng khoán,(Increase)/Decrease in Trading Securities,cash_flow_statement
+Tăng/Giảm các công cụ tài chính phái sinh và các tài sản tài chính khác (Trực tiếp),CF_012,11. (Tăng)/Giảm các công cụ tài chính phái sinh và các tài sản tài chính khác,(Increase)/Decrease in Derivative Financial Instruments and Other Financial Assets,cash_flow_statement
+Tăng/Giảm các khoản cho vay khách hàng (Trực tiếp),CF_013,(Tăng)/Giảm các khoản cho vay khách hàng,(Increase)/Decrease in Loans to Customers,cash_flow_statement
+Tăng/Giảm nguồn dự phòng để bù đắp tổn thất các khoản (Trực tiếp),CF_014,Giảm nguồn dự phòng để bù đắp tổn thất các khoản,Decrease in Provision Funds to Offset Asset Losses,cash_flow_statement
+Tăng/Giảm khác về tài sản hoạt động (Trực tiếp),CF_015,(Tăng)/Giảm khác về tài sản hoạt động,(Increase)/Decrease in Other Operating Assets,cash_flow_statement
+Tăng/Giảm các khoản nợ chính phủ và NHNN (Trực tiếp),CF_016,Tăng/(Giảm) các khoản nợ chính phủ và NHNN,Increase/(Decrease) in Government and State Bank Borrowings,cash_flow_statement
+Tăng/Giảm các khoản tiền gửi và vay các TCTD khác (Trực tiếp),CF_017,"Tăng/(Giảm) các khoản tiền gửi, tiền vay các tổ chức tín dụng",Increase/(Decrease) in Deposits and Borrowings from Other Credit Institutions,cash_flow_statement
+Tăng/Giảm tiền gửi của khách hàng (Trực tiếp),CF_018,Tăng/(Giảm) tiền gửi của khách hàng(bao gồm cả kho bạc nhà nước),Increase/(Decrease) in Customer Deposits (Including Treasury Deposits),cash_flow_statement
+Tăng/Giảm phát hành giấy tờ có giá (Trực tiếp),CF_019,Tăng(/Giảm) phát hành giấy tờ có giá(ngoại trừ giấy tờ có giá phát hành được tính vào hoạt động tài chính),Increase/(Decrease) in Issued Debt Securities (Excluding those Classified as Financial Activities),cash_flow_statement
+"Tăng/Giảm vốn tài trợ, uỷ thác đầu tư của chính phủ và các TCTD khác (Trực tiếp)",CF_020,"Tăng/(Giảm) vốn tài trợ, ủy thác đầu tư, cho vay TCTD chịu rủi ro","Increase/(Decrease) in Sponsored Capital, Entrusted Investments, Loans to Risk-bearing Credit Institutions",cash_flow_statement
+Tăng/Giảm khác về công nợ hoạt động (Trực tiếp),CF_022,Tăng/ (Giảm) khác về công nợ hoạt động,Increase/ (Decrease) in Other Operating Liabilities,cash_flow_statement
+Tăng/Giảm các công cụ tài chính phái sinh và các khoản nợ tài chính khác (Trực tiếp),CF_021,Tăng/ (Giảm) các công cụ tài chính phái sinh và các khoản nợ tài chính khác,Increase/(Decrease) in Derivative Financial Instruments and Other Financial Liabilities,cash_flow_statement
+Chi từ các quỹ của TCTD (Trực tiếp),CF_023,Chi từ các quỹ của TCTD(*),Cash Disbursed from Credit Institution Reserves(*),cash_flow_statement
+LƯU CHUYỂN TIỀN TỆ RÒNG TỪ CÁC HOẠT ĐỘNG SẢN XUẤT KINH DOANH,CF_024,Lưu chuyển tiền thuần từ hoạt động kinh doanh,Net Cash Flow from Operating Activities,cash_flow_statement
+Tiền mua tài sản cố định và các tài sản dài hạn khác,CF_025,Mua sắm tài sản cố định(*),Purchase of Fixed Assets(*),cash_flow_statement
+Tiền thu được từ thanh lý tài sản cố định,CF_026,"Tiền thu từ thanh lý, nhượng bán TSCĐ",Cash Received from Disposal of Fixed Assets,cash_flow_statement
+"Tiền chi từ thanh lý, nhượng bán TSCĐ",CF_027,"Tiền chi từ thanh lý, nhượng bán TSCĐ(*)",Cash Paid for Disposal of Fixed Assets(*),cash_flow_statement
+Mua sắm Bất động sản đầu tư,CF_028,Mua sắm bất động sản đầu tư(*),Purchase of Investment Properties(*),cash_flow_statement
+"Tiền thu từ bán, thanh lý bất động sản đầu tư",CF_029,"Tiền thu từ bán, thanh lý bất động sản đầu tư",Cash Received from Sale/Disposal of Investment Properties,cash_flow_statement
+"Tiền chi ra do bán, thanh lý bất động sản đầu tư",CF_030,"Tiền chi ra do bán, thanh lý bất động sản đầu tư (*)",Cash Paid for Sale/Disposal of Investment Properties(*),cash_flow_statement
+Đầu tư vào các doanh nghiệp khác,CF_031,"Tiền chi đầu t­ư, góp vốn vào các đơn vị khác (Chi đầu tư mua công ty con, góp vốn liên doanh, liên kết, và các khoản đầu tư dài hạn khác) (*)","Cash Paid for Equity Investments in Other Entities (Including Subsidiaries, Joint Ventures, and Other Long-term Investments)(*)",cash_flow_statement
+Tiền thu từ việc bán các khoản đầu tư vào các doanh nghiệp khác,CF_032,"Tiền thu đầu t­ư, góp vốn vào các đơn vị khác (Thu bán, thanh lý công ty con, góp vốn liên doanh, liên kết, các khoản đầu tư dài hạn khác)","Cash Received from Sale of Equity Investments in Other Entities (Including Subsidiaries, Joint Ventures, and Other Long-term Investments)",cash_flow_statement
+Cổ tức và tiền lãi nhận được,CF_033,"Tiền thu cổ tức và lợi nhuận được chia từ các khoản đầu tư, góp vốn dài hạn",Cash Dividends and Profits from Long-term Investments,cash_flow_statement
+LƯU CHUYỂN TIỀN TỆ RÒNG TỪ HOẠT ĐỘNG ĐẦU TƯ,CF_034,Lưu chuyển tiền thuần từ hoạt động đầu tư,Net Cash Flow from Investing Activities,cash_flow_statement
+Tiền thu từ phát hành cổ phiếu và vốn góp,CF_035,Tăng vốn cổ phần từ góp vốn và/hoặc phát hành cổ phiếu,Increase in Share Capital from Contributions and/or Share Issuance,cash_flow_statement
+Tiền thu từ phát hành giấy tờ có giá dài hạn đủ điều kiện tính vào vốn tự có và các khoản vốn vay dài hạn khác,CF_036,Tiền thu từ phát hành giấy tờ có giá dài hạn có đủ điều kiện tính vào vốn tự có và các khoản vốn vay dài hạn khác,Cash Received from Issuance of Long-term Debt Securities Qualifying for Equity and Other Long-term Borrowings,cash_flow_statement
+Tiền chi thanh toán giấy tờ có giá dài hạn đủ điều kiện tính vào vốn tự có và các khoản vốn vay dài hạn khác,CF_037,Tiền chi thanh toán giấy tờ có giá dài hạn có đủ điều kiện tính vào vốn tự có và các khoản vốn vay dài hạn khác(*),Cash Paid for Repayment of Long-term Debt Securities Qualifying for Equity and Other Long-term Borrowings(*),cash_flow_statement
+Cổ tức đã trả,CF_038,"Cổ tức trả cho cổ đông, lợi nhuận đã chia(*)",Dividends and Profits Paid to Shareholders(*),cash_flow_statement
+Tiền chi ra mua cổ phiếu quỹ,CF_039,Tiền chi ra mua cổ phiếu quỹ (*),Cash Paid for Share Buyback(*),cash_flow_statement
+tiền thu được do bán cổ phiếu quỹ,CF_040,Tiền thu được do bán cổ phiếu quỹ,Cash Received from Sale of Treasury Shares,cash_flow_statement
+LƯU CHUYỂN TIỀN TỆ RÒNG TỪ HOẠT ĐỘNG TÀI CHÍNH,CF_041,Lưu chuyển tiền thuần từ hoạt động tài chính,Net Cash Flow from Financing Activities,cash_flow_statement
+LƯU CHUYỂN TIỀN THUẦN TRONG KỲ,CF_042,Lưu chuyển tiền thuần trong kỳ,Net Cash Flow for the Period,cash_flow_statement
+TIỀN VÀ TƯƠNG ĐƯƠNG TIỀN ĐẦU KỲ,CF_043,Tiền và các khoản tương đương tiền tại thời điểm đầu kỳ,Cash and Cash Equivalents at the Beginning of the Period,cash_flow_statement
+Ảnh hưởng của chênh lệch tỷ giá,CF_044,Điều chỉnh ảnh hưởng của thay đổi tỷ giá,Adjustments for Exchange Rate Changes,cash_flow_statement
+TIỀN VÀ TƯƠNG ĐƯƠNG TIỀN CUỐI KỲ,CF_045,Tiền và các khoản tương đương tiền tại thời điểm cuối kỳ,Cash and Cash Equivalents at the End of the Period,cash_flow_statement
