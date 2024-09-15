@@ -1,5 +1,25 @@
 # group_2_chatbot_financial_statement
 
+## Update
+
+### Database new design
+
+Separate 2 type of financial reports: Bank and non-bank firms
+
+Each of them will have 2 tables, one store information and the other store mapping code 
+
+In total, there are 4 tables:
+- bank_financial_report
+- non_bank_financial_report
+- map_category_code_non_bank
+- map_category_code_bank
+
+### New prompting strategies
+
+- 2-step text2sql. First asking LLM to analyze the problem and choose which category do they want to access. Then adding snapshot of the table into prompt, so it can correctly select the right column.
+
+- Partial sql. Instead of query to find the solution, we can ask LLM to generate which table does it want for snapshot, and then create a general SQL for it, or using CoT reasoning directly.
+
 ## LLM setup
 
 Clone my separate library for LLM 
@@ -7,8 +27,8 @@ Clone my separate library for LLM
 For sample folder 
 
 ```
-cd group_2_chatbot_financial_statement/sample 
-git clone https://github.com/hung20gg/llm.git
+cd group_2_chatbot_financial_statement/sample && git clone https://github.com/hung20gg/llm.git
+
 ```
 
 Create a `.env` file in folder `sample` and add `OPENAI_API_KEY = sk-...`
@@ -18,13 +38,14 @@ Create a `.env` file in folder `sample` and add `OPENAI_API_KEY = sk-...`
 First, you need to create the environment
 
 ```
+cd ../
 python -m venv env
 ```
 
 Install the library
 
 ```
-cd group_2_chatbot_financial_statement && pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 To setup a database, simply pull a Docker image via
@@ -42,7 +63,7 @@ run docker in another port `5433` to avoid conflict with local port
 Then run the python scripts to connect and add data to the database
 
 ```
-cd group_2_chatbot_financial_statement/sample && python setup_db.py
+cd sample && python setup_db.py
 ```
 
 You can test the chat ability in `chatbot.ipynb`
