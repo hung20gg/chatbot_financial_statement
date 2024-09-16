@@ -179,6 +179,7 @@ if __name__ == '__main__':
     persist_directory = 'data/category_non_bank_chroma'
 
     # Load csv data to PostgreSQL
+
     load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
     print("Loaded map_category_code_non_bank")
     setup_chroma_db(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
@@ -209,7 +210,4 @@ if __name__ == '__main__':
     table_name = 'non_bank_financial_report'
     load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_non_bank(category_code)'})
     print("Loaded non_bank_financial_report")
-    
-    
-    
         
