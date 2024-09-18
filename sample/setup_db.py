@@ -54,7 +54,9 @@ def create_table_if_not_exists(conn, table_name, df, primary_key = None, foreign
         
         column_definitions = column_definitions[:-2]
         cur.execute(f"""
-            CREATE TABLE IF NOT EXISTS {table_name} (
+            DROP TABLE IF EXISTS {table_name};        
+                    
+            CREATE TABLE {table_name} (
                 {column_definitions}
             );
         """)
