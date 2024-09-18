@@ -2,22 +2,22 @@
 
 -- Get Net income value
 WITH net_income AS (
-    SELECT nbfr.data AS net_income, nbfr.stock_code as stock_code, nbfr.quarter as quarter, nbfr.year as year
-    FROM non_bank_financial_report nbfr
-    WHERE nbfr.stock_code in ('VIC', 'VRE', 'VHM')
-      AND nbfr.year = 2024
-      AND nbfr.quarter in (1,2)
-      AND nbfr.category_code = 'IS_060'
+    SELECT data AS net_income, stock_code, quarter, year
+    FROM non_bank_financial_report
+    WHERE stock_code in ('VIC', 'VRE', 'VHM')
+      AND year = 2024
+      AND quarter in (1,2)
+      AND category_code = 'IS_060'
 ),
 
 -- Get Revenue value
 revenue AS (
-    SELECT nbfr.data AS revenue, nbfr.stock_code as stock_code, nbfr.quarter as quarter, nbfr.year as year
-    FROM non_bank_financial_report nbfr
-    WHERE nbfr.stock_code in ('VIC', 'VRE', 'VHM')
-      AND nbfr.year = 2024
-      AND nbfr.quarter in (1,2)
-      AND nbfr.category_code = 'IS_001'
+    SELECT data AS revenue, stock_code, quarter, year
+    FROM non_bank_financial_report
+    WHERE stock_code in ('VIC', 'VRE', 'VHM')
+      AND year = 2024
+      AND quarter in (1,2)
+      AND category_code = 'IS_001'
 )
 -- Select detail information 
 SELECT 
