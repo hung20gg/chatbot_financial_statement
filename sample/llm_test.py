@@ -162,7 +162,7 @@ def reasoning_text2SQL(llm, text, search_func, top_k):
     with open('prompt/seek_database.txt', 'r') as f:
         database_description = f.read()
         
-    with open('prompt/example1 no_col_name.txt', 'r') as f:
+    with open('prompt/question_query.txt', 'r') as f:
         few_shot = f.read()
         
     prompt = f"""You have the following database schema:
