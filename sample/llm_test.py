@@ -170,6 +170,7 @@ def reasoning_text2SQL(llm, text, search_func, top_k):
     
     database_description = utils.read_file_without_comments('prompt/seek_database.txt')
         
+
     few_shot = utils.read_file_without_comments('prompt/example1.txt')
         
     prompt = f"""You have the following database schema:

@@ -1,0 +1,557 @@
+-- nonbank : 14
+-- bank : 17 
+
+-- 1. Calculate ROE of VIC, VNM, and HPG for the first two quarters of 2024
+
+-- Calculate ROE of VIC, VRE and VHM in first 2 quarter of 2024
+
+-- Get Net income value
+WITH net_income AS (
+    SELECT nbfr.data AS net_income, nbfr.stock_code as stock_code, nbfr.quarter as quarter, nbfr.year as year
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc 
+      ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code in ('VIC', 'VNM', 'HPG')
+      AND nbfr.year = 2024
+      AND nbfr.quarter in (1,2)
+      AND mc.en_caption = 'Profit after Corporate Income Tax'),
+
+-- Get equity value
+equity AS (
+    SELECT nbfr.data AS equity, nbfr.stock_code as stock_code, nbfr.quarter as quarter, nbfr.year as year
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc 
+      ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code in ('VIC', 'VNM', 'HPG')
+      AND nbfr.year = 2024
+      AND nbfr.quarter in (1,2)
+      AND mc.en_caption = 'Equity'
+)
+-- Select detail information 
+SELECT 
+	net_income.stock_code,
+	net_income.year,
+	net_income.quarter,
+	net_income.net_income,
+    (net_income.net_income / equity.equity) AS ROE
+    	
+FROM net_income
+JOIN equity 
+ON net_income.stock_code = equity.stock_code
+AND net_income.quarter = equity.quarter 
+AND net_income.year = equity.year;
+-- Join on both quarter and year to avoid duplication
+
+-- 2. Compare the Debt-to-Equity Ratio of VNM and MSN for the last two quarters of 2024
+
+WITH total_debt AS (
+    SELECT nbfr.data AS total_debt, nbfr.stock_code, nbfr.quarter, nbfr.year
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code IN ('VNM', 'MSN') AND nbfr.year = 2024 AND nbfr.quarter IN (1, 2)
+      AND mc.en_caption = 'Liabilities'
+),
+total_equity AS (
+    SELECT nbfr.data AS total_equity, nbfr.stock_code, nbfr.quarter, nbfr.year
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code IN ('VNM', 'MSN') AND nbfr.year = 2024 AND nbfr.quarter IN (1, 2)
+      AND mc.en_caption = 'Equity'
+)
+SELECT 
+    total_debt.stock_code,
+    total_debt.year,
+    total_debt.quarter,
+    (total_debt.total_debt / total_equity.total_equity) AS debt_to_equity_ratio
+FROM total_debt
+JOIN total_equity
+  ON total_debt.stock_code = total_equity.stock_code
+  AND total_debt.quarter = total_equity.quarter
+  AND total_debt.year = total_equity.year;
+
+  -- 3. Compare Gross Profit Margin of VIC, VHM, and VNM for Q1 2024
+
+  WITH gross_profit AS (
+    SELECT nbfr.data AS gross_profit, nbfr.stock_code, nbfr.quarter, nbfr.year
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code IN ('VIC', 'VHM', 'VNM') AND nbfr.year = 2024 AND nbfr.quarter = 1
+      AND mc.en_caption = 'Gross Profit from Sales of Goods and Services'
+),
+revenue AS (
+    SELECT nbfr.data AS revenue, nbfr.stock_code, nbfr.quarter, nbfr.year
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code IN ('VIC', 'VHM', 'VNM') AND nbfr.year = 2024 AND nbfr.quarter = 1
+      AND mc.en_caption = 'Revenue from Sales of Goods and Services'
+)
+SELECT 
+    gross_profit.stock_code,
+    gross_profit.year,
+    gross_profit.quarter,
+    (gross_profit.gross_profit / revenue.revenue) * 100 AS gross_profit_margin
+FROM gross_profit
+JOIN revenue 
+  ON gross_profit.stock_code = revenue.stock_code
+  AND gross_profit.quarter = revenue.quarter
+  AND gross_profit.year = revenue.year;
+
+-- 4. Calculate Free Cash Flow for VHM and VNM for Q1 2024
+
+WITH operating_cash_flow AS (
+    SELECT nbfr.data AS operating_cash_flow, nbfr.stock_code, nbfr.quarter, nbfr.year
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code IN ('VHM', 'VNM') AND nbfr.year = 2024 AND nbfr.quarter = 1
+      AND mc.en_caption = 'Net Cash Flow from Operating Activities'
+),
+investing_cash_flow AS (
+    SELECT nbfr.data AS investing_cash_flow, nbfr.stock_code, nbfr.quarter, nbfr.year
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code IN ('VHM', 'VNM') AND nbfr.year = 2024 AND nbfr.quarter = 1
+      AND mc.en_caption = 'Cash Paid for Purchase, Construction of Fixed Assets and Other Long-term Assets'
+)
+SELECT 
+    operating_cash_flow.stock_code,
+    operating_cash_flow.year,
+    operating_cash_flow.quarter,
+    (operating_cash_flow.operating_cash_flow - investing_cash_flow.investing_cash_flow) AS free_cash_flow
+FROM operating_cash_flow
+JOIN investing_cash_flow 
+  ON operating_cash_flow.stock_code = investing_cash_flow.stock_code
+  AND operating_cash_flow.quarter = investing_cash_flow.quarter
+  AND operating_cash_flow.year = investing_cash_flow.year;
+
+-- 5. Compare Earnings Per Share (EPS) of VIC, VHM, and MSN for 2024
+
+SELECT nbfr.stock_code, nbfr.year, nbfr.data AS EPS
+FROM non_bank_financial_report nbfr
+JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+WHERE nbfr.stock_code IN ('VIC', 'VHM', 'MSN') AND nbfr.year = 2024
+  AND mc.en_caption = 'Basic Earnings per Share (EPS)';
+
+-- 6. Top 5 companies by Total Assets in 2023
+
+SELECT nbfr.stock_code, nbfr.year, nbfr.data AS total_assets
+FROM non_bank_financial_report nbfr
+JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+WHERE nbfr.year = 2023 AND mc.en_caption = 'Total Assets' AND nbfr.quarter = 0
+ORDER BY total_assets DESC
+LIMIT 5;
+
+-- 7. Top 3 companies by Gross Profit Margin in Q1 2024
+
+WITH gross_profit AS (
+    SELECT nbfr.stock_code, nbfr.data AS gross_profit
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE mc.en_caption = 'Gross Profit from Sales of Goods and Services' AND nbfr.year = 2024 AND nbfr.quarter = 1
+),
+revenue AS (
+    SELECT nbfr.stock_code, nbfr.data AS revenue
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE mc.en_caption = 'Revenue from Sales of Goods and Services' AND nbfr.year = 2024 AND nbfr.quarter = 1
+)
+SELECT gross_profit.stock_code, (gross_profit.gross_profit / revenue.revenue) * 100 AS gross_profit_margin
+FROM gross_profit
+JOIN revenue ON gross_profit.stock_code = revenue.stock_code
+ORDER BY gross_profit_margin DESC
+LIMIT 3;
+
+-- 8. Which company had the highest Revenue from Sales of Goods and Services in Q2 2024?
+
+SELECT nbfr.stock_code, nbfr.year, nbfr.quarter, nbfr.data AS revenue
+FROM non_bank_financial_report nbfr
+JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+WHERE mc.en_caption = 'Revenue from Sales of Goods and Services' AND nbfr.year = 2024 AND nbfr.quarter = 2
+ORDER BY revenue DESC
+LIMIT 1;
+
+-- 9. Top 5 companies by Profit after Corporate Income Tax in 2023
+
+SELECT nbfr.stock_code, nbfr.year, nbfr.data AS net_profit
+FROM non_bank_financial_report nbfr
+JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+WHERE mc.en_caption = 'Profit after Corporate Income Tax' AND nbfr.year = 2023 AND nbfr.quarter = 0
+ORDER BY net_profit DESC
+LIMIT 5;
+
+-- 10. Compare Inventories of VNM, HPG, and VIC in 2023
+
+SELECT nbfr.stock_code, nbfr.year, nbfr.data AS inventories
+FROM non_bank_financial_report nbfr
+JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+WHERE mc.en_caption = 'Inventories' AND nbfr.stock_code IN ('VNM', 'HPG', 'VIC') AND nbfr.year = 2023 AND nbfr.quarter = 0;
+
+-- 11. Profit before tax of VHM in Q1 2024
+
+SELECT nbfr.stock_code, nbfr.year, nbfr.quarter, nbfr.data AS profit_before_tax
+FROM non_bank_financial_report nbfr
+JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+WHERE nbfr.stock_code = 'VHM' AND nbfr.year = 2024 AND nbfr.quarter = 1 AND mc.en_caption = 'Total Accounting Profit before Tax';
+
+-- 12. Calculate the Return on Assets (ROA) of FPT for Q1 2024
+
+WITH net_income AS (
+    SELECT nbfr.data AS net_income, nbfr.stock_code, nbfr.quarter, nbfr.year
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'FPT' AND nbfr.year = 2024 AND nbfr.quarter = 1
+      AND mc.en_caption = 'Profit after Corporate Income Tax'
+),
+total_assets AS (
+    SELECT nbfr.data AS total_assets, nbfr.stock_code, nbfr.quarter, nbfr.year
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'FPT' AND nbfr.year = 2024 AND nbfr.quarter = 1
+      AND mc.en_caption = 'Total Assets'
+)
+SELECT 
+    net_income.stock_code,
+    net_income.year,
+    net_income.quarter,
+    (net_income.net_income / total_assets.total_assets) * 100 AS ROA
+FROM net_income
+JOIN total_assets 
+  ON net_income.stock_code = total_assets.stock_code
+  AND net_income.quarter = total_assets.quarter
+  AND net_income.year = total_assets.year;
+
+  -- 13. What is the revenue growth rate of VNM from 2022 to Q1 2023?
+
+  WITH revenue_2023 AS (
+    SELECT nbfr.data AS revenue, nbfr.stock_code, nbfr.year
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'VNM' AND nbfr.year = 2023 AND nbfr.quarter = 0
+      AND mc.en_caption = 'Revenue from Sales of Goods and Services'
+),
+revenue_2022 AS (
+    SELECT nbfr.data AS revenue, nbfr.stock_code, nbfr.year
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'VNM' AND nbfr.year = 2022 AND nbfr.quarter = 0
+      AND mc.en_caption = 'Revenue from Sales of Goods and Services'
+)
+SELECT 
+    revenue_2023.stock_code,
+    ((revenue_2023.revenue - revenue_2022.revenue) / revenue_2022.revenue) * 100 AS revenue_growth_rate
+FROM revenue_2023
+JOIN revenue_2022
+  ON revenue_2023.stock_code = revenue_2022.stock_code;
+
+-- 14. What is the net income growth rate of FPT in Q1 and Q2 of 2024 compared to Q1 and Q2 of 2023?
+
+WITH net_income_2023 AS (
+    SELECT nbfr.data AS net_income, nbfr.stock_code, nbfr.year, nbfr.quarter
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'FPT' AND nbfr.year = 2023
+    and nbfr.quarter = 0
+    AND mc.en_caption = 'Profit after Corporate Income Tax'
+),
+net_income_2022 AS (
+    SELECT nbfr.data AS net_income, nbfr.stock_code, nbfr.year, nbfr.quarter
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'FPT' AND nbfr.year = 2022 
+    and nbfr.quarter = 0 
+    AND mc.en_caption = 'Profit after Corporate Income Tax'
+)
+SELECT 
+    net_income_2023.stock_code,
+    ((net_income_2023.net_income - net_income_2022.net_income) / net_income_2022.net_income) * 100 AS net_income_growth_rate
+FROM net_income_2023
+JOIN net_income_2022 
+  ON net_income_2023.stock_code = net_income_2022.stock_code;
+
+-- 15. Calculate the Interest Coverage Ratio (ICR) for VIC, GVR, and GAS in the first two quarters of 2024
+
+WITH ebit_2024 AS (
+    SELECT nbfr.data AS ebit, nbfr.stock_code, nbfr.year, nbfr.quarter
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'VIC' AND nbfr.year = 2024
+    AND nbfr.quarter IN (1, 2)
+    AND mc.en_caption = 'Total Accounting Profit before Tax'
+),
+interest_expense_2024 AS (
+    SELECT nbfr.data AS interest_expense, nbfr.stock_code, nbfr.year, nbfr.quarter
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'VIC' AND nbfr.year = 2024
+    AND nbfr.quarter IN (1, 2)
+    AND mc.en_caption = 'Including: Interest Expenses'
+)
+SELECT 
+    ebit_2024.stock_code,
+    ebit_2024.quarter,
+    (ebit_2024.ebit / interest_expense_2024.interest_expense) AS interest_coverage_ratio
+FROM ebit_2024
+JOIN interest_expense_2024 
+  ON ebit_2024.stock_code = interest_expense_2024.stock_code
+  AND ebit_2024.quarter = interest_expense_2024.quarter;
+
+-- 16. Calculate the Operating Expense Ratio for HPG for 2023
+
+WITH operating_expenses AS (
+    SELECT nbfr.data AS operating_expenses, nbfr.stock_code, nbfr.year, nbfr.quarter
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'HPG' AND nbfr.year = 2023
+    AND nbfr.quarter = 0
+    AND mc.en_caption IN ('Selling Expenses', 'General and Administrative Expenses')
+),
+revenue AS (
+    SELECT nbfr.data AS revenue, nbfr.stock_code, nbfr.year, nbfr.quarter
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'HPG' AND nbfr.year = 2023
+    AND nbfr.quarter = 0
+    AND mc.en_caption = 'Revenue from Sales of Goods and Services'
+)
+SELECT 
+    operating_expenses.stock_code,
+    (SUM(operating_expenses.operating_expenses) / revenue.revenue) * 100 AS operating_expense_ratio
+FROM operating_expenses
+JOIN revenue 
+  ON operating_expenses.stock_code = revenue.stock_code
+GROUP BY operating_expenses.stock_code, revenue.revenue;
+
+-- 17.  Calculate the Capital Expenditure to Revenue Ratio for VJC in 2023
+
+WITH capex AS (
+    SELECT nbfr.data AS capex, nbfr.stock_code, nbfr.year, nbfr.quarter
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'VJC' AND nbfr.year = 2023
+    AND nbfr.quarter = 0
+    AND mc.en_caption = 'Cash Paid for Purchase, Construction of Fixed Assets and Other Long-term Assets'
+),
+revenue AS (
+    SELECT nbfr.data AS revenue, nbfr.stock_code, nbfr.year, nbfr.quarter
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'VJC' AND nbfr.year = 2023
+    AND nbfr.quarter = 0
+    AND mc.en_caption = 'Revenue from Sales of Goods and Services'
+)
+SELECT 
+    capex.stock_code,
+    (capex.capex / revenue.revenue) * 100 AS capex_to_revenue_ratio
+FROM capex
+JOIN revenue 
+  ON capex.stock_code = revenue.stock_code;
+
+-- 18. Calculate the Quick Ratio for FPT in 2024 (Q1 and Q2)
+-- The quick ratio is a liquidity ratio that measures a company’s ability to meet short-term obligations without relying on the sale of inventory.
+
+WITH current_assets AS (
+    SELECT nbfr.data AS current_assets, nbfr.stock_code, nbfr.year, nbfr.quarter
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'FPT' AND nbfr.year = 2024
+    AND nbfr.quarter IN (1, 2)
+    AND mc.en_caption = 'Current Assets'
+),
+inventory AS (
+    SELECT nbfr.data AS inventory, nbfr.stock_code, nbfr.year, nbfr.quarter
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'FPT' AND nbfr.year = 2024
+    AND nbfr.quarter IN (1, 2)
+    AND mc.en_caption = 'Inventories'
+),
+current_liabilities AS (
+    SELECT nbfr.data AS current_liabilities, nbfr.stock_code, nbfr.year, nbfr.quarter
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'FPT' AND nbfr.year = 2024
+    AND nbfr.quarter IN (1, 2)
+    AND mc.en_caption = 'Current Liabilities'
+)
+SELECT 
+    current_assets.stock_code,
+    current_assets.quarter,
+    ((current_assets.current_assets - inventory.inventory) / current_liabilities.current_liabilities) AS quick_ratio
+FROM current_assets
+JOIN inventory 
+  ON current_assets.stock_code = inventory.stock_code
+  AND current_assets.quarter = inventory.quarter
+JOIN current_liabilities 
+  ON current_assets.stock_code = current_liabilities.stock_code
+  AND current_assets.quarter = current_liabilities.quarter;
+
+-- 19. Calculate the Asset Turnover Ratio for POW in 2024 (Q1 and Q2)
+-- The asset turnover ratio indicates how efficiently a company uses its assets to generate revenue.
+
+WITH revenue AS (
+    SELECT nbfr.data AS revenue, nbfr.stock_code, nbfr.year, nbfr.quarter
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'POW' AND nbfr.year = 2024
+    AND nbfr.quarter IN (1, 2)
+    AND mc.en_caption = 'Revenue from Sales of Goods and Services'
+),
+total_assets AS (
+    SELECT nbfr.data AS total_assets, nbfr.stock_code, nbfr.year, nbfr.quarter
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'POW' AND nbfr.year = 2024
+    AND nbfr.quarter IN (1, 2)
+    AND mc.en_caption = 'Total Assets'
+)
+SELECT 
+    revenue.stock_code,
+    revenue.quarter,
+    (revenue.revenue / total_assets.total_assets) AS asset_turnover_ratio
+FROM revenue
+JOIN total_assets 
+  ON revenue.stock_code = total_assets.stock_code
+  AND revenue.quarter = total_assets.quarter;
+
+-- 20. Calculate the Return on Sales (ROS) vs Loss Ratio for GAS in 2024 (Q1 and Q2)
+
+-- Get Net income value for VNM in 2024
+WITH net_income AS (
+    SELECT nbfr.data AS net_income, nbfr.stock_code, nbfr.year, nbfr.quarter
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'VNM'
+      AND nbfr.year = 2024
+      AND nbfr.quarter IN (1, 2, 3, 4) -- Use quarterly data
+      AND mc.en_caption = 'Profit after Corporate Income Tax'
+),
+
+-- Get Revenue value for VNM in 2024
+revenue AS (
+    SELECT nbfr.data AS revenue, nbfr.stock_code, nbfr.year, nbfr.quarter
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.stock_code = 'VNM'
+      AND nbfr.year = 2024
+      AND nbfr.quarter IN (1, 2, 3, 4) -- Use quarterly data
+      AND mc.en_caption = 'Revenue from Sales of Goods and Services'
+)
+
+-- Select ROS calculation
+SELECT 
+    net_income.stock_code,
+    net_income.year,
+    net_income.quarter,
+    net_income.net_income,
+    revenue.revenue,
+    (net_income.net_income / revenue.revenue) AS ROS -- Return on Sales
+FROM net_income
+JOIN revenue 
+ON net_income.stock_code = revenue.stock_code
+AND net_income.quarter = revenue.quarter
+AND net_income.year = revenue.year;
+
+-- 21. calculate the fastest growing company from 2022 to 2023 
+
+-- Get Net Income for 2024
+WITH net_income_2024 AS (
+    SELECT nbfr.stock_code, nbfr.data AS net_income_2024
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.year = 2023
+      AND nbfr.quarter = 0 -- Annual report
+      AND mc.en_caption = 'Profit after Corporate Income Tax'
+),
+
+-- Get Net Income for 2023
+net_income_2023 AS (
+    SELECT nbfr.stock_code, nbfr.data AS net_income_2023
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.year = 2022
+      AND nbfr.quarter = 0 -- Annual report
+      AND mc.en_caption = 'Profit after Corporate Income Tax'
+)
+
+-- Calculate growth rate and find the company with the highest growth
+SELECT 
+    net_income_2024.stock_code,
+    ((net_income_2024.net_income_2024 - net_income_2023.net_income_2023) / net_income_2023.net_income_2023) * 100 AS growth_rate
+FROM net_income_2024
+JOIN net_income_2023 
+  ON net_income_2024.stock_code = net_income_2023.stock_code
+ORDER BY growth_rate DESC
+LIMIT 1; -- Select the company with the highest growth rate
+
+--- 22. calculate the fastest Compound Annual Growth Rate (CAGR) 
+
+-- Get Net Income for 2024 (End Value)
+WITH net_income_2023 AS (
+    SELECT nbfr.stock_code, nbfr.data AS net_income_2023
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.year = 2023
+      AND nbfr.quarter = 0 -- Annual report
+      AND mc.en_caption = 'Profit after Corporate Income Tax'
+),
+
+-- Get Net Income for 2019 (Start Value)
+net_income_2020 AS (
+    SELECT nbfr.stock_code, nbfr.data AS net_income_2020
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.year = 2020
+      AND nbfr.quarter = 0 -- Annual report
+      AND mc.en_caption = 'Profit after Corporate Income Tax'
+)
+
+-- Calculate CAGR and find the company with the highest growth
+SELECT 
+    net_income_2023.stock_code,
+    ((POWER((net_income_2023.net_income_2023 / net_income_2020.net_income_2020), (1.0/3))) - 1) * 100 AS cagr_growth_rate
+FROM net_income_2023
+JOIN net_income_2020 
+  ON net_income_2023.stock_code = net_income_2020.stock_code
+ORDER BY cagr_growth_rate DESC
+LIMIT 1; -- Select the company with the highest CAGR
+
+-- 23. Which companies increased their trading securities from 2022 to 2023, and by how much?
+
+-- Get Trading Securities of 2023
+WITH trading_securities_2023 AS (
+    SELECT nbfr.stock_code, SUM(nbfr.data) AS trading_securities_2023
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.year = 2023
+      AND nbfr.quarter = 0
+      AND mc.en_caption = 'Increase/Decrease in Trading Securities'
+    GROUP BY nbfr.stock_code
+),
+
+-- Get Trading Securities of 2022
+trading_securities_2022 AS (
+    SELECT nbfr.stock_code, SUM(nbfr.data) AS trading_securities_2022
+    FROM non_bank_financial_report nbfr
+    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
+    WHERE nbfr.year = 2022
+      AND nbfr.quarter = 0
+      AND mc.en_caption = 'Increase/Decrease in Trading Securities'
+    GROUP BY nbfr.stock_code
+)
+
+-- Calculate the change in trading securities and filter for companies that increased
+SELECT 
+    trading_securities_2023.stock_code,
+    (trading_securities_2023.trading_securities_2023 - trading_securities_2022.trading_securities_2022) AS change_in_trading_securities
+FROM trading_securities_2023
+JOIN trading_securities_2022
+  ON trading_securities_2023.stock_code = trading_securities_2022.stock_code
+WHERE (trading_securities_2023.trading_securities_2023 - trading_securities_2022.trading_securities_2022) > 0
+ORDER BY change_in_trading_securities DESC;
+
+
+deb rate, debt asset rate, dòng tiền / chi tiêu vốn 
+chỉ số trung bình ngành ( có quy chuẩn ), đối thủ cạnh tranh ( chỉ số cạnh tranh), tỉ lệ sở hữu của nhà nước, cổ đông lớn, 
+cty đang nợ ai, có cty con nào, hàng tồn kho ...
+fcf: dòng tiền tự do
+đi sâu : beta ? 
+phái sinh là gì, vn có sản phẩm phái sinh nào ?
