@@ -1,5 +1,6 @@
 from llm.llm.chatgpt import ChatGPT
 from llm.llm_utils import get_code_from_text_response, get_json_from_text_response
+import utils
 import re
 
 
@@ -35,22 +36,26 @@ def text2sql(llm, text):
     You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query.
     """
     
-    with open('prompt/seek_database.txt', 'r') as f:
-        database_description = f.read()
+    database_description = utils.read_file_without_comments('prompt/seek_database.txt')
         
-    with open('prompt/example1.txt', 'r') as f:
-        few_shot = f.read()
+    few_shot = utils.read_file_without_comments('prompt/example1.txt')
         
     prompt = f"""You have the following database schema:
     {database_description}
     
     Here is a natural language query that you need to convert into a SQL query:
+    <data>
     {text}
+    </data>
     
     Here is an example of a query that you can refer to:
+    <example>
     {few_shot}
+    </example>
     
+    <instruction>
     Think step-by-step and return SQL query that suitable with the database schema based on the natural language query above
+    </instruction>
     """
     
     messages = [
@@ -73,8 +78,7 @@ def partial_text2sql_1(llm, text):
     You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query.
     """
     
-    with open('prompt/seek_database.txt', 'r') as f:
-        database_description = f.read()
+    database_description = utils.read_file_without_comments('prompt/seek_database.txt')
 
     prompt = f"""You have the following database schema:
     {database_description}
@@ -110,17 +114,22 @@ def find_suitable_column(llm, text):
     prompt = f"""
     {text}
     
+    <task>
     Based on given question, analyze and suggest the suitable column in the financial statement that can be used to answer the question.
     Notice that there are two types of financial statements: one for banks and one for non-banks cooperate.
     
     Analyze and return the suggested column names in JSON format.
     You don't need to return both bank and non-bank column names if you think only one type of column is suitable.
+    </task>
+    
+    <formatting_example>
     ```json
     {{
         "bank_column_name": [],
         "non_bank_column_name": []
     }}
     ```
+    </formatting_example>
     """
     
     messages = [
@@ -159,11 +168,10 @@ def reasoning_text2SQL(llm, text, search_func, top_k):
     You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query.
     """
     
-    with open('prompt/seek_database.txt', 'r') as f:
-        database_description = f.read()
+    database_description = utils.read_file_without_comments('prompt/seek_database.txt')
         
-    with open('prompt/question_query.txt', 'r') as f:
-        few_shot = f.read()
+
+    few_shot = utils.read_file_without_comments('prompt/example1.txt')
         
     prompt = f"""You have the following database schema:
 {database_description}
@@ -172,16 +180,25 @@ Here is a natural language query that you need to convert into a SQL query:
 {text}
 
 Snapshot of the mapping table:
+<data>
 `map_category_code_bank`
 {bank_column}
 
 `map_category_code_non_bank`
 {non_bank_column}
+</data>
 
 Here is an example of a query that you can refer to:
-{few_shot}
-    
+
+<example>
+```sql
+    {few_shot}
+```
+</example>
+
+<instruction>
 Think step-by-step and return SQL query that suitable with the database schema based on the natural language query above
+</instruction>
 """
     
     messages = [
