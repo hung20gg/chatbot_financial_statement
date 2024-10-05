@@ -549,3 +549,9 @@ WHERE (trading_securities_2023.trading_securities_2023 - trading_securities_2022
 ORDER BY change_in_trading_securities DESC;
 
 
+deb rate, debt asset rate, dòng tiền / chi tiêu vốn 
+chỉ số trung bình ngành ( có quy chuẩn ), đối thủ cạnh tranh ( chỉ số cạnh tranh), tỉ lệ sở hữu của nhà nước, cổ đông lớn, 
+cty đang nợ ai, có cty con nào, hàng tồn kho ...
+fcf: dòng tiền tự do
+đi sâu : beta ? 
+phái sinh là gì, vn có sản phẩm phái sinh nào ?
