@@ -1,7 +1,5 @@
-Your given database about the financial reports of top Vietnamese companies, both bank and cooperates.
-All the data in the financial report are followed by the regulation of Vietnamese Accounting Standard (VAS) and Circula num 200
-ON GUIDELINES FOR ACCOUNTING POLICIES FOR ENTERPRISES. The English translation of the categories are followed by the 
-International Financial Reporting Standards (IFRS).
+You're given database about the financial reports of top Vietnamese companies, both bank and cooperates.
+All the data in the financial report are followed by the regulation of Vietnamese Accounting Standard (VAS). The English translation of the categories are followed by the International Financial Reporting Standards (IFRS).
 
 Here are the descriptions of tables in the database:
 
@@ -21,37 +19,44 @@ The table has six columns:
  - `category_code` : The category_code recorded in the financial report. Refer to `category_code` of table `map_category_code_bank`.
  - `data` : The value of the recorded category (usually in Billion VND)
  - `report_type` : Report type recorded for each line (balance_sheet, cash_flow_statement or income_statement)
+
 Each row will has the value of category listed in the specific quarterly or annually financial report of a bank
 
 ### Table: `non_bank_financial_report`
 This table is similar to `bank_financial_report`, but for non-bank cooperate
 
-|stock_code|year|quarter|category_code|data|report_type|
-|---|----|----|----|----|----|
-|VNM|2023|  0 | BS_270 |52673.3711|balance_sheet|
-|GVR|2022|  1 | CF_008 |2080.7331|cash_flow_statement|
-
-Different between `bank_financial_report`:
- - `stock_code`: The trading symbol of the company.
- - `category_code` : The category_code recorded in the financial report. Refer to `category_code` of table `map_category_code_non_bank`.
-
-Each row will has the value of category listed in the specific quarterly or annually financial report of a company
-
 ### Table: `map_category_code_bank`
 This table store mapping value from category code to human-readable caption.
 
-|category_code|vi_caption|en_caption|report_type|
-|----|----|----|----|
-|IS_003| Thu nhập lãi thuần | Net Interest Income | income_statement |
+|category_code|en_caption|report_type|
+|----|----|----|
+|IS_003| Net Interest Income | income_statement |
 
 The table has four columns:
- - `category_code` : The category_code recorded in the financial report. 
- - `vi_caption` : The Vietnamese caption for the `category_code`.
+ - `category_code` : The category_code recorded in the financial report.
  - `en_caption` : The English caption for the `category_code`.
  - `report_type` : Report type recorded for each line (balance_sheet, cash_flow_statement or income_statement)
 
 ### Table: `map_category_code_non_bank`
 This table is similar to `map_category_code_bank`, but for non-bank (normal) company
+
+### Table: `company_info`
+This table store general information of the company
+
+|stock_code|company_name|is_bank|industry|issue_share|
+|----|----|----|----|----|
+|VIC|Tập đoàn Vingroup - Công ty CP|False|Real-estate|3823700000|
+
+### Table: `company_connection`
+
+
+The table has five columns:
+- `stock_code`
+- `company_name` : Full name of the company.
+- `is_bank`: Bool value, checking whether the company is a bank or not.
+- `industry`: Current industry of company.
+- `issue_share`: Number of share issued.
+
 
 Note: for each `category_code`, the prefix tell which report does that code refer to.
 - `BS`: Balance sheet
@@ -60,7 +65,7 @@ Note: for each `category_code`, the prefix tell which report does that code refe
 
 You can access the database by using
 
-```sql 
+```sql
 SELECT * FROM bank_financial_report;
 ```
 
