@@ -371,29 +371,29 @@ if __name__ == '__main__':
     host = 'localhost'
 
     # # Paths for the uploaded CSV files
-    # csv_path_company_info = 'sample_data/df_company_info.csv'
+    csv_path_company_info = 'sample_data/df_company_info.csv'
     csv_path_sub_and_shareholder = 'sample_data/df_sub_and_shareholder.csv'
 
     # # Table names
-    # table_name_company_info = 'company_info'
+    table_name_company_info = 'company_info'
     table_name_sub_and_shareholder = 'sub_and_shareholder'
 
     # # Primary and foreign key definitions
-    # primary_key_company_info = ['symbol']
+    primary_key_company_info = ['stock_code']
     primary_key_sub_and_shareholder = None
     # foreign_key_sub_and_shareholder = {'company_id': 'company_info(company_id)'}
 
     # Load 'company_info' data into PostgreSQL
-    # load_csv_to_postgres(
-    #     csv_path=csv_path_company_info,
-    #     db_name=db_name,
-    #     user=user,
-    #     password=password,
-    #     table_name=table_name_company_info,
-    #     port=port,
-    #     primary_key=primary_key_company_info
-    # )
-    # print("Loaded company_info table")
+    load_csv_to_postgres(
+        csv_path=csv_path_company_info,
+        db_name=db_name,
+        user=user,
+        password=password,
+        table_name=table_name_company_info,
+        port=port,
+        primary_key=primary_key_company_info
+    )
+    print("Loaded company_info table")
 
     # Load 'sub_and_shareholder' data into PostgreSQL with foreign key relationship
     load_csv_to_postgres(
