@@ -1,0 +1,2 @@
+In Vietnam market, the stock only have 3 letters. If the stock code is not provided, your first step must be:
+"Find the stock code of the listed company name"
