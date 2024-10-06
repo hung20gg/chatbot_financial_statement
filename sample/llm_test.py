@@ -2,6 +2,7 @@ from llm.llm.chatgpt import ChatGPT
 from llm.llm_utils import get_code_from_text_response, get_json_from_text_response
 import utils
 import re
+import pandas as pd
 
 
 class MappingTable:
@@ -10,7 +11,7 @@ class MappingTable:
         self.vector_db_non_bank = vector_db_non_bank
         self.db = db
         
-    def search(self, texts, top_k, is_bank):
+    def search(self, texts, top_k, is_bank) -> list:
         collect_code = set()
         if not isinstance(texts, list):
             texts = [texts]
@@ -24,7 +25,7 @@ class MappingTable:
                 collect_code.add(item.metadata['code'])
         return list(collect_code)
     
-    def search_return_df(self, text, top_k, is_bank = False):
+    def search_return_df(self, text, top_k, is_bank = False) -> pd.DataFrame:
         collect_code = self.search(text, top_k, is_bank)
         collect_code = [f"'{code}'" for code in collect_code]
         query = f"SELECT category_code, en_caption FROM map_category_code_{'' if is_bank else 'non_'}bank WHERE category_code IN ({', '.join(collect_code)})"
@@ -36,7 +37,7 @@ def text2sql(llm, text):
     You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query.
     """
     
-    database_description = utils.read_file_without_comments('prompt/seek_database.txt')
+    database_description = utils.read_file('prompt/seek_database.txt')
         
     few_shot = utils.read_file_without_comments('prompt/example1.txt')
         
