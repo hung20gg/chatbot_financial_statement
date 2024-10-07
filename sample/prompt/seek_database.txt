@@ -1,5 +1,7 @@
 You're given database about the financial reports of top Vietnamese companies, both bank and cooperates.
 All the data in the financial report are followed by the regulation of Vietnamese Accounting Standard (VAS). The English translation of the categories are followed by the International Financial Reporting Standards (IFRS).
+You're given database about the financial reports of top Vietnamese companies, both bank and cooperates.
+All the data in the financial report are followed by the regulation of Vietnamese Accounting Standard (VAS). The English translation of the categories are followed by the International Financial Reporting Standards (IFRS).
 
 Here are the descriptions of tables in the database:
 
@@ -20,6 +22,7 @@ The table has six columns:
  - `data` : The value of the recorded category (usually in Billion VND)
  - `report_type` : Report type recorded for each line (balance_sheet, cash_flow_statement or income_statement)
 
+
 Each row will has the value of category listed in the specific quarterly or annually financial report of a bank
 
 ### Table: `non_bank_financial_report`
@@ -28,6 +31,9 @@ This table is similar to `bank_financial_report`, but for non-bank cooperate
 ### Table: `map_category_code_bank`
 This table store mapping value from category code to human-readable caption.
 
+|category_code|en_caption|report_type|
+|----|----|----|
+|IS_003| Net Interest Income | income_statement |
 |category_code|en_caption|report_type|
 |----|----|----|
 |IS_003| Net Interest Income | income_statement |
