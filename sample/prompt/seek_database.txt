@@ -1,5 +1,7 @@
 You're given database about the financial reports of top Vietnamese companies, both bank and cooperates.
 All the data in the financial report are followed by the regulation of Vietnamese Accounting Standard (VAS). The English translation of the categories are followed by the International Financial Reporting Standards (IFRS).
+You're given database about the financial reports of top Vietnamese companies, both bank and cooperates.
+All the data in the financial report are followed by the regulation of Vietnamese Accounting Standard (VAS). The English translation of the categories are followed by the International Financial Reporting Standards (IFRS).
 
 Here are the descriptions of tables in the database:
 
@@ -20,6 +22,7 @@ The table has six columns:
  - `data` : The value of the recorded category (usually in Billion VND)
  - `report_type` : Report type recorded for each line (balance_sheet, cash_flow_statement or income_statement)
 
+
 Each row will has the value of category listed in the specific quarterly or annually financial report of a bank
 
 ### Table: `non_bank_financial_report`
@@ -31,8 +34,11 @@ This table store mapping value from category code to human-readable caption.
 |category_code|en_caption|report_type|
 |----|----|----|
 |IS_003| Net Interest Income | income_statement |
+|category_code|en_caption|report_type|
+|----|----|----|
+|IS_003| Net Interest Income | income_statement |
 
-The table has four columns:
+The table has three columns:
  - `category_code` : The category_code recorded in the financial report.
  - `en_caption` : The English caption for the `category_code`.
  - `report_type` : Report type recorded for each line (balance_sheet, cash_flow_statement or income_statement)
@@ -43,20 +49,28 @@ This table is similar to `map_category_code_bank`, but for non-bank (normal) com
 ### Table: `company_info`
 This table store general information of the company
 
-|stock_code|company_name|is_bank|industry|issue_share|
-|----|----|----|----|----|
-|VIC|Tập đoàn Vingroup - Công ty CP|False|Real-estate|3823700000|
+|stock_code|is_bank|industry|issue_share|
+|----|----|----|----|
+|VIC|False|Real-estate|3823700000|
 
-### Table: `company_connection`
-
-
-The table has five columns:
-- `stock_code`
-- `company_name` : Full name of the company.
+The table has four columns, which:
 - `is_bank`: Bool value, checking whether the company is a bank or not.
 - `industry`: Current industry of company.
 - `issue_share`: Number of share issued.
 
+### Table: `sub_and_shareholder`
+This table store the ownership rate of a company to another company
+
+|stock_code|invest_on|percentage|
+|---|---|---|
+|MSN|TCB|0.18|
+
+Explain:
+This mean MSN is a shareholder and has 18% of TCB's total share. 
+
+The table has three column, which:
+- `invest_on`: the company invested on (can be subsidiary)
+- `percentage`: ownership rate
 
 Note: for each `category_code`, the prefix tell which report does that code refer to.
 - `BS`: Balance sheet

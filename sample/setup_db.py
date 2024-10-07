@@ -166,10 +166,61 @@ def setup_chroma_db_company_name(db_name, user, password, host, port, collection
     
     for company in companies:
         print(company)
-        chroma_db.add_texts([company[0]], metadatas=[{'lang': 'vi', 'stock_code': company[1]}])
-        chroma_db.add_texts([company[0]], metadatas=[{'lang': 'en', 'stock_code': company[2]}])
-        chroma_db.add_texts([company[0]], metadatas=[{'lang': 'vi', 'stock_code': company[3]}])
-        chroma_db.add_texts([company[0]], metadatas=[{'lang': 'en', 'stock_code': company[4]}])
+        chroma_db.add_texts([company[1]], metadatas=[{'lang': 'vi', 'stock_code': company[0]}])
+        chroma_db.add_texts([company[2]], metadatas=[{'lang': 'en', 'stock_code': company[0]}])
+        chroma_db.add_texts([company[3]], metadatas=[{'lang': 'vi', 'stock_code': company[0]}])
+        chroma_db.add_texts([company[4]], metadatas=[{'lang': 'en', 'stock_code': company[0]}])
+        
+        
+class DBHUB:
+    """
+    This will be the hub for both similarity search and rational DB
+    """
+    def __init__(self, conn, vector_db_bank: Chroma, vector_db_non_bank: Chroma, vector_db_company: Chroma):
+        self.conn = conn
+        self.vector_db_bank = vector_db_bank
+        self.vector_db_non_bank = vector_db_non_bank
+        self.vector_db_company = vector_db_company
+    
+    
+    # Search for columns in bank and non_bank financial report
+    def search(self, texts, top_k, is_bank) -> list:
+        collect_code = set()
+        if not isinstance(texts, list):
+            texts = [texts]
+        for text in texts:
+            if is_bank:
+                result = self.vector_db_bank.similarity_search(text, top_k)
+            else:
+                result = self.vector_db_non_bank.similarity_search(text, top_k)
+            
+            for item in result:
+                collect_code.add(item.metadata['code'])
+        return list(collect_code)
+    
+    def search_return_df(self, text, top_k, is_bank = False) -> pd.DataFrame:
+        collect_code = self.search(text, top_k, is_bank)
+        collect_code = [f"'{code}'" for code in collect_code]
+        query = f"SELECT category_code, en_caption FROM map_category_code_{'' if is_bank else 'non_'}bank WHERE category_code IN ({', '.join(collect_code)})"
+        return self.db.query(query,return_type='dataframe')
+    
+    def query(self, query, return_type='dataframe'):
+        return self.db.query(query, return_type=return_type)
+    
+    def find_stock_code_similarity(self, company_name):
+        if isinstance(company_name, str):
+            company_name = [company_name]
+        stock_codes = []
+        company_names = []
+        for name in company_name:
+            result = self.vector_db_company.similarity_search(name, top_k=2)
+            for item in result:
+                stock_codes.append(item.metadata['stock_code'])
+                company_names.append(item.page_content)
+        result = pd.DataFrame({'stock_code': stock_codes, 'company_name': company_names})
+        result = result.drop_duplicates(subset=['stock_code'])
+        return result
+
 
 # Example usage
 if __name__ == '__main__':
@@ -244,6 +295,9 @@ if __name__ == '__main__':
     print("Loaded company_info table")
     
     # Setup Chroma DB for company_info
+    collection_chromadb = 'category_non_bank_chroma'
+    persist_directory = 'data/category_non_bank_chroma'
+    setup_chroma_db_company_name(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name_company_info)
 
     # Load 'sub_and_shareholder' data into PostgreSQL with foreign key relationship
     load_csv_to_postgres(
@@ -256,28 +310,3 @@ if __name__ == '__main__':
     )
     print("Loaded sub_and_shareholder table")
 
-    # # Setup Chroma DB for company_info
-    # setup_chroma_db(
-    #     db_name=db_name,
-    #     user=user,
-    #     password=password,
-    #     host=host,
-    #     port=port,
-    #     collection_name='company_info_chroma',
-    #     persist_directory='data/company_info_chroma',
-    #     table=table_name_company_info
-    # )
-    # print("Setup Chroma DB for company_info")
-
-    # # Setup Chroma DB for sub_and_shareholder
-    # setup_chroma_db(
-    #     db_name=db_name,
-    #     user=user,
-    #     password=password,
-    #     host=host,
-    #     port=port,
-    #     collection_name='sub_and_shareholder_chroma',
-    #     persist_directory='data/sub_and_shareholder_chroma',
-    #     table=table_name_sub_and_shareholder
-    # )
-    # print("Setup Chroma DB for sub_and_shareholder")
