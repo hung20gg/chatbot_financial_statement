@@ -4,8 +4,24 @@ import os
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
 import dotenv
+import re
 
 dotenv.load_dotenv()
+
+industry_trans = {
+    "Ngân hàng": "Banking",
+    "Bất động sản": "Real Estate",
+    "Thực phẩm và đồ uống": "Food and Beverage",
+    "Điện, nước & xăng dầu khí đốt": "Electricity, Water & Gasoline/Oil and Gas",
+    "Bảo hiểm": "Insurance",
+    "Công nghệ Thông tin": "Information Technology",
+    "Hóa chất": "Chemicals",
+    "Tài nguyên Cơ bản": "Basic Resources",
+    "Bán lẻ": "Retail",
+    "Dầu khí": "Oil and Gas",
+    "Dịch vụ tài chính": "Financial Services",
+    "Du lịch và Giải trí": "Tourism and Entertainment"
+}
 
 # Step 1: Connect to PostgreSQL
 def connect_to_db(db_name, user, password, host='localhost', port='5432'):
@@ -37,6 +53,8 @@ def create_table_if_not_exists(conn, table_name, df, primary_key=None, foreign_k
             col_type.append('FLOAT')
         elif pd.api.types.is_datetime64_any_dtype(df[col]):
             col_type.append('TIMESTAMP')
+        elif pd.api.types.is_bool_dtype(df[col]):
+            col_type.append('BOOLEAN')
         else:
             df[col] = df[col].astype(str)
             max_len = df[col].str.len().max()
@@ -156,9 +174,9 @@ def setup_chroma_db_company_name(db_name, user, password, host, port, collection
     print("Connected to database")
     try:
         with conn.cursor() as cur:
-            cur.execute(f"SELECT  stock_code, company_name, en_company_name, short_name, en_short_name,  FROM {table}")
+            cur.execute(f"SELECT  stock_code, company_name, en_company_name, en_short_name  FROM {table}")
             companies = cur.fetchall()
-            companies = [(company[0], company[1], company[2], company[3], company[4]) for company in companies]
+            companies = [(company[0], company[1], company[2], company[3]) for company in companies]
     finally:
         conn.close()
     
@@ -166,21 +184,37 @@ def setup_chroma_db_company_name(db_name, user, password, host, port, collection
     
     for company in companies:
         print(company)
+        chroma_db.add_texts([company[0]], metadatas=[{'lang': 'vi', 'stock_code': company[0]}])
         chroma_db.add_texts([company[1]], metadatas=[{'lang': 'vi', 'stock_code': company[0]}])
         chroma_db.add_texts([company[2]], metadatas=[{'lang': 'en', 'stock_code': company[0]}])
-        chroma_db.add_texts([company[3]], metadatas=[{'lang': 'vi', 'stock_code': company[0]}])
-        chroma_db.add_texts([company[4]], metadatas=[{'lang': 'en', 'stock_code': company[0]}])
+        chroma_db.add_texts([company[3]], metadatas=[{'lang': 'en', 'stock_code': company[0]}])
         
+def setup_chroma_db_sql_query(collection_name, persist_directory, txt_path):
+    with open(txt_path, 'r') as f:
+        content = f.read()
+    chroma_db = create_chroma_db(collection_name, persist_directory)
+    sql = re.split(r'--\s*\d+', content)
+    heading = re.findall(r'--\s*\d+', content)
+    codes = []
+    for i, s in enumerate(sql[1:]):
+        sql_code = heading[i]+ s
+        task = sql_code.split('\n')[0]
+        task = re.sub(r'--\s*\d+\.?', '', task).strip()
+        codes.append((task, sql_code))
+        
+    for code in codes:
+        chroma_db.add_texts([code[0]], metadatas=[{'lang': 'sql', 'sql_code': code[1]}])
         
 class DBHUB:
     """
     This will be the hub for both similarity search and rational DB
     """
-    def __init__(self, conn, vector_db_bank: Chroma, vector_db_non_bank: Chroma, vector_db_company: Chroma):
+    def __init__(self, conn, vector_db_bank: Chroma, vector_db_non_bank: Chroma, vector_db_company: Chroma, vector_db_sql: Chroma):
         self.conn = conn
         self.vector_db_bank = vector_db_bank
         self.vector_db_non_bank = vector_db_non_bank
         self.vector_db_company = vector_db_company
+        self.vector_db_sql = vector_db_sql
     
     
     # Search for columns in bank and non_bank financial report
@@ -202,25 +236,32 @@ class DBHUB:
         collect_code = self.search(text, top_k, is_bank)
         collect_code = [f"'{code}'" for code in collect_code]
         query = f"SELECT category_code, en_caption FROM map_category_code_{'' if is_bank else 'non_'}bank WHERE category_code IN ({', '.join(collect_code)})"
-        return self.db.query(query,return_type='dataframe')
+        return self.query(query,return_type='dataframe')
     
+    # Execute SQL query
     def query(self, query, return_type='dataframe'):
-        return self.db.query(query, return_type=return_type)
+        return execute_query(query, self.conn, return_type)
     
-    def find_stock_code_similarity(self, company_name):
+    def find_stock_code_similarity(self, company_name, top_k=2):
         if isinstance(company_name, str):
             company_name = [company_name]
         stock_codes = []
         company_names = []
         for name in company_name:
-            result = self.vector_db_company.similarity_search(name, top_k=2)
+            result = self.vector_db_company.similarity_search(name, top_k)
             for item in result:
                 stock_codes.append(item.metadata['stock_code'])
                 company_names.append(item.page_content)
         result = pd.DataFrame({'stock_code': stock_codes, 'company_name': company_names})
         result = result.drop_duplicates(subset=['stock_code'])
         return result
-
+    
+    # Find SQL query for few shot learning
+    def find_sql_query(self, text, top_k=1):
+        result = self.vector_db_sql.similarity_search(text, top_k)
+        if result[0].metadata.get('sql_code', None) is not None:
+            return f"```sql\n\n{result[0].metadata['sql_code']}```"
+        return 'No SQL query found'
 
 # Example usage
 if __name__ == '__main__':
@@ -232,43 +273,43 @@ if __name__ == '__main__':
     host = 'localhost'
     
     
-#     csv_path = 'sample_data/map_category_code_non_bank.csv'
-#     table_name = 'map_category_code_non_bank'
-#     collection_chromadb = 'category_non_bank_chroma'
-#     persist_directory = 'data/category_non_bank_chroma'
+    # csv_path = 'sample_data/map_category_code_non_bank.csv'
+    # table_name = 'map_category_code_non_bank'
+    # collection_chromadb = 'category_non_bank_chroma'
+    # persist_directory = 'data/category_non_bank_chroma'
 
-#     # Load csv data to PostgreSQL
+    # # Load csv data to PostgreSQL
 
-#     load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
-#     print("Loaded map_category_code_non_bank")
-#     setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
-#     print("Setup Chroma DB for map_category_code_non_bank")
-#     # Generate embeddings  for the data
+    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
+    # print("Loaded map_category_code_non_bank")
+    # setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
+    # print("Setup Chroma DB for map_category_code_non_bank")
+    # # Generate embeddings  for the data
     
     
-#     csv_path = 'sample_data/map_category_code_bank.csv'
-#     table_name = 'map_category_code_bank'
-#     collection_chromadb = 'category_bank_chroma'
-#     persist_directory = 'data/category_bank_chroma'
+    # csv_path = 'sample_data/map_category_code_bank.csv'
+    # table_name = 'map_category_code_bank'
+    # collection_chromadb = 'category_bank_chroma'
+    # persist_directory = 'data/category_bank_chroma'
 
-#     # Load csv data to PostgreSQL
-#     load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
-#     print("Loaded map_category_code_bank")
-#     setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
-#     print("Setup Chroma DB for map_category_code_bank")
+    # # Load csv data to PostgreSQL
+    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
+    # print("Loaded map_category_code_bank")
+    # setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
+    # print("Setup Chroma DB for map_category_code_bank")
     
     
-#     # Load Bank Financial Report
-#     csv_path = 'sample_data/bank_financial_report.csv'
-#     table_name = 'bank_financial_report'
-#     load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_bank(category_code)'})
-#     print("Loaded bank_financial_report")
+    # # Load Bank Financial Report
+    # csv_path = 'sample_data/bank_financial_report.csv'
+    # table_name = 'bank_financial_report'
+    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_bank(category_code)'})
+    # print("Loaded bank_financial_report")
     
-#     # Load Non Bank Financial Report
-#     csv_path = 'sample_data/non_bank_financial_report.csv'
-#     table_name = 'non_bank_financial_report'
-#     load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_non_bank(category_code)'})
-#     print("Loaded non_bank_financial_report")
+    # # Load Non Bank Financial Report
+    # csv_path = 'sample_data/non_bank_financial_report.csv'
+    # table_name = 'non_bank_financial_report'
+    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_non_bank(category_code)'})
+    # print("Loaded non_bank_financial_report")
 
     # Paths for the uploaded CSV files
     csv_path_company_info = 'sample_data/df_company_info.csv'
@@ -295,18 +336,22 @@ if __name__ == '__main__':
     print("Loaded company_info table")
     
     # Setup Chroma DB for company_info
-    collection_chromadb = 'category_non_bank_chroma'
-    persist_directory = 'data/category_non_bank_chroma'
-    setup_chroma_db_company_name(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name_company_info)
+    # collection_chromadb = 'company_name_chroma'
+    # persist_directory = 'data/company_name_chroma'
+    # setup_chroma_db_company_name(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name_company_info)
 
-    # Load 'sub_and_shareholder' data into PostgreSQL with foreign key relationship
-    load_csv_to_postgres(
-        csv_path=csv_path_sub_and_shareholder,
-        db_name=db_name,
-        user=user,
-        password=password,
-        table_name=table_name_sub_and_shareholder,
-        port=port,
-    )
-    print("Loaded sub_and_shareholder table")
+    # collection_chromadb = 'sql_query'
+    # persist_directory = 'data/sql_query'
+    # setup_chroma_db_sql_query(collection_chromadb, persist_directory, 'prompt/question_query.txt')
+
+    # # Load 'sub_and_shareholder' data into PostgreSQL with foreign key relationship
+    # load_csv_to_postgres(
+    #     csv_path=csv_path_sub_and_shareholder,
+    #     db_name=db_name,
+    #     user=user,
+    #     password=password,
+    #     table_name=table_name_sub_and_shareholder,
+    #     port=port,
+    # )
+    # print("Loaded sub_and_shareholder table")
 

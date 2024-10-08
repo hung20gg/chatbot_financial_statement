@@ -69,7 +69,7 @@ JOIN total_equity
   AND total_debt.quarter = total_equity.quarter
   AND total_debt.year = total_equity.year;
 
-  -- 3. Compare Gross Profit Margin of VIC, VHM, and VNM for Q1 2024
+-- 3. Compare Gross Profit Margin of VIC, VHM, and VNM for Q1 2024
 
   WITH gross_profit AS (
     SELECT nbfr.data AS gross_profit, nbfr.stock_code, nbfr.quarter, nbfr.year
@@ -219,7 +219,7 @@ JOIN total_assets
   AND net_income.quarter = total_assets.quarter
   AND net_income.year = total_assets.year;
 
-  -- 13. What is the revenue growth rate of VNM from 2022 to Q1 2023?
+-- 13. What is the revenue growth rate of VNM from 2022 to Q1 2023?
 
   WITH revenue_2023 AS (
     SELECT nbfr.data AS revenue, nbfr.stock_code, nbfr.year
@@ -482,7 +482,7 @@ JOIN net_income_2023
 ORDER BY growth_rate DESC
 LIMIT 1; -- Select the company with the highest growth rate
 
---- 22. calculate the fastest Compound Annual Growth Rate (CAGR) 
+-- 22. calculate the fastest Compound Annual Growth Rate (CAGR) 
 
 -- Get Net Income for 2024 (End Value)
 WITH net_income_2023 AS (
@@ -547,11 +547,3 @@ JOIN trading_securities_2022
   ON trading_securities_2023.stock_code = trading_securities_2022.stock_code
 WHERE (trading_securities_2023.trading_securities_2023 - trading_securities_2022.trading_securities_2022) > 0
 ORDER BY change_in_trading_securities DESC;
-
-
-deb rate, debt asset rate, dòng tiền / chi tiêu vốn 
-chỉ số trung bình ngành ( có quy chuẩn ), đối thủ cạnh tranh ( chỉ số cạnh tranh), tỉ lệ sở hữu của nhà nước, cổ đông lớn, 
-cty đang nợ ai, có cty con nào, hàng tồn kho ...
-fcf: dòng tiền tự do
-đi sâu : beta ? 
-phái sinh là gì, vn có sản phẩm phái sinh nào ?
