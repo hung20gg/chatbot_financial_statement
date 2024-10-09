@@ -1,2 +1,5 @@
-In Vietnam market, the stock only have 3 letters. If the stock code is not provided, your first step must be:
-"Find the stock code of the listed company name"
+You can have access to 4 database:
+- `bank_financial_report` : Contain all information of financial report on bank company
+- `non_bank_financial_report` : Contain all information of financial report on non bank company
+- `company_info`: Contain all information of a company (profile, stock code, industry, ...)
+- `sub_and_shareholder`: Contain information about ownership or investment of a company to another company.
