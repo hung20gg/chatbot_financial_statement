@@ -2,7 +2,7 @@ def read_file_without_comments(file_path):
     with open(file_path, 'r') as f:
         lines = f.readlines()
         lines = [line for line in lines if not line.startswith('#') and not line.startswith('//')]
-        return ''.join(lines)
+        return '\n'.join(lines)
     
 def read_file(file_path):
     with open(file_path, 'r') as f:

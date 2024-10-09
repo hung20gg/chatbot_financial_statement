@@ -51,11 +51,13 @@ This table store general information of the company
 
 |stock_code|is_bank|industry|issue_share|
 |----|----|----|----|
-|VIC|False|Real-estate|3823700000|
+|VIC|False|Real Estate|3823700000|
+
 
 The table has four columns, which:
 - `is_bank`: Bool value, checking whether the company is a bank or not.
-- `industry`: Current industry of company.
+- `industry`: Current industry of company. 
+The industry is one of the following: Banking, Real Estate, Electricity, Water & Gasoline/Oil and Gas, Insurance, Information Technology, Chemicals, Basic Resources, Retail, Oil and Gas, Financial Services and Tourism and Entertainment
 - `issue_share`: Number of share issued.
 
 ### Table: `sub_and_shareholder`
