@@ -142,6 +142,7 @@ Return an empty list if no company name is found.
 
 
 def llm_branch_reasoning(llm, task, db: DBHUB, verbose=False):
+
     """
     Branch reasoning for financial statement
     """
@@ -173,8 +174,7 @@ Here is a natural language query that you need to convert into a SQL query:
 {task}
 </query>    
 
-{find_suitable_column(llm, task, steps=steps_string, db=db, verbose=verbose)}  
-    
+   
 Note:
 - Your SQL query must only access the database schema provided.
 - In each step, you should only do the task that is required. Do not do the task of next step.

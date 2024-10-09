@@ -53,6 +53,7 @@ This table store general information of the company
 |----|----|----|----|
 |VIC|False|Real Estate|3823700000|
 
+
 The table has four columns, which:
 - `is_bank`: Bool value, checking whether the company is a bank or not.
 - `industry`: Current industry of company. 

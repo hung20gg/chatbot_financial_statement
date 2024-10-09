@@ -204,17 +204,20 @@ def setup_chroma_db_sql_query(collection_name, persist_directory, txt_path):
         
     for code in codes:
         chroma_db.add_texts([code[0]], metadatas=[{'lang': 'sql', 'sql_code': code[1]}])
+
         
 class DBHUB:
     """
     This will be the hub for both similarity search and rational DB
     """
+
     def __init__(self, conn, vector_db_bank: Chroma, vector_db_non_bank: Chroma, vector_db_company: Chroma, vector_db_sql: Chroma):
         self.conn = conn
         self.vector_db_bank = vector_db_bank
         self.vector_db_non_bank = vector_db_non_bank
         self.vector_db_company = vector_db_company
         self.vector_db_sql = vector_db_sql
+
     
     
     # Search for columns in bank and non_bank financial report
@@ -255,7 +258,7 @@ class DBHUB:
         result = pd.DataFrame({'stock_code': stock_codes, 'company_name': company_names})
         result = result.drop_duplicates(subset=['stock_code'])
         return result
-    
+
     # Find SQL query for few shot learning
     def find_sql_query(self, text, top_k=1):
         result = self.vector_db_sql.similarity_search(text, top_k)
