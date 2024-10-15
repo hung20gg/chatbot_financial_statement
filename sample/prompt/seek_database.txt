@@ -1,26 +1,23 @@
 You're given database about the financial reports of top Vietnamese companies, both bank and cooperates.
 All the data in the financial report are followed by the regulation of Vietnamese Accounting Standard (VAS). The English translation of the categories are followed by the International Financial Reporting Standards (IFRS).
-You're given database about the financial reports of top Vietnamese companies, both bank and cooperates.
-All the data in the financial report are followed by the regulation of Vietnamese Accounting Standard (VAS). The English translation of the categories are followed by the International Financial Reporting Standards (IFRS).
 
 Here are the descriptions of tables in the database:
 
 ### Table: `bank_financial_report`
 This table store information of financial report for bank
 
-|stock_code|year|quarter|category_code|data|report_type|
+|stock_code|year|quarter|category_code|data|
 |---|----|----|----|----|----|
-|VCB|2023|  0 | BS_300 | 1839613.198 | balance_sheet |
-|LPB|2024|  2 | CF_045 | 68522.835|cash_flow_statement|
-|BID|2024|  1 | IS_014 | 5392.606 |  income_statement |
+|VCB|2023|  0 | BS_300 | 1839613.198 |
+|LPB|2024|  2 | CF_045 | 68522.835|
+|BID|2024|  1 | IS_014 | 5392.606 |
 
 The table has six columns:
  - `stock_code`: The trading symbol of the bank.
  - `year` : The reported financial year.
  - `quarter` : The quarter reported (contain value either 1, 2, 3, 4). If the value is 0, that mean the report is for annual report.
  - `category_code` : The category_code recorded in the financial report. Refer to `category_code` of table `map_category_code_bank`.
- - `data` : The value of the recorded category (usually in Billion VND)
- - `report_type` : Report type recorded for each line (balance_sheet, cash_flow_statement or income_statement)
+ - `data` : The value of the recorded category (in Million VND)
 
 
 Each row will has the value of category listed in the specific quarterly or annually financial report of a bank
@@ -31,9 +28,6 @@ This table is similar to `bank_financial_report`, but for non-bank cooperate
 ### Table: `map_category_code_bank`
 This table store mapping value from category code to human-readable caption.
 
-|category_code|en_caption|report_type|
-|----|----|----|
-|IS_003| Net Interest Income | income_statement |
 |category_code|en_caption|report_type|
 |----|----|----|
 |IS_003| Net Interest Income | income_statement |
