@@ -139,6 +139,7 @@ def llm_branch_reasoning(llm, task, db: DBHUB, self_debug = False, verbose=False
     look_up_stock_code = ""
     
     content = f"""You have the following database schema:
+
 <description>
 {utils.read_file_without_comments('prompt/seek_database.txt', start=['//'])}
 </description>
@@ -172,7 +173,6 @@ Here are the steps to break down the task:
             "content": content
         }
     ]
-    
     
     cur_step = 0
     # Get company stock code
