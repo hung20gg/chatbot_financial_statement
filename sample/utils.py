@@ -1,8 +1,14 @@
-def read_file_without_comments(file_path):
+import pandas as pd
+from setup_db import DBHUB
+
+def read_file_without_comments(file_path, start=["#", "//"]):
     with open(file_path, 'r') as f:
         lines = f.readlines()
-        lines = [line for line in lines if not line.startswith('#') and not line.startswith('//')]
-        return '\n'.join(lines)
+        new_lines = []
+        for line in lines:
+            if not any([line.startswith(s) for s in start]):
+                new_lines.append(line)
+        return '\n'.join(new_lines)
     
 def read_file(file_path):
     with open(file_path, 'r') as f:
@@ -47,6 +53,64 @@ def edit_distance_score(str1, str2):
 def df_to_markdown(df):
     markdown = df.to_markdown(index=False)
     return markdown
+
+
+def company_name_to_stock_code(db : DBHUB, names, method = 'similarity') -> pd.DataFrame:
+    """
+    Get the stock code based on the company name
+    """
+    if not isinstance(names, list):
+        names = [names]
+    
+    if method == 'similarity': # Using similarity search
+        return db.return_company_info(names)
+    
+    else: # Using rational DB
+        dfs = []
+        query = "SELECT * FROM company WHERE company_name LIKE '%{name}%'"
+        
+        if method == 'bm25-ts':
+            query = "SELECT stock_code, company_name FROM company_info WHERE to_tsvector('english', company_name) @@ to_tsquery('{name}');"
+        
+        elif 'bm25' in method:
+            pass # Using paradeDB
+        
+        else:
+            raise ValueError("Method not supported")  
+        
+        for name in names:
+            
+            # Require translate company name in Vietnamese to English
+            name = name # translate(name, 'vi', 'en')
+            query = query.format(name=name)
+            result = db.query(query, return_type='dataframe')
+            
+            dfs.append(result)
+            
+        if len(dfs) > 0:
+            result = pd.concat(dfs)
+        else:
+            result = pd.DataFrame(columns=['stock_code', 'company_name'])
+        return result
+
+    
+def get_company_detail_from_df(dfs, db: DBHUB, method = 'similarity') -> pd.DataFrame:
+    stock_code = set()
+    if not isinstance(dfs, list):
+        dfs = [dfs]
+    
+    for df in dfs:
+        for col in df.columns:
+            if col == 'stock_code':
+                stock_code.update(df[col].tolist())
+            if col == 'company_name':
+                stock_code.update(company_name_to_stock_code(db, df[col].tolist(), method)['stock_code'].tolist())
+            if col == 'invest_on':
+                stock_code.update(company_name_to_stock_code(db, df[col].tolist(), method)['stock_code'].tolist())
+            
+    list_stock_code = list(stock_code)
+    
+    return company_name_to_stock_code(db, list_stock_code, method)
     
 if __name__ == '__main__':
     print(read_file_without_comments('prompt/seek_database.txt'))
