@@ -1,5 +1,7 @@
 from llm.llm.chatgpt import ChatGPT
 from llm.llm_utils import get_code_from_text_response, get_json_from_text_response
+from llm_general import find_suitable_column, TIR_reasoning
+from setup_db import DBHUB
 import utils
 import re
 import pandas as pd
@@ -74,105 +76,21 @@ def text2sql(llm, text):
     return get_code_from_text_response(response)
 
 
-def partial_text2sql_1(llm, text):
-    system_prompt = """
-    You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query.
-    """
-    
-    database_description = utils.read_file_without_comments('prompt/seek_database.txt')
 
-    prompt = f"""You have the following database schema:
-    {database_description}
-    
-    Here is a natural language query that you need to convert into a SQL query:
-    {text}
-    
-    However, you have no information about the detail of the database, you only only have to create partial SQL query for database exploration.
-    
-    Think step-by-step and return partial SQL query based on the natural language query above.
-    """
-    
-    messages = [
-        {
-            "role": "system",
-            "content": system_prompt
-        },
-        {
-            "role": "user",
-            "content": prompt
-        }
-    ]
-    
-    response = llm(messages)
-    return get_code_from_text_response(response)
-
-
-def find_suitable_column(llm, text):
-    system_prompt = """
-    You are an expert in analyzing financial reports. 
-    """
-    
-    prompt = f"""
-    {text}
-    
-    <task>
-    Based on given question, analyze and suggest the suitable column in the financial statement that can be used to answer the question.
-    Notice that there are two types of financial statements: one for banks and one for non-banks cooperate.
-    
-    Analyze and return the suggested column names in JSON format.
-    You don't need to return both bank and non-bank column names if you think only one type of column is suitable.
-    </task>
-    
-    <formatting_example>
-    ```json
-    {{
-        "bank_column_name": [],
-        "non_bank_column_name": []
-    }}
-    ```
-    </formatting_example>
-    """
-    
-    messages = [
-        {
-            "role": "system",
-            "content": system_prompt
-        },
-        {
-            "role": "user",
-            "content": prompt
-        }
-    ]
-    
-    response = llm(messages)
-    print(response)
-    return get_json_from_text_response(response)[0]
-
-
-def reasoning_text2SQL(llm, text, search_func, top_k):
+def reasoning_text2SQL(llm, text, db: DBHUB, top_k = 5, verbose = False):
     
     # Step 1: Find suitable column
-    extracted_column = find_suitable_column(llm, text)
-    
-    bank_column = ""
-    non_bank_column = ""
-    
-    if "bank_column_name" in extracted_column and len(extracted_column["bank_column_name"]) > 0:
-        bank_column = df_to_markdown(search_func(extracted_column["bank_column_name"], top_k, is_bank=True))
-    
-    if "non_bank_column_name" in extracted_column and len(extracted_column["non_bank_column_name"]) > 0:
-        non_bank_column = df_to_markdown(search_func(extracted_column["non_bank_column_name"], top_k, is_bank=False))
-    
+    bank_column, non_bank_column = find_suitable_column(llm, text, top_k=top_k, verbose=verbose)
+
     
     # Step 2: Convert text to SQL
     system_prompt = """
     You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query.
     """
     
-    database_description = utils.read_file_without_comments('prompt/seek_database.txt')
+    database_description = utils.read_file_without_comments('prompt/seek_database.txt', start=['//'])
         
-
-    few_shot = utils.read_file_without_comments('prompt/example1.txt')
+    few_shot = utils.read_file_without_comments('prompt/example1 no_col_name.txt')
         
     prompt = f"""You have the following database schema:
 {database_description}
@@ -214,7 +132,21 @@ Think step-by-step and return SQL query that suitable with the database schema b
     ]
     
     response = llm(messages)
+    if verbose:
+        print(response)
+    
+    # Add TIR to the SQL query
+    response, error_message, execution_table = TIR_reasoning(response, db, verbose=verbose)
+    
+    messages.append(
+        {
+            "role": "assistant",
+            "content": response
+        }
+    )
+    
     return get_code_from_text_response(response)
+
 
 def df_to_markdown(df):
     markdown = df.to_markdown(index=False)
