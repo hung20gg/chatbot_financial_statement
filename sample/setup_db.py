@@ -50,7 +50,7 @@ def create_table_if_not_exists(conn, table_name, df, primary_key=None, foreign_k
         if pd.api.types.is_integer_dtype(df[col]):
             max_num = df[col].max()
             if max_num > 100_000_000:
-                col_type.append('DECIMAL(12, 4)')
+                col_type.append('DECIMAL')
             else:
                 col_type.append('INTEGER')
         elif pd.api.types.is_float_dtype(df[col]):
