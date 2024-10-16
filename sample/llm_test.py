@@ -80,8 +80,10 @@ def text2sql(llm, text):
 def reasoning_text2SQL(llm, text, db: DBHUB, top_k = 5, verbose = False):
     
     # Step 1: Find suitable column
-    bank_column, non_bank_column = find_suitable_column(llm, text, top_k=top_k, verbose=verbose)
-
+    bank_column, non_bank_column = find_suitable_column(llm, text, db=db, top_k=top_k, verbose=verbose)
+    if verbose:
+        print(f"Bank column: {bank_column}")
+        print(f"Non-bank column: {non_bank_column}")
     
     # Step 2: Convert text to SQL
     system_prompt = """
@@ -118,6 +120,9 @@ Here is an example of a query that you can refer to:
 <instruction>
 Think step-by-step and return SQL query that suitable with the database schema based on the natural language query above
 </instruction>
+
+Note: 
+- Do not make any assumption about the column name. You can refer to the mapping table above to find the suitable column name.
 """
     
     messages = [
