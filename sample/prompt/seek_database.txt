@@ -57,16 +57,15 @@ The industry is one of the following: Banking, Real Estate, Electricity, Water &
 ### Table: `sub_and_shareholder`
 This table store the ownership rate of a company to another company
 
-|stock_code|invest_on|percentage|
-|---|---|---|
-|MSN|TCB|0.18|
+|stock_code|invest_on|
+|---|---|
+|MSN|TCB|
 
 Explain:
-This mean MSN is a shareholder and has 18% of TCB's total share. 
+This mean MSN is a shareholder of TCB. 
 
 The table has three column, which:
 - `invest_on`: the company invested on (can be subsidiary)
-- `percentage`: ownership rate
 
 Note: for each `category_code`, the prefix tell which report does that code refer to.
 - `BS`: Balance sheet

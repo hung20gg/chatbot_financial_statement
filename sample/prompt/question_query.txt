@@ -1,31 +1,27 @@
 -- nonbank : 14
 -- bank : 17 
 
--- 1. Calculate ROE of VIC, VNM, and HPG for the first two quarters of 2024
+-- 1. Calculate ROE of company VIC, VNM, and HPG for the first two quarters of 2024
 
 -- Calculate ROE of VIC, VRE and VHM in first 2 quarter of 2024
 
 -- Get Net income value
 WITH net_income AS (
-    SELECT nbfr.data AS net_income, nbfr.stock_code as stock_code, nbfr.quarter as quarter, nbfr.year as year
-    FROM non_bank_financial_report nbfr
-    JOIN map_category_code_non_bank mc 
-      ON nbfr.category_code = mc.category_code
-    WHERE nbfr.stock_code in ('VIC', 'VNM', 'HPG')
-      AND nbfr.year = 2024
-      AND nbfr.quarter in (1,2)
-      AND mc.en_caption = 'Profit after Corporate Income Tax'),
-
+    SELECT data AS net_income, stock_code, quarter, year
+    FROM non_bank_financial_report
+    WHERE stock_code in ('VIC', 'VNM', 'HPG')
+      AND year = 2024
+      AND quarter in (1,2)
+      AND category_code = 'IS_060'
+),
 -- Get equity value
 equity AS (
-    SELECT nbfr.data AS equity, nbfr.stock_code as stock_code, nbfr.quarter as quarter, nbfr.year as year
-    FROM non_bank_financial_report nbfr
-    JOIN map_category_code_non_bank mc 
-      ON nbfr.category_code = mc.category_code
-    WHERE nbfr.stock_code in ('VIC', 'VNM', 'HPG')
-      AND nbfr.year = 2024
-      AND nbfr.quarter in (1,2)
-      AND mc.en_caption = 'Equity'
+    SELECT data AS equity, stock_code, quarter, year
+    FROM non_bank_financial_report
+    WHERE stock_code in ('VIC', 'VNM', 'HPG')
+      AND year = 2024
+      AND quarter in (1,2)
+      AND category_code = 'BS_400'
 )
 -- Select detail information 
 SELECT 
@@ -42,22 +38,28 @@ AND net_income.quarter = equity.quarter
 AND net_income.year = equity.year;
 -- Join on both quarter and year to avoid duplication
 
--- 2. Compare the Debt-to-Equity Ratio of VNM and MSN for the last two quarters of 2024
+-- 2. Compare the Debt-to-Equity Ratio of company VNM and MSN for the last two quarters of 2024
 
+-- Get total debt
 WITH total_debt AS (
-    SELECT nbfr.data AS total_debt, nbfr.stock_code, nbfr.quarter, nbfr.year
-    FROM non_bank_financial_report nbfr
-    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
-    WHERE nbfr.stock_code IN ('VNM', 'MSN') AND nbfr.year = 2024 AND nbfr.quarter IN (1, 2)
-      AND mc.en_caption = 'Liabilities'
+    SELECT data AS total_debt, stock_code, quarter, year
+    FROM non_bank_financial_report
+    WHERE stock_code in ('VNM', 'MSN')
+      AND year = 2024
+      AND quarter in (1,2)
+      AND category_code = 'BS_300'
 ),
+-- Get equity
 total_equity AS (
-    SELECT nbfr.data AS total_equity, nbfr.stock_code, nbfr.quarter, nbfr.year
-    FROM non_bank_financial_report nbfr
-    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
-    WHERE nbfr.stock_code IN ('VNM', 'MSN') AND nbfr.year = 2024 AND nbfr.quarter IN (1, 2)
-      AND mc.en_caption = 'Equity'
+    SELECT data AS total_equity, stock_code, quarter, year
+    FROM non_bank_financial_report
+    WHERE stock_code in ('VNM', 'MSN')
+      AND year = 2024
+      AND quarter in (1,2)
+      AND category_code = 'BS_400'
 )
+
+
 SELECT 
     total_debt.stock_code,
     total_debt.year,
@@ -69,21 +71,24 @@ JOIN total_equity
   AND total_debt.quarter = total_equity.quarter
   AND total_debt.year = total_equity.year;
 
--- 3. Compare Gross Profit Margin of VIC, VHM, and VNM for Q1 2024
+-- 3. Compare Gross Profit Margin of company VIC, VHM, and VNM for Q1 2024
 
-  WITH gross_profit AS (
-    SELECT nbfr.data AS gross_profit, nbfr.stock_code, nbfr.quarter, nbfr.year
-    FROM non_bank_financial_report nbfr
-    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
-    WHERE nbfr.stock_code IN ('VIC', 'VHM', 'VNM') AND nbfr.year = 2024 AND nbfr.quarter = 1
-      AND mc.en_caption = 'Gross Profit from Sales of Goods and Services'
+WITH gross_profit AS (
+    SELECT data AS gross_profit, stock_code, quarter, year
+    FROM non_bank_financial_report
+    WHERE stock_code in ('VIC', 'VHM', 'VNM')
+      AND year = 2024
+      AND quarter = 1
+      AND category_code = 'IS_020'
 ),
+
 revenue AS (
-    SELECT nbfr.data AS revenue, nbfr.stock_code, nbfr.quarter, nbfr.year
-    FROM non_bank_financial_report nbfr
-    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
-    WHERE nbfr.stock_code IN ('VIC', 'VHM', 'VNM') AND nbfr.year = 2024 AND nbfr.quarter = 1
-      AND mc.en_caption = 'Revenue from Sales of Goods and Services'
+    SELECT data AS revenue, stock_code, quarter, year
+    FROM non_bank_financial_report
+    WHERE stock_code in ('VIC', 'VHM', 'VNM')
+      AND year = 2024
+      AND quarter = 1
+      AND category_code = 'IS_001'
 )
 SELECT 
     gross_profit.stock_code,
@@ -99,19 +104,23 @@ JOIN revenue
 -- 4. Calculate Free Cash Flow for VHM and VNM for Q1 2024
 
 WITH operating_cash_flow AS (
-    SELECT nbfr.data AS operating_cash_flow, nbfr.stock_code, nbfr.quarter, nbfr.year
-    FROM non_bank_financial_report nbfr
-    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
-    WHERE nbfr.stock_code IN ('VHM', 'VNM') AND nbfr.year = 2024 AND nbfr.quarter = 1
-      AND mc.en_caption = 'Net Cash Flow from Operating Activities'
+    SELECT data AS operating_cash_flow, stock_code, quarter, year
+    FROM non_bank_financial_report
+    WHERE stock_code in ('VHM', 'VNM')
+      AND year = 2024
+      AND quarter = 1
+      AND category_code = 'CF_020'
 ),
+
 investing_cash_flow AS (
-    SELECT nbfr.data AS investing_cash_flow, nbfr.stock_code, nbfr.quarter, nbfr.year
-    FROM non_bank_financial_report nbfr
-    JOIN map_category_code_non_bank mc ON nbfr.category_code = mc.category_code
-    WHERE nbfr.stock_code IN ('VHM', 'VNM') AND nbfr.year = 2024 AND nbfr.quarter = 1
-      AND mc.en_caption = 'Cash Paid for Purchase, Construction of Fixed Assets and Other Long-term Assets'
+    SELECT data AS investing_cash_flow, stock_code, quarter, year
+    FROM non_bank_financial_report
+    WHERE stock_code in ('VHM', 'VNM')
+      AND year = 2024
+      AND quarter = 1
+      AND category_code = 'CF_021'
 )
+
 SELECT 
     operating_cash_flow.stock_code,
     operating_cash_flow.year,

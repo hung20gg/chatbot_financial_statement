@@ -28,7 +28,7 @@ SELECT
     (net_income.net_income / revenue.revenue) AS ROS
     	
 FROM net_income
-JOIN equity 
+JOIN revenue 
 ON net_income.stock_code = revenue.stock_code
 AND net_income.quarter = revenue.quarter 
 AND net_income.year = revenue.year;
