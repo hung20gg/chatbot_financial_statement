@@ -51,11 +51,13 @@ def edit_distance_score(str1, str2):
     
     
 def df_to_markdown(df):
+    if not isinstance(df, pd.DataFrame):
+        return str(df)
     markdown = df.to_markdown(index=False)
     return markdown
 
 
-def company_name_to_stock_code(db : DBHUB, names, method = 'similarity') -> pd.DataFrame:
+def company_name_to_stock_code(db : DBHUB, names, method = 'similarity', top_k = 2) -> pd.DataFrame:
     """
     Get the stock code based on the company name
     """
@@ -63,7 +65,7 @@ def company_name_to_stock_code(db : DBHUB, names, method = 'similarity') -> pd.D
         names = [names]
     
     if method == 'similarity': # Using similarity search
-        return db.return_company_info(names)
+        return db.return_company_info(names, top_k)
     
     else: # Using rational DB
         dfs = []

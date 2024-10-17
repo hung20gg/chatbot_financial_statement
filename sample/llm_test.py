@@ -1,86 +1,24 @@
-from llm.llm.chatgpt import ChatGPT
 from llm.llm_utils import get_code_from_text_response, get_json_from_text_response
-from llm_general import find_suitable_column, TIR_reasoning
+from llm_general import find_suitable_column, TIR_reasoning, get_stock_code_based_on_company_name
 from setup_db import DBHUB
 import utils
 import re
 import pandas as pd
 
 
-class MappingTable:
-    def __init__(self, vector_db_bank, vector_db_non_bank, db):
-        self.vector_db_bank = vector_db_bank
-        self.vector_db_non_bank = vector_db_non_bank
-        self.db = db
-        
-    def search(self, texts, top_k, is_bank) -> list:
-        collect_code = set()
-        if not isinstance(texts, list):
-            texts = [texts]
-        for text in texts:
-            if is_bank:
-                result = self.vector_db_bank.similarity_search(text, top_k)
-            else:
-                result = self.vector_db_non_bank.similarity_search(text, top_k)
-            
-            for item in result:
-                collect_code.add(item.metadata['code'])
-        return list(collect_code)
-    
-    def search_return_df(self, text, top_k, is_bank = False) -> pd.DataFrame:
-        collect_code = self.search(text, top_k, is_bank)
-        collect_code = [f"'{code}'" for code in collect_code]
-        query = f"SELECT category_code, en_caption FROM map_category_code_{'' if is_bank else 'non_'}bank WHERE category_code IN ({', '.join(collect_code)})"
-        return self.db.query(query,return_type='dataframe')
-
-
-def text2sql(llm, text):
-    system_prompt = """
-    You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query.
-    """
-    
-    database_description = utils.read_file('prompt/seek_database.txt')
-        
-    few_shot = utils.read_file_without_comments('prompt/example1.txt')
-        
-    prompt = f"""You have the following database schema:
-    {database_description}
-    
-    Here is a natural language query that you need to convert into a SQL query:
-    <data>
-    {text}
-    </data>
-    
-    Here is an example of a query that you can refer to:
-    <example>
-    {few_shot}
-    </example>
-    
-    <instruction>
-    Think step-by-step and return SQL query that suitable with the database schema based on the natural language query above
-    </instruction>
-    """
-    
-    messages = [
-        {
-            "role": "system",
-            "content": system_prompt
-        },
-        {
-            "role": "user",
-            "content": prompt
-        }
-    ]
-    
-    response = llm(messages)
-    return get_code_from_text_response(response)
-
-
-
-def reasoning_text2SQL(llm, text, db: DBHUB, top_k = 5, verbose = False):
+def reasoning_text2SQL(llm, text, db: DBHUB, top_k = 5, verbose = False, running_type = 'sequential'):
     
     # Step 1: Find suitable column
-    bank_column, non_bank_column = find_suitable_column(llm, text, db=db, top_k=top_k, verbose=verbose)
+    if running_type == 'parallel':
+        bank_column = ""
+        non_bank_column = ""
+        company_info = ""
+        pass 
+    else:
+        bank_column, non_bank_column = find_suitable_column(llm, text, db=db, top_k=top_k, verbose=verbose)
+        company_info = get_stock_code_based_on_company_name(llm, text, db=db) 
+        stock_code_table = utils.df_to_markdown(company_info)
+               
     if verbose:
         print(f"Bank column: {bank_column}")
         print(f"Non-bank column: {non_bank_column}")
@@ -99,6 +37,11 @@ def reasoning_text2SQL(llm, text, db: DBHUB, top_k = 5, verbose = False):
 
 Here is a natural language query that you need to convert into a SQL query:
 {text}
+
+Company details
+<data>
+{stock_code_table}
+</data>
 
 Snapshot of the mapping table:
 <data>
