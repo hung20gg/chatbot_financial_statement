@@ -50,7 +50,7 @@ def create_table_if_not_exists(conn, table_name, df, primary_key=None, foreign_k
         if pd.api.types.is_integer_dtype(df[col]):
             max_num = df[col].max()
             if max_num > 100_000_000:
-                col_type.append('BIGINT')
+                col_type.append('DECIMAL')
             else:
                 col_type.append('INTEGER')
         elif pd.api.types.is_float_dtype(df[col]):
@@ -273,6 +273,34 @@ class DBHUB:
         if result[0].metadata.get('sql_code', None) is not None:
             return f"```sql\n\n{result[0].metadata['sql_code']}```"
         return 'No SQL query found'
+    
+    def return_mapping_table(self, bank_column = [], non_bank_column = [], top_k = 5):
+        bank_column_table = ""
+        bank_exact_column = []
+        for col in bank_column:
+            result = self.vector_db_bank.similarity_search(col, top_k)
+            for item in result:
+                bank_exact_column.append(item.metadata['code'])
+        
+        # Get into PostgreSQL to get the exact column name. Should be moved to the Chroma DB
+        if len(bank_exact_column) > 0:
+            bank_exact_column = [f"'{code}'" for code in bank_exact_column]
+            query = f"SELECT category_code, en_caption FROM map_category_code_bank WHERE category_code IN ({', '.join(bank_exact_column)})"
+            bank_column_table = self.query(query, return_type='dataframe')
+                
+        non_bank_column_table = ""
+        non_bank_exact_column = []
+        for col in non_bank_column:
+            result = self.vector_db_non_bank.similarity_search(col, top_k)
+            for item in result:
+                non_bank_exact_column.append(item.metadata['code'])
+        
+        if len(non_bank_exact_column) > 0:
+            non_bank_exact_column = [f"'{code}'" for code in non_bank_exact_column]
+            query = f"SELECT category_code, en_caption FROM map_category_code_non_bank WHERE category_code IN ({', '.join(non_bank_exact_column)})"
+            non_bank_column_table = self.query(query, return_type='dataframe')   
+        
+        return bank_column_table, non_bank_column_table
 
 # Example usage
 if __name__ == '__main__':

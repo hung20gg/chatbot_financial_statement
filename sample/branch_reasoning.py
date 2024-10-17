@@ -1,4 +1,5 @@
 from llm.llm_utils import get_code_from_text_response, get_json_from_text_response
+from llm_general import find_suitable_column
 from setup_db import DBHUB
 import utils
 import numpy as np
@@ -130,6 +131,8 @@ def llm_branch_reasoning(llm, task, db: DBHUB, self_debug = False, verbose=False
         sql_llm = llm
     
     steps = simplify_branch_reasoning(llm, task, verbose=verbose)
+    bank_column, non_bank_column = find_suitable_column(llm, task, db=db, verbose=verbose)
+    
     steps_string = ""
     
     for i, step in enumerate(steps):
@@ -158,7 +161,18 @@ Note:
 Here are the steps to break down the task:
 <steps>
 {steps_string}
-</steps>            
+</steps>      
+
+Snapshot of the mapping table:
+### Table: map_category_code_bank
+<table>
+{bank_column}
+</table>     
+
+### Table: map_category_code_non_bank
+<table>
+{non_bank_column}
+</table> 
 """
 
     original_content = content
@@ -245,78 +259,78 @@ Here are the steps to break down the task:
     return history
         
     
-def find_suitable_column(llm, text, steps='', return_type='markdown', db: DBHUB = None, top_k = 5, verbose=False):
+# def find_suitable_column(llm, text, steps='', return_type='markdown', db: DBHUB = None, top_k = 5, verbose=False):
 
-    system_prompt = """
-    You are an expert in analyzing financial reports. 
-    """
+#     system_prompt = """
+#     You are an expert in analyzing financial reports. 
+#     """
     
-    prompt = f"""
-    {text}
-    {steps}
-    <task>
-    Based on given question, analyze and suggest the suitable column in the financial statement that can be used to answer the question.
-    Notice that there are two types of financial statements: one for banks and one for non-banks cooperate.
+#     prompt = f"""
+#     {text}
+#     {steps}
+#     <task>
+#     Based on given question, analyze and suggest the suitable column in the financial statement that can be used to answer the question.
+#     Notice that there are two types of financial statements: one for banks and one for non-banks cooperate.
     
-    Analyze and return the suggested column names in JSON format.
-    You don't need to return both bank and non-bank column names if you think only one type of column is suitable.
-    </task>
+#     Analyze and return the suggested column names in JSON format.
+#     You don't need to return both bank and non-bank column names if you think only one type of column is suitable.
+#     </task>
     
-    <formatting_example>
-    ```json
-    {{
-        "bank_column_name": [],
-        "non_bank_column_name": []
-    }}
-    ```
-    </formatting_example>
-    """
+#     <formatting_example>
+#     ```json
+#     {{
+#         "bank_column_name": [],
+#         "non_bank_column_name": []
+#     }}
+#     ```
+#     </formatting_example>
+#     """
     
-    messages = [
-        {
-            "role": "system",
-            "content": system_prompt
-        },
-        {
-            "role": "user",
-            "content": prompt
-        }
-    ]
+#     messages = [
+#         {
+#             "role": "system",
+#             "content": system_prompt
+#         },
+#         {
+#             "role": "user",
+#             "content": prompt
+#         }
+#     ]
     
-    response = llm(messages)
-    if verbose:
-        print("Find suitable column response: ")
-        print(response)
-        print("====================================")
+#     response = llm(messages)
+#     if verbose:
+#         print("Find suitable column response: ")
+#         print(response)
+#         print("====================================")
     
-    extracted_column = get_json_from_text_response(response, new_method=True)
+#     extracted_column = get_json_from_text_response(response, new_method=True)
     
-    if return_type == 'json':
-        return extracted_column
+#     if return_type == 'json':
+#         return extracted_column
     
-    assert db is not None, "DBHUB object is required"
-    bank_column = ""
-    non_bank_column = ""
+#     assert db is not None, "DBHUB object is required"
+#     bank_column = ""
+#     non_bank_column = ""
     
-    if "bank_column_name" in extracted_column and len(extracted_column["bank_column_name"]) > 0:
-        bank_column = utils.df_to_markdown(db.search_return_df(extracted_column["bank_column_name"], top_k, is_bank=True))
+#     if "bank_column_name" in extracted_column and len(extracted_column["bank_column_name"]) > 0:
+#         bank_column = utils.df_to_markdown(db.search_return_df(extracted_column["bank_column_name"], top_k, is_bank=True))
     
-    if "non_bank_column_name" in extracted_column and len(extracted_column["non_bank_column_name"]) > 0:
-        non_bank_column = utils.df_to_markdown(db.search_return_df(extracted_column["non_bank_column_name"], top_k, is_bank=False))
+#     if "non_bank_column_name" in extracted_column and len(extracted_column["non_bank_column_name"]) > 0:
+#         non_bank_column = utils.df_to_markdown(db.search_return_df(extracted_column["non_bank_column_name"], top_k, is_bank=False))
     
-    snapshot = f"""
-Snapshot of the mapping table:
-<data>
-`map_category_code_bank` 
+#     snapshot = f"""
+# Snapshot of the mapping table:
+# <data>
+# `map_category_code_bank` 
 
-{bank_column}
+# {bank_column}
 
-`map_category_code_non_bank` 
+# `map_category_code_non_bank` 
 
-{non_bank_column}
-</data>      
-"""
-    return snapshot
+# {non_bank_column}
+# </data>      
+# """
+#     return snapshot
   
     
     

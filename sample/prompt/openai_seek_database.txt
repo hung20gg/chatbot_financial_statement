@@ -19,7 +19,6 @@ CREATE TABLE company_info(
 CREATE TABLE sub_and_shareholder(
     stock_code VARCHAR(255) references company_info(stock_code),
     invest_on VARCHAR(255) references company_info(stock_code), -- The company invested on (can be subsidiary)
-    percentage float -- ownership rate
 );
 
 -- Table: map_category_code_bank
@@ -70,12 +69,12 @@ Note: for each `category_code` column, the prefix tell which report does that co
 
 - `sub_and_shareholder`
 
-|stock_code|invest_on|percentage|
-|---|---|---|
-|MSN|TCB|0.18|
+|stock_code|invest_on|
+|---|---|
+|MSN|TCB|
 
 Explain:
-This mean MSN is a shareholder and has 18% of TCB's total share. 
+This mean MSN is a shareholder of TCB. 
 
 - `bank_financial_report`
 
