@@ -1,0 +1,108 @@
+category_code,vi_caption,en_caption,report_type
+BS_100,A. TÀI SẢN NGẮN HẠN,A. CURRENT ASSETS,balance_sheet
+BS_110,I. Tài sản tài chính,I. Financial Assets,balance_sheet
+BS_111,1. Tiền và các khoản tương đương tiền,1. Cash and cash equivalents,balance_sheet
+BS_111.1,1.1. Tiền,1.1. Cash,balance_sheet
+BS_111.2,1.2. Các khoản tương đương tiền,1.2. Cash equivalents,balance_sheet
+BS_112,2. Các tài sản tài chính ghi nhận thông qua lãi lỗ (FVTPL),2. Financial assets at fair value through profit or loss (FVTPL),balance_sheet
+BS_113,3. Các khoản đầu tư giữ đến ngày đáo hạn (HTM),3. Held-to-maturity investments (HTM),balance_sheet
+BS_114,4. Các khoản cho vay,4. Loans,balance_sheet
+BS_115,5. Các tài sản tài chính sẵn sàng để bán (AFS),5. Available-for-sale financial assets (AFS),balance_sheet
+BS_116,6. Dự phòng suy giảm giá trị các tài sản tài chính và tài sản thế chấp,6. Provision for impairment of financial assets and collateral,balance_sheet
+BS_117,7. Các khoản phải thu,7. Receivables,balance_sheet
+BS_117.1,7.1. Phải thu bán các tài sản tài chính,7.1. Receivables from sale of financial assets,balance_sheet
+BS_117.2,"7.2. Phải thu và dự thu cổ tức, tiền lãi các tài sản tài chính",7.2. Dividends and interest receivables from financial assets,balance_sheet
+BS_117.4,"7.2.2. Dự thu cổ tức, tiền lãi chưa đến ngày nhận",7.2.2. Accrued dividends and interest not yet due,balance_sheet
+BS_118,Trả trước cho người bán,Advances to suppliers,balance_sheet
+BS_119,9. Phải thu các dịch vụ CTCK cung cấp,8. Receivables from securities services provided,balance_sheet
+BS_120,10. Phải thu nội bộ,9. Internal receivables,balance_sheet
+BS_121,11. Phải thu về lỗi giao dịch chứng khoán,10. Receivables from securities transaction errors,balance_sheet
+BS_122,12. Các khoản phải thu khác,11. Other receivables,balance_sheet
+BS_129,13. Dự phòng suy giảm giá trị các khoản phải thu (*),12. Provision for impairment of receivables (*),balance_sheet
+BS_130,II.Tài sản ngắn hạn khác,II. Other Current Assets,balance_sheet
+BS_131,1. Tạm ứng,1. Advances,balance_sheet
+BS_132,"2. Vật tư văn phòng, công cụ, dụng cụ","2. Office supplies, tools, and instruments",balance_sheet
+BS_133,3. Chi phí trả trước ngắn hạn,3. Short-term prepaid expenses,balance_sheet
+BS_134,"4. Cầm cố, thế chấp, ký quỹ, ký cược ngắn hạn",4. Short-term deposits and collateral,balance_sheet
+BS_135,5. Thuế giá trị gia tăng được khấu trừ,5. Deductible value-added tax (VAT),balance_sheet
+BS_136,6. Thuế và các khoản khác phải thu Nhà nước,6. Taxes and other receivables from the government,balance_sheet
+BS_137,5. Tài sản ngắn hạn khác,7. Other current assets,balance_sheet
+BS_200,B.TÀI SẢN DÀI HẠN,B. NON-CURRENT ASSETS,balance_sheet
+BS_210,I. Tài sản tài chính dài hạn,I. Long-term Financial Assets,balance_sheet
+BS_212,2. Các khoản đầu tư,2. Investments,balance_sheet
+BS_212.1,2.1. Các khoản đầu tư nắm giữ đến ngày đáo hạn,2.1. Held-to-maturity investments (HTM),balance_sheet
+BS_212.2,2.2. Đầu tư vào công ty con,2.2. Investments in subsidiaries,balance_sheet
+BS_212.3,"2.3. Đầu tư vào công ty liên doanh, liên kết",2.3. Investments in joint ventures and associates,balance_sheet
+BS_212.4,2.4. Đầu tư dài hạn khác,2.4. Other long-term investments,balance_sheet
+BS_220,II. Tài sản cố định,II. Fixed Assets,balance_sheet
+BS_221,1. Tài sản cố định hữu hình,1. Tangible fixed assets,balance_sheet
+BS_222,- Nguyên giá,Original cost,balance_sheet
+BS_223a,- Giá trị hao mòn lũy kế,Accumulated depreciation,balance_sheet
+BS_227,3. Tài sản cố định vô hình,3. Intangible fixed assets,balance_sheet
+BS_228,- Nguyên giá,Original cost,balance_sheet
+BS_229a,- Giá trị hao mòn lũy kế,Accumulated depreciation,balance_sheet
+BS_230,III. Bất động sản đầu tư,III. Investment Properties,balance_sheet
+BS_231,- Nguyên giá,Original cost,balance_sheet
+BS_2321,- Giá trị hao mòn lũy kế,Accumulated depreciation,balance_sheet
+BS_240,IV. Chi phí xây dựng cơ bản dở dang,IV. Construction in Progress,balance_sheet
+BS_250,V. Tài sản dài hạn khác,V. Other Long-term Assets,balance_sheet
+BS_251,"1. Cầm cố, thế chấp, ký quỹ, ký cược dài hạn",1. Long-term deposits and collateral,balance_sheet
+BS_252,2. Chi phí trả trước dài hạn,2. Long-term prepaid expenses,balance_sheet
+BS_253,3. Tài sản thuế thu nhập hoãn lại,3. Deferred tax assets,balance_sheet
+BS_254,4. Tiền nộp Quỹ Hỗ trợ thanh toán,4. Contributions to the Clearing Support Fund,balance_sheet
+BS_255,5. Tài sản dài hạn khác,5. Other long-term assets,balance_sheet
+BS_270,TỔNG CỘNG TÀI SẢN,TOTAL ASSETS,balance_sheet
+BS_300,C. NỢ PHẢI TRẢ,C. LIABILITIES,balance_sheet
+BS_310,I. Nợ phải trả ngắn hạn,I. Current Liabilities,balance_sheet
+BS_311,1. Vay và nợ thuê tài sản tài chính ngắn hạn,1. Short-term borrowings and financial lease liabilities,balance_sheet
+BS_312,1.1. Vay ngắn hạn,1.1. Short-term borrowings,balance_sheet
+BS_313,1.2. Nợ thuê tài sản tài chính ngắn hạn,1.2. Short-term financial lease liabilities,balance_sheet
+BS_314,2. Vay tài sản tài chính ngắn hạn,2. Short-term financial borrowings,balance_sheet
+BS_315,3. Trái phiếu chuyển đổi ngắn hạn,3. Convertible bonds - short term,balance_sheet
+BS_316,4. Trái phiếu phát hành ngắn hạn,4. Short-term issued bonds,balance_sheet
+BS_317,5. Vay Quỹ Hỗ trợ thanh toán,5. Borrowings from the Clearing Support Fund,balance_sheet
+BS_318,6. Phải trả hoạt động giao dịch chứng khoán,6. Payables from securities transactions,balance_sheet
+BS_319,7. Phải trả về lỗi giao dịch các tài sản tài chính,7. Payables from errors in financial asset transactions,balance_sheet
+BS_320,8. Phải trả người bán ngắn hạn,8. Payables to short-term suppliers,balance_sheet
+BS_321,9. Người mua trả tiền trước,9. Advances from customers,balance_sheet
+BS_322,10. Thuế và các khoản phải nộp nhà nước,10. Taxes and amounts payable to the government,balance_sheet
+BS_323,11. Phải trả người lao động,11. Payables to employees,balance_sheet
+BS_324,12. Các khoản trích nộp phúc lợi nhân viên,12. Employee welfare fund contributions,balance_sheet
+BS_325,13. Chi phí phải trả ngắn hạn,13. Short-term accrued expenses,balance_sheet
+BS_326,14. Phải trả nội bộ ngắn hạn,14. Internal payables - short term,balance_sheet
+BS_327,15. Doanh thu chưa thực hiện ngắn hạn,15. Short-term deferred revenue,balance_sheet
+BS_328,"16. Nhận ký quỹ, ký cược ngắn hạn",16. Short-term deposits and collateral received,balance_sheet
+BS_329,"17.Các khoản phải trả, phải nộp khác ngắn hạn",17. Other short-term payables and liabilities,balance_sheet
+BS_330,18. Dự phòng phải trả ngắn hạn,18. Short-term provisions,balance_sheet
+BS_331,12. Quỹ khen thưởng phúc lợi,19. Employee welfare fund,balance_sheet
+BS_340,II. Nợ phải trả dài hạn,II. Long-term Liabilities,balance_sheet
+BS_346,4. Trái phiếu phát hành dài hạn,4. Long-term issued bonds,balance_sheet
+BS_347,5. Phải trả người bán dài hạn,5. Long-term payables to suppliers,balance_sheet
+BS_348,6. Người mua trả tiền trước dài hạn,6. Advances from long-term customers,balance_sheet
+BS_349,7. Chi phí phải trả dài hạn,7. Long-term accrued expenses,balance_sheet
+BS_350,8. Phải trả nội bộ dài hạn,8. Internal payables - long term,balance_sheet
+BS_351,9. Doanh thu chưa thực hiện dài hạn,9. Long-term deferred revenue,balance_sheet
+BS_352,"10. Nhận ký quỹ, ký cược dài hạn",10. Long-term deposits and collateral received,balance_sheet
+BS_353,"11. Các khoản phải trả, phải nộp khác dài hạn",11. Other long-term payables and liabilities,balance_sheet
+BS_354,12. Dự phòng phải trả dài hạn,12. Long-term provisions,balance_sheet
+BS_355,13. Dự phòng bồi thường thiệt hại cho nhà đầu tư,13. Provision for compensation to investors,balance_sheet
+BS_356,14. Thuế thu nhập hoãn lại phải trả,14. Deferred tax liabilities,balance_sheet
+BS_357,15. Quỹ phát triển khoa học và công nghệ,15. Science and technology development fund,balance_sheet
+BS_400,D. VỐN CHỦ SỞ HỮU,D. OWNER'S EQUITY,balance_sheet
+BS_410,I. Vốn chủ sở hữu,I. Owner's Equity,balance_sheet
+BS_411,1. Vốn đầu tư của chủ sở hữu,1. Owner's capital,balance_sheet
+BS_411.1,1.1. Vốn góp của chủ sở hữu,1.1. Contributed capital from owners,balance_sheet
+BS_411.2,1.2. Thặng dư vốn cổ phần,1.2. Share premium,balance_sheet
+BS_411.3,1.3. Quyền chọn chuyển đổi trái phiếu,1.3. Convertible bond options,balance_sheet
+BS_411.4,1.4. Vốn khác của chủ sở hữu,1.4. Other owner's capital,balance_sheet
+BS_411.5,1.5. Cổ phiếu quỹ,1.5. Treasury shares,balance_sheet
+BS_412,2. Chênh lệch đánh giá tài sản theo giá trị hợp lý,2. Revaluation differences on assets at fair value,balance_sheet
+BS_413,3. Chênh lệch tỷ giá hối đoái,3. Foreign exchange differences,balance_sheet
+BS_414,4. Quỹ dự trữ điều lệ,4. Statutory reserves,balance_sheet
+BS_415,5. Quỹ dự phòng tài chính và rủi ro nghề nghiệp,5. Financial reserves and professional risk reserves,balance_sheet
+BS_416,6. Các Quỹ khác thuộc vốn chủ sở hữu,6. Other reserves in owner's equity,balance_sheet
+BS_417,7. Lợi nhuận chưa phân phối,7. Undistributed profits,balance_sheet
+BS_417.1,7.1. Lợi nhuận đã thực hiện,7.1. Realized profits,balance_sheet
+BS_417.2,7.2. Lợi nhuận chưa thực hiện,7.2. Unrealized profits,balance_sheet
+BS_418,8. Lợi ích của cổ đông không nắm quyền kiểm soát,8. Non-controlling interests,balance_sheet
+BS_440,TỔNG CỘNG NỢ PHẢI TRẢ VÀ VỐN CHỦ SỞ HỮU,TOTAL LIABILITIES AND OWNER'S EQUITY,balance_sheet
