@@ -25,7 +25,7 @@ SELECT
 	net_income.year,
 	net_income.quarter,
 	net_income.net_income,
-    (net_income.net_income / revenue.revenue) AS ROS
+    (net_income.net_income / revenue.revenue) * 100 AS ROS
     	
 FROM net_income
 JOIN revenue 
