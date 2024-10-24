@@ -58,4 +58,4 @@ IS_009,1.10. Doanh thu lưu ký chứng khoán,1.10. Custody revenue,income_stat
 IS_090,IX. TỔNG LỢI NHUẬN KẾ TOÁN TRƯỚC THUẾ,IX. TOTAL ACCOUNTING PROFIT BEFORE TAX,income_statement
 IS_091,9.1. Lợi nhuận đã thực hiện,9.1. Realized profit,income_statement
 IS_092,9.2. Lợi nhuận chưa thực hiện,9.2. Unrealized profit,income_statement
-IS_024,"2.3. Chi phí lãi vay, lỗ từ các khoản cho vay và phải thu","2.3. Interest expense, loss from loans and receivables",income_statement
+IS_024,"2.3. Chi phí lãi vay, lỗ từ các khoản cho vay và phải thu","Provision expenses for financial assets, bad debt write-offs, financial asset impairment, and borrowing costs",income_statement

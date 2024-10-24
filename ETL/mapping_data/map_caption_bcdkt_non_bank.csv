@@ -1,4 +1,5 @@
 vi_caption,category_code,en_caption,report_type
+TÀI SẢN,,,
 A- TÀI SẢN NGẮN HẠN,BS_100,A. CURRENT ASSETS,balance_sheet
 I. Tiền và các khoản tương đương tiền,BS_110,I. Cash and cash equivalents,balance_sheet
 1. Tiền,BS_111,Cash,balance_sheet
@@ -63,6 +64,7 @@ VI. Tài sản dài hạn khác,BS_260,VI. Other non-current assets,balance_shee
 4. Tài sản dài hạn khác,BS_268,Other non-current assets,balance_sheet
 5. Lợi thế thương mại,BS_269,Goodwill,balance_sheet
 TỔNG CỘNG TÀI SẢN,BS_270,TOTAL ASSETS,balance_sheet
+NGUỒN VỐN,,,
 C. NỢ PHẢI TRẢ,BS_300,C. LIABILITIES,balance_sheet
 I. Nợ ngắn hạn,BS_310,I. Current liabilities,balance_sheet
 1. Phải trả người bán ngắn hạn,BS_311,Trade payables (short-term),balance_sheet
