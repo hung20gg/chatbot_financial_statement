@@ -1,5 +1,5 @@
 from llm.llm_utils import get_code_from_text_response, get_json_from_text_response
-from llm_general import find_suitable_column, TIR_reasoning, get_stock_code_based_on_company_name
+from llm_general import find_suitable_row, find_suitable_row_v2, TIR_reasoning, get_stock_code_based_on_company_name
 from setup_db import DBHUB
 import utils
 import numpy as np
@@ -62,7 +62,7 @@ Based on the question and databse, thinking and return the steps in JSON format.
 
 
 
-def llm_branch_reasoning(llm, task, db: DBHUB, self_debug = False, verbose=False, sql_llm = None):
+def llm_branch_reasoning(llm, task, db: DBHUB, self_debug = False, verbose=False, sql_llm = None, row_method = 'v2'):
 
     """
     Branch reasoning for financial statement
@@ -71,15 +71,23 @@ def llm_branch_reasoning(llm, task, db: DBHUB, self_debug = False, verbose=False
         sql_llm = llm
     
     steps = simplify_branch_reasoning(llm, task, verbose=verbose)
-    bank_column, non_bank_column = find_suitable_column(llm, task, db=db, verbose=verbose)
     
     steps_string = ""
-    
     for i, step in enumerate(steps):
         steps_string += f"Step {i+1}: \n {step}\n\n"
     
     # Check step 1: Extract company name
-    look_up_stock_code = ""
+
+    print("Step 0: Extract company name")
+    company_info_df = get_stock_code_based_on_company_name(llm, steps_string, db=db, verbose=verbose)
+    stock_code_table = utils.df_to_markdown(company_info_df)
+    look_up_stock_code = f"\nHere are the detail of the companies: \n\n{stock_code_table}"
+    
+    if row_method == 'v2':
+        bank_column, non_bank_column = find_suitable_row_v2(llm, task, stock_code=company_info_df['stock_code'], db=db, verbose=verbose)
+        
+    else:
+        bank_column, non_bank_column = find_suitable_row(llm, task, db=db, verbose=verbose)
     
     content = f"""You have the following database schema:
 
@@ -132,12 +140,7 @@ Snapshot of the mapping table:
     cur_step = 0
     # Get company stock code
     # Need to make a copy to add new company table everytimes the code find a new company
-
-    print("Step 0: Extract company name")
-    company_info_df = get_stock_code_based_on_company_name(llm, task, db=db, verbose=verbose)
-    stock_code_table = utils.df_to_markdown(company_info_df)
     
-    look_up_stock_code = f"\nHere are the detail of the companies: \n\n{stock_code_table}"
     history[-1]["content"] += look_up_stock_code
         
     # Other steps

@@ -1,5 +1,5 @@
 from llm.llm_utils import get_code_from_text_response, get_json_from_text_response
-from llm_general import find_suitable_column, TIR_reasoning, get_stock_code_based_on_company_name
+from llm_general import find_suitable_row, TIR_reasoning, get_stock_code_based_on_company_name
 from setup_db import DBHUB
 import utils
 import re
@@ -15,7 +15,9 @@ def reasoning_text2SQL(llm, text, db: DBHUB, top_k = 5, verbose = False, running
         company_info = ""
         pass 
     else:
-        bank_column, non_bank_column = find_suitable_column(llm, text, db=db, top_k=top_k, verbose=verbose)
+        
+        # Find suitable column. V2 ?
+        bank_column, non_bank_column = find_suitable_row(llm, text, db=db, top_k=top_k, verbose=verbose)
         company_info = get_stock_code_based_on_company_name(llm, text, db=db) 
         stock_code_table = utils.df_to_markdown(company_info)
                
@@ -50,6 +52,12 @@ Snapshot of the mapping table:
 
 `map_category_code_non_bank`
 {non_bank_column}
+
+`map_company_code_securities`
+
+`map_company_code_financial_ratio`
+
+
 </data>
 
 Here is an example of a query that you can refer to:

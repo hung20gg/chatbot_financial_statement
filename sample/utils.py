@@ -65,7 +65,9 @@ def company_name_to_stock_code(db : DBHUB, names, method = 'similarity', top_k =
         names = [names]
     
     if method == 'similarity': # Using similarity search
-        return db.return_company_info(names, top_k)
+        df = db.return_company_info(names, top_k)
+        df.drop_duplicates(subset=['stock_code'], inplace=True)
+        return df
     
     else: # Using rational DB
         dfs = []

@@ -37,7 +37,60 @@ Return an empty list if no company name is found.
     return utils.company_name_to_stock_code(db, company_names, top_k=top_k)
 
 
-def find_suitable_column(llm, text, db: DBHUB = None, top_k=5, verbose=False):
+def find_suitable_row_v2(llm, text, stock_code = [], db: DBHUB = None, top_k=5, verbose=False):
+    system_prompt = """
+    You are an expert in analyzing financial reports. You are given 2 database, finacial statements and pre-calculated pre-calculated financial performance ratios.
+    """
+    
+    prompt = f"""
+    <thought>
+    {text}
+    </thought>
+
+    <task>
+    Based on given question, analyze and suggest the suitable rows (categories) in the financial statement and/or financial performance ratios that can be used to answer the question.
+    Analyze and return the suggested rows' name in JSON format.
+    </task>
+
+    <formatting_example>
+    ```json
+    {{
+        "financial_statement_row": [],
+        "financial_ratio_row": []
+    }}
+    ```
+    </formatting_example>
+    """
+    
+    messages = [
+        {
+            "role": "system",
+            "content": system_prompt
+        },
+        {
+            "role": "user",
+            "content": prompt
+        }
+    ]
+    
+    response = llm(messages)
+    
+    if verbose:
+        print("Find suitable column response: ")
+        print(response)
+        print("====================================")
+
+    response = get_json_from_text_response(response, new_method=True)    
+    if db is None:
+        return response
+    
+    financial_statement_row = response.get("financial_statement_row", [])
+    financial_ratio_row = response.get("financial_ratio_row", [])
+    
+    return db.return_mapping_table_v2(financial_statement_row = financial_statement_row, financial_ratio_row = financial_ratio_row, stock_code = stock_code, top_k =top_k)
+
+
+def find_suitable_row(llm, text, db: DBHUB = None, top_k=5, verbose=False):
     system_prompt = """
     You are an expert in analyzing financial reports. 
     """
@@ -47,19 +100,24 @@ def find_suitable_column(llm, text, db: DBHUB = None, top_k=5, verbose=False):
 {text}
 </thought>
 
-<task>
-Based on given question, analyze and suggest the suitable column in the financial statement that can be used to answer the question.
-Notice that there are two types of financial statements: one for banks and one for non-banks cooperate.
+Notice that there are 3 type of financial reports, based on VA regulation: bank, non-bank corporation and securities.
+In addition, you are also given a pre-calculated financial performance ratios based on those financial reports.
 
-Analyze and return the suggested column names in JSON format.
-You don't need to return both bank and non-bank column names if you think only one type of column is suitable.
+<task>
+Based on given question, analyze and suggest the suitable row in the financial statement and/or financial performance ratios that can be used to answer the question.
+
+
+Analyze and return the suggested row names in JSON format.
+You don't need to return all row names if you think only limited type of row is suitable.
 </task>
 
 <formatting_example>
 ```json
 {{
-    "bank_column_name": [],
-    "non_bank_column_name": []
+    "bank_row": [],
+    "non_bank_row": [],
+    "securities_row": [],
+    "financial_ratio_row": []
 }}
 ```
 </formatting_example>
@@ -87,10 +145,12 @@ You don't need to return both bank and non-bank column names if you think only o
     if db is None:
         return response
     
-    bank_column = response.get("bank_column_name", [])
-    non_bank_column = response.get("non_bank_column_name", [])
+    bank_column = response.get("bank_row", [])
+    non_bank_column = response.get("non_bank_row", [])
+    sec_bank_column = response.get("financial_ratio_row", [])
+    financial_ratio_row = response.get("financial_ratio_row", [])
     
-    return db.return_mapping_table(bank_column, non_bank_column, top_k)
+    return db.return_mapping_table_v1(bank_column, non_bank_column, sec_bank_column, financial_ratio_row, top_k)
 
 
 def TIR_reasoning(response, db: DBHUB, verbose=False):

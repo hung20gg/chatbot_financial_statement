@@ -309,6 +309,13 @@ class DBHUB:
             non_bank_column_table = self.query(query, return_type='dataframe')   
         
         return bank_column_table, non_bank_column_table
+    
+    def return_mapping_table_v1(self, bank_column=[], non_bank_column=[], sec_bank_column=[], financial_ratio_row=[], top_k=5):
+        raise NotImplementedError("This function is not implemented yet")
+    
+    
+    def return_mapping_table_v2(self, financial_statement_row = [], financial_ratio_row = [], stock_code = [], top_k =5):
+        raise NotImplementedError("This function is not implemented yet")
 
 # Example usage
 if __name__ == '__main__':
