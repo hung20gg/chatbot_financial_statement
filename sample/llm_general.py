@@ -37,7 +37,7 @@ Return an empty list if no company name is found.
     return utils.company_name_to_stock_code(db, company_names, top_k=top_k)
 
 
-def find_suitable_row_v2(llm, text, stock_code = [], db: DBHUB = None, top_k=5, verbose=False):
+def find_suitable_row_v2(llm, text, stock_code = [], db: DBHUB = None, top_k=5, verbose=False, format = 'dataframe'):
     system_prompt = """
     You are an expert in analyzing financial reports. You are given 2 database, finacial statements and pre-calculated pre-calculated financial performance ratios.
     """
@@ -48,13 +48,14 @@ def find_suitable_row_v2(llm, text, stock_code = [], db: DBHUB = None, top_k=5, 
     </thought>
 
     <task>
-    Based on given question, analyze and suggest the suitable rows (categories) in the financial statement and/or financial performance ratios that can be used to answer the question.
+    Based on given question, analyze and suggest the industry and suitable rows (categories) in the financial statement and/or financial performance ratios that can be used to answer the question.
     Analyze and return the suggested rows' name in JSON format.
     </task>
 
     <formatting_example>
     ```json
     {{
+        "industry": [],
         "financial_statement_row": [],
         "financial_ratio_row": []
     }}
@@ -84,73 +85,23 @@ def find_suitable_row_v2(llm, text, stock_code = [], db: DBHUB = None, top_k=5, 
     if db is None:
         return response
     
+    industry = response.get("industry", [])
     financial_statement_row = response.get("financial_statement_row", [])
     financial_ratio_row = response.get("financial_ratio_row", [])
     
-    return db.return_mapping_table_v2(financial_statement_row = financial_statement_row, financial_ratio_row = financial_ratio_row, stock_code = stock_code, top_k =top_k)
-
-
-def find_suitable_row(llm, text, db: DBHUB = None, top_k=5, verbose=False):
-    system_prompt = """
-    You are an expert in analyzing financial reports. 
-    """
+    dict_dfs = db.return_mapping_table_v2(financial_statement_row = financial_statement_row, financial_ratio_row = financial_ratio_row, industry = industry, stock_code = stock_code, top_k =top_k)
     
-    prompt = f"""
-<thought>
-{text}
-</thought>
-
-Notice that there are 3 type of financial reports, based on VA regulation: bank, non-bank corporation and securities.
-In addition, you are also given a pre-calculated financial performance ratios based on those financial reports.
-
-<task>
-Based on given question, analyze and suggest the suitable row in the financial statement and/or financial performance ratios that can be used to answer the question.
-
-
-Analyze and return the suggested row names in JSON format.
-You don't need to return all row names if you think only limited type of row is suitable.
-</task>
-
-<formatting_example>
-```json
-{{
-    "bank_row": [],
-    "non_bank_row": [],
-    "securities_row": [],
-    "financial_ratio_row": []
-}}
-```
-</formatting_example>
-"""
+    if format == 'dataframe':
+        return dict_dfs.values()
     
-    messages = [
-        {
-            "role": "system",
-            "content": system_prompt
-        },
-        {
-            "role": "user",
-            "content": prompt
-        }
-    ]
-    
-    response = llm(messages)
-    
-    if verbose:
-        print("Find suitable column response: ")
-        print(response)
-        print("====================================")
-
-    response = get_json_from_text_response(response)[0]    
-    if db is None:
-        return response
-    
-    bank_column = response.get("bank_row", [])
-    non_bank_column = response.get("non_bank_row", [])
-    sec_bank_column = response.get("financial_ratio_row", [])
-    financial_ratio_row = response.get("financial_ratio_row", [])
-    
-    return db.return_mapping_table_v1(bank_column, non_bank_column, sec_bank_column, financial_ratio_row, top_k)
+    elif format == 'markdown':
+        text = ""
+        for title, df in dict_dfs.items():
+            text += f"\n\nTable `{title}`\n\n{utils.df_to_markdown(df)}"
+            
+        return text
+    else:
+        raise ValueError("Format not supported")
 
 
 def TIR_reasoning(response, db: DBHUB, verbose=False):
@@ -183,3 +134,25 @@ def TIR_reasoning(response, db: DBHUB, verbose=False):
             response += f"\n\n### Error in SQL {i+1}:\n\n{error}"
     
     return response, error_message, execution_table
+
+
+
+def debug_SQL(llm, history, db, verbose=False):
+    """
+    Debug the SQL code
+    """
+    
+    new_query = "You have some error in the previous SQL query. Please fix the error and try again."
+    history.append({
+        "role": "user",
+        "content": new_query
+    })
+    
+    # Re-run the previous step
+    response = llm(history)
+    if verbose:
+        print("Error response: ")
+        print(response)
+        print("====================================")
+        
+    return TIR_reasoning(response, db, verbose=verbose)

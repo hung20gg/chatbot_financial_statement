@@ -1,30 +1,35 @@
-# group_2_chatbot_financial_statement
+# Chatbot_financial_statement
 
-## Update
+## Major Update
 
 ### Database new design
 
-Separate 2 type of financial reports: Bank and non-bank firms
+- Separate 3 type of financial reports: Bank, non-bank and security firms (VA regulation)
+- Store both company general information and ownership
+- Pre-calculated financial ratio
+- Average indicator based on collected stock-code
 
-Each of them will have 2 tables, one store information and the other store mapping code 
+Each of them will have 2 tables, one store information and the other store mapping code
 
-In total, there are 4 tables:
+In total, there are 13 tables:
+
 - bank_financial_report
 - non_bank_financial_report
 - map_category_code_non_bank
 - map_category_code_bank
 
-### New prompting strategies
+### Prompting strategies
 
-- 2-step text2sql. First asking LLM to analyze the problem and choose which category do they want to access. Then adding snapshot of the table into prompt, so it can correctly select the right column.
-
-- Partial sql. Instead of query to find the solution, we can ask LLM to generate which table does it want for snapshot, and then create a general SQL for it, or using CoT reasoning directly.
+- General: 2-step Text2sql. First asking LLM to analyze the problem and choose which category do they want to access. Then adding snapshot of the table into prompt, so it can correctly select the right column.
+- Reasoning: After having snapshot, ask LLM to generate SQL directly to solve the problem
+- Partial sql. Instead of query to find the solution, breakdown steps and solve it one-by-one
+- Include debugging
 
 ## LLM setup
 
-Clone my separate library for LLM 
+Clone my separate library for LLM
 
-For sample folder 
+For sample folder
 
 ```
 cd group_2_chatbot_financial_statement/sample && git clone https://github.com/hung20gg/llm.git
