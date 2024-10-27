@@ -1,0 +1,51 @@
+ratio_name,ratio_code
+Equity Ratio,ER
+Long Term Asset Self Financing Ratio,LTASFR
+Fixed Asset Self Financing Ratio,FASFR
+General Solvency Ratio,GSR
+Return On Investment,ROI
+Basic Earning Power,BEP
+Debt To Assets Ratio,DTAR
+Debt To Equity Ratio,DTER
+Short Term Debt To Assets Ratio,STDTAR
+Interest Coverage Ratio,ICR
+Long Term Debt To Equity Ratio,LTDTER
+Short Term Debt To Equity Ratio,STDTER
+Receivables To Payables Ratio,RTPR
+Receivables To Total Assets Ratio,RTTAR
+Debt To Total Capital Ratio,DTTCR
+Receivables To Sales Ratio,RTSR
+Allowance For Doubtful Accounts Ratio,AFDAR
+Asset To Debt Ratio,ATDR
+Current Ratio,CR
+Quick Ratio,QR
+Cash Ratio,CR
+Long Term Debt Coverage Ratio,LTDCR
+Long Term Debt To Equity Capital Ratio,LTDTECR
+Time Interest Earned,TIE
+Debt To Tangible Net Worth Ratio,DTTNWR
+Financial Leverage,FL
+Allowance For Doubtful Accounts To Total Assets Ratio,AFDATTAR
+Permanent Financing Ratio,PFR
+Financial Income To Net Revenue Ratio,FITNRR
+Return On Assets,ROA
+Return On Fixed Assets,ROFA
+Return On Long Term Operating Assets,ROLTOA
+Basic Earning Power Ratio,BEPR
+Return On Equity,ROE
+Profitability Of Cost Of Goods Sold,POCOGS
+Price Spread Ratio,PSR
+Profitability Of Operating Expenses,POOE
+Return On Sales,ROS
+Operating Profit Margin,OPM
+Gross Profit Margin,GPM
+EBITDA,EBITDA
+Free Cash Flow,FCF
+Cash Interest Coverage,CIC
+Cash Flow From Sales To Sales,CFFSTS
+Cash Flow Margin,CFM
+Earning Quality Ratio,EQR
+Cash Debt Coverage Ratio,CDCR
+Cash Return On Assets,CROA
+Cash Return On Fixed Assets,CROFA
+CFO To Total Equity,CFOTTE
