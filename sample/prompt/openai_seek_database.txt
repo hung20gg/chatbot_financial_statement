@@ -1,7 +1,6 @@
 You're given database about the financial reports of top Vietnamese companies, both bank and cooperates.
 All the data in the financial report are followed by the regulation of Vietnamese Accounting Standard (VAS). The English translation of the categories are followed by the International Financial Reporting Standards (IFRS).
-
-There are 2 type of financial report: for bank and non-bank cooperations
+There are 3 type of financial reports, based on VAS regulation: bank, non-bank corporation and securities firm (firms that provide stock options and financial instruments).
 
 Here are the descriptions of tables in the database:
 
@@ -11,6 +10,7 @@ Here are the descriptions of tables in the database:
 CREATE TABLE company_info(
     stock_code VARCHAR(255) primary key, --The trading symbol.
     is_bank BOOLEAN, --Bool checking whether the company is a bank or not.
+    is_sec BOOLEAN, --Bool checking whether the company is a securities firm or not.
     industry VARCHAR(255), --Current industry of company. 
     issue_share int --Number of share issued.
 );
@@ -35,7 +35,14 @@ CREATE TABLE map_category_code_non_bank(
     report_type VARCHAR(255)
 );
 
--- Table: bank_financial_report
+-- Table: map_category_code_securities. Same as `map_category_code_bank`
+CREATE TABLE map_category_code_non_bank(
+    category_code VARCHAR(255) primary key,
+    en_caption VARCHAR(255),
+    report_type VARCHAR(255)
+);
+
+-- Table: bank_financial_report: Financial report of banks
 CREATE TABLE bank_financial_report(
     stock_code VARCHAR(255) references company_info(stock_code),
     year int, -- The reported financial year
@@ -44,7 +51,7 @@ CREATE TABLE bank_financial_report(
     data float, -- The value of the recorded category (in Million VND)
 );
 
--- Table non_bank_financial_report. Same as `bank_financial_report`
+-- Table non_bank_financial_report: Financial report of corporation. Same as `bank_financial_report`
 CREATE TABLE non_bank_financial_report(
     stock_code VARCHAR(255) references company_info(stock_code),
     year int,
@@ -53,12 +60,27 @@ CREATE TABLE non_bank_financial_report(
     data float,
 );
 
+-- Table securities_financial_report: Financial report of securities firms. Same as `bank_financial_report`
+CREATE TABLE non_bank_financial_report(
+    stock_code VARCHAR(255) references company_info(stock_code),
+    year int,
+    quarter int,
+    category_code VARCHAR(255) references map_category_code_securities(category_code),
+    data float,
+);
+
+-- Table map_category_code_ratio
+
+-- Table ratio: Pre-calculated common financial ratio
+CREATE TABLE 
+
+
+
 ```
 
-Note: for each `category_code` column, the prefix tell which report does that code refer to.
-- `BS`: Balance sheet
-- `IS`: Income statement 
-- `CF`: Cash flow
+Note: 
+- For each `category_code` column, the prefix tell which report does that code refer to, BS is Balance sheet IS is for Income statement and CF is Cash flow.
+- The numerical part of category_code is based on the account code from VA standard. If 2 row might have same meaning, prefer to use a rounder code
 
 ### Peek view of the schema
  - `company_info`

@@ -1,6 +1,8 @@
 You're given database about the financial reports of top Vietnamese companies, both bank and cooperates.
 All the data in the financial report are followed by the regulation of Vietnamese Accounting Standard (VAS). The English translation of the categories are followed by the International Financial Reporting Standards (IFRS).
 
+There are 3 type of financial reports, based on VAS regulation: bank, non-bank corporation and securities firm (firms that provide stock options and financial instruments).
+
 Here are the descriptions of tables in the database:
 
 ### Table: `bank_financial_report`
@@ -19,11 +21,13 @@ The table has six columns:
  - `category_code` : The category_code recorded in the financial report. Refer to `category_code` of table `map_category_code_bank`.
  - `data` : The value of the recorded category (in Million VND)
 
-
 Each row will has the value of category listed in the specific quarterly or annually financial report of a bank
 
 ### Table: `non_bank_financial_report`
-This table is similar to `bank_financial_report`, but for non-bank cooperate
+This table is similar to `bank_financial_report`, but for non-bank corporations
+
+### Table: `securities_financial_report`
+This table is similar to `bank_financial_report`, but for securities firms
 
 ### Table: `map_category_code_bank`
 This table store mapping value from category code to human-readable caption.
@@ -38,7 +42,10 @@ The table has three columns:
  - `report_type` : Report type recorded for each line (balance_sheet, cash_flow_statement or income_statement)
 
 ### Table: `map_category_code_non_bank`
-This table is similar to `map_category_code_bank`, but for non-bank (normal) company
+This table is similar to `map_category_code_bank`, but for non-bank corporations
+
+### Table: `map_category_code_securities`
+This table is similar to `map_category_code_bank`, but for securities firms
 
 ### Table: `company_info`
 This table store general information of the company
@@ -46,7 +53,6 @@ This table store general information of the company
 |stock_code|is_bank|industry|issue_share|
 |----|----|----|----|
 |VIC|False|Real Estate|3823700000|
-
 
 The table has four columns, which:
 - `is_bank`: Bool value, checking whether the company is a bank or not.

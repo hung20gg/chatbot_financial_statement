@@ -1,5 +1,5 @@
 from llm.llm_utils import get_code_from_text_response, get_json_from_text_response
-from llm_general import find_suitable_column, TIR_reasoning, get_stock_code_based_on_company_name
+from llm_general import find_suitable_row, find_suitable_row_v2, TIR_reasoning, get_stock_code_based_on_company_name, debug_SQL
 from setup_db import DBHUB
 import utils
 import numpy as np
@@ -62,7 +62,7 @@ Based on the question and databse, thinking and return the steps in JSON format.
 
 
 
-def llm_branch_reasoning(llm, task, db: DBHUB, self_debug = False, verbose=False, sql_llm = None):
+def llm_branch_reasoning(llm, task, db: DBHUB, self_debug = False, verbose=False, sql_llm = None, row_method = 'v2'):
 
     """
     Branch reasoning for financial statement
@@ -71,15 +71,20 @@ def llm_branch_reasoning(llm, task, db: DBHUB, self_debug = False, verbose=False
         sql_llm = llm
     
     steps = simplify_branch_reasoning(llm, task, verbose=verbose)
-    bank_column, non_bank_column = find_suitable_column(llm, task, db=db, verbose=verbose)
     
     steps_string = ""
-    
     for i, step in enumerate(steps):
         steps_string += f"Step {i+1}: \n {step}\n\n"
     
     # Check step 1: Extract company name
-    look_up_stock_code = ""
+
+    print("Step 0: Extract company name")
+    company_info_df = get_stock_code_based_on_company_name(llm, steps_string, db=db, verbose=verbose)
+    stock_code_table = utils.df_to_markdown(company_info_df)
+    look_up_stock_code = f"\nHere are the detail of the companies: \n\n{stock_code_table}"
+    
+    suggestions_table = find_suitable_row_v2(llm, task, stock_code=company_info_df['stock_code'], db=db, verbose=verbose)
+
     
     content = f"""You have the following database schema:
 
@@ -106,14 +111,9 @@ Here are the steps to break down the task:
 
 Snapshot of the mapping table:
 ### Table: map_category_code_bank
-<table>
-{bank_column}
-</table>     
-
-### Table: map_category_code_non_bank
-<table>
-{non_bank_column}
-</table> 
+<data>
+{suggestions_table}
+</data>
 """
 
     original_content = content
@@ -132,13 +132,11 @@ Snapshot of the mapping table:
     cur_step = 0
     # Get company stock code
     # Need to make a copy to add new company table everytimes the code find a new company
-
-    print("Step 0: Extract company name")
-    company_info_df = get_stock_code_based_on_company_name(llm, task, db=db, verbose=verbose)
-    stock_code_table = utils.df_to_markdown(company_info_df)
     
-    look_up_stock_code = f"\nHere are the detail of the companies: \n\n{stock_code_table}"
     history[-1]["content"] += look_up_stock_code
+    
+    error_messages = []
+    execution_tables = []
         
     # Other steps
     for i, step in enumerate(steps):
@@ -147,7 +145,7 @@ Snapshot of the mapping table:
         
         history.append({
             "role": "user",
-            "content": f"Think step-by-step and do the {step}\n\nHere is the sample SQL you might need\n\n{db.find_sql_query(step)}"
+            "content": f"<instruction>\nThink step-by-step and do the {step}\n</instruction>\n\nHere is the sample SQL you might need\n\n{db.find_sql_query(step)}"
         })
         
         print("RAG for step: ", cur_step, db.find_sql_query(step))
@@ -158,14 +156,36 @@ Snapshot of the mapping table:
             print(response)
             print("====================================")
         # Check TIR 
-        response, error_message, execute_tables = TIR_reasoning(response, db, verbose=verbose)
+        response, error_message, execute_table = TIR_reasoning(response, db, verbose=verbose)
+        
+        error_messages.extend(error_message)
+        execution_tables.extend(execute_table)
+        
         history.append({
             "role": "assistant",
             "content": response
         })
         
-        # Update new company info
-        new_company_info_df = utils.get_company_detail_from_df(execute_tables, db)
+        # Self-debug the SQL code
+        count_debug = 0
+        if len(error_message) > 0 and self_debug:
+            while count_debug < 3:
+                
+                response, error_message, execute_table = debug_SQL(response, db, verbose=verbose)
+                error_messages.extend(error_message)
+                execution_tables.extend(execute_table)
+            
+                history.append({
+                    "role": "assistant",
+                    "content": response
+                })
+                if len(error_message) == 0:
+                    break
+                    
+                count_debug += 1
+          
+        # Update the company info  
+        new_company_info_df = utils.get_company_detail_from_df(execution_tables, db)
         if isinstance(new_company_info_df, pd.DataFrame):
             company_info_df = pd.concat([company_info_df, new_company_info_df])
             stock_code_table = utils.df_to_markdown(company_info_df)
@@ -174,39 +194,6 @@ Snapshot of the mapping table:
         else:
             # Need a logger here
             print("Error on execute SQL")
-            
-        # Self-debug the SQL code
-        count_debug = 0
-        while len(error_message) > 0 and self_debug and count_debug < 3:
-            
-            new_query = "You have some error in the previous SQL query. Please fix the error and try again."
-            history.append({
-                "role": "user",
-                "content": new_query
-            })
-            
-            # Re-run the previous step
-            response = llm(history)
-            if verbose:
-                print("Error response: ")
-                print(response)
-                print("====================================")
-            
-            response, error_message, execute_tables = TIR_reasoning(response, db, verbose=verbose)
-        
-            history.append({
-                "role": "assistant",
-                "content": response
-            })
-            
-            new_company_info_df = utils.get_company_detail_from_df(execute_tables, db)
-            if isinstance(new_company_info_df, pd.DataFrame):
-                company_info_df = pd.concat([company_info_df, new_company_info_df])
-                stock_code_table = utils.df_to_markdown(company_info_df)
-                history[1]["content"] = original_content + f"\nHere are the detail of the companies: \n\n{stock_code_table}"
-                break
-                
-            count_debug += 1
             
     return history
         
