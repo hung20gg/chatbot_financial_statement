@@ -3,7 +3,9 @@ import os
 current_path = os.path.dirname(__file__)
 sys.path.append(current_path)
 
+
 import const
+
 import pandas as pd 
 import numpy as np 
 
@@ -108,7 +110,9 @@ def short_term_debt_to_equity_ratio(short_term_liabilities, equity):
     return short_term_liabilities / equity if equity else None
 
 def get_financial_structure_ratios(data_df):
+
     return __get_financial_ratio(data_df, const.FINANCIAL_STRUCTURE_RATIO_FUNCTIONS)
+
 
 
 #===================#
@@ -162,6 +166,7 @@ def debt_to_tangible_net_worth_ratio(total_liabilities, equity, intangible_asset
 
 def get_liquidity_ratios(data_df):
     return __get_financial_ratio(data_df, const.LIQUIDITY_RATIO_FUNCTIONS)
+
     
 #===================#
 #   Financial Risk  #
