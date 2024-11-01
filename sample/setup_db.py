@@ -8,21 +8,6 @@ import re
 
 dotenv.load_dotenv()
 
-industry_trans = {
-    "Ngân hàng": "Banking",
-    "Bất động sản": "Real Estate",
-    "Thực phẩm và đồ uống": "Food and Beverage",
-    "Điện, nước & xăng dầu khí đốt": "Electricity, Water & Gasoline/Oil and Gas",
-    "Bảo hiểm": "Insurance",
-    "Công nghệ Thông tin": "Information Technology",
-    "Hóa chất": "Chemicals",
-    "Tài nguyên Cơ bản": "Basic Resources",
-    "Bán lẻ": "Retail",
-    "Dầu khí": "Oil and Gas",
-    "Dịch vụ tài chính": "Financial Services",
-    "Du lịch và Giải trí": "Tourism and Entertainment"
-}
-
 # Step 1: Connect to PostgreSQL
 def connect_to_db(db_name, user, password, host='localhost', port='5432'):
     print(f'Connecting to database {db_name}, {user}...')

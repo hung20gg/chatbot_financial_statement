@@ -72,3 +72,25 @@ CASHFLOW_RATIO_FUNCTIONS = {
     'cash_flow_margin': ['CF_020', ['IS_010', 'IS_021']],  # operating_net_cash_flow (CF_020), total_revenue (IS_010 + IS_021)
     'earning_quality_ratio': ['CF_020', 'IS_060'],  # operating_net_cash_flow (CF_020), net_income (IS_060)
 }
+
+
+INDUSTRIES_TRANSLATION = {
+    "Ngân hàng": "Banking",
+    "Bất động sản": "Real Estate",
+    "Xây dựng và Vật liệu": "Construction and Materials",
+    "Thực phẩm và đồ uống": "Food and Beverages",
+    "Hóa chất": "Chemicals",
+    "Dịch vụ tài chính": "Financial Services",
+    "Tài nguyên Cơ bản": "Basic Resources",
+    "Bán lẻ": "Retail",
+    "Dầu khí": "Oil and Gas",
+    "Điện, nước & xăng dầu khí đốt": "Utilities (Electricity, Water & Gas)",
+    "Hàng cá nhân & Gia dụng": "Personal and Household Goods",
+    "Công nghệ Thông tin": "Information Technology",
+    "Hàng & Dịch vụ Công nghiệp": "Industrial Goods and Services",
+    "Truyền thông": "Media",
+    "Du lịch và Giải trí": "Travel and Leisure",
+    "Y tế": "Healthcare",
+    "Ô tô và phụ tùng": "Automobiles and Parts",
+    "Viễn thông": "Telecommunications"
+}
