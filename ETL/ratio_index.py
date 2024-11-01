@@ -3,7 +3,9 @@ import os
 current_path = os.path.dirname(__file__)
 sys.path.append(current_path)
 
-import ratio_const
+
+import const
+
 import pandas as pd 
 import numpy as np 
 
@@ -108,7 +110,9 @@ def short_term_debt_to_equity_ratio(short_term_liabilities, equity):
     return short_term_liabilities / equity if equity else None
 
 def get_financial_structure_ratios(data_df):
-    return __get_financial_ratio(data_df, ratio_const.FINANCIAL_STRUCTURE_RATIO_FUNCTIONS)
+
+    return __get_financial_ratio(data_df, const.FINANCIAL_STRUCTURE_RATIO_FUNCTIONS)
+
 
 
 #===================#
@@ -161,7 +165,8 @@ def debt_to_tangible_net_worth_ratio(total_liabilities, equity, intangible_asset
 
 
 def get_liquidity_ratios(data_df):
-    return __get_financial_ratio(data_df, ratio_const.LIQUIDITY_RATIO_FUNCTIONS)
+    return __get_financial_ratio(data_df, const.LIQUIDITY_RATIO_FUNCTIONS)
+
     
 #===================#
 #   Financial Risk  #
@@ -181,7 +186,7 @@ def permanent_financing_ratio(permanent_capital, total_lia_and_equity):
     return permanent_capital / total_lia_and_equity if total_lia_and_equity else None
 
 def get_financial_risk_ratio(data_df):
-    return __get_financial_ratio(data_df, ratio_const.FINANCIAL_RATIO_FUNCTIONS)
+    return __get_financial_ratio(data_df, const.FINANCIAL_RATIO_FUNCTIONS)
 
 
 #===================#
@@ -192,7 +197,7 @@ def financial_income_to_net_revenue_ratio(financial_income, net_revenue):
     return financial_income / net_revenue if net_revenue else None
 
 def get_income_ratios(data_df):
-    return __get_financial_ratio(data_df, ratio_const.INCOME_RATIO_FUNCTIONS)
+    return __get_financial_ratio(data_df, const.INCOME_RATIO_FUNCTIONS)
 
 
 #===================#
@@ -237,7 +242,7 @@ def gross_profit_margin(gross_profit, net_sales):
     return gross_profit / net_sales if net_sales else None
 
 def get_profitability_ratios(data_df):
-    return __get_financial_ratio(data_df, ratio_const.PROFITABILITY_RATIO_FUNCTIONS)
+    return __get_financial_ratio(data_df, const.PROFITABILITY_RATIO_FUNCTIONS)
 
 
 #===================#
@@ -290,7 +295,7 @@ def get_cashflow_ratios(data_df):
     for index, row in pivot_df_6.iterrows():
         stock_code, year, quarter = index
         
-        for ratio, inputs in ratio_const.CASHFLOW_RATIO_FUNCTIONS.items():
+        for ratio, inputs in const.CASHFLOW_RATIO_FUNCTIONS.items():
             input_values = []
             for input_name in inputs:
                 if isinstance(input_name, list):  # Sum for cases like capital_expenditures or total_revenue
@@ -343,7 +348,7 @@ def get_financial_ratios(data_df):
     df.rename(columns={'ratio_code': 'ratio_mapping'}, inplace=True)
     df['ratio_mapping'] = df['ratio_mapping'].str.lower().replace(' ', '_', regex=True)
     
-    ratio_df = pd.read_csv(os.path.join(current_path ,'mapping_data/map_ratios_codes.csv'))
+    ratio_df = pd.read_csv(os.path.join(current_path ,'../csv/map_ratio_code.csv'))
     ratio_df['ratio_mapping'] = ratio_df['ratio_name'].str.lower().replace(' ', '_', regex=True)
     
     # Find the intersection (inner join)
@@ -365,6 +370,7 @@ if __name__ == '__main__':
     
     data_df = pd.read_csv(os.path.join(current_path, '../csv/non_bank_financial_report_v2_1.csv'))
     df = get_financial_ratios(data_df)
+    df.to_csv(os.path.join(current_path, '../csv/financial_ratio.csv'), index=False)
     
     ratio = df['ratio_code'].unique()
     
