@@ -1,0 +1,464 @@
+[
+    {
+        "main_task": "Financial Ratios",
+        "sub_task": "compare 2 or more company",
+        "time": "at specific year",
+        "questions": [
+            {
+                "question": "What was the Return on Equity (ROE) for Vietcombank (VCB) and Techcombank (TCB) in 2022?",
+                "year": 2022,
+                "companies": [
+                    "VCB",
+                    "TCB"
+                ],
+                "ratio": "ROE"
+            },
+            {
+                "question": "What were the Debt-to-Equity ratios for BIDV (BID) and Eximbank (EIB) in Q2 2024?",
+                "year": 2024,
+                "quarter": "Q2",
+                "companies": [
+                    "BID",
+                    "EIB"
+                ],
+                "ratio": "Debt-to-Equity"
+            },
+            {
+                "question": "Compare the Price-to-Earnings (P/E) ratios of Vinamilk (VNM) and Masan Group (MSN) in 2023.",
+                "year": 2023,
+                "companies": [
+                    "VNM",
+                    "MSN"
+                ],
+                "ratio": "P/E"
+            },
+            {
+                "question": "What were the Current Ratios for ACB and MBBank (MBB) in 2020?",
+                "year": 2020,
+                "companies": [
+                    "ACB",
+                    "MBB"
+                ],
+                "ratio": "Current Ratio"
+            },
+            {
+                "question": "Calculate the Gross Profit Margin for Mobile World Investment (MWG) and FPT Retail (FRT) for the year 2023.",
+                "year": 2023,
+                "companies": [
+                    "MWG",
+                    "FRT"
+                ],
+                "ratio": "Gross Profit Margin"
+            },
+            {
+                "question": "What were the Net Profit Margins of VietinBank (CTG) and VPBank (VPB) in 2021?",
+                "year": 2021,
+                "companies": [
+                    "CTG",
+                    "VPB"
+                ],
+                "ratio": "Net Profit Margin"
+            },
+            {
+                "question": "Compare the Quick Ratios of Sacombank (STB) and TPBank (TPB) in Q1 2024.",
+                "year": 2024,
+                "quarter": "Q1",
+                "companies": [
+                    "STB",
+                    "TPB"
+                ],
+                "ratio": "Quick Ratio"
+            }
+        ]
+    },
+    {
+        "main_task": "Financial Ratios",
+        "sub_task": "get data 1 or more company",
+        "time": "at specific year",
+        "questions": [
+            {
+                "question": "What was the Return on Equity (ROE) for Vietcombank (VCB) in 2022?",
+                "companies": [
+                    "VCB"
+                ],
+                "years": [
+                    2022
+                ]
+            },
+            {
+                "question": "What were the Current Ratios for ACB, BIDV, and Techcombank (TCB) in Q2 2024?",
+                "companies": [
+                    "ACB",
+                    "BID",
+                    "TCB"
+                ],
+                "years": [
+                    2024
+                ],
+                "quarters": [
+                    2
+                ]
+            },
+            {
+                "question": "Calculate the Debt-to-Equity Ratio for all Banking companies listed on HOSE in 2023.",
+                "companies": [
+                    "BID",
+                    "EIB",
+                    "OCB",
+                    "CTG",
+                    "VCB",
+                    "ACB",
+                    "MBB",
+                    "HDB",
+                    "TPB",
+                    "VPB",
+                    "STB",
+                    "TCB",
+                    "SHB",
+                    "VIB",
+                    "LPB"
+                ],
+                "years": [
+                    2023
+                ]
+            },
+            {
+                "question": "What was the Price-to-Earnings Ratio (P/E) for Vinamilk (VNM) and Masan Group (MSN) in 2020?",
+                "companies": [
+                    "VNM",
+                    "MSN"
+                ],
+                "years": [
+                    2020
+                ]
+            },
+            {
+                "question": "Compute the Gross Profit Margin for Mobile World Investment (MWG) for each quarter from 2020 to Q2 2024.",
+                "companies": [
+                    "MWG"
+                ],
+                "years": [
+                    2020,
+                    2021,
+                    2022,
+                    2023,
+                    2024
+                ],
+                "quarters": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    1,
+                    2
+                ]
+            },
+            {
+                "question": "What was the Net Profit Margin for all companies in the 'Real Estate' industry listed on HOSE in 2023?",
+                "companies": [
+                    "VHM",
+                    "VRE",
+                    "VIC",
+                    "BCM",
+                    "VPI",
+                    "KDH",
+                    "HDC",
+                    "TCH",
+                    "NVL",
+                    "DXG"
+                ],
+                "years": [
+                    2023
+                ]
+            },
+            {
+                "question": "Provide the Quick Ratio for FPT Corporation (FPT) and PetroVietnam Gas (GAS) for the years 2021 and 2022.",
+                "companies": [
+                    "FPT",
+                    "GAS"
+                ],
+                "years": [
+                    2021,
+                    2022
+                ]
+            }
+        ]
+    },
+    {
+        "main_task": "Financial Ratios",
+        "sub_task": "compare 2 or more company",
+        "time": "at specific quater and year",
+        "questions": [
+            {
+                "question": "What was the Return on Equity (ROE) for Vietcombank (VCB) and Techcombank (TCB) in Q2 2024?",
+                "companies": [
+                    "VCB",
+                    "TCB"
+                ],
+                "quarter": "Q2",
+                "year": 2024,
+                "ratio": "ROE"
+            },
+            {
+                "question": "Compare the Price-to-Earnings Ratio (P/E) of Vinamilk (VNM) and Masan Group (MSN) in Q4 2023.",
+                "companies": [
+                    "VNM",
+                    "MSN"
+                ],
+                "quarter": "Q4",
+                "year": 2023,
+                "ratio": "P/E"
+            },
+            {
+                "question": "What were the Debt-to-Equity Ratios for BIDV (BID) and Eximbank (EIB) at the end of 2022?",
+                "companies": [
+                    "BID",
+                    "EIB"
+                ],
+                "quarter": "Year End",
+                "year": 2022,
+                "ratio": "Debt-to-Equity Ratio"
+            },
+            {
+                "question": "Calculate the Current Ratio for ACB and OCB in Q1 2024.",
+                "companies": [
+                    "ACB",
+                    "OCB"
+                ],
+                "quarter": "Q1",
+                "year": 2024,
+                "ratio": "Current Ratio"
+            },
+            {
+                "question": "Compare the Gross Profit Margin of Mobile World Investment (MWG) and FPT Retail (FRT) during Q3 2023.",
+                "companies": [
+                    "MWG",
+                    "FRT"
+                ],
+                "quarter": "Q3",
+                "year": 2023,
+                "ratio": "Gross Profit Margin"
+            },
+            {
+                "question": "What was the Net Profit Margin for Vietjet Air (VJC) and VinGroup (VIC) in Q2 2023?",
+                "companies": [
+                    "VJC",
+                    "VIC"
+                ],
+                "quarter": "Q2",
+                "year": 2023,
+                "ratio": "Net Profit Margin"
+            },
+            {
+                "question": "Analyze the Quick Ratio of VPBank (VPB) and Sacombank (STB) at the end of 2020.",
+                "companies": [
+                    "VPB",
+                    "STB"
+                ],
+                "quarter": "Year End",
+                "year": 2020,
+                "ratio": "Quick Ratio"
+            },
+            {
+                "question": "Compare the Return on Assets (ROA) for Petrolimex (PLX) and PetroVietnam Gas (GAS) in Q4 2022.",
+                "companies": [
+                    "PLX",
+                    "GAS"
+                ],
+                "quarter": "Q4",
+                "year": 2022,
+                "ratio": "ROA"
+            }
+        ]
+    },
+    {
+        "main_task": "Financial Ratios",
+        "sub_task": "get data 1 or more company",
+        "time": "at specific quater and year",
+        "questions": [
+            {
+                "question": "What is the Return on Equity (ROE) for Vietcombank (VCB) in Q2 2024?",
+                "companies": [
+                    "VCB"
+                ],
+                "year": 2024,
+                "quarter": 2
+            },
+            {
+                "question": "What was the Debt-to-Equity Ratio for Techcombank (TCB) and ACB in Q4 2023?",
+                "companies": [
+                    "TCB",
+                    "ACB"
+                ],
+                "year": 2023,
+                "quarter": 4
+            },
+            {
+                "question": "Calculate the Current Ratio for BIDV (BID), Eximbank (EIB), and OCB Bank (OCB) for the full year 2022.",
+                "companies": [
+                    "BID",
+                    "EIB",
+                    "OCB"
+                ],
+                "year": 2022,
+                "quarter": null
+            },
+            {
+                "question": "What was the Price-to-Earnings Ratio (P/E) of Vinamilk (VNM) in Q1 2024 and Q1 2023?",
+                "companies": [
+                    "VNM"
+                ],
+                "year": [
+                    2024,
+                    2023
+                ],
+                "quarter": 1
+            },
+            {
+                "question": "Provide the Gross Profit Margin for Mobile World Investment (MWG) for each quarter from 2020 to Q2 2024.",
+                "companies": [
+                    "MWG"
+                ],
+                "year": [
+                    2020,
+                    2021,
+                    2022,
+                    2023,
+                    2024
+                ],
+                "quarter": [
+                    1,
+                    2,
+                    3,
+                    4
+                ]
+            },
+            {
+                "question": "What is the Quick Ratio for the top 5 banks (by market capitalization) as of Q1 2024?",
+                "companies": [
+                    "VCB",
+                    "CTG",
+                    "TCB",
+                    "BID",
+                    "VPB"
+                ],
+                "year": 2024,
+                "quarter": 1
+            },
+            {
+                "question": "Calculate the Net Profit Margin for FPT Corporation (FPT) and Masan Group (MSN) for the full year 2023.",
+                "companies": [
+                    "FPT",
+                    "MSN"
+                ],
+                "year": 2023,
+                "quarter": null
+            },
+            {
+                "question": "What was the Inventory Turnover for Hoa Phat Group (HPG) in Q4 2023 and Q4 2022?",
+                "companies": [
+                    "HPG"
+                ],
+                "year": [
+                    2023,
+                    2022
+                ],
+                "quarter": 4
+            }
+        ]
+    },
+    {
+        "main_task": "Financial Ratios",
+        "sub_task": "get data 1 or more company",
+        "time": "over time with specific period",
+        "questions": [
+            {
+                "question": "What is the trend of the Return on Equity (ROE) for Vietcombank (VCB) from 2020 to Q2 2024?",
+                "companies": [
+                    "VCB"
+                ],
+                "ratios": [
+                    "ROE"
+                ],
+                "period": "2020-Q2 2024"
+            },
+            {
+                "question": "Calculate the Debt-to-Equity ratio for the top 5 banks (by market capitalization in 2020) from 2020 to Q2 2024.  Provide the data for each bank separately.",
+                "companies": [
+                    "VCB",
+                    "BID",
+                    "CTG",
+                    "ACB",
+                    "TCB"
+                ],
+                "ratios": [
+                    "Debt-to-Equity"
+                ],
+                "period": "2020-Q2 2024"
+            },
+            {
+                "question": "Show the year-over-year growth rate of the Net Profit Margin for Mobile World Investment (MWG) and Vinamilk (VNM) from 2020 to 2023.",
+                "companies": [
+                    "MWG",
+                    "VNM"
+                ],
+                "ratios": [
+                    "Net Profit Margin"
+                ],
+                "period": "2020-2023"
+            },
+            {
+                "question": "What is the average Current Ratio for the companies in the Banking industry listed on HOSE from 2021 to Q2 2024?",
+                "companies": [
+                    "BID",
+                    "EIB",
+                    "OCB",
+                    "CTG",
+                    "VCB",
+                    "ACB",
+                    "MBB",
+                    "HDB",
+                    "TPB",
+                    "VPB",
+                    "STB",
+                    "TCB",
+                    "SHB",
+                    "VIB",
+                    "LPB"
+                ],
+                "ratios": [
+                    "Current Ratio"
+                ],
+                "period": "2021-Q2 2024"
+            },
+            {
+                "question": "Compare the Price-to-Earnings ratio (P/E) of Vinhomes (VHM) and Novaland (NVL) from 2020 to Q2 2024. Present the data in a table.",
+                "companies": [
+                    "VHM",
+                    "NVL"
+                ],
+                "ratios": [
+                    "P/E"
+                ],
+                "period": "2020-Q2 2024"
+            },
+            {
+                "question": "For the companies in the Real Estate sector listed on HOSE, calculate the average Return on Assets (ROA) for each quarter from 2022 to Q2 2024.",
+                "companies": [
+                    "VHM",
+                    "VRE",
+                    "VIC",
+                    "DXG",
+                    "KDH",
+                    "HDC",
+                    "TCH",
+                    "NVL"
+                ],
+                "ratios": [
+                    "ROA"
+                ],
+                "period": "2022-Q2 2024"
+            }
+        ]
+    }
+]
