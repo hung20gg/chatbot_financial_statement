@@ -1,27 +1,40 @@
 from llm.llm_utils import get_code_from_text_response, get_json_from_text_response
-from llm_general import find_suitable_column, TIR_reasoning, get_stock_code_based_on_company_name
+from llm_general import find_suitable_row_v2, TIR_reasoning, get_stock_code_based_on_company_name, debug_SQL
+from branch_reasoning import simplify_branch_reasoning
 from setup_db import DBHUB
 import utils
 import re
 import pandas as pd
 
 
-def reasoning_text2SQL(llm, text, db: DBHUB, top_k = 5, verbose = False, running_type = 'sequential'):
+def reasoning_text2SQL(llm, text, db: DBHUB, top_k = 5, verbose = False, running_type = 'sequential', branch_reasoning = False, self_debug = False):
     
     # Step 1: Find suitable column
     if running_type == 'parallel':
-        bank_column = ""
-        non_bank_column = ""
+        suggestions_table = ""
         company_info = ""
         pass 
     else:
-        bank_column, non_bank_column = find_suitable_column(llm, text, db=db, top_k=top_k, verbose=verbose)
+        
+        # Branch COT but one go
+        if branch_reasoning:
+            steps = simplify_branch_reasoning(llm, text, verbose=verbose)
+            
+            steps_string = ""
+            for i, step in enumerate(steps):
+                steps_string += f"Step {i+1}: \n {step}\n\n"
+            text = steps_string
+        
         company_info = get_stock_code_based_on_company_name(llm, text, db=db) 
+        stock_code = company_info['stock_code'].tolist()
+        
+        # Find suitable column V2
+        suggestions_table = find_suitable_row_v2(llm, text, stock_code=stock_code, db=db, top_k=top_k, verbose=verbose, format='markdown')
         stock_code_table = utils.df_to_markdown(company_info)
                
     if verbose:
-        print(f"Bank column: {bank_column}")
-        print(f"Non-bank column: {non_bank_column}")
+        print(f"Peek rows: {suggestions_table}")
+
     
     # Step 2: Convert text to SQL
     system_prompt = """
@@ -45,11 +58,7 @@ Company details
 
 Snapshot of the mapping table:
 <data>
-`map_category_code_bank`
-{bank_column}
-
-`map_category_code_non_bank`
-{non_bank_column}
+{suggestions_table}
 </data>
 
 Here is an example of a query that you can refer to:
@@ -84,7 +93,12 @@ Note:
         print(response)
     
     # Add TIR to the SQL query
+    error_messages = []
+    execution_tables = []
+    
     response, error_message, execution_table = TIR_reasoning(response, db, verbose=verbose)
+    error_messages.extend(error_message)
+    execution_tables.extend(execution_table)
     
     messages.append(
         {
@@ -92,6 +106,25 @@ Note:
             "content": response
         }
     )
+    
+    # Self-debug the SQL code
+    count_debug = 0
+    if len(error_message) > 0 and self_debug:
+        while count_debug < 3:
+            
+            response, error_message, execute_table = debug_SQL(response, db, verbose=verbose)
+            error_messages.extend(error_message)
+            execution_tables.extend(execute_table)
+        
+            messages.append({
+                "role": "assistant",
+                "content": response
+            })
+            if len(error_message) == 0:
+                break
+                
+            count_debug += 1
+    
     
     return get_code_from_text_response(response)
 
