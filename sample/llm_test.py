@@ -25,8 +25,13 @@ def reasoning_text2SQL(llm, text, db: DBHUB, top_k = 5, verbose = False, running
                 steps_string += f"Step {i+1}: \n {step}\n\n"
             text = steps_string
         
-        company_info = get_stock_code_based_on_company_name(llm, text, db=db) 
-        stock_code = company_info['stock_code'].tolist()
+        company_info, industries = get_stock_code_based_on_company_name(llm, text, db=db, verbose=verbose) 
+        
+        try:
+            stock_code = company_info['stock_code'].tolist()
+        except:
+            stock_code = []
+            print("No stock code found")
         
         # Find suitable column V2
         suggestions_table = find_suitable_row_v2(llm, text, stock_code=stock_code, db=db, top_k=top_k, verbose=verbose, format='markdown')

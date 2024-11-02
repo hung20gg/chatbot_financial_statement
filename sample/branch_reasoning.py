@@ -79,7 +79,7 @@ def llm_branch_reasoning(llm, task, db: DBHUB, self_debug = False, verbose=False
     # Check step 1: Extract company name
 
     print("Step 0: Extract company name")
-    company_info_df = get_stock_code_based_on_company_name(llm, steps_string, db=db, verbose=verbose)
+    company_info_df, industries = get_stock_code_based_on_company_name(llm, steps_string, db=db, verbose=verbose)
     stock_code_table = utils.df_to_markdown(company_info_df)
     look_up_stock_code = f"\nHere are the detail of the companies: \n\n{stock_code_table}"
     

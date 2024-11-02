@@ -71,13 +71,13 @@ CREATE TABLE non_bank_financial_report(
 
 -- Table map_category_code_ratio
 CREATE TABLE map_category_code_ratio(
-    category_code VARCHAR(255) primary key,
+    ratio_code VARCHAR(255) primary key,
     ratio_name VARCHAR(255)
 )
 
 -- Table ratio: Pre-calculated common Financial Ratio. Same structure as `bank_financial_report`
 CREATE TABLE financial_ratio(
-    category_code VARCHAR(255) references map_category_code_ratio(category_code),
+    ratio_code VARCHAR(255) references map_category_code_ratio(ratio_code),
     stock_code VARCHAR(255) references company_info(stock_code),
     year int,
     quarter int,
