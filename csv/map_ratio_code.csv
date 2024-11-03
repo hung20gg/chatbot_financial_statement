@@ -17,9 +17,9 @@ Debt To Total Capital Ratio,DTTCR
 Receivables To Sales Ratio,RTSR
 Allowance For Doubtful Accounts Ratio,AFDAR
 Asset To Debt Ratio,ATDR
-Current Ratio,CR
+Current Ratio,CurrentR
 Quick Ratio,QR
-Cash Ratio,CR
+Cash Ratio,CashR
 Long Term Debt Coverage Ratio,LTDCR
 Long Term Debt To Equity Capital Ratio,LTDTECR
 Time Interest Earned,TIE
@@ -49,3 +49,4 @@ Cash Debt Coverage Ratio,CDCR
 Cash Return On Assets,CROA
 Cash Return On Fixed Assets,CROFA
 CFO To Total Equity,CFOTTE
+Net Interest Margin,NIM

@@ -1,4 +1,4 @@
-ratio_name,category_code
+ratio_name,ratio_code
 Equity Ratio,ER
 Long Term Asset Self Financing Ratio,LTASFR
 Fixed Asset Self Financing Ratio,FASFR
@@ -17,9 +17,9 @@ Debt To Total Capital Ratio,DTTCR
 Receivables To Sales Ratio,RTSR
 Allowance For Doubtful Accounts Ratio,AFDAR
 Asset To Debt Ratio,ATDR
-Current Ratio,CR
+Current Ratio,CashR
 Quick Ratio,QR
-Cash Ratio,CR
+Cash Ratio,CurrentR
 Long Term Debt Coverage Ratio,LTDCR
 Long Term Debt To Equity Capital Ratio,LTDTECR
 Time Interest Earned,TIE
@@ -49,3 +49,4 @@ Cash Debt Coverage Ratio,CDCR
 Cash Return On Assets,CROA
 Cash Return On Fixed Assets,CROFA
 CFO To Total Equity,CFOTTE
+Net Interest Margin,NIM

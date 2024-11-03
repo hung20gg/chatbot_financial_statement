@@ -141,8 +141,11 @@ def execute_query(query, conn=None, return_type='tuple'):
     return result
 
 # Step 6: Create Chroma DB
-def create_chroma_db(collection_name, persist_directory):
-    embedding_function = OpenAIEmbeddings(api_key=os.getenv('OPENAI_API_KEY'), model="text-embedding-3-small")
+def create_chroma_db(collection_name, persist_directory, model_name='text-embedding-3-small'):
+    if 'text-embedding' in model_name:
+        embedding_function = OpenAIEmbeddings(api_key=os.getenv('OPENAI_API_KEY'), model="text-embedding-3-small")
+    else:
+        raise ValueError("Model name not supported")
     
     return Chroma(collection_name=collection_name, 
                   embedding_function=embedding_function, 
@@ -166,6 +169,23 @@ def setup_chroma_db_fs(db_name, user, password, host, port, collection_name, per
         print(category)
         chroma_db.add_texts([category[0]], metadatas=[{'lang': 'vi', 'code': category[2]}])
         chroma_db.add_texts([category[1]], metadatas=[{'lang': 'en', 'code': category[2]}])
+  
+def setup_chroma_db_ratio(db_name, user, password, host, port, collection_name, persist_directory, table='map_category_non_sec'):
+    conn = connect_to_db(db_name, user, password, host, port)
+    print("Connected to database")
+    try:
+        with conn.cursor() as cur:
+            cur.execute(f"SELECT ratio_name, ratio_code FROM {table}")
+            categories = cur.fetchall()
+            categories = [(category[0], category[1]) for category in categories]
+    finally:
+        conn.close()
+    
+    chroma_db = create_chroma_db(collection_name, persist_directory)
+    
+    for category in categories:
+        print(category)
+        chroma_db.add_texts([category[0]], metadatas=[{'lang': 'en', 'code': category[1]}])
         
 def setup_chroma_db_company_name(db_name, user, password, host, port, collection_name, persist_directory, table='company_info'):
     conn = connect_to_db(db_name, user, password, host, port)
@@ -337,7 +357,7 @@ class DBHUB:
                                 bank_column=[], 
                                 non_bank_column=[], 
                                 sec_bank_column=[], 
-                                financial_ratio_row=[], top_k=5):
+                                financial_ratio_row=[], top_k=5, *args, **kwargs):
         
         raise NotImplementedError("This function is not implemented yet")
     
@@ -402,10 +422,13 @@ if __name__ == '__main__':
     port = '5433'
     host = 'localhost'
     
-    csv_path_company_info = 'sample_data/df_company_info.csv'
-    table_name_company_info = 'company_info'
+    
+    # # Load general data into df
+    
+    # csv_path_company_info = '../csv/df_company_info.csv'
+    # table_name_company_info = 'company_info'
 
-    # Primary and foreign key definitions
+    # # Primary and foreign key definitions
     # primary_key_company_info = ['stock_code']
     # primary_key_sub_and_shareholder = None
 
@@ -421,7 +444,7 @@ if __name__ == '__main__':
     # )
     # print("Loaded company_info table")
     
-    # csv_path = 'sample_data/map_category_code_non_bank.csv'
+    # csv_path = '../csv/map_category_code_non_bank.csv'
     # table_name = 'map_category_code_non_bank'
     # collection_chromadb = 'category_non_bank_chroma'
     # persist_directory = 'data/category_non_bank_chroma'
@@ -431,11 +454,11 @@ if __name__ == '__main__':
     # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
     # print("Loaded map_category_code_non_bank")
     # # setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
-    # print("Setup Chroma DB for map_category_code_non_bank")
+    # print(f"Setup Chroma DB for {table_name}")
     # # Generate embeddings  for the data
     
     
-    # csv_path = 'sample_data/map_category_code_bank.csv'
+    # csv_path = '../csv/map_category_code_bank.csv'
     # table_name = 'map_category_code_bank'
     # collection_chromadb = 'category_bank_chroma'
     # persist_directory = 'data/category_bank_chroma'
@@ -444,47 +467,85 @@ if __name__ == '__main__':
     # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
     # print("Loaded map_category_code_bank")
     # # setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
-    # print("Setup Chroma DB for map_category_code_bank")
+    # print(f"Setup Chroma DB for {table_name}")
+    
+    
+    # csv_path = '../csv/map_category_code_sec.csv'
+    # table_name = 'map_category_code_securities'
+    # collection_chromadb = 'category_sec_chroma'
+    # persist_directory = 'data/category_sec_chroma'
+
+    # # Load csv data to PostgreSQL
+    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
+    # print("Loaded map_category_code_bank")
+    # setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
+    # print(f"Setup Chroma DB for {table_name}")
+    
+    # csv_path = '../csv/map_ratio_code.csv'
+    # table_name = 'map_category_code_ratio'
+    # collection_chromadb = 'category_ratio_chroma'
+    # persist_directory = 'data/category_ratio_chroma'
+
+    # Load csv data to PostgreSQL
+    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['ratio_code'])
+    # print("Loaded map_category_code_bank")
+    # setup_chroma_db_ratio(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
+    # print(f"Setup Chroma DB for {table_name}")
+    
+    # Load financial record data 
     
     
     # # Load Bank Financial Report
-    # csv_path = 'sample_data/bank_financial_report.csv'
+    # csv_path = '../csv/bank_financial_report_v2_1.csv'
     # table_name = 'bank_financial_report'
     # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'})
-    # print("Loaded bank_financial_report")
+    # print(f"Loaded {table_name}")
     
     # # # Load Non Bank Financial Report
-    # csv_path = 'sample_data/non_bank_financial_report.csv'
+    # csv_path = '../csv/non_bank_financial_report_v2_1.csv'
     # table_name = 'non_bank_financial_report'
     # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'})
-    # print("Loaded non_bank_financial_report")
+    # print(f"Loaded {table_name}")
 
-    # # Paths for the uploaded CSV files
+    # # # Load Securities Financial Report
+    # csv_path = '../csv/securities_financial_report_v2_1.csv'
+    # table_name = 'securities_financial_report'
+    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'})
+    # print(f"Loaded {table_name}")
+
+    # # Load Financial Ratio
+    # csv_path = '../csv/financial_ratio.csv'
+    # table_name = 'financial_ratio'
+    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'})
+    # print(f"Loaded {table_name}")
     
     
     # # Setup Chroma DB for company_info
     # collection_chromadb = 'company_name_chroma'
     # persist_directory = 'data/company_name_chroma'
-    # # setup_chroma_db_company_name(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name_company_info)
+    # setup_chroma_db_company_name(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name_company_info)
+
+
+
+    # SQL Prompt Few shot
 
     collection_chromadb = 'sql_query'
     persist_directory = 'data/sql_query'
-    setup_chroma_db_sql_query(collection_chromadb, persist_directory, 'prompt/question_query.txt')
-    setup_chroma_db_sql_query(collection_chromadb, persist_directory, 'prompt/simple_query_v2.txt')
+    # setup_chroma_db_sql_query(collection_chromadb, persist_directory, 'prompt/question_query.txt')
+    # setup_chroma_db_sql_query(collection_chromadb, persist_directory, 'prompt/simple_query_v2.txt')
 
     # # Load 'sub_and_shareholder' data into PostgreSQL with foreign key relationship
-    # csv_path_sub_and_shareholder = 'sample_data/df_sub_and_shareholder.csv'
-    # table_name_sub_and_shareholder = 'sub_and_shareholder'
-
+    csv_path_sub_and_shareholder = '../csv/df_sub_and_shareholders.csv'
+    table_name_sub_and_shareholder = 'sub_and_shareholder'
     
-    # load_csv_to_postgres(
-    #     csv_path=csv_path_sub_and_shareholder,
-    #     db_name=db_name,
-    #     user=user,
-    #     password=password,
-    #     table_name=table_name_sub_and_shareholder,
-    #     port=port,
-    #     foreign_key={'stock_code': 'company_info(stock_code)'}
-    # )
-    # print("Loaded sub_and_shareholder table")
+    load_csv_to_postgres(
+        csv_path=csv_path_sub_and_shareholder,
+        db_name=db_name,
+        user=user,
+        password=password,
+        table_name=table_name_sub_and_shareholder,
+        port=port,
+        foreign_key={'stock_code': 'company_info(stock_code)'}
+    )
+    print("Loaded sub_and_shareholder table")
 
