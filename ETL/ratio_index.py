@@ -136,6 +136,9 @@ def receivables_to_sales_ratio(accounts_receivables, total_sales):
 def allowance_for_doubtful_accounts_ratio(allowance_for_doubtful_accounts, accounts_receivables):
     return allowance_for_doubtful_accounts / accounts_receivables if accounts_receivables else None
 
+def allowance_for_loan_customers_ratio(allowance_for_loan_customers, loan_to_customers):
+    return allowance_for_loan_customers / loan_to_customers if loan_to_customers else None
+
 def asset_to_debt_ratio(total_assets, total_liabilities):
     return total_assets / total_liabilities if total_liabilities else None
 
@@ -235,7 +238,12 @@ def profitability_of_operating_expenses(net_income_from_operating, total_operati
 def Return_on_sales(net_income, net_sales):
     return net_income / net_sales if net_sales else None
 
-def operating_profit_margin(net_profit_from_operating, net_sales):
+def operating_profit_margin(net_profit_from_operating, net_sales, bank_params = None):
+    # Poor code design, but it's the only way to pass the bank_params to the function
+    if bank_params is not None:
+        profit_from_operating, operating_expense, net_sales = net_profit_from_operating, net_sales, bank_params
+        return (profit_from_operating - operating_expense)/ net_sales if net_sales else None
+    
     return net_profit_from_operating / net_sales if net_sales else None
 
 def gross_profit_margin(gross_profit, net_sales):
@@ -282,6 +290,9 @@ def cash_flow_margin(operating_net_cash_flow, total_revenue):
 
 def earning_quality_ratio(operating_net_cash_flow, net_income):
     return operating_net_cash_flow / net_income if net_income else None
+
+def net_interest_margin(net_interest_income, avg_earning_assets):
+    return net_interest_income / avg_earning_assets if avg_earning_assets else None
 
 def get_cashflow_ratios(data_df, func_dict):
     pivot_df_6 = data_df.pivot_table(index=['stock_code', 'year', 'quarter'], 
@@ -373,7 +384,7 @@ def get_financial_ratios(data_df, type_ = 'non_bank'):
     df.rename(columns={'ratio_code': 'ratio_mapping'}, inplace=True)
     df['ratio_mapping'] = df['ratio_mapping'].str.lower().replace(' ', '_', regex=True)
     
-    ratio_df = pd.read_csv(os.path.join(current_path ,'mapping_data/map_ratio_code.csv'))
+    ratio_df = pd.read_csv(os.path.join(current_path ,'../csv/map_ratio_code.csv'))
     ratio_df['ratio_mapping'] = ratio_df['ratio_name'].str.lower().replace(' ', '_', regex=True)
     
     # # Find the intersection (inner join)
@@ -386,20 +397,36 @@ def get_financial_ratios(data_df, type_ = 'non_bank'):
     # assert len(outer_join_excluding_inner) == 0, f"Missing mapping for ratio: {outer_join_excluding_inner}"
     
     df = pd.merge(df, ratio_df, on='ratio_mapping', how='left')
+    if df['ratio_name'].isna().sum() > 0:
+        print(f"Missing mapping for ratio: {df[df['ratio_name'].isna()]['ratio_mapping'].unique()}")
+        raise ValueError("Missing mapping for ratio")
     df.drop(columns=['ratio_mapping', 'ratio_name'], inplace=True)
+    
     return df
     
     
 if __name__ == '__main__':
     print("Test financial ratios")
     
-    data_df = pd.read_csv(os.path.join(current_path, '../csv/non_bank_financial_report_v2_1.csv'))
-    df = get_financial_ratios(data_df)
-    df.to_csv(os.path.join(current_path, '../csv/financial_ratio.csv'), index=False)
+    dfs = None
+    types = ['non_bank', 'bank']
     
-    ratio = df['ratio_code'].unique()
+    for type_ in types:
+        print(f"Processing {type_} data")
+        data_df = pd.read_csv(os.path.join(current_path, f'../csv/{type_}_financial_report_v2_1.csv'))
+        df = get_financial_ratios(data_df, type_)
+        if dfs is None:
+            dfs = df
+        else:
+            dfs = pd.concat([dfs, df], ignore_index=True)
+    
+    assert dfs['ratio_code'].isna().sum()==0 , "Null value in ratio_code"
+    
+    dfs.to_csv(os.path.join(current_path, '../csv/financial_ratio.csv'), index=False)
+    
+    ratio = dfs['ratio_code'].unique()
     
     for r in ratio[:5]:
         print(r)
-        print(df[(df['ratio_code'] == r)&(df['quarter'] == 0)&(df['year'] == 2022)].head(5))
+        print(dfs[(dfs['ratio_code'] == r)&(dfs['quarter'] == 0)&(dfs['year'] == 2022)].head(5))
         print('========================================')

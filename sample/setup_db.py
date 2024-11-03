@@ -422,108 +422,109 @@ if __name__ == '__main__':
     port = '5433'
     host = 'localhost'
     
+    # It is recommended to delete all the existing db, vector db and load the data in the following order:
     
     # # Load general data into df
     
-    # csv_path_company_info = '../csv/df_company_info.csv'
-    # table_name_company_info = 'company_info'
+    csv_path_company_info = '../csv/df_company_info.csv'
+    table_name_company_info = 'company_info'
 
-    # # Primary and foreign key definitions
-    # primary_key_company_info = ['stock_code']
-    # primary_key_sub_and_shareholder = None
+    # Primary and foreign key definitions
+    primary_key_company_info = ['stock_code']
+    primary_key_sub_and_shareholder = None
 
-    # # Load 'company_info' data into PostgreSQL
-    # load_csv_to_postgres(
-    #     csv_path=csv_path_company_info,
-    #     db_name=db_name,
-    #     user=user,
-    #     password=password,
-    #     table_name=table_name_company_info,
-    #     port=port,
-    #     primary_key=primary_key_company_info
-    # )
-    # print("Loaded company_info table")
+    # Load 'company_info' data into PostgreSQL
+    load_csv_to_postgres(
+        csv_path=csv_path_company_info,
+        db_name=db_name,
+        user=user,
+        password=password,
+        table_name=table_name_company_info,
+        port=port,
+        primary_key=primary_key_company_info
+    )
+    print("Loaded company_info table")
     
-    # csv_path = '../csv/map_category_code_non_bank.csv'
-    # table_name = 'map_category_code_non_bank'
-    # collection_chromadb = 'category_non_bank_chroma'
-    # persist_directory = 'data/category_non_bank_chroma'
-
-    # # Load csv data to PostgreSQL
-
-    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
-    # print("Loaded map_category_code_non_bank")
-    # # setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
-    # print(f"Setup Chroma DB for {table_name}")
-    # # Generate embeddings  for the data
+    # Setup Chroma DB for company_info
+    collection_chromadb = 'company_name_chroma'
+    persist_directory = 'data/company_name_chroma'
+    setup_chroma_db_company_name(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name_company_info)
     
-    
-    # csv_path = '../csv/map_category_code_bank.csv'
-    # table_name = 'map_category_code_bank'
-    # collection_chromadb = 'category_bank_chroma'
-    # persist_directory = 'data/category_bank_chroma'
-
-    # # Load csv data to PostgreSQL
-    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
-    # print("Loaded map_category_code_bank")
-    # # setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
-    # print(f"Setup Chroma DB for {table_name}")
-    
-    
-    # csv_path = '../csv/map_category_code_sec.csv'
-    # table_name = 'map_category_code_securities'
-    # collection_chromadb = 'category_sec_chroma'
-    # persist_directory = 'data/category_sec_chroma'
-
-    # # Load csv data to PostgreSQL
-    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
-    # print("Loaded map_category_code_bank")
-    # setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
-    # print(f"Setup Chroma DB for {table_name}")
-    
-    # csv_path = '../csv/map_ratio_code.csv'
-    # table_name = 'map_category_code_ratio'
-    # collection_chromadb = 'category_ratio_chroma'
-    # persist_directory = 'data/category_ratio_chroma'
+    csv_path = '../csv/map_category_code_non_bank.csv'
+    table_name = 'map_category_code_non_bank'
+    collection_chromadb = 'category_non_bank_chroma'
+    persist_directory = 'data/category_non_bank_chroma'
 
     # Load csv data to PostgreSQL
-    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['ratio_code'])
-    # print("Loaded map_category_code_bank")
-    # setup_chroma_db_ratio(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
-    # print(f"Setup Chroma DB for {table_name}")
+
+    load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
+    print("Loaded map_category_code_non_bank")
+    # setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
+    print(f"Setup Chroma DB for {table_name}")
+    # Generate embeddings  for the data
+    
+    
+    csv_path = '../csv/map_category_code_bank.csv'
+    table_name = 'map_category_code_bank'
+    collection_chromadb = 'category_bank_chroma'
+    persist_directory = 'data/category_bank_chroma'
+
+    # Load csv data to PostgreSQL
+    load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
+    print("Loaded map_category_code_bank")
+    # setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
+    print(f"Setup Chroma DB for {table_name}")
+    
+    
+    csv_path = '../csv/map_category_code_sec.csv'
+    table_name = 'map_category_code_securities'
+    collection_chromadb = 'category_sec_chroma'
+    persist_directory = 'data/category_sec_chroma'
+
+    # Load csv data to PostgreSQL
+    load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
+    print("Loaded map_category_code_bank")
+    setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
+    print(f"Setup Chroma DB for {table_name}")
+    
+    csv_path = '../csv/map_ratio_code.csv'
+    table_name = 'map_category_code_ratio'
+    collection_chromadb = 'category_ratio_chroma'
+    persist_directory = 'data/category_ratio_chroma'
+
+    # Load csv data to PostgreSQL
+    load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['ratio_code'])
+    print("Loaded map_category_code_bank")
+    setup_chroma_db_ratio(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
+    print(f"Setup Chroma DB for {table_name}")
     
     # Load financial record data 
     
     
-    # # Load Bank Financial Report
-    # csv_path = '../csv/bank_financial_report_v2_1.csv'
-    # table_name = 'bank_financial_report'
-    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'})
-    # print(f"Loaded {table_name}")
+    # Load Bank Financial Report
+    csv_path = '../csv/bank_financial_report_v2_1.csv'
+    table_name = 'bank_financial_report'
+    load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'})
+    print(f"Loaded {table_name}")
     
-    # # # Load Non Bank Financial Report
-    # csv_path = '../csv/non_bank_financial_report_v2_1.csv'
-    # table_name = 'non_bank_financial_report'
-    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'})
-    # print(f"Loaded {table_name}")
+    # # Load Non Bank Financial Report
+    csv_path = '../csv/non_bank_financial_report_v2_1.csv'
+    table_name = 'non_bank_financial_report'
+    load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'})
+    print(f"Loaded {table_name}")
 
-    # # # Load Securities Financial Report
-    # csv_path = '../csv/securities_financial_report_v2_1.csv'
-    # table_name = 'securities_financial_report'
-    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'})
-    # print(f"Loaded {table_name}")
+    # # Load Securities Financial Report
+    csv_path = '../csv/securities_financial_report_v2_1.csv'
+    table_name = 'securities_financial_report'
+    load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'})
+    print(f"Loaded {table_name}")
 
-    # # Load Financial Ratio
-    # csv_path = '../csv/financial_ratio.csv'
-    # table_name = 'financial_ratio'
-    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'})
-    # print(f"Loaded {table_name}")
+    # Load Financial Ratio
+    csv_path = '../csv/financial_ratio.csv'
+    table_name = 'financial_ratio'
+    load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'})
+    print(f"Loaded {table_name}")
     
-    
-    # # Setup Chroma DB for company_info
-    # collection_chromadb = 'company_name_chroma'
-    # persist_directory = 'data/company_name_chroma'
-    # setup_chroma_db_company_name(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name_company_info)
 
 
 
