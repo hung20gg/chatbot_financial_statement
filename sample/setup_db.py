@@ -448,7 +448,7 @@ if __name__ == '__main__':
     # Setup Chroma DB for company_info
     collection_chromadb = 'company_name_chroma'
     persist_directory = 'data/company_name_chroma'
-    setup_chroma_db_company_name(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name_company_info)
+    # setup_chroma_db_company_name(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name_company_info)
     
     csv_path = '../csv/map_category_code_non_bank.csv'
     table_name = 'map_category_code_non_bank'
@@ -484,7 +484,7 @@ if __name__ == '__main__':
     # Load csv data to PostgreSQL
     load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
     print("Loaded map_category_code_bank")
-    setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
+    # setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
     print(f"Setup Chroma DB for {table_name}")
     
     csv_path = '../csv/map_ratio_code.csv'
@@ -495,7 +495,7 @@ if __name__ == '__main__':
     # Load csv data to PostgreSQL
     load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['ratio_code'])
     print("Loaded map_category_code_bank")
-    setup_chroma_db_ratio(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
+    # setup_chroma_db_ratio(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
     print(f"Setup Chroma DB for {table_name}")
     
     # Load financial record data 

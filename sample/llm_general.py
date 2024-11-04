@@ -3,7 +3,7 @@ from setup_db import DBHUB
 import utils
 
 
-def get_stock_code_based_on_company_name(llm, task, db: DBHUB = None, top_k = 2, verbose=False):
+def get_stock_code_based_on_company_name(llm, task, db: DBHUB = None, top_k = 2, verbose=False, get_industry=False):
     """
     Get the stock code based on the company name
     """

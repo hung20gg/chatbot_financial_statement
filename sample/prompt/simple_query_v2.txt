@@ -93,7 +93,5 @@ total_assets AS (
 )
 
 -- Step 3: Calculate the total asset of all subsidiaries of Viettel
---SELECT SUM(total_asset) AS total_asset_of_viettel_subsidiaries
---FROM total_assets;
 select * from total_assets
 order by year desc
