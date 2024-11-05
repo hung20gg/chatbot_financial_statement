@@ -95,3 +95,42 @@ total_assets AS (
 -- Step 3: Calculate the total asset of all subsidiaries of Viettel
 select * from total_assets
 order by year desc
+
+-- 8. What is the Return on Equity (ROE) for all Banking companies in Q1 2024?
+
+SELECT
+    stock_code,
+    data AS roe_percentage
+FROM financial_ratio
+WHERE ratio_code = 'ROE'
+  AND year = 2024
+  AND quarter = 1
+  AND stock_code IN (SELECT stock_code FROM company_info WHERE is_bank = TRUE);
+
+-- 9. For Vietcombank and Techcombank, please provide the quarterly data for the Debt-to-Equity ratio from 2020 to 2023.
+
+SELECT 
+    stock_code,
+    year,
+    quarter,
+    data AS debt_to_equity_ratio
+FROM financial_ratio
+WHERE ratio_code = 'DTER' -- Assuming 'DTER' is the code for Debt-to-Equity Ratio
+  AND stock_code IN ('VCB', 'TCB')
+  AND year BETWEEN 2018 AND 2023
+  and quarter = 0
+ORDER BY stock_code, year, quarter;
+
+-- 10. Compare the Current Ratio of Vinhomes (VIC), Vincom Retail (VRE), and Novaland (NVL) in Q1 2024.  How does this compare to their respective Current Ratios in Q1 2020?
+
+SELECT 
+    stock_code,
+    year,
+    quarter,
+    data AS current_ratio
+FROM financial_ratio
+WHERE ratio_code = 'CURRENT_RATIO'
+  AND stock_code IN ('VHM', 'VRE', 'NVL') -- Vinhomes, Vincom Retail, Novaland
+  AND year IN (2020, 2024)
+  AND quarter = 1
+ORDER BY stock_code, year;
