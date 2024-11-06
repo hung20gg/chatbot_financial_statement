@@ -362,7 +362,7 @@ class DBHUB:
         raise NotImplementedError("This function is not implemented yet")
     
     
-    def return_mapping_table_v2(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5):
+    def return_mapping_table_v2(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = False):
         
         check_status_table = {
             'map_category_code_non_bank': True,
@@ -371,7 +371,7 @@ class DBHUB:
             'map_category_code_ratio': True
         }
         
-        if len(stock_code) != 0:
+        if len(stock_code) != 0 and not get_all_tables:
             company_df = self.return_company_from_stock_codes(stock_code)
             
             if company_df['is_bank'].sum() == 0:
@@ -382,7 +382,7 @@ class DBHUB:
                 check_status_table['map_category_code_non_bank'] = False     
          
         # Avoid override from the previous check
-        if len(industry) != 0:
+        if len(industry) != 0 and not get_all_tables:
             for ind in industry:
                 result = self.vector_industry.similarity_search(ind, 1)
                 if result[0].metadata['code'] == 'Banking':

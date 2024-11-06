@@ -48,7 +48,7 @@ Return an empty list if no company name is found.
     return utils.company_name_to_stock_code(db, company_names, top_k=top_k)
 
 
-def find_suitable_row_v2(llm, text, stock_code = [], db: DBHUB = None, top_k=5, verbose=False, format = 'dataframe'):
+def find_suitable_row_v2(llm, text, stock_code = [], db: DBHUB = None, top_k=5, verbose=False, get_all_table = False, format = 'dataframe'):
     system_prompt = """
     You are an expert in analyzing financial reports. You are given 2 database, finacial statements and pre-calculated pre-calculated financial performance ratios.
     """
@@ -100,7 +100,7 @@ def find_suitable_row_v2(llm, text, stock_code = [], db: DBHUB = None, top_k=5, 
     financial_statement_row = response.get("financial_statement_row", [])
     financial_ratio_row = response.get("financial_ratio_row", [])
     
-    dict_dfs = db.return_mapping_table_v2(financial_statement_row = financial_statement_row, financial_ratio_row = financial_ratio_row, industry = industry, stock_code = stock_code, top_k =top_k)
+    dict_dfs = db.return_mapping_table_v2(financial_statement_row = financial_statement_row, financial_ratio_row = financial_ratio_row, industry = industry, stock_code = stock_code, top_k =top_k, get_all_tables=get_all_table)
     
     if format == 'dataframe':
         return dict_dfs.values()
@@ -123,25 +123,37 @@ def TIR_reasoning(response, db: DBHUB, verbose=False):
     execution_error = []
     execution_table = []
     
-    for j, code in enumerate(codes):
+    sql_code = []
+    
+    for code in codes:
         if code['language'] == 'sql':
-            print(f"SQL Code {j+1}: \n{code['code']}")
-            table = db.query(code['code'], return_type='dataframe')
-            if isinstance(table, str):
-                execution_error.append((j, table))
-                continue
-            execution_table.append(table)
-            table_markdown = utils.df_to_markdown(table)
-            TIR_response += f"SQL result for {j+1}: \n{table_markdown}\n\n"
+            codes = code['code'].split(";")
+            for content in codes:
+                # clean the content
+                if content.strip() != "":
+                    sql_code.append(code)
+            
+    for i, code in enumerate(sql_code):    
+        if verbose:    
+            print(f"SQL Code {i+1}: \n{code}")
+            
+        table = db.query(code, return_type='dataframe')
+        
+        # If it see an error in the SQL code
+        if isinstance(table, str):
+            execution_error.append((j, table))
+            continue
+        
+        execution_table.append(table)
+        table_markdown = utils.df_to_markdown(table)
+        TIR_response += f"SQL result for {i+1}: \n{table_markdown}\n\n"
+    
+    response += f"\n\n### The result of the given SQL:\n\n{TIR_response}"
     
     error_message = ""
     if len(execution_error) > 0:
         for i, error in execution_error:
             error_message += f"Error in SQL {i+1}: {error}\n\n"
-            
-    response += f"\n\n### The result of the given SQL:\n\n{TIR_response}"
-    if len(error_message) > 0:
-        for i, error in execution_error:
             response += f"\n\n### Error in SQL {i+1}:\n\n{error}"
     
     return response, error_message, execution_table
