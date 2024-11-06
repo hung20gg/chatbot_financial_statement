@@ -109,9 +109,9 @@ def long_term_debt_to_equity_ratio(long_term_liabilities, equity):
 def short_term_debt_to_equity_ratio(short_term_liabilities, equity):
     return short_term_liabilities / equity if equity else None
 
-def get_financial_structure_ratios(data_df):
+def get_financial_structure_ratios(data_df, func_dict):
 
-    return __get_financial_ratio(data_df, const.FINANCIAL_STRUCTURE_RATIO_FUNCTIONS)
+    return __get_financial_ratio(data_df, func_dict)
 
 
 
@@ -135,6 +135,9 @@ def receivables_to_sales_ratio(accounts_receivables, total_sales):
 
 def allowance_for_doubtful_accounts_ratio(allowance_for_doubtful_accounts, accounts_receivables):
     return allowance_for_doubtful_accounts / accounts_receivables if accounts_receivables else None
+
+def allowance_for_loan_customers_ratio(allowance_for_loan_customers, loan_to_customers):
+    return allowance_for_loan_customers / loan_to_customers if loan_to_customers else None
 
 def asset_to_debt_ratio(total_assets, total_liabilities):
     return total_assets / total_liabilities if total_liabilities else None
@@ -164,8 +167,8 @@ def debt_to_tangible_net_worth_ratio(total_liabilities, equity, intangible_asset
     return total_liabilities / (equity - intangible_assets) if (equity - intangible_assets) else None
 
 
-def get_liquidity_ratios(data_df):
-    return __get_financial_ratio(data_df, const.LIQUIDITY_RATIO_FUNCTIONS)
+def get_liquidity_ratios(data_df, func_dict):
+    return __get_financial_ratio(data_df, func_dict)
 
     
 #===================#
@@ -185,8 +188,8 @@ def allowance_for_doubtful_accounts_to_total_assets_ratio(allowance_for_doubtful
 def permanent_financing_ratio(permanent_capital, total_lia_and_equity):
     return permanent_capital / total_lia_and_equity if total_lia_and_equity else None
 
-def get_financial_risk_ratio(data_df):
-    return __get_financial_ratio(data_df, const.FINANCIAL_RATIO_FUNCTIONS)
+def get_financial_risk_ratio(data_df, func_dict):
+    return __get_financial_ratio(data_df, func_dict)
 
 
 #===================#
@@ -196,8 +199,8 @@ def get_financial_risk_ratio(data_df):
 def financial_income_to_net_revenue_ratio(financial_income, net_revenue):
     return financial_income / net_revenue if net_revenue else None
 
-def get_income_ratios(data_df):
-    return __get_financial_ratio(data_df, const.INCOME_RATIO_FUNCTIONS)
+def get_income_ratios(data_df, func_dict):
+    return __get_financial_ratio(data_df, func_dict)
 
 
 #===================#
@@ -235,14 +238,19 @@ def profitability_of_operating_expenses(net_income_from_operating, total_operati
 def Return_on_sales(net_income, net_sales):
     return net_income / net_sales if net_sales else None
 
-def operating_profit_margin(net_profit_from_operating, net_sales):
+def operating_profit_margin(net_profit_from_operating, net_sales, bank_params = None):
+    # Poor code design, but it's the only way to pass the bank_params to the function
+    if bank_params is not None:
+        profit_from_operating, operating_expense, net_sales = net_profit_from_operating, net_sales, bank_params
+        return (profit_from_operating - operating_expense)/ net_sales if net_sales else None
+    
     return net_profit_from_operating / net_sales if net_sales else None
 
 def gross_profit_margin(gross_profit, net_sales):
     return gross_profit / net_sales if net_sales else None
 
-def get_profitability_ratios(data_df):
-    return __get_financial_ratio(data_df, const.PROFITABILITY_RATIO_FUNCTIONS)
+def get_profitability_ratios(data_df, func_dict):
+    return __get_financial_ratio(data_df, func_dict)
 
 
 #===================#
@@ -283,7 +291,10 @@ def cash_flow_margin(operating_net_cash_flow, total_revenue):
 def earning_quality_ratio(operating_net_cash_flow, net_income):
     return operating_net_cash_flow / net_income if net_income else None
 
-def get_cashflow_ratios(data_df):
+def net_interest_margin(net_interest_income, avg_earning_assets):
+    return net_interest_income / avg_earning_assets if avg_earning_assets else None
+
+def get_cashflow_ratios(data_df, func_dict):
     pivot_df_6 = data_df.pivot_table(index=['stock_code', 'year', 'quarter'], 
                                  columns='category_code', 
                                  values='data', 
@@ -295,7 +306,7 @@ def get_cashflow_ratios(data_df):
     for index, row in pivot_df_6.iterrows():
         stock_code, year, quarter = index
         
-        for ratio, inputs in const.CASHFLOW_RATIO_FUNCTIONS.items():
+        for ratio, inputs in func_dict.items():
             input_values = []
             for input_name in inputs:
                 if isinstance(input_name, list):  # Sum for cases like capital_expenditures or total_revenue
@@ -333,14 +344,39 @@ def get_cashflow_ratios(data_df):
 #   Main Function   #
 #===================#
 
-def get_financial_ratios(data_df):
+def get_constant_values(type_):
+    if type_ == 'non_bank':
+        return {
+            'financial_structure': const.FINANCIAL_STRUCTURE_RATIO_FUNCTIONS,
+            'liquidity': const.LIQUIDITY_RATIO_FUNCTIONS,
+            'financial_risk': const.FINANCIAL_RATIO_FUNCTIONS,
+            'income': const.INCOME_RATIO_FUNCTIONS,
+            'profitability': const.PROFITABILITY_RATIO_FUNCTIONS,
+            'cashflow': const.CASHFLOW_RATIO_FUNCTIONS
+        }
+        
+    elif type_ == 'bank':
+        return {
+            'financial_structure': const.BANK_FINANCIAL_STRUCTURE_RATIO_FUNCTIONS,
+            'liquidity': const.BANK_LIQUIDITY_RATIO_FUNCTIONS,
+            'financial_risk': const.BANK_FINANCIAL_RATIO_FUNCTIONS,
+            'income': const.BANK_INCOME_RATIO_FUNCTIONS,
+            'profitability': const.BANK_PROFITABILITY_RATIO_FUNCTIONS,
+            'cashflow': const.BANK_CASHFLOW_RATIO_FUNCTIONS
+        }
+    else:
+        raise ValueError(f"Invalid type: {type_}")
+
+def get_financial_ratios(data_df, type_ = 'non_bank'):
     
-    df_financial_structure = get_financial_structure_ratios(data_df)
-    df_liquidity = get_liquidity_ratios(data_df)
-    df_financial_risk = get_financial_risk_ratio(data_df)
-    df_income = get_income_ratios(data_df)
-    df_profitability = get_profitability_ratios(data_df)
-    df_cashflow = get_cashflow_ratios(data_df)
+    constant = get_constant_values(type_)
+    
+    df_financial_structure = get_financial_structure_ratios(data_df, constant['financial_structure'])
+    df_liquidity = get_liquidity_ratios(data_df, constant['liquidity'])
+    df_financial_risk = get_financial_risk_ratio(data_df, constant['financial_risk'])
+    df_income = get_income_ratios(data_df, constant['income'])
+    df_profitability = get_profitability_ratios(data_df, constant['profitability'])
+    df_cashflow = get_cashflow_ratios(data_df, constant['cashflow'])
     
     df = pd.concat([df_financial_structure, df_liquidity, df_financial_risk, df_income, df_profitability, df_cashflow], ignore_index=True)
     
@@ -351,30 +387,46 @@ def get_financial_ratios(data_df):
     ratio_df = pd.read_csv(os.path.join(current_path ,'../csv/map_ratio_code.csv'))
     ratio_df['ratio_mapping'] = ratio_df['ratio_name'].str.lower().replace(' ', '_', regex=True)
     
-    # Find the intersection (inner join)
-    set1 = set(df['ratio_mapping'])
-    set2 = set(ratio_df['ratio_mapping'])
-    intersection = set1.intersection(set2)
+    # # Find the intersection (inner join)
+    # set1 = set(df['ratio_mapping'])
+    # set2 = set(ratio_df['ratio_mapping'])
+    # intersection = set1.intersection(set2)
 
-    # Perform the outer join excluding the intersection
-    outer_join_excluding_inner = (set1.union(set2)) - intersection
-    assert len(outer_join_excluding_inner) == 0, f"Missing mapping for ratio: {outer_join_excluding_inner}"
+    # # Perform the outer join excluding the intersection
+    # outer_join_excluding_inner = (set1.union(set2)) - intersection
+    # assert len(outer_join_excluding_inner) == 0, f"Missing mapping for ratio: {outer_join_excluding_inner}"
     
     df = pd.merge(df, ratio_df, on='ratio_mapping', how='left')
+    if df['ratio_name'].isna().sum() > 0:
+        print(f"Missing mapping for ratio: {df[df['ratio_name'].isna()]['ratio_mapping'].unique()}")
+        raise ValueError("Missing mapping for ratio")
     df.drop(columns=['ratio_mapping', 'ratio_name'], inplace=True)
+    
     return df
     
     
 if __name__ == '__main__':
     print("Test financial ratios")
     
-    data_df = pd.read_csv(os.path.join(current_path, '../csv/non_bank_financial_report_v2_1.csv'))
-    df = get_financial_ratios(data_df)
-    df.to_csv(os.path.join(current_path, '../csv/financial_ratio.csv'), index=False)
+    dfs = None
+    types = ['non_bank', 'bank']
     
-    ratio = df['ratio_code'].unique()
+    for type_ in types:
+        print(f"Processing {type_} data")
+        data_df = pd.read_csv(os.path.join(current_path, f'../csv/{type_}_financial_report_v2_1.csv'))
+        df = get_financial_ratios(data_df, type_)
+        if dfs is None:
+            dfs = df
+        else:
+            dfs = pd.concat([dfs, df], ignore_index=True)
     
-    for r in ratio:
+    assert dfs['ratio_code'].isna().sum()==0 , "Null value in ratio_code"
+    
+    dfs.to_csv(os.path.join(current_path, '../csv/financial_ratio.csv'), index=False)
+    
+    ratio = dfs['ratio_code'].unique()
+    
+    for r in ratio[:5]:
         print(r)
-        print(df[(df['ratio_code'] == r)&(df['quarter'] == 0)&(df['year'] == 2022)].head(10))
+        print(dfs[(dfs['ratio_code'] == r)&(dfs['quarter'] == 0)&(dfs['year'] == 2022)].head(5))
         print('========================================')

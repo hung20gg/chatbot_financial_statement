@@ -32,7 +32,13 @@ def generate_questions(llm, main_task, sub_task, time, company_table):
             'content': f"""Here are the details of the company
 {company_table}
 Notice that there are 4 company that was not listed on any exchange, since they are government company, and they only have data about ownership/shareholder of other companies. 
-Generate 5-10 questions on {main_task} with {sub_task} {time}. It is recommended to ask questions to provide data only.
+
+Task: Generate 2 questions on {main_task} with {sub_task} {time}. 
+Note:
+- You must ask questions to provide data only.
+- Your question must only contain the name of the company and/or the industry only. You must only leak any other information of the company table.
+- It is recommended not to provide stock code.
+
 Return the questions in a JSON format
 {{
     "questions": []

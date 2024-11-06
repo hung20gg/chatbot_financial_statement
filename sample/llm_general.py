@@ -3,7 +3,7 @@ from setup_db import DBHUB
 import utils
 
 
-def get_stock_code_based_on_company_name(llm, task, db: DBHUB = None, top_k = 2, verbose=False):
+def get_stock_code_based_on_company_name(llm, task, db: DBHUB = None, top_k = 2, verbose=False, get_industry=False):
     """
     Get the stock code based on the company name
     """
@@ -12,13 +12,16 @@ def get_stock_code_based_on_company_name(llm, task, db: DBHUB = None, top_k = 2,
         {
             "role": "user",
             "content": f"""
-Extract the company name based on the given question.
+Extract the company name and/or the industry that positively mentioned based on the given question.
+<question>
 {task}
+</question>
 Only return exact the company name mentioned. Do not answer the question.
 Return in JSON format. 
 
 ```json
 {{
+    "industry": [],
     "company_name": ["company1"]
 }}
 ```
@@ -31,9 +34,17 @@ Return an empty list if no company name is found.
         print(response)
         print("====================================")
     company_names = get_json_from_text_response(response, new_method=True)['company_name']
+    industries = response.get("industry", [])
+
     if db is None:
         print("Not using DB")
+        if get_industry:
+            return company_names, industries
         return company_names
+    
+    if get_industry:
+        return utils.company_name_to_stock_code(db, company_names, top_k=top_k), industries
+    
     return utils.company_name_to_stock_code(db, company_names, top_k=top_k)
 
 

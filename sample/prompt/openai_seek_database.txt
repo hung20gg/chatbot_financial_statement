@@ -17,8 +17,11 @@ CREATE TABLE company_info(
 
 -- Table: sub_and_shareholder
 CREATE TABLE sub_and_shareholder(
-    stock_code VARCHAR(255) references company_info(stock_code),
-    invest_on VARCHAR(255) references company_info(stock_code), -- The company invested on (can be subsidiary)
+    stock_code VARCHAR(255) NOT NULL, 
+    invest_on VARCHAR(255) NOT NULL, -- The company invested on (can be subsidiary)
+    FOREIGN KEY (stock_code) REFERENCES company_info(stock_code),
+    FOREIGN KEY (invest_on) REFERENCES company_info(stock_code),
+    PRIMARY KEY (stock_code, invest_on) 
 );
 
 -- Table: map_category_code_bank
@@ -36,7 +39,7 @@ CREATE TABLE map_category_code_non_bank(
 );
 
 -- Table: map_category_code_securities. Same as `map_category_code_bank`
-CREATE TABLE map_category_code_non_bank(
+CREATE TABLE map_category_code_securities(
     category_code VARCHAR(255) primary key,
     en_caption VARCHAR(255),
     report_type VARCHAR(255)
@@ -61,7 +64,7 @@ CREATE TABLE non_bank_financial_report(
 );
 
 -- Table securities_financial_report: Financial report of securities firms. Same structure as `bank_financial_report`
-CREATE TABLE non_bank_financial_report(
+CREATE TABLE securities_financial_report(
     stock_code VARCHAR(255) references company_info(stock_code),
     year int,
     quarter int,
@@ -71,20 +74,19 @@ CREATE TABLE non_bank_financial_report(
 
 -- Table map_category_code_ratio
 CREATE TABLE map_category_code_ratio(
-    category_code VARCHAR(255) primary key,
+    ratio_code VARCHAR(255) primary key,
     ratio_name VARCHAR(255)
-)
+);
 
--- Table ratio: Pre-calculated common Financial Ratio. Same structure as `bank_financial_report`
+-- Table financial_ratio: This table will have pre-calculated common Financial Ratio such as ROA, ROE, FCF, etc
+-- Same structure as `bank_financial_report`
 CREATE TABLE financial_ratio(
-    category_code VARCHAR(255) references map_category_code_ratio(category_code),
+    ratio_code VARCHAR(255) references map_category_code_ratio(ratio_code),
     stock_code VARCHAR(255) references company_info(stock_code),
     year int,
     quarter int,
     data float
 )
-
-
 
 ```
 

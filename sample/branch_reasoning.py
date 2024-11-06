@@ -15,7 +15,7 @@ def simplify_branch_reasoning(llm, task, num_steps=2, verbose=False):
     messages = [
         {
             "role": "system",
-            "content": f"You are an expert in financial statement and database management. You are tasked to break down the given task to {num_steps-1}-{num_steps+1} simpler steps. Please provide the steps."
+            "content": f"You are an expert in financial statement and database management. You are tasked to break down the given task to {num_steps-1}-{num_steps} simpler steps. Please provide the steps."
         },
         {
             "role": "user",
@@ -30,23 +30,22 @@ Here are some information you might need:
 <example>
 ### Task: Calculate ROA, ROE of all the company which are owned by VinGroup
 
-Step 1: Find the stock code of the company that is owned by VinGroup in `category_code` database.
-
-Step 2: Calculate ROA, ROE of the chosen stock codes in the `financial_statement` database.
+Step 1: Find the stock code of the company that is owned by VinGroup in `df_sub_and_shareholders` table.
+Step 2: Get ROA, ROE of the chosen stock codes in the `financial_ratio` table.
 
 </example>
 
 Note:
  - You should provide general steps to solve the question. 
  - You must not provide the SQL query. 
- - Each step should be a task for SQL query as independence as possible.
+ - Each step should be a as independence as possible.
  - The number of steps should be lowest if possible. You will be heavily penalized if create meaningless steps
  - You must not provide the steps that are too obvious or easy for an SQL query (retrieve and data,..).
  
 Based on the question and databse, thinking and return the steps in JSON format.
     ```json
     {{
-        "steps" : ["Step 1", "Step 2"]
+        "steps" : ["Step 1"]
     }}
     ```         
 """
@@ -79,7 +78,7 @@ def llm_branch_reasoning(llm, task, db: DBHUB, self_debug = False, verbose=False
     # Check step 1: Extract company name
 
     print("Step 0: Extract company name")
-    company_info_df = get_stock_code_based_on_company_name(llm, steps_string, db=db, verbose=verbose)
+    company_info_df, industries = get_stock_code_based_on_company_name(llm, steps_string, db=db, verbose=verbose)
     stock_code_table = utils.df_to_markdown(company_info_df)
     look_up_stock_code = f"\nHere are the detail of the companies: \n\n{stock_code_table}"
     
@@ -100,7 +99,7 @@ Here is a natural language query that you need to convert into a query:
 Note:
 - Your SQL query must only access the database schema provided.
 - In each step, you should only do the task that is required. Do not do the task of next step.
-- Make the SQL query as simple and readable as possible. Utilize existing tables and columns from previous steps to avoid multiple.
+- Make the SQL query as simple and readable as possible. Utilize existing data from previous steps to avoid unnecessary query.
 - You are penalized if generating wrong or meaningless SQL query 
 - If the data provided is enough to answer the question, you don't have to return SQL query.
         
@@ -110,7 +109,6 @@ Here are the steps to break down the task:
 </steps>      
 
 Snapshot of the mapping table:
-### Table: map_category_code_bank
 <data>
 {suggestions_table}
 </data>
@@ -145,7 +143,7 @@ Snapshot of the mapping table:
         
         history.append({
             "role": "user",
-            "content": f"<instruction>\nThink step-by-step and do the {step}\n</instruction>\n\nHere is the sample SQL you might need\n\n{db.find_sql_query(step)}"
+            "content": f"<instruction>\nThink step-by-step and do the {step}\n</instruction>\n\nHere are the samples SQL you might need\n\n{db.find_sql_query(step)}"
         })
         
         print("RAG for step: ", cur_step, db.find_sql_query(step))

@@ -2,13 +2,13 @@
 
 SELECT stock_code as company, invest_on 
 FROM sub_and_shareholder 
-WHERE stock_code = 'MSN'
+WHERE stock_code = 'MSN';
 
 -- 2. Get all the shareholder of TCB 
 
 SELECT stock_code as shareholder, invest_on
 FROM sub_and_shareholder 
-WHERE invest_on = 'TCB'
+WHERE invest_on = 'TCB';
 
 -- 3. Get all the real-estate companies own by VIC 
 
@@ -17,11 +17,120 @@ FROM company_info ci
 join sub_and_shareholder sns  on sns.invest_on  = ci.stock_code 
 
 WHERE sns.stock_code = 'VIC'
-AND industry = 'Real Estate' 
+AND industry = 'Real Estate';
 
 -- 4. Get all Food and Beverage companies
 
 SELECT stock_code, industry FROM company_info
-WHERE industry = 'Food and Beverage'
+WHERE industry = 'Food and Beverage';
 
+-- 5. What is the Return on Equity (ROE) for Masan Group (MSN) in Q2 2023?  Provide the ROE as a percentage.
 
+SELECT 
+    stock_code,
+    ROUND(data::numeric  * 100, 2) AS ROE_percentage
+FROM 
+    financial_ratio
+WHERE 
+    ratio_code = 'ROE' -- assuming 'ROE' is the ratio code for Return on Equity
+    AND year = 2023
+    AND quarter = 2
+    AND stock_code = 'MSN';
+
+-- 6. What were the current ratio and quick ratio for Vinamilk (VHM) and Masan Group (MSN) in 2023?
+
+with value as (SELECT 
+    stock_code,
+    year,
+    quarter,
+    ratio_code,
+    ROUND(data::numeric  * 100, 2) AS data 
+FROM 
+    financial_ratio
+WHERE 
+    ratio_code in ('CashR', 'CurrentR')
+    AND year = 2023
+    AND quarter = 2
+    AND stock_code = 'MSN')
+    
+ select value.stock_code as stock_code,
+ 		value.year as year,
+ 		value.quarter as quarter,
+ 		value.data as data,
+ 		mccr.ratio_name as ratio_name
+from value
+join map_category_code_ratio mccr 
+on value.ratio_code = mccr.ratio_code;
+
+-- 7. Get the total asset of all child company of viettel
+-- Step 1: Get all companies owned by Viettel
+WITH viettel_subsidiaries AS (
+    SELECT invest_on AS subsidiary
+    FROM sub_and_shareholder
+    WHERE stock_code = 'Viettel'
+),
+
+-- Step 2: Get total assets of these subsidiaries using BS_270 as the code for total assets
+total_assets AS (
+    SELECT nf.stock_code, nf.data AS total_asset, nf.year as year
+    FROM viettel_subsidiaries vs
+    JOIN non_bank_financial_report nf ON vs.subsidiary = nf.stock_code
+    WHERE nf.quarter = 0 AND nf.category_code = 'BS_270'
+    
+    UNION ALL
+    
+    SELECT bf.stock_code, bf.data AS total_asset, bf.year as year
+    FROM viettel_subsidiaries vs
+    JOIN bank_financial_report bf ON vs.subsidiary = bf.stock_code
+    WHERE bf.quarter = 0 AND bf.category_code = 'BS_300'
+    
+    UNION ALL
+    
+    SELECT sf.stock_code, sf.data AS total_asset, sf.year as year
+    FROM viettel_subsidiaries vs
+    JOIN securities_financial_report sf ON vs.subsidiary = sf.stock_code
+    WHERE sf.quarter = 0 AND sf.category_code = 'BS_270'
+)
+
+-- Step 3: Calculate the total asset of all subsidiaries of Viettel
+select * from total_assets
+order by year desc
+
+-- 8. What is the Return on Equity (ROE) for all Banking companies in Q1 2024?
+
+SELECT
+    stock_code,
+    data AS roe_percentage
+FROM financial_ratio
+WHERE ratio_code = 'ROE'
+  AND year = 2024
+  AND quarter = 1
+  AND stock_code IN (SELECT stock_code FROM company_info WHERE is_bank = TRUE);
+
+-- 9. For Vietcombank and Techcombank, please provide the quarterly data for the Debt-to-Equity ratio from 2020 to 2023.
+
+SELECT 
+    stock_code,
+    year,
+    quarter,
+    data AS debt_to_equity_ratio
+FROM financial_ratio
+WHERE ratio_code = 'DTER' -- Assuming 'DTER' is the code for Debt-to-Equity Ratio
+  AND stock_code IN ('VCB', 'TCB')
+  AND year BETWEEN 2018 AND 2023
+  and quarter = 0
+ORDER BY stock_code, year, quarter;
+
+-- 10. Compare the Current Ratio of Vinhomes (VIC), Vincom Retail (VRE), and Novaland (NVL) in Q1 2024.  How does this compare to their respective Current Ratios in Q1 2020?
+
+SELECT 
+    stock_code,
+    year,
+    quarter,
+    data AS current_ratio
+FROM financial_ratio
+WHERE ratio_code = 'CURRENT_RATIO'
+  AND stock_code IN ('VHM', 'VRE', 'NVL') -- Vinhomes, Vincom Retail, Novaland
+  AND year IN (2020, 2024)
+  AND quarter = 1
+ORDER BY stock_code, year;
