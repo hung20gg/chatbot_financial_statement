@@ -128,7 +128,7 @@ IS_021.1,a. Loss on sale of financial assets,a. Lỗ bán các tài sản tài c
 IS_021.2,b. Revaluation loss on financial assets measured at fair value through profit or loss (FVTPL),b. Chênh lệch giảm đánh giá lại các TSTC thông qua lãi/lỗ,income_statement
 IS_021.3,c. Transaction costs for purchasing financial assets (FVTPL),c. c.Chi phí giao dịch mua các tài sản tài chính FVTPL,income_statement
 IS_021.4,d. Revaluation gain on outstanding warrants payable,d. Chênh lệch tăng do đánh giá lại phải trả chứng quyền đang lưu hành,income_statement
-IS_023,2.2. Loss from held-to-maturity investments (HTM),2.2. Lỗ các khoản đầu tư nắm giữ đến ngày đáo hạn (HTM),income_statement
+IS_022,2.2. Loss from held-to-maturity investments (HTM),2.2. Lỗ các khoản đầu tư nắm giữ đến ngày đáo hạn (HTM),income_statement
 IS_023,2.4. Loss on sale of available-for-sale (AFS) financial assets,2.4. Lỗ bán các tài sản tài chính sẵn sàng để bán (AFS),income_statement
 IS_024,"Provision expenses for financial assets, bad debt write-offs, financial asset impairment, and borrowing costs","Chi phí dự phòng tài sản tài chính, xử lý tổn thất các khoản phải thu khó đòi, lỗ suy giảm tài sản tài chính và chi phí đi vay của các khoản cho vay",income_statement
 IS_026,2.6. Proprietary trading expenses,2.6. Chi phí hoạt động tự doanh,income_statement
@@ -166,7 +166,6 @@ IS_009,1.10. Custody revenue,1.10. Doanh thu lưu ký chứng khoán,income_stat
 IS_090,IX. TOTAL ACCOUNTING PROFIT BEFORE TAX,IX. TỔNG LỢI NHUẬN KẾ TOÁN TRƯỚC THUẾ,income_statement
 IS_091,9.1. Realized profit,9.1. Lợi nhuận đã thực hiện,income_statement
 IS_092,9.2. Unrealized profit,9.2. Lợi nhuận chưa thực hiện,income_statement
-IS_024,"Provision expenses for financial assets, bad debt write-offs, financial asset impairment, and borrowing costs","2.3. Chi phí lãi vay, lỗ từ các khoản cho vay và phải thu",income_statement
 CF_001,Profit before corporate income tax,Lợi nhuận trước thuế TNDN,cash_flow_statement
 CF_003,Depreciation of fixed assets,Khấu hao tài sản cố định,cash_flow_statement
 CF_004,Provisions,Các khoản dự phòng,cash_flow_statement
