@@ -10,7 +10,7 @@ Here are the descriptions of tables in the database:
 CREATE TABLE company_info(
     stock_code VARCHAR(255) primary key, --The trading symbol.
     is_bank BOOLEAN, --Bool checking whether the company is a bank or not.
-    is_sec BOOLEAN, --Bool checking whether the company is a securities firm or not.
+    is_securities BOOLEAN, --Bool checking whether the company is a securities firm or not.
     industry VARCHAR(255), --Current industry of company. 
     issue_share int --Number of share issued.
 );
@@ -124,11 +124,13 @@ This mean MSN is a shareholder of TCB.
 |----|----|----|
 |IS_003| Net Interest Income | income_statement |
 
+### Note
 You can access the database by using
 
 ```sql
 SELECT * FROM bank_financial_report;
 ```
 
-For any financial ratio, you must select it from the database instead of calculate it yourself.
-If not required, the query for `quarter` should always be 0 (select data annually)
+- For any financial ratio, you must select it from the database instead of calculate it yourself.
+- If not required or mentioned, always answer for data reported annually, which the query for `quarter` should always be 0 as default
+- You must not directly compare the data for quarterly financial report and annually financial report
