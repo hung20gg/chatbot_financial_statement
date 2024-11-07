@@ -317,6 +317,9 @@ class DBHUB:
         stock_codes = self.find_stock_code_similarity(company_name, top_k)
         
         df = self.return_company_from_stock_codes(stock_codes)
+        if isinstance(df, str):
+            return pd.DataFrame(columns=['stock_code', 'company_name', 'en_company_name', 'industry', 'is_bank', 'is_securities'])
+        
         df.drop_duplicates(subset=['stock_code'], inplace=True)
         return df
 
@@ -385,7 +388,7 @@ WHERE industry_tsvector @@ to_tsquery('english', '{industry}');
         return list(exact_industries)
             
     
-    def return_mapping_table_v2(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = False):
+    def return_mapping_table_v2(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = True):
         
         check_status_table = {
             'map_category_code_non_bank': True,
@@ -399,9 +402,9 @@ WHERE industry_tsvector @@ to_tsquery('english', '{industry}');
             
             if company_df['is_bank'].sum() == 0:
                 check_status_table['map_category_code_bank'] = False
-            if company_df['is_security'].sum() == 0:
+            if company_df['is_securities'].sum() == 0:
                 check_status_table['map_category_code_securities'] = False
-            if company_df['is_bank'].sum() + company_df['is_security'].sum() == len(company_df):
+            if company_df['is_bank'].sum() + company_df['is_securities'].sum() == len(company_df):
                 check_status_table['map_category_code_non_bank'] = False     
          
         # Avoid override from the previous check
@@ -510,16 +513,16 @@ if __name__ == '__main__':
     # setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
     # print(f"Setup Chroma DB for {table_name}")
     
-    # csv_path = '../csv/map_ratio_code.csv'
-    # table_name = 'map_category_code_ratio'
-    # collection_chromadb = 'category_ratio_chroma'
-    # persist_directory = 'data/category_ratio_chroma'
+    csv_path = '../csv/map_ratio_code.csv'
+    table_name = 'map_category_code_ratio'
+    collection_chromadb = 'category_ratio_chroma'
+    persist_directory = 'data/category_ratio_chroma'
 
-    # # Load csv data to PostgreSQL
-    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['ratio_code'])
-    # print("Loaded map_category_code_bank")
-    # setup_chroma_db_ratio(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
-    # print(f"Setup Chroma DB for {table_name}")
+    # Load csv data to PostgreSQL
+    load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['ratio_code'])
+    print("Loaded map_category_code_bank")
+    setup_chroma_db_ratio(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
+    print(f"Setup Chroma DB for {table_name}")
     
     # # Load financial record data 
     
