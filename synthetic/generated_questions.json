@@ -1,112 +1,101 @@
 [
     {
         "main_task": "Accounts in Financial Statements",
-        "sub_task": "Ranking with special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
-        "time": "at specific year",
-        "analyzing_types": "Analysis of profitability",
-        "job_titles": "Financial Analyst",
-        "questions": [
-            "Rank the top 5 companies with the highest Net Profit Margin in 2023, considering only companies with total assets exceeding 100 billion VND in 2022.",
-            "Identify the top 10 companies with the highest Return on Equity (ROE) in 2022, focusing on companies whose Return on Assets (ROA) exceeded 10% in 2021."
-        ]
-    },
-    {
-        "main_task": "Financial Ratios",
-        "sub_task": "analyze the Subsidiaries or invested company",
+        "sub_task": "compare 2 or more company",
         "time": "over time with specific period",
-        "analyzing_types": "Analysis of financial equilibrium",
-        "job_titles": "Tax Consultant",
+        "analyzing_types": "Analysis of profitability",
+        "job_titles": "Auditor",
         "questions": [
-            "What is the trend of the Debt-to-Equity ratio for Vietcombank, Techcombank, and Sacombank from 2020 to Q2 2024, considering their respective subsidiaries and investments in other companies during this period?",
-            "How has the Return on Assets (ROA) of VinGroup, Vinhomes, and Vietjet Air changed from 2020 to Q2 2024, taking into account the financial performance of their subsidiaries and associated companies over the same period?  Analyze the impact of these subsidiaries and investments on the overall ROA."
+            "What is the trend of Net Profit Margin for Vietcombank, Techcombank, and ACB from 2020 to Q2 2024?",
+            "How has the Return on Equity (ROE) of Vinamilk, Masan Group, and SABECO changed from 2020 to Q2 2024?"
         ]
     },
     {
-        "main_task": "Financial Ratios",
+        "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+        "sub_task": "Ranking with special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+        "time": "over time with specific period",
+        "analyzing_types": "Analysis of profitability",
+        "job_titles": "Financial Manager",
+        "questions": [
+            "Rank the top 5 companies with total assets greater than 100 billion VND based on their Return on Equity (ROE) for the period 2020-Q2 2024.  Present the ROE values for each company.",
+            "For the period 2020-Q2 2024, rank the top 10 companies with Net Income greater than 10 billion VND by their Net Profit Margin. Show the Net Profit Margin for each company."
+        ]
+    },
+    {
+        "main_task": "Both Financial Ratios and Accounts in Financial Statements",
         "sub_task": "Ranking with special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
         "time": "at specific quater and year",
+        "analyzing_types": "Analysis of financial equilibrium",
+        "job_titles": "Financial Analyst",
+        "questions": [
+            "Rank the top 5 companies with total assets greater than 100,000 billion VND as of Q2 2024, based on their Return on Equity (ROE).",
+            "For Q4 2023, provide a ranking of the top 10 companies with net income exceeding 1,000 billion VND, ordered by their Debt-to-Equity ratio."
+        ]
+    },
+    {
+        "main_task": "Financial Ratios",
+        "sub_task": "compare 2 or more company",
+        "time": "over time with specific period",
+        "analyzing_types": "Analysis of liquidity and payment status",
+        "job_titles": "Financial Manager",
+        "questions": [
+            "What is the trend of the Current Ratio for Vietcombank, Techcombank, and ACB from 2020 to Q2 2024?",
+            "How has the Debt-to-Equity Ratio of Vinamilk, Masan Group, and Hoa Phat Group changed from 2020 to Q2 2024?"
+        ]
+    },
+    {
+        "main_task": "Accounts in Financial Statements",
+        "sub_task": "Ranking with special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+        "time": "over time with specific period",
         "analyzing_types": "Cash flow analysis",
         "job_titles": "Investment Analyst",
         "questions": [
-            "Rank the top 5 companies with total assets greater than 100,000,000,000,000 VND as of Q2 2024 based on their Return on Equity (ROE).",
-            "For Q4 2023, identify the top 10 companies with operating cash flow exceeding 1,000,000,000,000 VND, ranked by their free cash flow to firm (FCFF) ratio."
+            "Rank the top 5 companies with the highest total assets exceeding 100 trillion VND based on their balance sheets from 2020 to Q2 2024, showing the values for each year.",
+            "For the period 2020-Q2 2024, identify the top 10 companies with the highest Return on Equity (ROE) exceeding 20%, presenting their ROE for each reporting period."
         ]
     },
     {
         "main_task": "Both Financial Ratios and Accounts in Financial Statements",
         "sub_task": "analyze the Subsidiaries or invested company",
-        "time": "at specific quater and year",
-        "analyzing_types": "Analysis of business performance",
-        "job_titles": "Accountant",
-        "questions": [
-            "What was the Return on Equity (ROE) for  Vietcombank, Techcombank, and VPBank in Q2 2024, and how do these figures compare to their respective ROE in Q2 2020?  Consider the impact of any subsidiaries or investments held by these banks on their reported ROE.",
-            "Comparing the financial statements of Vinamilk and Masan Group for Q2 2024 and Q2 2020: What are the total assets, total liabilities, and net income for each company? How do these figures reflect the financial health of each company, considering the influence of any subsidiaries or investments they hold?"
-        ]
-    },
-    {
-        "main_task": "Both Financial Ratios and Accounts in Financial Statements",
-        "sub_task": "Ranking (Top 5 - Top 10)",
         "time": "at specific year",
-        "analyzing_types": "Forecasting of financial indicators",
-        "job_titles": "Investment Analyst",
+        "analyzing_types": "Analysis of the financial structure",
+        "job_titles": "Financial Analyst",
         "questions": [
-            "Rank the top 5 companies with the highest Return on Equity (ROE) in 2023, based on their financial statements.  Then, forecast the ROE for these top 5 companies for 2024, and provide a justification for your forecast based on the available financial data.",
-            "For the year 2022, identify the top 10 companies with the highest current ratio.  Then, analyze the trend of their current ratio from 2020 to 2022 and forecast the current ratio for these 10 companies in 2025, explaining the rationale behind your forecast using relevant financial statement data."
+            "What were the total assets and total liabilities of  Vietcombank,  Techcombank, and  Sacombank as of December 31, 2022, and what was the debt-to-equity ratio for each of these banks at that time?  Further, what was the total value of their investments in subsidiaries and other companies reported on their balance sheets for that year?",
+            "For the fiscal year 2023, what were the return on assets (ROA) and return on equity (ROE) for  Vinamilk,  PetroVietnam Gas, and  Vingroup?  Additionally, provide the total revenue and net income for each company, and specify the revenue and net income generated from their subsidiaries and associated companies."
         ]
     },
     {
         "main_task": "Financial Ratios",
-        "sub_task": "Ranking (Top 5 - Top 10)",
+        "sub_task": "Ranking with special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
         "time": "over time with specific period",
-        "analyzing_types": "Analysis of profitability",
-        "job_titles": "Investment Analyst",
-        "questions": [
-            "Rank the top 10 companies by Return on Equity (ROE) from 2020 to Q2 2024, showing the ROE for each company in each period.",
-            "Rank the top 5 companies with the highest Net Profit Margin from 2020 to Q2 2024, displaying the Net Profit Margin for each company in each period."
-        ]
-    },
-    {
-        "main_task": "Both Financial Ratios and Accounts in Financial Statements",
-        "sub_task": "compare 2 or more company",
-        "time": "at specific year",
-        "analyzing_types": "Analysis of business performance",
+        "analyzing_types": "Analysis of financial risk",
         "job_titles": "Accountant",
         "questions": [
-            "Comparing Vietcombank, Techcombank, and ACB in 2023, what were the differences in their Return on Equity (ROE) and Net Interest Margin (NIM), and how did these ratios reflect the profitability and efficiency of their core banking operations?",
-            "For the year 2022, what were the variations in the total assets, total liabilities, and shareholders' equity of Vinamilk, Masan Group, and Hoa Phat Group, and what insights can be drawn from these figures regarding their financial leverage and capital structure?"
+            "Rank the top 10 companies with total assets greater than 100,000,000,000,000 VND based on their Return on Equity (ROE) for the period 2020-Q2 2024.",
+            "For companies with total liabilities exceeding 50,000,000,000,000 VND, what is the Debt-to-Equity ratio ranking for the top 5 companies from 2020 to Q2 2024?"
         ]
     },
     {
-        "main_task": "Accounts in Financial Statements",
-        "sub_task": "analyze the Subsidiaries or invested company",
-        "time": "at specific quater and year",
-        "analyzing_types": "Analysis of business performance",
-        "job_titles": "Financial Analyst",
-        "questions": [
-            "What was the total revenue generated by Vietcombank's subsidiaries in Q2 2023, and how does this compare to the revenue generated by its direct operations during the same period?",
-            "For the year 2022, what were the combined net profits of all subsidiaries and associated companies of VinGroup, and what percentage of VinGroup's total net profit did this represent?"
-        ]
-    },
-    {
-        "main_task": "Accounts in Financial Statements",
-        "sub_task": "Ranking (Top 5 - Top 10)",
+        "main_task": "Financial Ratios",
+        "sub_task": "Ranking with special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
         "time": "at specific year",
-        "analyzing_types": "Forecasting of financial indicators",
-        "job_titles": "Financial Analyst",
+        "analyzing_types": "Cash flow analysis",
+        "job_titles": "Financial Consultant",
         "questions": [
-            "Rank the top 5 companies by total assets in 2022.",
-            "For the year 2023, what are the top 10 companies with the highest net income?"
+            "Rank the top 5 companies with total assets greater than 100,000,000,000,000 VND as of December 31, 2023, based on their Return on Equity (ROE).",
+            "For the fiscal year 2022, identify the top 10 companies with operating cash flow exceeding 1,000,000,000,000 VND, ranked by their cash flow from operations to revenue ratio."
         ]
     },
     {
         "main_task": "Accounts in Financial Statements",
-        "sub_task": "Ranking (Top 5 - Top 10)",
-        "time": "at specific year",
-        "analyzing_types": "Analysis of business performance",
-        "job_titles": "Financial Analyst",
+        "sub_task": "compare 2 or more company",
+        "time": "over time with specific period",
+        "analyzing_types": "Analysis of profitability",
+        "job_titles": "Tax Consultant",
         "questions": [
-            "Rank the top 5 companies with the highest total assets in 2023, based on their financial statements.",
-            "Identify the top 10 companies with the lowest return on equity (ROE) in 2022, according to their financial reports."
+            "What is the trend of Net Profit Margin for Vietcombank, Techcombank, and ACB from 2020 to Q2 2024?",
+            "How has the Return on Equity (ROE) of Vinamilk, Masan Group, and SABECO changed from 2020 to Q2 2024?"
         ]
     },
     {
@@ -169,109 +158,175 @@
         "sub_task": "Ranking with special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
         "time": "at specific year",
         "analyzing_types": "Analysis of financial risk",
+        "job_titles": "Financial Analyst",
+        "questions": [
+            "What were the Debt-to-Equity ratios for Vietcombank, Techcombank, and ACB in 2022, and how do these ratios compare?",
+            "What were the Return on Assets (ROA) and Return on Equity (ROE) for Vinamilk, Masan Group, and Mobile World Investment in 2023 Q2?  Compare these ratios across the three companies."
+        ]
+    },
+    {
+        "main_task": "Accounts in Financial Statements",
+        "sub_task": "compare 2 or more company",
+        "time": "at specific year",
+        "analyzing_types": "Analysis of liquidity and payment status",
+        "job_titles": "Tax Consultant",
+        "questions": [
+            "What were the current ratios of Vietcombank and Techcombank in 2022?",
+            "Compare the accounts receivable turnover ratios of Vinamilk and Masan Group for the fiscal year 2023."
+        ]
+    },
+    {
+        "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+        "sub_task": "Ranking (Top 5 - Top 10)",
+        "time": "over time with specific period",
+        "analyzing_types": "Analysis of liquidity and payment status",
+        "job_titles": "Broker",
+        "questions": [
+            "Rank the top 10 companies by their Current Ratio from 2020 to Q2 2024, showing the ratio's evolution over time for each company: Vietcombank, Techcombank, BIDV, Eximbank, ACB, MBBank, HDBank, TPBank, VPBank, Sacombank, OCB Bank, SH Bank, VIBBank, An Binh Bank, LPBank, National Citizen Bank.",
+            "What are the top 5 companies with the highest Net Profit Margin from 2020 to Q2 2024, and what is the trend of their Net Profit Margin over this period?  Companies to analyze: Vinamilk, Mobile World Investment, PetroVietnam Gas, Masan Group, Vinhomes, Phu Nhuan Jewelry, FPT Corp, Vincom Retail, Vietjet Air, Vingroup, Petrolimex, SABECO, PV Power, Viet Nam Rubber Group, Becamex IDC Corp., Van Phu - Invest, Vietnam Medicinal Materials, Khang Dien House, Ba Ria - Vung Tau House Development, Hoang Huy Investment Financial Services, CEO Group, Tasco, Novaland, DABACO, Safoco Foodstuff, Ha Tay Pharmaceutical, Viettel Post, PVTrans, FPT Retail, Ducgiang Chemicals, PetroVietnam Camau Fertilizer, Nam Kim Steel, CMC Corporation, Viettel Global Investment, Petrovietnam Chemical and Services, Yen Bai Forest Agricultural, Thanh Dat Investment Development, HUDLAND Real Estate, Licogi 14, Licogi 18, Lam Thao Fertilizers, Lam Dong Construction, Tien Phong Plastics, Petrolimex Petrochemical, Petrosetco Distribution, Petro Vietnam LPG, Petroleum Technical Services, Son La Sugar, ThangLong Investment Group, Vinacomin Northern Coal, TNG Investment And Trading, Vang Danh Coal, Nam MeKong Group, VICOSTONE, Dat xanh real estate."
+        ]
+    },
+    {
+        "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+        "sub_task": "Ranking with special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+        "time": "at specific quater and year",
+        "analyzing_types": "Analysis of financial equilibrium",
         "job_titles": "Accountant",
         "questions": [
-            "Rank the top 5 companies with the highest total assets exceeding 100 Billion VND as of December 31, 2023, and provide their respective account receivables and account payables figures.  This will help assess their liquidity risk and potential for future cash flow issues.",
-            "Identify the top 10 companies with the highest Return on Equity (ROE) exceeding 20% for the fiscal year 2022.  For these companies, list their total liabilities and equity to assess their financial leverage and solvency risk."
+            "Rank the top 5 companies with total assets greater than 100,000,000,000,000 VND as of Q2 2024, based on their Return on Equity (ROE).",
+            "For Q4 2023, identify the top 10 companies with a Debt-to-Equity ratio below 1 and list them in ascending order of their Current Ratio."
+        ]
+    },
+    {
+        "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+        "sub_task": "Ranking (Top 5 - Top 10)",
+        "time": "at specific quater and year",
+        "analyzing_types": "Analysis of liquidity and payment status",
+        "job_titles": "Financial Consultant",
+        "questions": [
+            "Rank the top 5 companies with the highest Current Ratio as of Q2 2024, using data from their balance sheets.  List the companies in descending order.",
+            "For Q4 2023, what are the top 10 companies with the highest Net Profit Margin, calculated from their income statements?  Present the results in descending order."
         ]
     },
     {
         "main_task": "Financial Ratios",
         "sub_task": "analyze the Subsidiaries or invested company",
         "time": "at specific quater and year",
-        "analyzing_types": "Analysis of liquidity and payment status",
-        "job_titles": "Tax Consultant",
+        "analyzing_types": "Cash flow analysis",
+        "job_titles": "Financial Consultant",
         "questions": [
-            "What is the average quick ratio for companies with subsidiaries/investments in other companies in Q2 2024, and how does this compare to the average quick ratio for companies without subsidiaries/investments in the same quarter?",
-            "For the year 2023, what was the median debt-to-equity ratio of companies that have subsidiaries or investments in other companies, and how does this compare to the median debt-to-equity ratio of companies without subsidiaries or investments?"
+            "What is the Free Cash Flow to Firm (FCFF) for  Vietcombank,  Techcombank, and  VPBank for Q2 2024, and how does it compare to their respective Free Cash Flow to Equity (FCFE) for the same period, considering their investments in subsidiaries?",
+            "For Q4 2023, what were the Cash Flow from Operating Activities and the Capital Expenditures (CAPEX) for  Vinamilk,  Masan Group, and  VinGroup, and what insights can be derived regarding their cash flow generation and investment activities, given their subsidiary ownership?"
+        ]
+    },
+    {
+        "main_task": "Accounts in Financial Statements",
+        "sub_task": "Ranking (Top 5 - Top 10)",
+        "time": "over time with specific period",
+        "analyzing_types": "Analysis of financial risk",
+        "job_titles": "Financial Analyst",
+        "questions": [
+            "Rank the top 10 companies by their Return on Equity (ROE) for the period 2020-Q2 2024, showing the ROE for each year and quarter.",
+            "What are the top 5 companies with the highest Debt-to-Equity ratio from 2020 to Q2 2024, providing the ratio for each reporting period?"
+        ]
+    },
+    {
+        "main_task": "Accounts in Financial Statements",
+        "sub_task": "Ranking with special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+        "time": "over time with specific period",
+        "analyzing_types": "Analysis of business performance",
+        "job_titles": "Broker",
+        "questions": [
+            "Rank the top 5 companies with the highest Return on Equity (ROE) among Vietcombank, Techcombank, ACB, BIDV, and VPBank for the period from 2020 to Q2 2024,  filtering for companies with total assets exceeding 100 billion VND in each reporting period.",
+            "For the period 2020 to Q2 2024, list the top 10 companies with the highest Net Profit Margin,  considering only companies with total equity exceeding 50 billion VND in each reporting period, among  Vinamilk, Masan Group, PetroVietnam Gas,  Mobile World Investment, and FPT Corp."
+        ]
+    },
+    {
+        "main_task": "Financial Ratios",
+        "sub_task": "analyze the Subsidiaries or invested company",
+        "time": "at specific year",
+        "analyzing_types": "Analysis of the financial structure",
+        "job_titles": "Auditor",
+        "questions": [
+            "What was the average Return on Equity (ROE) for  Vietcombank, Techcombank, and Sacombank in 2022, and how did this compare to their respective subsidiaries' average ROE for the same year?",
+            "For the year 2023, what was the Debt-to-Equity ratio for VinGroup, and how does this compare to the consolidated Debt-to-Equity ratio when including its subsidiaries' financial data?"
+        ]
+    },
+    {
+        "main_task": "Accounts in Financial Statements",
+        "sub_task": "analyze the Subsidiaries or invested company",
+        "time": "at specific year",
+        "analyzing_types": "Analysis of financial equilibrium",
+        "job_titles": "Financial Consultant",
+        "questions": [
+            "What were the total assets and total liabilities of  Vietcombank,  Techcombank, and  Sacombank's subsidiaries and associated companies in 2022, broken down by individual subsidiary/associated company?",
+            "For the year 2023, what were the equity values of  Vinamilk,  Masan Group, and  PetroVietnam Gas's subsidiaries and associated companies,  separately showing the equity value for each subsidiary/associated company?"
+        ]
+    },
+    {
+        "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+        "sub_task": "Ranking (Top 5 - Top 10)",
+        "time": "at specific quater and year",
+        "analyzing_types": "Analysis of business performance",
+        "job_titles": "Investment Analyst",
+        "questions": [
+            "Rank the top 5 companies with the highest Return on Equity (ROE) for Q2 2024, based on their financial statements.",
+            "For Q4 2023, provide a ranking of the top 10 companies with the highest Net Profit Margin, using data from their income statements."
+        ]
+    },
+    {
+        "main_task": "Accounts in Financial Statements",
+        "sub_task": "Ranking with special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+        "time": "at specific quater and year",
+        "analyzing_types": "Forecasting of financial indicators",
+        "job_titles": "Auditor",
+        "questions": [
+            "Rank the top 5 companies with the highest Return on Equity (ROE) exceeding 20% as of Q2 2024, based on their reported financial statements.",
+            "For Q4 2023, provide a ranking of the top 10 companies with total assets greater than 100 billion VND, listing them in descending order based on their reported total assets."
+        ]
+    },
+    {
+        "main_task": "Financial Ratios",
+        "sub_task": "analyze the Subsidiaries or invested company",
+        "time": "over time with specific period",
+        "analyzing_types": "Analysis of financial equilibrium",
+        "job_titles": "Financial Manager",
+        "questions": [
+            "For the period 2020 to Q2 2024, what is the trend of the Debt-to-Equity ratio for companies with subsidiaries or investments in other companies, specifically Vietcombank,  Techcombank,  VPBank, and  Masan Group, and how does this compare to the same ratio for companies without subsidiaries or investments, such as Vinamilk and Mobile World Investment?",
+            "From 2020 to Q2 2024, what were the Return on Equity (ROE) and Return on Assets (ROA) for companies with significant subsidiary holdings (e.g., BIDV, VietinBank,  TPBank) and how did these ratios change over time?  Additionally, provide the same data for companies without subsidiaries (e.g., LPBank,  National Citizen Bank)."
+        ]
+    },
+    {
+        "main_task": "Accounts in Financial Statements",
+        "sub_task": "compare 2 or more company",
+        "time": "over time with specific period",
+        "analyzing_types": "Analysis of business performance",
+        "job_titles": "Broker",
+        "questions": [
+            "What is the trend of the Net Profit Margin ratio for Vietcombank, Techcombank, and ACB from 2020 to Q2 2024?",
+            "How has the total assets of Vinamilk, Masan Group, and Hoa Phat Group changed from 2020 to Q2 2024?"
+        ]
+    },
+    {
+        "main_task": "Accounts in Financial Statements",
+        "sub_task": "analyze the Subsidiaries or invested company",
+        "time": "at specific quater and year",
+        "analyzing_types": "Analysis of liquidity and payment status",
+        "job_titles": "Accountant",
+        "questions": [
+            "What were the total current assets and current liabilities for Vietcombank, Techcombank, and VPBank at the end of Q2 2024?  Provide a breakdown of the current assets into cash and cash equivalents, accounts receivable, and other current assets.  Also, provide a breakdown of current liabilities into accounts payable, short-term debt, and other current liabilities.",
+            "What is the value of investments in subsidiaries and associated companies for BIDV, Eximbank, and  Masan Group as reported in their Q1 2023 balance sheets?  Specify if the investment is reported at cost or fair value."
         ]
     },
     {
         "main_task": "Financial Ratios",
         "sub_task": "compare 2 or more company",
         "time": "over time with specific period",
-        "analyzing_types": "Cash flow analysis",
-        "job_titles": "Accountant",
+        "analyzing_types": "Analysis of profitability",
+        "job_titles": "Investment Analyst",
         "questions": [
-            "What is the trend of the Cash Flow from Operating Activities to Cash Flow from Investing Activities ratio for Vietcombank, Techcombank, and ACB from 2020 to Q2 2024, and how does this compare to the same ratio for other major Vietnamese banks during the same period?",
-            "How has the Free Cash Flow yield (FCF/Market Cap) of Vinamilk, Masan Group, and SABECO changed from 2020 to Q2 2024, and how does this compare to the FCF yield of other companies in the Food and Beverages sector over the same period?"
-        ]
-    },
-    {
-        "main_task": "Both Financial Ratios and Accounts in Financial Statements",
-        "sub_task": "compare 2 or more company",
-        "time": "at specific quater and year",
-        "analyzing_types": "Cash flow analysis",
-        "job_titles": "Accountant",
-        "questions": [
-            "What was the difference in the Return on Equity (ROE) between Vietcombank and Techcombank in Q2 2024?",
-            "Comparing the Cash Flow from Operating Activities of Vinamilk and Masan Group for the year 2023, what was the percentage difference in their respective cash flow from operating activities?"
-        ]
-    },
-    {
-        "main_task": "Accounts in Financial Statements",
-        "sub_task": "Ranking (Top 5 - Top 10)",
-        "time": "at specific quater and year",
-        "analyzing_types": "Analysis of the financial structure",
-        "job_titles": "Tax Consultant",
-        "questions": [
-            "What are the top 5 companies with the highest total assets as of Q2 2024, ranked in descending order?",
-            "Which 10 companies reported the lowest total liabilities as of Q4 2023, ranked in ascending order?"
-        ]
-    },
-    {
-        "main_task": "Financial Ratios",
-        "sub_task": "Ranking (Top 5 - Top 10)",
-        "time": "at specific quater and year",
-        "analyzing_types": "Analysis of the financial structure",
-        "job_titles": "Financial Manager",
-        "questions": [
-            "Rank the top 10 companies with the highest Return on Equity (ROE) for Q2 2024.",
-            "Rank the top 5 companies with the lowest Debt-to-Equity ratio as of Q4 2023."
-        ]
-    },
-    {
-        "main_task": "Financial Ratios",
-        "sub_task": "Ranking with special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
-        "time": "at specific year",
-        "analyzing_types": "Analysis of financial equilibrium",
-        "job_titles": "Financial Consultant",
-        "questions": [
-            "Rank the top 5 companies with total assets greater than 100,000,000,000,000 VND in 2023 based on their Return on Equity (ROE).",
-            "For the year 2022, identify the top 10 companies with a Debt-to-Equity ratio below 1 and total equity exceeding 50,000,000,000,000 VND, ranked by their Current Ratio."
-        ]
-    },
-    {
-        "main_task": "Both Financial Ratios and Accounts in Financial Statements",
-        "sub_task": "compare 2 or more company",
-        "time": "at specific year",
-        "analyzing_types": "Analysis of liquidity and payment status",
-        "job_titles": "Tax Consultant",
-        "questions": [
-            "What was the difference in the Current Ratio between Vietcombank and Techcombank in 2023, and how did this compare to their respective Quick Ratios for the same year?",
-            "Comparing the 2022 balance sheets of Vinamilk and Masan Group, what were the relative proportions of their total assets held as cash and cash equivalents versus accounts receivable, and what does this suggest about their respective liquidity positions and payment collection practices?"
-        ]
-    },
-    {
-        "main_task": "Accounts in Financial Statements",
-        "sub_task": "Ranking (Top 5 - Top 10)",
-        "time": "at specific year",
-        "analyzing_types": "Forecasting of financial indicators",
-        "job_titles": "Accountant",
-        "questions": [
-            "Rank the top 5 companies by total assets in their financial statements for the year 2023, from highest to lowest.  ",
-            "Identify the top 10 companies with the highest net income growth rate from 2020 to Q2 2024, based on their financial statements.  Provide the growth rate for each company."
-        ]
-    },
-    {
-        "main_task": "Both Financial Ratios and Accounts in Financial Statements",
-        "sub_task": "analyze the Subsidiaries or invested company",
-        "time": "at specific quater and year",
-        "analyzing_types": "Analysis of business performance",
-        "job_titles": "Tax Consultant",
-        "questions": [
-            "What was the Return on Equity (ROE) for Vietcombank, Techcombank, and VPBank in Q2 2024, and how did this compare to their respective ROE in Q2 2020?  Further, what were the significant changes in their equity holdings in subsidiaries or invested companies between these two periods, and how did these changes correlate with the ROE fluctuations?",
-            "Comparing Q1 2023 and Q1 2024, what were the changes in total assets and total liabilities for Vinamilk, Masan Group, and Hoa Phat Group?  Additionally, what were the notable changes in their investments in subsidiaries or associated companies during this period, and how did these investment changes affect the overall asset and liability positions of these three companies?"
+            "What is the trend of Return on Equity (ROE) for Vietcombank, Techcombank, and ACB from 2020 to Q2 2024?",
+            "How has the Net Profit Margin of Vinamilk, Masan Group, and SABECO changed from 2020 to Q2 2024?"
         ]
     }
 ]
