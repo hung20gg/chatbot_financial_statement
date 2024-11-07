@@ -64,7 +64,7 @@ def llm_judge(llm, task, answer, ground_truth, db, verbose=False):
 
 def get_answer(func, qa, **kwargs):
     task = qa['question']
-    history, error_messages, execution_tables = func(task=task ,**kwargs)
+    history, error_messages, execution_tables = func(**kwargs)
     get_tables = execution_tables[-3:]
     table_text = ""
     for i,table in enumerate(get_tables):
@@ -76,17 +76,17 @@ def get_answer(func, qa, **kwargs):
     qa['code'] = get_code_from_text_response(history[-1]['content'])
     return qa
 
-def scoring_a_task(llm, qa, db, function, **kwargs):
+def scoring_a_task(judge_llm, llm, qa, db, function, **kwargs):
     """
     Score a task based on the qa and the function.
     """
     task = qa['question']
-    ground_truth = qa['ground_truth']
-    answer = get_answer(function, llm=llm, task=task, db=db, **kwargs)
+    ground_truth = qa['answer']
+    answer = get_answer(function, qa, llm=llm, task=task, db=db, **kwargs)
     
-    return llm_judge(llm, task, answer, ground_truth, db, verbose=False)
+    return llm_judge(judge_llm, task, answer, ground_truth, db, verbose=False)
 
-def scoring(llm, qas, db, function, **kwargs):
+def scoring(judge_llm, llm, qas, db, function, **kwargs):
     """
     Score a list of tasks based on the qas and the function.
     """
@@ -97,7 +97,7 @@ def scoring(llm, qas, db, function, **kwargs):
     for qa in qas:
         try:
             
-            scores.append(scoring_a_task(llm, qa, db, function, **kwargs))
+            scores.append(scoring_a_task(judge_llm, llm, qa, db, function, **kwargs))
             usage = llm.usage()
             input_tokens.append(usage['input_token'])
             output_tokens.append(usage['output_token'])
@@ -117,14 +117,19 @@ def get_llm(llm_obj, model_name):
         llm = llm_obj()
     return llm
     
-def scoring_a_task_parallel(llm_obj, qa, db, function, model_name = None, **kwargs):
+def scoring_a_task_parallel(judge_llm_obj, llm_obj, qa, db, function, model_name = None, judge_model_name = None, **kwargs):
     """
     Score a task based on the qa and the function.
     """
+    judge_llm = get_llm(judge_llm_obj, judge_model_name)
     llm = get_llm(llm_obj, model_name)    
-    score = scoring_a_task(llm, qa, db, function, **kwargs)
+    score = scoring_a_task(judge_llm, llm, qa, db, function, **kwargs)
     usage = llm.usage()
-    return score, usage['input_token'], usage['output_token'], qa['question']
+    qa['score'] = score
+    qa['input_token'] = usage['input_token']
+    qa['output_token'] = usage['output_token']
+    
+    return qa
 
 
 def get_a_answer_parallel(llm_obj, qa, db, func, model_name = None, **kwargs):
@@ -144,18 +149,15 @@ def get_answers_parallel(llm_obj, tasks, db, func, **kwargs):
     return answers
 
 
-def scoring_parallel(llm_obj, qas, db, function, **kwargs):
+def scoring_parallel(judge_llm_obj, llm_obj, qas, db, function, **kwargs):
     results = []
     with ThreadPoolExecutor(max_workers=5) as executor:
-        future_to_qa = {executor.submit(scoring_a_task_parallel, llm_obj, qa, db, function, **kwargs): qa for qa in qas}
+        future_to_qa = {executor.submit(scoring_a_task_parallel, judge_llm_obj, llm_obj, qa, db, function, **kwargs): qa for qa in qas}
         
         for future in as_completed(future_to_qa):
             results.append(future.result())
             
-    df = pd.DataFrame(results, columns=['score', 'input_token', 'output_token', 'question'])
-    return df
-
-
+    return results
 
 
 
@@ -196,17 +198,23 @@ if __name__ == '__main__':
     db = DBHUB(conn, bank_vector_store, none_bank_vector_store, sec_vector_store, ratio_vector_store, vector_db_company, vector_db_sql)
     print("DB initialized")
     
-    with open('../synthetic/generated_qa_200.json', 'r') as f:
+    with open('../synthetic/gpt-4o_generated.json', 'r') as f:
         questions = json.load(f)
     
     # Test
-    questions = questions[:10]
+    questions = questions[:2]
     
     # Change LLM here
     llm_obj = Gemini #ChatGPT
-    model_name = 'gemini-1.5-pro-002' #'gpt-4o'
-    # table = get_answer(reasoning_text2SQL, llm=llm, task=questions[0], db=db)
-    result = get_answers_parallel(llm_obj, questions, db, reasoning_text2SQL, model_name=model_name)
+    model_name = 'gemini-1.5-flash-002' #'gpt-4o'
     
-    with open('../synthetic/gpt-4o_generated.json', 'w') as f:
-        json.dump(result, f, indent=4)
+    judge_llm_obj = ChatGPT
+    judge_model_name = 'gpt-4o'
+    
+    result = scoring_parallel(judge_llm_obj, llm_obj, questions, db, reasoning_text2SQL, model_name=model_name, judge_model_name=judge_model_name)
+    print(result)
+    # table = get_answer(reasoning_text2SQL, llm=llm, task=questions[0], db=db)
+    #result = get_answers_parallel(llm_obj, questions, db, reasoning_text2SQL, model_name=model_name)
+    
+    # with open('../synthetic/gpt-4o_generated.json', 'w') as f:
+    #     json.dump(result, f, indent=4)
