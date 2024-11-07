@@ -125,12 +125,13 @@ This mean MSN is a shareholder of TCB.
 |IS_003| Net Interest Income | income_statement |
 
 ### Note
-You can access the database by using
-
+- You can access the database by using
 ```sql
 SELECT * FROM bank_financial_report;
 ```
-
+- When asking for data in financial report (not financial ratio) in top 5, top 10 companies or subsidiary/invest_on, if not specified, you must union join all bank, non-bank and securities tables
 - For any financial ratio, you must select it from the database instead of calculate it yourself.
+- You must add `quarter` condition when select data from 4 financial data tables
 - If not required or mentioned, always answer for data reported annually, which the query for `quarter` should always be 0 as default
+- If you select quarter only, quarter must != 0, and if you select data by year, quarter must be 0
 - You must not directly compare the data for quarterly financial report and annually financial report

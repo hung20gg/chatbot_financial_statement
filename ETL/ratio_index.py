@@ -422,6 +422,7 @@ if __name__ == '__main__':
     
     assert dfs['ratio_code'].isna().sum()==0 , "Null value in ratio_code"
     
+    dfs.drop_duplicates(inplace=True)
     dfs.to_csv(os.path.join(current_path, '../csv/financial_ratio.csv'), index=False)
     
     ratio = dfs['ratio_code'].unique()
