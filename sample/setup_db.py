@@ -219,7 +219,11 @@ def setup_chroma_db_sql_query(collection_name, persist_directory, txt_path):
         task = sql_code.split('\n')[0]
         task = re.sub(r'--\s*\d+\.?', '', task).strip()
         codes.append((task, sql_code))
+        print(task)
+        print(sql_code)
+        print('====================')
         
+                
     for code in codes:
         chroma_db.add_texts([code[0]], metadatas=[{'lang': 'sql', 'sql_code': code[1]}])
 
@@ -234,7 +238,6 @@ class DBHUB:
                  vector_db_non_bank: Chroma, 
                  vector_db_securities: Chroma, 
                  vector_db_ratio: Chroma, 
-                 vector_industry: Chroma,
                  vector_db_company: Chroma, 
                  vector_db_sql: Chroma):
         
@@ -245,7 +248,6 @@ class DBHUB:
         self.vector_db_securities = vector_db_securities
         self.vector_db_ratio = vector_db_ratio
         
-        self.vector_industry = vector_industry
         self.vector_db_company = vector_db_company
         self.vector_db_sql = vector_db_sql
 
@@ -276,10 +278,10 @@ class DBHUB:
     def search_return_df(self, text, top_k, type_ = 'non_bank') -> pd.DataFrame:
         collect_code = self.search(text, top_k, type_)
         collect_code = [f"'{code}'" for code in collect_code]
-        
-        query = ""
-
-        query = f"SELECT category_code, en_caption FROM map_category_code_{type_} WHERE category_code IN ({', '.join(collect_code)})"
+        if type_ == 'ratio':
+            query = f"SELECT ratio_code, ratio_name FROM map_category_code_ratio WHERE ratio_code IN ({', '.join(collect_code)})"
+        else:
+            query = f"SELECT category_code, en_caption FROM map_category_code_{type_} WHERE category_code IN ({', '.join(collect_code)})"
         return self.query(query,return_type='dataframe')
     
     # Execute SQL query
@@ -305,9 +307,9 @@ class DBHUB:
         
         # If no stock code found
         if len(stock_codes) == 0:
-            return pd.DataFrame(columns=['stock_code', 'company_name', 'en_company_name', 'industry', 'is_bank', 'is_security'])
+            return pd.DataFrame(columns=['stock_code', 'company_name', 'en_company_name', 'industry', 'is_bank', 'is_securities'])
         
-        query = f"SELECT stock_code, company_name, en_company_name, industry, is_bank, is_security FROM company_info WHERE stock_code IN ({', '.join(stock_codes)})"
+        query = f"SELECT stock_code, company_name, en_company_name, industry, is_bank, is_securities FROM company_info WHERE stock_code IN ({', '.join(stock_codes)})"
         return self.query(query, return_type='dataframe')
     
     
@@ -320,10 +322,15 @@ class DBHUB:
 
     # Find SQL query for few shot learning
     def find_sql_query(self, text, top_k=1):
-        result = self.vector_db_sql.similarity_search(text, top_k)
-        if result[0].metadata.get('sql_code', None) is not None:
-            return f"```sql\n\n{result[0].metadata['sql_code']}```"
-        return 'No SQL query found'
+        results = self.vector_db_sql.similarity_search(text, top_k)
+        
+        few_shot = ""
+        for result in results:
+            if result.metadata.get('sql_code', None) is not None:
+                few_shot += '#### '+result.page_content + '\n\n'
+                few_shot += f"```sql\n\n{result.metadata['sql_code']}```"
+                
+        return few_shot
     
     def return_mapping_table(self, bank_column = [], non_bank_column = [], top_k = 5):
         bank_column_table = ""
@@ -361,8 +368,24 @@ class DBHUB:
         
         raise NotImplementedError("This function is not implemented yet")
     
+    def __get_exact_industry_bm25(self, industries):
+        query = """
+        SELECT distinct (industry)
+FROM company_info
+WHERE industry_tsvector @@ to_tsquery('english', '{industry}');
+        """
+        if not isinstance(industries, list):
+            industries = [industries]
+        exact_industries = set()
+        for industry in industries:
+            df = self.query(query.format(industry=industry))
+            result = df['industry'].values.tolist()
+            for item in result:
+                exact_industries.add(item[0])
+        return list(exact_industries)
+            
     
-    def return_mapping_table_v2(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5):
+    def return_mapping_table_v2(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = False):
         
         check_status_table = {
             'map_category_code_non_bank': True,
@@ -371,7 +394,7 @@ class DBHUB:
             'map_category_code_ratio': True
         }
         
-        if len(stock_code) != 0:
+        if len(stock_code) != 0 and not get_all_tables:
             company_df = self.return_company_from_stock_codes(stock_code)
             
             if company_df['is_bank'].sum() == 0:
@@ -382,12 +405,12 @@ class DBHUB:
                 check_status_table['map_category_code_non_bank'] = False     
          
         # Avoid override from the previous check
-        if len(industry) != 0:
-            for ind in industry:
-                result = self.vector_industry.similarity_search(ind, 1)
-                if result[0].metadata['code'] == 'Banking':
+        if len(industry) != 0 and not get_all_tables:
+            exact_industries = self.__get_exact_industry_bm25(industry)
+            for ind in exact_industries:
+                if ind == 'Banking':
                     check_status_table['map_category_code_non_bank'] = True
-                if result[0].metadata['code'] == 'Financial Services':
+                if ind == 'Financial Services':
                     check_status_table['map_category_code_securities'] = True
                 else:
                     check_status_table['map_category_code_bank'] = True
@@ -401,11 +424,11 @@ class DBHUB:
                 
         if len(financial_statement_row) != 0:  
             if check_status_table['map_category_code_non_bank']:
-                return_table['map_category_code_non_bank'] = self.search_return_df(financial_statement_row, top_k, is_bank=False)
+                return_table['map_category_code_non_bank'] = self.search_return_df(financial_statement_row, top_k, type_='non_bank')
             if check_status_table['map_category_code_bank']:
-                return_table['map_category_code_bank'] = self.search_return_df(financial_statement_row, top_k, is_bank=True)
+                return_table['map_category_code_bank'] = self.search_return_df(financial_statement_row, top_k, type_='bank')
             if check_status_table['map_category_code_securities']:
-                return_table['map_category_code_securities'] = self.search_return_df(financial_statement_row, top_k, is_security=True)
+                return_table['map_category_code_securities'] = self.search_return_df(financial_statement_row, top_k, type_='securities')
                 
         if len(financial_ratio_row) != 0:
             return_table['map_category_code_ratio'] = self.search_return_df(financial_ratio_row, top_k, type_='ratio')
@@ -426,127 +449,127 @@ if __name__ == '__main__':
     
     # # Load general data into df
     
-    csv_path_company_info = '../csv/df_company_info.csv'
-    table_name_company_info = 'company_info'
+    # csv_path_company_info = '../csv/df_company_info.csv'
+    # table_name_company_info = 'company_info'
 
-    # Primary and foreign key definitions
-    primary_key_company_info = ['stock_code']
-    primary_key_sub_and_shareholder = None
+    # # Primary and foreign key definitions
+    # primary_key_company_info = ['stock_code']
+    # primary_key_sub_and_shareholder = None
 
-    # Load 'company_info' data into PostgreSQL
-    load_csv_to_postgres(
-        csv_path=csv_path_company_info,
-        db_name=db_name,
-        user=user,
-        password=password,
-        table_name=table_name_company_info,
-        port=port,
-        primary_key=primary_key_company_info
-    )
-    print("Loaded company_info table")
+    # # Load 'company_info' data into PostgreSQL
+    # load_csv_to_postgres(
+    #     csv_path=csv_path_company_info,
+    #     db_name=db_name,
+    #     user=user,
+    #     password=password,
+    #     table_name=table_name_company_info,
+    #     port=port,
+    #     primary_key=primary_key_company_info
+    # )
+    # print("Loaded company_info table")
     
-    # Setup Chroma DB for company_info
-    collection_chromadb = 'company_name_chroma'
-    persist_directory = 'data/company_name_chroma'
+    # # Setup Chroma DB for company_info
+    # collection_chromadb = 'company_name_chroma'
+    # persist_directory = 'data/company_name_chroma'
     # setup_chroma_db_company_name(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name_company_info)
     
-    csv_path = '../csv/map_category_code_non_bank.csv'
-    table_name = 'map_category_code_non_bank'
-    collection_chromadb = 'category_non_bank_chroma'
-    persist_directory = 'data/category_non_bank_chroma'
+    # csv_path = '../csv/map_category_code_non_bank.csv'
+    # table_name = 'map_category_code_non_bank'
+    # collection_chromadb = 'category_non_bank_chroma'
+    # persist_directory = 'data/category_non_bank_chroma'
 
-    # Load csv data to PostgreSQL
+    # # Load csv data to PostgreSQL
 
-    load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
-    print("Loaded map_category_code_non_bank")
+    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
+    # print("Loaded map_category_code_non_bank")
+    # # setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
+    # print(f"Setup Chroma DB for {table_name}")
+    # # Generate embeddings  for the data
+    
+    
+    # csv_path = '../csv/map_category_code_bank.csv'
+    # table_name = 'map_category_code_bank'
+    # collection_chromadb = 'category_bank_chroma'
+    # persist_directory = 'data/category_bank_chroma'
+
+    # # Load csv data to PostgreSQL
+    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
+    # print("Loaded map_category_code_bank")
+    # # setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
+    # print(f"Setup Chroma DB for {table_name}")
+    
+    
+    # csv_path = '../csv/map_category_code_sec.csv'
+    # table_name = 'map_category_code_securities'
+    # collection_chromadb = 'category_sec_chroma'
+    # persist_directory = 'data/category_sec_chroma'
+
+    # # Load csv data to PostgreSQL
+    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
+    # print("Loaded map_category_code_bank")
     # setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
-    print(f"Setup Chroma DB for {table_name}")
-    # Generate embeddings  for the data
+    # print(f"Setup Chroma DB for {table_name}")
     
-    
-    csv_path = '../csv/map_category_code_bank.csv'
-    table_name = 'map_category_code_bank'
-    collection_chromadb = 'category_bank_chroma'
-    persist_directory = 'data/category_bank_chroma'
+    # csv_path = '../csv/map_ratio_code.csv'
+    # table_name = 'map_category_code_ratio'
+    # collection_chromadb = 'category_ratio_chroma'
+    # persist_directory = 'data/category_ratio_chroma'
 
-    # Load csv data to PostgreSQL
-    load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
-    print("Loaded map_category_code_bank")
-    # setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
-    print(f"Setup Chroma DB for {table_name}")
-    
-    
-    csv_path = '../csv/map_category_code_sec.csv'
-    table_name = 'map_category_code_securities'
-    collection_chromadb = 'category_sec_chroma'
-    persist_directory = 'data/category_sec_chroma'
-
-    # Load csv data to PostgreSQL
-    load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['category_code'])
-    print("Loaded map_category_code_bank")
-    # setup_chroma_db_fs(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
-    print(f"Setup Chroma DB for {table_name}")
-    
-    csv_path = '../csv/map_ratio_code.csv'
-    table_name = 'map_category_code_ratio'
-    collection_chromadb = 'category_ratio_chroma'
-    persist_directory = 'data/category_ratio_chroma'
-
-    # Load csv data to PostgreSQL
-    load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['ratio_code'])
-    print("Loaded map_category_code_bank")
+    # # Load csv data to PostgreSQL
+    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, primary_key=['ratio_code'])
+    # print("Loaded map_category_code_bank")
     # setup_chroma_db_ratio(db_name, user, password, host, port, collection_chromadb, persist_directory, table_name)
-    print(f"Setup Chroma DB for {table_name}")
+    # print(f"Setup Chroma DB for {table_name}")
     
-    # Load financial record data 
+    # # Load financial record data 
     
     
-    # Load Bank Financial Report
-    csv_path = '../csv/bank_financial_report_v2_1.csv'
-    table_name = 'bank_financial_report'
-    load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'})
-    print(f"Loaded {table_name}")
+    # # Load Bank Financial Report
+    # csv_path = '../csv/bank_financial_report_v2_1.csv'
+    # table_name = 'bank_financial_report'
+    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'})
+    # print(f"Loaded {table_name}")
     
-    # # Load Non Bank Financial Report
-    csv_path = '../csv/non_bank_financial_report_v2_1.csv'
-    table_name = 'non_bank_financial_report'
-    load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'})
-    print(f"Loaded {table_name}")
+    # # # Load Non Bank Financial Report
+    # csv_path = '../csv/non_bank_financial_report_v2_1.csv'
+    # table_name = 'non_bank_financial_report'
+    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'})
+    # print(f"Loaded {table_name}")
 
-    # # Load Securities Financial Report
-    csv_path = '../csv/securities_financial_report_v2_1.csv'
-    table_name = 'securities_financial_report'
-    load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'})
-    print(f"Loaded {table_name}")
+    # # # Load Securities Financial Report
+    # csv_path = '../csv/securities_financial_report_v2_1.csv'
+    # table_name = 'securities_financial_report'
+    # load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'})
+    # print(f"Loaded {table_name}")
 
-    # Load Financial Ratio
+    # # Load Financial Ratio
     csv_path = '../csv/financial_ratio.csv'
     table_name = 'financial_ratio'
     load_csv_to_postgres(csv_path, db_name, user, password, table_name, port, foreign_key = {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'})
-    print(f"Loaded {table_name}")
+    # print(f"Loaded {table_name}")
     
 
 
 
     # SQL Prompt Few shot
 
-    collection_chromadb = 'sql_query'
-    persist_directory = 'data/sql_query'
-    # setup_chroma_db_sql_query(collection_chromadb, persist_directory, 'prompt/question_query.txt')
+    # collection_chromadb = 'sql_query'
+    # persist_directory = 'data/sql_query'
+    # # setup_chroma_db_sql_query(collection_chromadb, persist_directory, 'prompt/question_query.txt')
     # setup_chroma_db_sql_query(collection_chromadb, persist_directory, 'prompt/simple_query_v2.txt')
 
-    # # Load 'sub_and_shareholder' data into PostgreSQL with foreign key relationship
-    csv_path_sub_and_shareholder = '../csv/df_sub_and_shareholders.csv'
-    table_name_sub_and_shareholder = 'sub_and_shareholder'
+    # # # Load 'sub_and_shareholder' data into PostgreSQL with foreign key relationship
+    # csv_path_sub_and_shareholder = '../csv/df_sub_and_shareholders.csv'
+    # table_name_sub_and_shareholder = 'sub_and_shareholder'
     
-    load_csv_to_postgres(
-        csv_path=csv_path_sub_and_shareholder,
-        db_name=db_name,
-        user=user,
-        password=password,
-        table_name=table_name_sub_and_shareholder,
-        port=port,
-        foreign_key={'stock_code': 'company_info(stock_code)'}
-    )
-    print("Loaded sub_and_shareholder table")
+    # load_csv_to_postgres(
+    #     csv_path=csv_path_sub_and_shareholder,
+    #     db_name=db_name,
+    #     user=user,
+    #     password=password,
+    #     table_name=table_name_sub_and_shareholder,
+    #     port=port,
+    #     foreign_key={'stock_code': 'company_info(stock_code)'}
+    # )
+    # print("Loaded sub_and_shareholder table")
 

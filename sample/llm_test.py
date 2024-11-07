@@ -1,5 +1,5 @@
 from llm.llm_utils import get_code_from_text_response, get_json_from_text_response
-from llm_general import find_suitable_row_v2, TIR_reasoning, get_stock_code_based_on_company_name, debug_SQL
+from llm_general import find_suitable_row_v2, TIR_reasoning, get_stock_code_based_on_company_name, debug_SQL, get_stock_code_and_suitable_row
 from branch_reasoning import simplify_branch_reasoning
 from setup_db import DBHUB
 import utils
@@ -7,7 +7,7 @@ import re
 import pandas as pd
 
 
-def reasoning_text2SQL(llm, text, db: DBHUB, top_k = 5, verbose = False, running_type = 'sequential', branch_reasoning = False, self_debug = False):
+def reasoning_text2SQL(llm, text, db: DBHUB, top_k = 4, verbose = False, running_type = 'sequential', branch_reasoning = False, self_debug = False):
     
     # Step 1: Find suitable column
     if running_type == 'parallel':
@@ -25,16 +25,19 @@ def reasoning_text2SQL(llm, text, db: DBHUB, top_k = 5, verbose = False, running
                 steps_string += f"Step {i+1}: \n {step}\n\n"
             text = steps_string
         
-        company_info, industries = get_stock_code_based_on_company_name(llm, text, db=db, verbose=verbose) 
+        # company_info, industries = get_stock_code_based_on_company_name(llm, text, db=db, verbose=verbose) 
         
-        try:
-            stock_code = company_info['stock_code'].tolist()
-        except:
-            stock_code = []
-            print("No stock code found")
+        # try:
+        #     stock_code = company_info['stock_code'].tolist()
+        # except:
+        #     stock_code = []
+        #     print("No stock code found")
         
-        # Find suitable column V2
-        suggestions_table = find_suitable_row_v2(llm, text, stock_code=stock_code, db=db, top_k=top_k, verbose=verbose, format='markdown')
+        # # Find suitable column V2
+        # suggestions_table = find_suitable_row_v2(llm, text, stock_code=stock_code, db=db, top_k=top_k, verbose=verbose, format='markdown', get_all_table=True)
+        
+        # New version
+        company_info, suggestions_table = get_stock_code_and_suitable_row(llm, text, db=db, verbose=verbose)
         stock_code_table = utils.df_to_markdown(company_info)
                
     if verbose:
@@ -46,32 +49,27 @@ def reasoning_text2SQL(llm, text, db: DBHUB, top_k = 5, verbose = False, running
     You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query.
     """
     
-    database_description = utils.read_file_without_comments('prompt/seek_database.txt', start=['//'])
+    database_description = utils.read_file_without_comments('prompt/openai_seek_database.txt', start=['//'])
         
-    few_shot = utils.read_file_without_comments('prompt/example1 no_col_name.txt')
+    few_shot = db.find_sql_query(text=text)
         
     prompt = f"""You have the following database schema:
 {database_description}
 
 Here is a natural language query that you need to convert into a SQL query:
 {text}
-
 Company details
 <data>
 {stock_code_table}
 </data>
-
 Snapshot of the mapping table:
 <data>
 {suggestions_table}
 </data>
 
 Here is an example of a query that you can refer to:
-
 <example>
-```sql
-    {few_shot}
-```
+{few_shot}
 </example>
 
 <instruction>
@@ -82,7 +80,7 @@ Note:
 - Do not make any assumption about the column name. You can refer to the mapping table above to find the suitable column name.
 """
     
-    messages = [
+    history = [
         {
             "role": "system",
             "content": system_prompt
@@ -93,7 +91,7 @@ Note:
         }
     ]
     
-    response = llm(messages)
+    response = llm(history)
     if verbose:
         print(response)
     
@@ -105,7 +103,7 @@ Note:
     error_messages.extend(error_message)
     execution_tables.extend(execution_table)
     
-    messages.append(
+    history.append(
         {
             "role": "assistant",
             "content": response
@@ -117,21 +115,23 @@ Note:
     if len(error_message) > 0 and self_debug:
         while count_debug < 3:
             
-            response, error_message, execute_table = debug_SQL(response, db, verbose=verbose)
+            # Generate response to fix SQL bug
+            response, error_message, execute_table = debug_SQL(response, history, db, verbose=verbose)
             error_messages.extend(error_message)
             execution_tables.extend(execute_table)
-        
-            messages.append({
+            history.append({
                 "role": "assistant",
                 "content": response
             })
+            
+            
             if len(error_message) == 0:
                 break
                 
             count_debug += 1
     
     
-    return get_code_from_text_response(response)
+    return history, error_messages, execution_tables
 
 
 def df_to_markdown(df):

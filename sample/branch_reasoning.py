@@ -1,9 +1,14 @@
 from llm.llm_utils import get_code_from_text_response, get_json_from_text_response
-from llm_general import find_suitable_row, find_suitable_row_v2, TIR_reasoning, get_stock_code_based_on_company_name, debug_SQL
+from llm_general import find_suitable_row_v2, TIR_reasoning, get_stock_code_based_on_company_name, debug_SQL
 from setup_db import DBHUB
 import utils
 import numpy as np
 import pandas as pd
+
+import sys
+import os
+sys.path.append('..')
+current_dir = os.path.dirname(__file__)
 
     # Get the detail of the company (Not done yet)
 
@@ -28,7 +33,7 @@ Here are some information you might need:
 {utils.read_file_without_comments("prompt/breakdown_note.txt")}   
 
 <example>
-### Task: Calculate ROA, ROE of all the company which are owned by VinGroup
+### Task: ROA, ROE of all the company which are owned by VinGroup
 
 Step 1: Find the stock code of the company that is owned by VinGroup in `df_sub_and_shareholders` table.
 Step 2: Get ROA, ROE of the chosen stock codes in the `financial_ratio` table.
@@ -88,7 +93,7 @@ def llm_branch_reasoning(llm, task, db: DBHUB, self_debug = False, verbose=False
     content = f"""You have the following database schema:
 
 <description>
-{utils.read_file_without_comments('prompt/seek_database.txt', start=['//'])}
+{utils.read_file_without_comments('prompt/openai_seek_database.txt', start=['//'])}
 </description>
 
 Here is a natural language query that you need to convert into a query:
@@ -193,5 +198,5 @@ Snapshot of the mapping table:
             # Need a logger here
             print("Error on execute SQL")
             
-    return history
+    return history, error_messages, execution_tables
         
