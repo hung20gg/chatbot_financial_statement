@@ -116,5 +116,37 @@ def get_company_detail_from_df(dfs, db: DBHUB, method = 'similarity') -> pd.Data
     
     return company_name_to_stock_code(db, list_stock_code, method)
     
+def is_sql_full_of_comments(sql_text):
+    lines = sql_text.strip().splitlines()
+    comment_lines = 0
+    total_lines = len(lines)
+    in_multiline_comment = False
+
+    for line in lines:
+        stripped_line = line.strip()
+        
+        # Check if it's a single-line comment or empty line
+        if stripped_line.startswith('--') or not stripped_line:
+            comment_lines += 1
+            continue
+        
+        # Check for multi-line comments
+        if stripped_line.startswith('/*'):
+            in_multiline_comment = True
+            comment_lines += 1
+            # If it ends on the same line
+            if stripped_line.endswith('*/'):
+                in_multiline_comment = False
+            continue
+        
+        if in_multiline_comment:
+            comment_lines += 1
+            if stripped_line.endswith('*/'):
+                in_multiline_comment = False
+            continue
+
+    # Check if comment lines are the majority of lines
+    return comment_lines >= total_lines    
+    
 if __name__ == '__main__':
     print(read_file_without_comments('prompt/seek_database.txt'))

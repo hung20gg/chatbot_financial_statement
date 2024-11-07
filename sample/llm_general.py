@@ -117,7 +117,7 @@ def find_suitable_row_v2(llm, text, stock_code = [], db: DBHUB = None, top_k=5, 
     else:
         raise ValueError("Format not supported")
     
-def get_stock_code_and_suitable_row(llm, task, db: DBHUB = None, company_top_k = 2, top_k = 4 , verbose=False, get_all_table=True, format = 'dataframe'):
+def get_stock_code_and_suitable_row(llm, task, db: DBHUB = None, company_top_k = 2, top_k = 4 , verbose=False, get_all_table=True, format = 'markdown'):
     """
         All two function squashed into one prompt
     """
@@ -180,7 +180,6 @@ Return an empty list if no company name is found.
 
 def TIR_reasoning(response, db: DBHUB, verbose=False):
     codes = get_code_from_text_response(response)
-    print(codes)
         
     TIR_response = ""
     execution_error = []
@@ -199,17 +198,18 @@ def TIR_reasoning(response, db: DBHUB, verbose=False):
     for i, code in enumerate(sql_code):    
         if verbose:    
             print(f"SQL Code {i+1}: \n{code}")
+        
+        if not utils.is_sql_full_of_comments(code):    
+            table = db.query(code, return_type='dataframe')
             
-        table = db.query(code, return_type='dataframe')
-        
-        # If it see an error in the SQL code
-        if isinstance(table, str):
-            execution_error.append((i, table))
-            continue
-        
-        execution_table.append(table)
-        table_markdown = utils.df_to_markdown(table)
-        TIR_response += f"SQL result for {i+1}: \n{table_markdown}\n\n"
+            # If it see an error in the SQL code
+            if isinstance(table, str):
+                execution_error.append((i, table))
+                continue
+            
+            execution_table.append(table)
+            table_markdown = utils.df_to_markdown(table)
+            TIR_response += f"SQL result for {i+1}: \n{table_markdown}\n\n"
     
     response += f"\n\n### The result of the given SQL:\n\n{TIR_response}"
     

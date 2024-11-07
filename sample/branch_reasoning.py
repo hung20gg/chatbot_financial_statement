@@ -1,5 +1,5 @@
 from llm.llm_utils import get_code_from_text_response, get_json_from_text_response
-from llm_general import find_suitable_row_v2, TIR_reasoning, get_stock_code_based_on_company_name, debug_SQL
+from llm_general import find_suitable_row_v2, TIR_reasoning, get_stock_code_based_on_company_name, debug_SQL, get_stock_code_and_suitable_row
 from setup_db import DBHUB
 import utils
 import numpy as np
@@ -66,7 +66,7 @@ Based on the question and databse, thinking and return the steps in JSON format.
 
 
 
-def llm_branch_reasoning(llm, task, db: DBHUB, self_debug = False, verbose=False, sql_llm = None, row_method = 'v2'):
+def llm_branch_reasoning(llm, task, db: DBHUB, self_debug = False, verbose=False, sql_llm = None, get_all_table=False):
 
     """
     Branch reasoning for financial statement
@@ -83,12 +83,9 @@ def llm_branch_reasoning(llm, task, db: DBHUB, self_debug = False, verbose=False
     # Check step 1: Extract company name
 
     print("Step 0: Extract company name")
-    company_info_df, industries = get_stock_code_based_on_company_name(llm, steps_string, db=db, verbose=verbose)
+    company_info_df, suggestions_table = get_stock_code_and_suitable_row(llm, steps_string, db=db, verbose=verbose, get_all_table=get_all_table)
     stock_code_table = utils.df_to_markdown(company_info_df)
     look_up_stock_code = f"\nHere are the detail of the companies: \n\n{stock_code_table}"
-    
-    suggestions_table = find_suitable_row_v2(llm, task, stock_code=company_info_df['stock_code'], db=db, verbose=verbose)
-
     
     content = f"""You have the following database schema:
 
@@ -102,6 +99,7 @@ Here is a natural language query that you need to convert into a query:
 </query>    
 
 Note:
+- You must get the financial ratio data in `financial_ratio` table.
 - Your SQL query must only access the database schema provided.
 - In each step, you should only do the task that is required. Do not do the task of next step.
 - Make the SQL query as simple and readable as possible. Utilize existing data from previous steps to avoid unnecessary query.
@@ -151,7 +149,7 @@ Snapshot of the mapping table:
             "content": f"<instruction>\nThink step-by-step and do the {step}\n</instruction>\n\nHere are the samples SQL you might need\n\n{db.find_sql_query(step)}"
         })
         
-        print("RAG for step: ", cur_step, db.find_sql_query(step))
+        # print("RAG for step: ", cur_step, db.find_sql_query(step))
         
         response = sql_llm(history)
         if verbose:

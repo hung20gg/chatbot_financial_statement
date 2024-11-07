@@ -135,7 +135,7 @@ def main():
     
     
     results = []
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=2) as executor:
         future_to_task = {executor.submit(parallel_generate_questions, *args): (args) for args in tasks}
         
         for future in as_completed(future_to_task):

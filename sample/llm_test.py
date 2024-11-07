@@ -7,7 +7,7 @@ import re
 import pandas as pd
 
 
-def reasoning_text2SQL(llm, text, db: DBHUB, top_k = 4, verbose = False, running_type = 'sequential', branch_reasoning = False, self_debug = False):
+def reasoning_text2SQL(llm, task, db: DBHUB, top_k = 4, sql_top_k = 2, verbose = False, running_type = 'sequential', branch_reasoning = False, self_debug = False, get_all_table=True):
     
     # Step 1: Find suitable column
     if running_type == 'parallel':
@@ -18,12 +18,12 @@ def reasoning_text2SQL(llm, text, db: DBHUB, top_k = 4, verbose = False, running
         
         # Branch COT but one go
         if branch_reasoning:
-            steps = simplify_branch_reasoning(llm, text, verbose=verbose)
+            steps = simplify_branch_reasoning(llm, task, verbose=verbose)
             
             steps_string = ""
             for i, step in enumerate(steps):
                 steps_string += f"Step {i+1}: \n {step}\n\n"
-            text = steps_string
+            task = steps_string
         
         # company_info, industries = get_stock_code_based_on_company_name(llm, text, db=db, verbose=verbose) 
         
@@ -37,8 +37,8 @@ def reasoning_text2SQL(llm, text, db: DBHUB, top_k = 4, verbose = False, running
         # suggestions_table = find_suitable_row_v2(llm, text, stock_code=stock_code, db=db, top_k=top_k, verbose=verbose, format='markdown', get_all_table=True)
         
         # New version
-        company_info, suggestions_table = get_stock_code_and_suitable_row(llm, text, db=db, verbose=verbose)
-        stock_code_table = utils.df_to_markdown(company_info)
+        company_info_df, suggestions_table = get_stock_code_and_suitable_row(llm, task, db=db, top_k=top_k, verbose=verbose, get_all_table=get_all_table)
+        stock_code_table = utils.df_to_markdown(company_info_df)
                
     if verbose:
         print(f"Peek rows: {suggestions_table}")
@@ -51,13 +51,13 @@ def reasoning_text2SQL(llm, text, db: DBHUB, top_k = 4, verbose = False, running
     
     database_description = utils.read_file_without_comments('prompt/openai_seek_database.txt', start=['//'])
         
-    few_shot = db.find_sql_query(text=text)
+    few_shot = db.find_sql_query(text=task, top_k=sql_top_k)
         
     prompt = f"""You have the following database schema:
 {database_description}
 
 Here is a natural language query that you need to convert into a SQL query:
-{text}
+{task}
 Company details
 <data>
 {stock_code_table}
@@ -113,7 +113,7 @@ Note:
     # Self-debug the SQL code
     count_debug = 0
     if len(error_message) > 0 and self_debug:
-        while count_debug < 3:
+        while count_debug < 2:
             
             # Generate response to fix SQL bug
             response, error_message, execute_table = debug_SQL(response, history, db, verbose=verbose)
