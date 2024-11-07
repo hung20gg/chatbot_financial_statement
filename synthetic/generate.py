@@ -55,7 +55,8 @@ job_titles = [
 ]
 
 def generate_questions(llm, main_task, sub_task, analyzing_types, time, job_titles,company_table):
-    system_prompt = f"You are a/an {job_titles}, you are having a task of analyzing the information from financial reports of companies from 2020 to Q2 2024 to give the good insights. You have deep knowledge about the domain of financial analyzing, and you have to ask many explicit,meaningful and insightful questions about the financial reports of companies."
+    system_prompt = f"You are a/an {job_titles}, you are having a task of analyzing the information from financial reports of companies from 2020 to Q2 2024 to give the good insights. You have deep knowledge about the domain of financial analyzing. Your questions should contain popular ratios, accounts in financial reports analysis."
+   # , and you have to ask many explicit,meaningful and insightful questions about the financial reports of companies.
     
     messages = [
         {
@@ -68,7 +69,8 @@ def generate_questions(llm, main_task, sub_task, analyzing_types, time, job_titl
 {company_table}
 Notice that there are 4 company that was not listed on any exchange, since they are government company, and they only have data about ownership/shareholder of other companies. 
 
-Task: Generate only 2 questions on {main_task} with {sub_task},{time}, and the questions need to be diversifying within {analyzing_types}, the question contents and remember that each time of question generation needs to be diverse in content. 
+Task: Generate only 2 questions on {main_task} with {sub_task},{time}, and the questions need to be diversifying within {analyzing_types}, the question contents and remember that each time of question generation needs to be diverse in content. The questions should be concise. 
+
 Note:
 - You must ask questions to provide data only.
 - Your question must only contain the name of the companies. You must not leak any other information of the company table.
@@ -76,6 +78,9 @@ Note:
 - you must return questions only.
 - You can ask questions in any format, but the questions must be relevant to the task.
 - You mustn't contain the word : "Include" the list of companies in the end of the question.
+- your question should not contain prediction or forecast parts.
+- your questions should not contain the phrase: "This will help", "consider".
+- your questions should not contain industry comparison.
 
 Return the questions in a JSON format
 {{

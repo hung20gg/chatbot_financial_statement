@@ -381,11 +381,12 @@ def get_financial_ratios(data_df, type_ = 'non_bank'):
     df = pd.concat([df_financial_structure, df_liquidity, df_financial_risk, df_income, df_profitability, df_cashflow], ignore_index=True)
     
     # Map ratio_code to ratio_name
-    df.rename(columns={'ratio_code': 'ratio_mapping'}, inplace=True)
-    df['ratio_mapping'] = df['ratio_mapping'].str.lower().replace(' ', '_', regex=True)
-    
-    ratio_df = pd.read_csv(os.path.join(current_path ,'../csv/map_ratio_code.csv'))
-    ratio_df['ratio_mapping'] = ratio_df['ratio_name'].str.lower().replace(' ', '_', regex=True)
+    df.rename(columns={'ratio_code': 'function_name'}, inplace=True)
+
+    map_df = pd.read_csv(os.path.join(current_path ,'../csv/map_ratio_code.csv'))
+    map_df['function_name'] = map_df['function_name'].str.strip()
+    df = pd.merge(df, map_df, on='function_name', how='left')
+    df.drop_duplicates(inplace=True)
     
     # # Find the intersection (inner join)
     # set1 = set(df['ratio_mapping'])
@@ -395,12 +396,6 @@ def get_financial_ratios(data_df, type_ = 'non_bank'):
     # # Perform the outer join excluding the intersection
     # outer_join_excluding_inner = (set1.union(set2)) - intersection
     # assert len(outer_join_excluding_inner) == 0, f"Missing mapping for ratio: {outer_join_excluding_inner}"
-    
-    df = pd.merge(df, ratio_df, on='ratio_mapping', how='left')
-    if df['ratio_name'].isna().sum() > 0:
-        print(f"Missing mapping for ratio: {df[df['ratio_name'].isna()]['ratio_mapping'].unique()}")
-        raise ValueError("Missing mapping for ratio")
-    df.drop(columns=['ratio_mapping', 'ratio_name'], inplace=True)
     
     return df
     
