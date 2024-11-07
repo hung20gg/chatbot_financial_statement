@@ -272,7 +272,10 @@ class DBHUB:
             
             
             for item in result:
-                collect_code.add(item.metadata['code'])
+                try:
+                    collect_code.add(item.metadata['code'])
+                except:
+                    pass
         return list(collect_code)
     
     def search_return_df(self, text, top_k, type_ = 'non_bank') -> pd.DataFrame:
@@ -559,7 +562,7 @@ if __name__ == '__main__':
     # collection_chromadb = 'sql_query'
     # persist_directory = 'data/sql_query'
     # # setup_chroma_db_sql_query(collection_chromadb, persist_directory, 'prompt/question_query.txt')
-    # setup_chroma_db_sql_query(collection_chromadb, persist_directory, 'prompt/simple_query_v2.txt')
+    setup_chroma_db_sql_query(collection_chromadb, persist_directory, 'prompt/simple_query_v2.txt')
 
     # # # Load 'sub_and_shareholder' data into PostgreSQL with foreign key relationship
     # csv_path_sub_and_shareholder = '../csv/df_sub_and_shareholders.csv'
