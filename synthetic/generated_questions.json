@@ -100,7 +100,62 @@
     },
     {
         "main_task": "Financial Ratios",
+        "sub_task": "Ranking with special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+        "time": "at specific quater and year",
+        "analyzing_types": "Analysis of financial equilibrium",
+        "job_titles": "Broker",
+        "questions": [
+            "Rank the top 5 companies with total assets greater than 100,000,000,000,000 VND as of Q2 2024 based on their Return on Equity (ROE).",
+            "For Q4 2023, identify the top 10 companies with a Debt-to-Equity ratio below 1 and total liabilities greater than 50,000,000,000,000 VND, ranked by their Current Ratio."
+        ]
+    },
+    {
+        "main_task": "Accounts in Financial Statements",
+        "sub_task": "Ranking with special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+        "time": "over time with specific period",
+        "analyzing_types": "Analysis of financial risk",
+        "job_titles": "Financial Analyst",
+        "questions": [
+            "Rank the top 5 companies with the highest total assets (in VND) for each year from 2020 to Q2 2024,  filtering for companies with total assets exceeding 100 billion VND at the end of each year.  Which companies consistently maintained a position within the top 5 during this period?",
+            "Identify the top 10 companies with the highest Return on Equity (ROE) for each year from 2020 to Q2 2024, considering only companies with ROE above 20% at the end of each year.  How has the composition of this top 10 list changed over time, and which companies demonstrated consistent high ROE performance?"
+        ]
+    },
+    {
+        "main_task": "Both Financial Ratios and Accounts in Financial Statements",
         "sub_task": "compare 2 or more company",
+        "time": "over time with specific period",
+        "analyzing_types": "Analysis of profitability",
+        "job_titles": "Financial Analyst",
+        "questions": [
+            "How has the Return on Equity (ROE) of Vietcombank, Techcombank, and ACB changed from 2020 to Q2 2024?  Present the data as a time series for each bank, showing the ROE for each year and quarter.",
+            "Compare the Gross Profit Margin of Vinamilk, Masan Group, and SABECO from 2020 to Q2 2024.  Specifically, what were the year-over-year changes in Gross Profit Margin for each company, and how do these changes compare to each other?"
+        ]
+    },
+    {
+        "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+        "sub_task": "analyze the Subsidiaries or invested company",
+        "time": "over time with specific period",
+        "analyzing_types": "Analysis of liquidity and payment status",
+        "job_titles": "Investment Analyst",
+        "questions": [
+            "How has the current ratio of Vietcombank, Techcombank, and ACB changed from 2020 to Q2 2024, and how do these changes correlate with their respective subsidiaries' performance during the same period, considering both profitability and liquidity of the subsidiaries?",
+            "Comparing the accounts receivable turnover ratio of Mobile World Investment, Vinamilk, and Masan Group from 2020 to Q2 2024, what are the differences in their collection efficiency, and how do these differences relate to the financial health and investment performance of their subsidiaries or associated companies over the same period?"
+        ]
+    },
+    {
+        "main_task": "Accounts in Financial Statements",
+        "sub_task": "analyze the Subsidiaries or invested company",
+        "time": "over time with specific period",
+        "analyzing_types": "Analysis of financial equilibrium",
+        "job_titles": "Financial Consultant",
+        "questions": [
+            "What is the trend of total assets and total liabilities of Vietcombank, Techcombank, and BIDV from 2020 to Q2 2024, considering their respective subsidiaries' financial statements?",
+            "Analyze the evolution of equity, specifically retained earnings, of  Masan Group, Vinamilk, and  PetroVietnam Gas from 2020 to Q2 2024, taking into account the impact of their investments in other companies."
+        ]
+    },
+    {
+        "main_task": "Accounts in Financial Statements",
+        "sub_task": "Ranking with special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
         "time": "at specific year",
         "analyzing_types": "Analysis of financial risk",
         "job_titles": "Financial Analyst",

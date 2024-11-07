@@ -130,4 +130,5 @@ You can access the database by using
 SELECT * FROM bank_financial_report;
 ```
 
-If not required, the query for `quarter` should always be 0
+For any financial ratio, you must select it from the database instead of calculate it yourself.
+If not required, the query for `quarter` should always be 0 (select data annually)
