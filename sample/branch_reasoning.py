@@ -66,7 +66,7 @@ Based on the question and databse, thinking and return the steps in JSON format.
 
 
 
-def llm_branch_reasoning(llm, task, db: DBHUB, self_debug = False, verbose=False, sql_llm = None, get_all_table=False):
+def llm_branch_reasoning(llm, task, db: DBHUB, self_debug = False, verbose=False, sql_llm = None, get_all_table=False, **kwargs):
 
     """
     Branch reasoning for financial statement

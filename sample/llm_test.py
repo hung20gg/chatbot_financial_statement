@@ -7,7 +7,7 @@ import re
 import pandas as pd
 
 
-def reasoning_text2SQL(llm, task, db: DBHUB, top_k = 4, sql_top_k = 2, verbose = False, running_type = 'sequential', branch_reasoning = False, self_debug = False, get_all_table=True):
+def reasoning_text2SQL(llm, task, db: DBHUB, top_k = 4, sql_top_k = 2, verbose = False, running_type = 'sequential', branch_reasoning = False, self_debug = False, get_all_table=True, **kwargs):
     
     # Step 1: Find suitable column
     if running_type == 'parallel':

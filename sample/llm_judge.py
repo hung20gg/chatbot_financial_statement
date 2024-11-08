@@ -12,6 +12,8 @@ import utils
 import sys
 import os
 import json
+from dotenv import load_dotenv
+load_dotenv()
 
 def llm_judge(llm, task, answer, ground_truth, db, verbose=False):
     """
@@ -28,7 +30,7 @@ def llm_judge(llm, task, answer, ground_truth, db, verbose=False):
         </task>
         
         <answer>
-        {answer}
+        {answer[:5000]}
         </answer>
         
         <ground_truth>
@@ -80,9 +82,16 @@ def llm_judge(llm, task, answer, ground_truth, db, verbose=False):
 
 def get_answer(func, qa, **kwargs):
     task = qa['question']
-    history, error_messages, execution_tables = func(task = task, **kwargs)
-    get_tables = execution_tables[-3:]
-    table_text = ""
+    try:
+        history, error_messages, execution_tables = func(task = task, **kwargs)
+        get_tables = execution_tables[-3:]
+        table_text = ""
+    except Exception as e:
+        print(e)
+        qa['answer'] = "Error in getting the answer"
+        qa['code'] = "Error in getting the code"
+        return qa
+    
     for i,table in enumerate(get_tables):
         table_text += f"Table {i+1}\n"
         table_text += utils.df_to_markdown(table)
@@ -94,15 +103,22 @@ def get_answer(func, qa, **kwargs):
 
 def get_prediction_answer(func, qa, **kwargs):
     task = qa['question']
-    history, error_messages, execution_tables = func(task = task, **kwargs)
-    get_tables = execution_tables[-3:]
-    table_text = ""
+    try:
+        history, error_messages, execution_tables = func(task = task, **kwargs)
+        get_tables = execution_tables[-3:]
+        table_text = ""
+    except Exception as e:
+        print(e)
+        qa['response'] = "Error in getting the answer"
+        qa['code_response'] = "Error in getting the code"
+        return qa
+    
     for i,table in enumerate(get_tables):
         table_text += f"Table {i+1}\n"
         table_text += utils.df_to_markdown(table)
         table_text += "\n\n"
         
-    qa['response'] = table_text
+    qa['response'] = table_text[:5000]
     qa['code_response'] = get_code_from_text_response(history[-1]['content'])
     return qa
 
@@ -119,11 +135,11 @@ def scoring_a_task(judge_llm, llm, qa, db, function, **kwargs):
     return qa
 
 
-def get_llm(llm_obj, model_name):
+def get_llm(llm_obj, model_name, **kwargs):
     if model_name is not None:
-        llm = llm_obj(model_name)
+        llm = llm_obj(model_name = model_name, **kwargs)
     else:
-        llm = llm_obj()
+        llm = llm_obj(**kwargs)
     return llm
 
 import time    
@@ -132,20 +148,20 @@ def scoring_a_task_parallel(judge_llm_obj, llm_obj, qa, db, function, model_name
     """
     Score a task based on the qa and the function.
     """
-    judge_llm = get_llm(judge_llm_obj, judge_model_name)
-    llm = get_llm(llm_obj, model_name)    
+    judge_llm = get_llm(judge_llm_obj, judge_model_name, **kwargs)
+    llm = get_llm(llm_obj, model_name, **kwargs)    
     qa = scoring_a_task(judge_llm, llm, qa, db, function, **kwargs)
     usage = llm.usage()
     
     qa['input_token'] = usage['input_token']
     qa['output_token'] = usage['output_token']
     
-    time.sleep(10)
+    time.sleep(5)
     return qa
 
 
 def get_a_answer_parallel(llm_obj, qa, db, func, model_name = None, **kwargs):
-    llm = get_llm(llm_obj, model_name)
+    llm = get_llm(llm_obj, model_name, **kwargs)
     answer = get_answer(func, qa, llm=llm, db=db, **kwargs)
     time.sleep(10)
     return answer
@@ -225,11 +241,13 @@ if __name__ == '__main__':
     # with open('../synthetic/gpt-4o-generated-v2.json', 'r') as f:
     #         old_result = json.load(f)
     # # Test
-    questions = questions[:3]
+    questions = questions
     
     # Change LLM here
-    llm_obj = ChatGPT #ChatGPT
-    model_name = 'gpt-4o-mini' #'gpt-4o'
+    llm_obj = OpenAIWrapper #ChatGPT
+    model_name = 'nvidia/Llama-3.1-Nemotron-70B-Instruct' #'gpt-4o'
+    api_key = os.getenv('DEEPINFRA_TOKEN')
+    host = 'https://api.deepinfra.com/v1/openai'
     
     judge_llm_obj = Gemini
     judge_model_name = 'gemini-1.5-pro-002'
@@ -237,23 +255,23 @@ if __name__ == '__main__':
     # result = scoring_parallel(judge_llm_obj, llm_obj, questions, db, reasoning_text2SQL, model_name=model_name, judge_model_name=judge_model_name)
     # print(result)
     # table = get_answer(reasoning_text2SQL, llm=llm, task=questions[0], db=db)
-    save_name = 'gpt-4o-mini'
-    batch_size = 6
+    save_name = 'Nemotron_70B'
+    batch_size = 12
     for i in range(0, len(questions), batch_size):
         bs_questions = questions[i:i+batch_size]
         
         try:
-            result = scoring_parallel(judge_llm_obj, llm_obj, questions, db, reasoning_text2SQL, model_name=model_name, judge_model_name=judge_model_name)
+            result = scoring_parallel(judge_llm_obj, llm_obj, bs_questions, db, reasoning_text2SQL, model_name=model_name, api_key=api_key, host = host , judge_model_name=judge_model_name)
             
             if i == 0:
-                with open(f'../synthetic/gpt-4o-generated-v2-{save_name}.json', 'w') as f:
+                with open(f'../synthetic/gpt-4o-v2-{save_name}.json', 'w') as f:
                     json.dump(result, f, indent=4)
             else:
-                with open(f'../synthetic/gpt-4o-generated-v2-{save_name}.json', 'r') as f:
+                with open(f'../synthetic/gpt-4o-v2-{save_name}.json', 'r') as f:
                     old_result = json.load(f)
                 
                 old_result.extend(result)
-                with open(f'../synthetic/gpt-4o-generated-v2-{save_name}.json', 'w') as f:
+                with open(f'../synthetic/gpt-4o-v2-{save_name}.json', 'w') as f:
                     json.dump(old_result, f, indent=4)
             
         except Exception as e:
