@@ -15,7 +15,7 @@ import json
 from dotenv import load_dotenv
 load_dotenv()
 
-def llm_judge(llm, task, answer, ground_truth, db, verbose=False):
+def llm_judge(llm, task, answer, ground_truth):
     """
     Judge the llm model and the ground truth. 
     """
@@ -36,32 +36,28 @@ def llm_judge(llm, task, answer, ground_truth, db, verbose=False):
         <ground_truth>
         {ground_truth}
         </ground_truth>
-        
-        The response must align accurately with the ground truth and the objectives of the task.
-        Analyze carefully the task, question and ground truth.
-"""}]
-    
-    response = llm(messages)
-    
-    messages.append(
-        {
-            "role": "assistant",
-            "content": response
-        }
-    )
-    
-    messages.append({
-        "role": "user",
-        "content": """
-        Return 1 if the answer is correct, 0.5 for partial accurate, 0 otherwise.
-        Return in JSON format.
+  
+<task>      
+Analyze carefully the task, question and ground truth and score the answer accordingly.
+</task>
+
+The response must align accurately with the ground truth and the objectives of the task.
+
+Score the answer based on the following criteria:
+ - 1 if the response provide accurate and enough answer to the task.
+ - 0.5 for accurate answer, with some abundant information to the task (provide some unnecessary information).
+ - 0 otherwise.
+  
+Return in JSON format.
             
             ```json
             {{
                 "correct": 1
-            }}
-        """
-    })
+            }}      
+        
+"""}]
+    
+    response = llm(messages)
     
     response = llm(messages)
     
@@ -131,7 +127,7 @@ def scoring_a_task(judge_llm, llm, qa, db, function, **kwargs):
     qa = get_prediction_answer(function, qa, llm=llm, db=db, **kwargs)
     answer = qa['response']
     
-    qa['evaluate'] = llm_judge(judge_llm, task, answer, ground_truth, db, verbose=False)
+    qa['evaluate'] = llm_judge(judge_llm, task, answer, ground_truth)
     return qa
 
 
@@ -163,7 +159,7 @@ def scoring_a_task_parallel(judge_llm_obj, llm_obj, qa, db, function, model_name
 def get_a_answer_parallel(llm_obj, qa, db, func, model_name = None, **kwargs):
     llm = get_llm(llm_obj, model_name, **kwargs)
     answer = get_answer(func, qa, llm=llm, db=db, **kwargs)
-    time.sleep(10)
+    time.sleep(5)
     return answer
 
 

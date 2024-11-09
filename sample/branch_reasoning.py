@@ -1,5 +1,5 @@
 from llm.llm_utils import get_code_from_text_response, get_json_from_text_response
-from llm_general import find_suitable_row_v2, TIR_reasoning, get_stock_code_based_on_company_name, debug_SQL, get_stock_code_and_suitable_row
+from llm_general import TIR_reasoning, debug_SQL, get_stock_code_and_suitable_row
 from setup_db import DBHUB
 import utils
 import numpy as np
@@ -41,18 +41,20 @@ Step 2: Get ROA, ROE of the chosen stock codes in the `financial_ratio` table.
 </example>
 
 Note:
- - You should provide general steps to solve the question. 
+ - You should provide general steps to solve the question, ach step should be a as independence as possible. 
  - You must not provide the SQL query. 
- - Each step should be a as independence as possible.
+ - In each step, you must provide specific task that should be done and gather the necessary data for the next step. Task such as collect all data, get all information,.. are not allowed.
+ - The financial ratio has been pre-calculated and stored in the `financial_ratio` table. Do not task to calculate the financial ratio again.
  - The number of steps should be lowest if possible. You will be heavily penalized if create meaningless steps
  - You must not provide the steps that are too obvious or easy for an SQL query (retrieve and data,..).
  
-Based on the question and databse, thinking and return the steps in JSON format.
+Based on the question and database, answer and return the steps in JSON format.
     ```json
     {{
-        "steps" : ["Step 1"]
+        "steps" : ["Step 1", "Step 2"]
     }}
-    ```         
+    ```  
+    Each step is a string.       
 """
         }  
     ]

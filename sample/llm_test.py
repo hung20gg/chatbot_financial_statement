@@ -1,5 +1,5 @@
 from llm.llm_utils import get_code_from_text_response, get_json_from_text_response
-from llm_general import find_suitable_row_v2, TIR_reasoning, get_stock_code_based_on_company_name, debug_SQL, get_stock_code_and_suitable_row
+from llm_general import TIR_reasoning, debug_SQL, get_stock_code_and_suitable_row
 from branch_reasoning import simplify_branch_reasoning
 from setup_db import DBHUB
 import utils
@@ -7,34 +7,25 @@ import re
 import pandas as pd
 
 
-def reasoning_text2SQL(llm, task, db: DBHUB, top_k = 4, sql_top_k = 2, verbose = False, running_type = 'sequential', branch_reasoning = False, self_debug = False, get_all_table=True, **kwargs):
+def reasoning_text2SQL(llm, task, db: DBHUB, top_k = 4, sql_top_k = 2, verbose = False, running_type = 'sequential', branch_reasoning = False, self_debug = False, sql_llm = None, get_all_table = False, **kwargs):
     
     # Step 1: Find suitable column
+    
+    if sql_llm is None:
+        sql_llm = llm
+    
     if running_type == 'parallel':
-        suggestions_table = ""
-        company_info = ""
-        pass 
+        raise NotImplementedError("Parallel running is not supported yet")
     else:
         
         # Branch COT but one go
         if branch_reasoning:
             steps = simplify_branch_reasoning(llm, task, verbose=verbose)
             
-            steps_string = ""
+            steps_string = task + "\nBreak down the task into steps:\n\n"
             for i, step in enumerate(steps):
                 steps_string += f"Step {i+1}: \n {step}\n\n"
             task = steps_string
-        
-        # company_info, industries = get_stock_code_based_on_company_name(llm, text, db=db, verbose=verbose) 
-        
-        # try:
-        #     stock_code = company_info['stock_code'].tolist()
-        # except:
-        #     stock_code = []
-        #     print("No stock code found")
-        
-        # # Find suitable column V2
-        # suggestions_table = find_suitable_row_v2(llm, text, stock_code=stock_code, db=db, top_k=top_k, verbose=verbose, format='markdown', get_all_table=True)
         
         # New version
         company_info_df, suggestions_table = get_stock_code_and_suitable_row(llm, task, db=db, top_k=top_k, verbose=verbose, get_all_table=get_all_table)
@@ -57,7 +48,9 @@ def reasoning_text2SQL(llm, task, db: DBHUB, top_k = 4, sql_top_k = 2, verbose =
 {database_description}
 
 Here is a natural language query that you need to convert into a SQL query:
+<task>
 {task}
+</task>
 Company details
 <data>
 {stock_code_table}
@@ -91,7 +84,7 @@ Note:
         }
     ]
     
-    response = llm(history)
+    response = sql_llm(history)
     if verbose:
         print(response)
     
@@ -112,11 +105,11 @@ Note:
     
     # Self-debug the SQL code
     count_debug = 0
-    if len(error_message) > 0 and self_debug:
+    if len(error_messages) > 0 and self_debug:
         while count_debug < 2:
             
             # Generate response to fix SQL bug
-            response, error_message, execute_table = debug_SQL(response, history, db, verbose=verbose)
+            response, error_message, execute_table = debug_SQL(sql_llm, history, db, verbose=verbose)
             error_messages.extend(error_message)
             execution_tables.extend(execute_table)
             history.append({

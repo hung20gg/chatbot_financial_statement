@@ -1,5 +1,10 @@
 # Chatbot_financial_statement
 
+## Major Update 2
+
+- Done evaluation for ML1
+- For fastest inference, use `llm = Gemini('gemini-1.5-flash-8b')` and `sql_llm = Gemini('gemini-1.5-flash-002')`
+
 ## Major Update
 
 ### Database new design

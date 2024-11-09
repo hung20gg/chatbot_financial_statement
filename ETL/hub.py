@@ -1,9 +1,7 @@
-import dotenv
 from langchain_chroma import Chroma
 import re
 
-dotenv.load_dotenv()
-
+from .connector import *
 class DBHUB:
     """
     This will be the hub for both similarity search and rational DB

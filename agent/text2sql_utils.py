@@ -1,5 +1,21 @@
 import pandas as pd
+
+from llm.llm.chatgpt import ChatGPT, OpenAIWrapper
+from llm.llm.gemini import Gemini
+
+from llm.llm_utils import get_code_from_text_response
 from ETL.hub import DBHUB
+
+def get_llm_wrapper(model_name, **kwargs):
+    if 'gpt' in model_name:
+        return ChatGPT(model_name=model_name, **kwargs)
+    
+    elif 'gemini' in model_name:
+        return Gemini(model_name=model_name, **kwargs)
+    
+    return OpenAIWrapper(model_name=model_name, **kwargs)
+    
+
 
 def read_file_without_comments(file_path, start=["#", "//"]):
     with open(file_path, 'r') as f:
@@ -13,41 +29,6 @@ def read_file_without_comments(file_path, start=["#", "//"]):
 def read_file(file_path):
     with open(file_path, 'r') as f:
         return f.read()
-    
-def edit_distance(str1, str2):
-    # Initialize a matrix to store distances
-    m = len(str1)
-    n = len(str2)
-    
-    # Create a table to store results of subproblems
-    dp = [[0] * (n + 1) for _ in range(m + 1)]
-    
-    # Fill dp[][] in bottom up manner
-    for i in range(m + 1):
-        for j in range(n + 1):
-            
-            # If the first string is empty, insert all characters of the second string
-            if i == 0:
-                dp[i][j] = j    
-            
-            # If the second string is empty, remove all characters of the first string
-            elif j == 0:
-                dp[i][j] = i    
-            
-            # If the last characters are the same, ignore it and recur for the remaining strings
-            elif str1[i-1] == str2[j-1]:
-                dp[i][j] = dp[i-1][j-1]
-            
-            # If the last character is different, consider all possibilities and find the minimum
-            else:
-                dp[i][j] = 1 + min(dp[i-1][j],    # Remove
-                                   dp[i][j-1],    # Insert
-                                   dp[i-1][j-1])  # Replace
-    
-    return dp[m][n]
-
-def edit_distance_score(str1, str2):
-    return 1 - edit_distance(str1, str2) / max(len(str1), len(str2))
     
     
 def df_to_markdown(df):
@@ -96,6 +77,84 @@ def company_name_to_stock_code(db : DBHUB, names, method = 'similarity', top_k =
         else:
             result = pd.DataFrame(columns=['stock_code', 'company_name'])
         return result
+    
+    
+def is_sql_full_of_comments(sql_text):
+    lines = sql_text.strip().splitlines()
+    comment_lines = 0
+    total_lines = len(lines)
+    in_multiline_comment = False
+
+    for line in lines:
+        stripped_line = line.strip()
+        
+        # Check if it's a single-line comment or empty line
+        if stripped_line.startswith('--') or not stripped_line:
+            comment_lines += 1
+            continue
+        
+        # Check for multi-line comments
+        if stripped_line.startswith('/*'):
+            in_multiline_comment = True
+            comment_lines += 1
+            # If it ends on the same line
+            if stripped_line.endswith('*/'):
+                in_multiline_comment = False
+            continue
+        
+        if in_multiline_comment:
+            comment_lines += 1
+            if stripped_line.endswith('*/'):
+                in_multiline_comment = False
+            continue
+
+    # Check if comment lines are the majority of lines
+    return comment_lines >= total_lines  
+    
+    
+    
+def TIR_reasoning(response, db: DBHUB, verbose=False):
+    codes = get_code_from_text_response(response)
+        
+    TIR_response = ""
+    execution_error = []
+    execution_table = []
+    
+    sql_code = []
+    
+    for code in codes:
+        if code['language'] == 'sql':
+            codes = code['code'].split(";")
+            for content in codes:
+                # clean the content
+                if content.strip() != "":
+                    sql_code.append(content)
+            
+    for i, code in enumerate(sql_code):    
+        if verbose:    
+            print(f"SQL Code {i+1}: \n{code}")
+        
+        if not is_sql_full_of_comments(code):    
+            table = db.query(code, return_type='dataframe')
+            
+            # If it see an error in the SQL code
+            if isinstance(table, str):
+                execution_error.append((i, table))
+                continue
+            
+            execution_table.append(table)
+            table_markdown = utils.df_to_markdown(table)
+            TIR_response += f"SQL result for {i+1}: \n{table_markdown}\n\n"
+    
+    response += f"\n\n### The result of the given SQL:\n\n{TIR_response}"
+    
+    error_message = ""
+    if len(execution_error) > 0:
+        for i, error in execution_error:
+            error_message += f"Error in SQL {i+1}: {error}\n\n"
+            response += f"\n\n### Error in SQL {i+1}:\n\n{error}"
+    
+    return response, execution_error, execution_table
 
     
 def get_company_detail_from_df(dfs, db: DBHUB, method = 'similarity') -> pd.DataFrame:
@@ -116,5 +175,3 @@ def get_company_detail_from_df(dfs, db: DBHUB, method = 'similarity') -> pd.Data
     
     return company_name_to_stock_code(db, list_stock_code, method)
     
-if __name__ == '__main__':
-    print(read_file_without_comments('prompt/seek_database.txt'))
