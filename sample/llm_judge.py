@@ -185,6 +185,85 @@ def scoring_parallel(judge_llm_obj, llm_obj, qas, db, function, **kwargs):
     return results
 
 
+def single_process_scoring(model_obj, model_name, **kwargs):
+    db_name = 'test_db'
+    user = 'postgres'
+    password = '12345678'
+    port = '5433'
+    host = 'localhost'
+    
+        
+    collection_chromadb = 'category_bank_chroma'
+    persist_directory = 'data/category_bank_chroma'
+    bank_vector_store = create_chroma_db(collection_chromadb, persist_directory)
+
+    collection_chromadb = 'category_non_bank_chroma'
+    persist_directory = 'data/category_non_bank_chroma'
+    none_bank_vector_store = create_chroma_db(collection_chromadb, persist_directory)
+
+    collection_chromadb = 'category_sec_chroma'
+    persist_directory = 'data/category_sec_chroma'
+    sec_vector_store = create_chroma_db(collection_chromadb, persist_directory)
+
+    collection_chromadb = 'category_ratio_chroma'
+    persist_directory = 'data/category_ratio_chroma'
+    ratio_vector_store = create_chroma_db(collection_chromadb, persist_directory)
+
+    collection_chromadb = 'company_name_chroma'
+    persist_directory = 'data/company_name_chroma'
+    vector_db_company = create_chroma_db(collection_chromadb, persist_directory)
+
+    collection_chromadb = 'sql_query'
+    persist_directory = 'data/sql_query'
+    vector_db_sql = create_chroma_db(collection_chromadb, persist_directory)
+    
+    conn = {
+        'db_name': db_name,
+        'user': user,
+        'password': password,
+        'host': host,
+        'port': port
+        
+    }
+    
+
+    judge_llm_obj = Gemini
+    judge_model_name = 'gemini-1.5-pro-002'
+    
+    with open('../synthetic/gpt-4o-generated-v2-scored-pass.json', 'r') as f:
+        questions = json.load(f)
+
+    save_name = model_name.replace('/', '_')
+    
+    batch_size = 12
+    for i in range(0, len(questions), batch_size):
+        bs_questions = questions[i:i+batch_size]
+        
+        try:
+            result = scoring_parallel(judge_llm_obj, llm_obj, bs_questions, db, reasoning_text2SQL, model_name=model_name, api_key=api_key, host = host , judge_model_name=judge_model_name)
+            
+            if i == 0:
+                with open(f'../synthetic/gpt-4o-v2-{save_name}.json', 'w') as f:
+                    json.dump(result, f, indent=4)
+            else:
+                with open(f'../synthetic/gpt-4o-v2-{save_name}.json', 'r') as f:
+                    old_result = json.load(f)
+                
+                old_result.extend(result)
+                with open(f'../synthetic/gpt-4o-v2-{save_name}.json', 'w') as f:
+                    json.dump(old_result, f, indent=4)
+            
+        except Exception as e:
+            print(e)
+            
+# from concurrent.futures import ProcessPoolExecutor    
+# def multi_process_scoring():
+#     args = [(OpenAIWrapper, )]
+    
+#     with ProcessPoolExecutor(max_workers=4) as executor:
+#         future = executor.submit(single_process_scoring, model_obj, model_name, **kwargs)
+        # result = future.result()
+
 if __name__ == '__main__':
     
     db_name = 'test_db'

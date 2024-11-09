@@ -5,15 +5,22 @@ sys.path.append('..')
 from ETL.hub import DBHUB
 from llm.llm.abstract import LLM
 from llm.llm_utils import get_json_from_text_response, get_code_from_text_response
-from .const import Text2SQLConfig
+from .const import Text2SQLConfig, Config
 from . import const
 
+import pandas as pd
 import logging
 import time
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
+
+def steps_to_strings(steps):
+    steps_string = "\nBreak down the task into steps:\n\n"
+    for i, step in enumerate(steps):
+        steps_string += f"Step {i+1}: \n {step}\n\n"
+    return steps_string
 
 class Text2SQL(BaseAgent):
     def __init__(self, config: Text2SQLConfig, db: DBHUB, max_steps: int = 2, **kwargs):
@@ -26,7 +33,8 @@ class Text2SQL(BaseAgent):
         if hasattr(config, 'sql_llm'):
             self.sql_llm = utils.get_llm_wrapper(model_name=config.sql_llm, **kwargs)
         else:
-            self.sql_llm = config.llm
+            logging.warning("SQL LLM is not provided. Use the same LLM model for SQL")
+            self.sql_llm = self.sql_llm
             
         # Reasoning
         self.reasoning = config.reasoning
@@ -52,15 +60,14 @@ class Text2SQL(BaseAgent):
         assert self.max_steps > 0, "Max steps must be greater than 0"
         
         brief_database = const.BREAKDOWN_NOTE_PROMPT
-        
         messages = [
             {
                 "role": "system",
-                "content": f"You are an expert in financial statement and database management. You are tasked to break down the given task to {num_steps-1}-{num_steps} simpler steps. Please provide the steps."
+                "content": f"You are an expert in financial statement and database management. You are tasked to break down the given task to {self.max_steps-1}-{self.max_steps} simpler steps. Please provide the steps."
             },
             {
                 "role": "user",
-                "content": const.BREAKDOWN_TASK_PROMPT.format(task, brief_database)
+                "content": const.BRANCH_REASONING_PROMPT.format(task = task, brief_database = brief_database)
             }
         ]
     
@@ -96,7 +103,7 @@ class Text2SQL(BaseAgent):
         messages = [
         {
             "role": "user",
-            "content": const.GET_STOCK_CODE_AND_SUITABLE_ROW_PROMPT.format(task)
+            "content": const.GET_STOCK_CODE_AND_SUITABLE_ROW_PROMPT.format(task = task)
         }]
         
         
@@ -126,10 +133,10 @@ class Text2SQL(BaseAgent):
         
         # Get company data stock code
         company_df = utils.company_name_to_stock_code(self.db, company_names, top_k=self.config.company_top_k)
-        stock_code = company_df['stock_code'].values
+        stock_code = company_df['stock_code'].values.tolist()
         
         # Get mapping table
-        dict_dfs = self.db.return_mapping_table_v2(financial_statement_row = financial_statement_row, financial_ratio_row = financial_ratio_row, industry = industry, stock_code = stock_code, top_k =self.config.top_k, get_all_tables=self.config.get_all_table)    
+        dict_dfs = self.db.return_mapping_table_v2(financial_statement_row = financial_statement_row, financial_ratio_row = financial_ratio_row, industry = industry, stock_code = stock_code, top_k =self.config.account_top_k, get_all_tables=self.config.get_all_acount)    
         
         # Return data
         if format == 'dataframe':
@@ -139,7 +146,7 @@ class Text2SQL(BaseAgent):
             text = ""
             for title, df in dict_dfs.items():
                 text += f"\n\nTable `{title}`\n\n{utils.df_to_markdown(df)}"
-            return utils.df_to_markdown(company_df), text
+            return company_df, text
         
         else:
             raise ValueError("Format not supported")
@@ -184,16 +191,33 @@ class Text2SQL(BaseAgent):
         return history, error_messages, execution_tables
     
     
-    def reasoning_text2SQL(self, task: str, company_info: str, suggest_table: str, history: list = None):
+    def reasoning_text2SQL(self, task: str, company_info: pd.DataFrame, suggest_table: str, history: list = None):
         
+        """
+        Reasoning with Text2SQL
+        
+        Input:
+            - task: str
+            - company_info: pd.DataFrame
+            - suggest_table: str
+            - history: list
+        Output:
+            - history: list
+            - error_messages: list
+            - execution_tables: list
+            
+        This function will convert the natural language query into SQL query and execute the SQL query
+        """
+        
+        stock_code_table = utils.df_to_markdown(company_info)
         system_prompt = """
     You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query.
     """
         database_description = const.OPENAI_SEEK_DATABASE_PROMPT
         
-        few_shot = self.db.find_sql_query(text=task, top_k=self.config.sql_top_k)
+        few_shot = self.db.find_sql_query(text=task, top_k=self.config.sql_example_top_k)
         
-        prompt = const.REASONING_TEXT2SQL_PROMPT.format(database_description, task, company_info, suggest_table, few_shot)
+        prompt = const.REASONING_TEXT2SQL_PROMPT.format(database_description = database_description, task = task, stock_code_table = stock_code_table, suggestions_table = suggest_table, few_shot = few_shot)
         
         if history is None:
             history = [
@@ -212,7 +236,7 @@ class Text2SQL(BaseAgent):
                 "content": prompt
             })
             
-        response = self.sql_llm(self.history)
+        response = self.sql_llm(history)
         if self.config.verbose:
             print(response)
          
@@ -241,24 +265,122 @@ class Text2SQL(BaseAgent):
         self.llm_responses.append(history)    
         
         return history, error_messages, execution_tables
-        
-    def branch_reasoning_text2SQL(self, task: str, company_info: str, suggest_table: str, history: list = None):
-        raise NotImplementedError("Branch reasoning is not implemented")
     
+        
+    def branch_reasoning_text2SQL(self, task: str, steps: list[str], company_info: pd.DataFrame, suggest_table: str, history: list = None):
+        
+        """
+        Branch reasoning with Text2SQL 
+        Instead of solving the task directly, it will break down the task into steps and solve each step
+        
+        Future work:
+            - Simulate with Monte Carlo Tree Search
+        """
+        
+        stock_code_table = utils.df_to_markdown(company_info)
+        look_up_stock_code = f"\nHere are the detail of the companies: \n\n{stock_code_table}"
+
+        database_description = const.OPENAI_SEEK_DATABASE_PROMPT
+        content = const.BRANCH_REASONING_TEXT2SQL_PROMPT.format(database_description = database_description, task = task, steps_string = steps_to_strings(steps), suggestions_table = suggest_table)
+    
+        if history is None:
+            task_index = 1
+            
+            history = [
+                {
+                    "role": "system",
+                    "content": "You are an expert in financial statement and database management. You will be asked to convert a natural language query into a PostgreSQL query."
+                },
+                {
+                    "role": "user",
+                    "content": content + look_up_stock_code
+                }
+            ]
+        else:
+            task_index = len(history)
+            history.append({
+                "role": "user",
+                "content": content + look_up_stock_code
+            })
+            
+        error_messages = []
+        execution_tables = []
+        
+        
+        for i, step in enumerate(steps):
+            logging.info(f"Step {i+1}: {step}")
+            if i == 0:
+                history[-1]["content"] += f"<instruction>\nThink step-by-step and do the {step}\n</instruction>\n\nHere are the samples SQL you might need\n\n{self.db.find_sql_query(step, top_k=self.config.sql_example_top_k)}"
+            else:
+                history.append({
+                    "role": "user",
+                    "content": f"<instruction>\nThink step-by-step and do the {step}\n</instruction>\n\nHere are the samples SQL you might need\n\n{self.db.find_sql_query(step, top_k=self.config.sql_example_top_k)}"
+                })
+            
+            response = self.sql_llm(history)
+            if self.config.verbose:
+                print(response)
+            
+            # Add TIR to the SQL query
+            response, error_message, execute_table = utils.TIR_reasoning(response, self.db, verbose=self.config.verbose)
+            
+            error_messages.extend(error_message)
+            execution_tables.extend(execute_table)
+            
+            history.append(
+                {
+                    "role": "assistant",
+                    "content": response
+                }
+            )
+            
+            
+            # Self-debug the SQL code
+            if self.config.self_debug:
+                history, debug_error_messages, debug_execution_tables = self.debug_sql_code(history)
+                error_messages.extend(debug_error_messages)
+                execution_tables.extend(debug_execution_tables)
+            
+            
+            # Prepare for the next step
+            company_info = utils.get_company_detail_from_df(execution_tables, self.db)
+            stock_code_table = utils.df_to_markdown(company_info)
+            look_up_stock_code = f"\nHere are the detail of the companies: \n\n{stock_code_table}"
+            history[task_index]["content"] = content + look_up_stock_code
+                   
+        self.llm_responses.append(history)
+        return history, error_messages, execution_tables
     
     def solve(self, task: str):
         """
         Solve the task with Text2SQL
         """
+        start = time.time()
+        steps = []
+        str_task = task
         if self.branch_reasoning:
             steps = self.simplify_branch_reasoning(task)
+            str_task = steps_to_strings(steps)
             
-        company_info, suggest_table = self.get_stock_code_and_suitable_row(task, format='markdown')
+        company_info, suggest_table = self.get_stock_code_and_suitable_row(str_task, format='markdown')
         
-        if self.branch_reasoning_text2SQL:
-            return self.branch_reasoning_text2SQL(task, company_info, suggest_table)
+        if not self.branch_reasoning:
+            
+            # If steps are broken down
+            if len(steps) == 0:
+                task += "\nBreak down the task into steps:\n\n" + steps_to_strings(steps)         
         
-        return self.reasoning_text2SQL(task, company_info, suggest_table)
+        
+            history, error_messages, execution_tables = self.reasoning_text2SQL(task, company_info, suggest_table)
+        else:
+            history, error_messages, execution_tables = self.branch_reasoning_text2SQL(task, steps, company_info, suggest_table)
+        
+        end = time.time()
+        logging.info(f"Time taken: {end-start}s")
+        return history, error_messages, execution_tables
+    
+    
+    
         
         
         

@@ -8,8 +8,8 @@ import re
 
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.embeddings.sentence_transformer import (
-    SentenceTransformerEmbeddings,
+from langchain_huggingface  import (
+    HuggingFaceEmbeddings,
 )
 
 import logging
@@ -161,10 +161,13 @@ def execute_query(query, conn=None, return_type='tuple'):
 #=================#
 
 def create_chroma_db(collection_name, persist_directory, model_name='text-embedding-3-small'):
-    if 'text-embedding' in model_name:
-        embedding_function = OpenAIEmbeddings(api_key=os.getenv('OPENAI_API_KEY'), model="text-embedding-3-small")
+    if isinstance(model_name, str):
+        if 'text-embedding' in model_name:
+            embedding_function = OpenAIEmbeddings(api_key=os.getenv('OPENAI_API_KEY'), model="text-embedding-3-small")
+        else:
+            embedding_function = HuggingFaceEmbeddings(model_name=model_name)
     else:
-        embedding_function = SentenceTransformerEmbeddings(model_name=model_name)
+        embedding_function = model_name
     
     return Chroma(collection_name=collection_name, 
                   embedding_function=embedding_function, 
@@ -176,7 +179,7 @@ def create_chroma_db(collection_name, persist_directory, model_name='text-embedd
 #==================#
 
 
-def setup_chroma_db_fs(collection_name, persist_directory, table,model_name='text-embedding-3-small', **db_conn):
+def setup_chroma_db_fs(collection_name, persist_directory, table, model_name='text-embedding-3-small', **db_conn):
     conn = connect_to_db(**db_conn)
     print("Connected to database")
     try:
@@ -232,10 +235,10 @@ def setup_chroma_db_company_name(collection_name, persist_directory, table, mode
         chroma_db.add_texts([company[2]], metadatas=[{'lang': 'en', 'stock_code': company[0]}])
         chroma_db.add_texts([company[3]], metadatas=[{'lang': 'en', 'stock_code': company[0]}])
         
-def setup_chroma_db_sql_query(collection_name, persist_directory, txt_path):
+def setup_chroma_db_sql_query(collection_name, persist_directory, txt_path, model_name='text-embedding-3-small'):
     with open(txt_path, 'r') as f:
         content = f.read()
-    chroma_db = create_chroma_db(collection_name, persist_directory)
+    chroma_db = create_chroma_db(collection_name, persist_directory, model_name)
     sql = re.split(r'--\s*\d+', content)
     heading = re.findall(r'--\s*\d+', content)
     codes = []
@@ -243,7 +246,6 @@ def setup_chroma_db_sql_query(collection_name, persist_directory, txt_path):
         sql_code = heading[i]+ s
         task = sql_code.split('\n')[0]
         task = re.sub(r'--\s*\d+\.?', '', task).strip()
-        codes.append((task, sql_code))
         print(task)
         print(sql_code)
         print('====================')
@@ -261,13 +263,13 @@ RDB_SETUP_CONFIG = {
     'map_category_code_bank': ['../csv/map_category_code_bank.csv', ['category_code']],
     'map_category_code_non_bank': ['../csv/map_category_code_non_bank.csv', ['category_code']],
     'map_category_code_securities': ['../csv/map_category_code_sec.csv', ['category_code']],
-    'map_ratio_code': ['../csv/map_ratio_code.csv', ['ratio_code']],
+    'map_category_code_ratio': ['../csv/map_ratio_code.csv', ['ratio_code']],
     'sub_and_shareholder': ['../csv/df_sub_and_shareholder.csv', None, {'stock_code': 'company_info(stock_code)'}],
     
     'bank_financial_report' : ['../csv/bank_financial_report_v2_1.csv', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}],
     'non_bank_financial_report' : ['../csv/non_bank_financial_report_v2_1.csv', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}],
     'securities_financial_report' : ['../csv/securities_financial_report_v2_1.csv', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}],
-    'financial_ratio' : ['../csv/financial_ratio.csv', None, {'ratio_code': 'map_ratio_code(ratio_code)', 'stock_code': 'company_info(stock_code)'}],
+    'financial_ratio' : ['../csv/financial_ratio.csv', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}],
 }
 
 VECTOR_DB_SETUP_CONFIG = {
@@ -275,8 +277,8 @@ VECTOR_DB_SETUP_CONFIG = {
     'category_bank_chroma': ['../data/category_bank_chroma', 'map_category_code_bank'],
     'category_non_bank_chroma': ['../data/category_non_bank_chroma', 'map_category_code_non_bank'],
     'category_sec_chroma': ['../data/category_sec_chroma', 'map_category_code_securities'],
-    'ratio_chroma': ['../data/ratio_chroma', 'map_ratio_code'],
-    'sql_query_chroma': ['../data/sql_query_chroma', '../data/sql_query.txt'],
+    'category_ratio_chroma': ['../data/category_ratio_chroma', 'map_category_code_ratio'],
+    'sql_query': ['../data/sql_query', '../agent/prompt/simple_query_v2.txt'],
 }
 
 def setup_rdb(config, **db_conn):
@@ -284,16 +286,20 @@ def setup_rdb(config, **db_conn):
         args = [table] + params
         load_csv_to_postgres(*args, **db_conn)
         
-def setup_vector_db(config, **db_conn):
+def setup_vector_db(config, model_name = 'text-embedding-3-small', **db_conn):
     for table, params in config.items():
-        if table == 'sql_query_chroma':
+        params.append(model_name)
+        if table == 'sql_query':
             setup_chroma_db_sql_query(table, *params)
         elif table == 'company_name_chroma':
             setup_chroma_db_company_name(table, *params, **db_conn)
+        elif table == 'category_ratio_chroma':
+            setup_chroma_db_ratio(table, *params, **db_conn)
         else:
             setup_chroma_db_fs(table, *params, **db_conn)
             
-if __name__ == '__main__':
+            
+def main():
     db_conn = {
         'db_name': 'test_db',
         'user': 'postgres',
@@ -303,10 +309,17 @@ if __name__ == '__main__':
         
     }
     
-    setup_rdb(RDB_SETUP_CONFIG, **db_conn)
-    logging.info("RDB setup completed")
+    # model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': 'cuda'})
     
+    # setup_rdb(RDB_SETUP_CONFIG, **db_conn)
+    # logging.info("RDB setup completed")
     setup_vector_db(VECTOR_DB_SETUP_CONFIG, **db_conn)
+    # setup_vector_db(VECTOR_DB_SETUP_CONFIG, model, **db_conn)
     logging.info("Vector DB setup completed")
+            
+if __name__ == '__main__':
+    main()
+
+
 
     

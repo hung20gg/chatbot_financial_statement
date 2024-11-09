@@ -19,6 +19,7 @@ class Text2SQLConfig(BaseModel):
     account_top_k: int = 5
     verbose: bool = False
     get_all_acount: bool = False    
+    self_debug: bool = False
     
 GEMINI_FAST_CONFIG = {
     "llm": 'gemini-1.5-flash-002',
@@ -45,7 +46,7 @@ OPENAI_BEST_CONFIG = {
 } 
 
     
-BEST_CONFIG = {
+TEXT2SQL_BEST_CONFIG = {
     "llm": 'gpt-4o',
     "sql_llm": 'gpt-4o',
     "self_debug": True,
@@ -55,52 +56,71 @@ BEST_CONFIG = {
     "sql_example_top_k": 2,
     "account_top_k": 5,
     "verbose": False,
-    'get_all_acount': True
+    'get_all_acount': True,
+    'self_debug': True
 }
 
-MEDIUM_OPENAI_CONFIG = {
-    "llm": 'gpt-4o-mini',
-    "sql_llm": 'gpt-4o-mini',
-    "reasoning": False,
-    "branch_reasoning": True,
-    "company_top_k": 2,
-    "sql_example_top_k": 2,
-    "account_top_k": 4,
-    "verbose": False,
-    'get_all_acount': False
-}
-
-MEDIUM_GEMINI_CONFIG = {
-    "llm": 'gemini-1.5-flash-002',
-    "sql_llm": 'gemini-1.5-flash-002',
-    "reasoning": False,
-    "branch_reasoning": True,
-    "company_top_k": 2,
-    "sql_example_top_k": 2,
-    "account_top_k": 4,
-    "verbose": False,
-    'get_all_acount': False
-}
-
-FASTEST_CONFIG = {
+TEXT2SQL_SWEET_SPOT_CONFIG = {
     "llm": 'gemini-1.5-flash-8b',
-    "sql_llm": 'gemini-1.5-flash-002',
+    "sql_llm": 'gpt-4o-mini',
     "reasoning": False,
     "branch_reasoning": False,
     "company_top_k": 2,
     "sql_example_top_k": 2,
     "account_top_k": 4,
     "verbose": False,
-    'get_all_acount': False
+    'get_all_acount': False,
+    'self_debug': False
+}
+
+TEXT2SQL_MEDIUM_OPENAI_CONFIG = {
+    "llm": 'gpt-4o-mini',
+    "sql_llm": 'gpt-4o-mini',
+    "reasoning": True,
+    "branch_reasoning": False,
+    "company_top_k": 2,
+    "sql_example_top_k": 2,
+    "account_top_k": 4,
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': False
+}
+
+TEXT2SQL_MEDIUM_GEMINI_CONFIG = {
+    "llm": 'gemini-1.5-flash-002',
+    "sql_llm": 'gemini-1.5-flash-002',
+    "reasoning": True,
+    "branch_reasoning": False,
+    "company_top_k": 2,
+    "sql_example_top_k": 2,
+    "account_top_k": 4,
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': False
+}
+
+TEXT2SQL_FASTEST_CONFIG = {
+    "llm": 'gemini-1.5-flash-8b',
+    "sql_llm": 'gemini-1.5-flash-002',
+    "reasoning": False,
+    "branch_reasoning": False,
+    "company_top_k": 1,
+    "sql_example_top_k": 2,
+    "account_top_k": 3,
+    "verbose": True,
+    'get_all_acount': False,
+    'self_debug': False
 }
 
 
 BREAKDOWN_NOTE_PROMPT = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/breakdown_note.txt'))
 
-OPENAI_SEEK_DATABASE_PROMPT  = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/openai_seek_database.txt'))
+OPENAI_SEEK_DATABASE_PROMPT  = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/openai_seek_database.txt'), start=['//'])
     
-GET_STOCK_CODE_AND_SUITABLE_ROW_PROMPT  = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/get_stock_code_and_suitable_row.txt'))
+GET_STOCK_CODE_AND_SUITABLE_ROW_PROMPT  = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/get_stock_code_and_suitable_row.txt'), start=['//'])
 
-BRANCH_REASONING_PROMPT = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/branch_reasoning.txt'))
+BRANCH_REASONING_PROMPT = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/branch_reasoning.txt'), start=['//'])
     
-REASONING_TEXT2SQL_PROMPT = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/reasoning_text2sql.txt'))
+REASONING_TEXT2SQL_PROMPT = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/reasoning_text2sql.txt'), start=['//'])
+
+BRANCH_REASONING_TEXT2SQL_PROMPT = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/branch_reasoning_text2sql.txt'), start=['//'])

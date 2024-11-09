@@ -1,6 +1,5 @@
-from pydantic import BaseModel
 from .const import Config
-class BaseAgent(BaseModel):
+class BaseAgent:
     def __init__(self, config : Config):
         self.config = config
 

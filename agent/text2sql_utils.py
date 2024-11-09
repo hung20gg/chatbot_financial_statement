@@ -143,7 +143,7 @@ def TIR_reasoning(response, db: DBHUB, verbose=False):
                 continue
             
             execution_table.append(table)
-            table_markdown = utils.df_to_markdown(table)
+            table_markdown = df_to_markdown(table)
             TIR_response += f"SQL result for {i+1}: \n{table_markdown}\n\n"
     
     response += f"\n\n### The result of the given SQL:\n\n{TIR_response}"
