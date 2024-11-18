@@ -160,7 +160,7 @@ class DBHUB:
         self.multi_thread = original_multi_thread
         
         end = time.time()
-        logging.info(f"Time taken to find stock code similarity multithread: {end-start}")
+        # logging.info(f"Time taken to find stock code similarity multithread: {end-start}")
         return list(stock_codes)
     
     
@@ -352,7 +352,7 @@ LIMIT 50;
             return_table[table_name] = result
             
         end = time.time()
-        logging.info(f"Time taken to return mapping table multithread: {end-start}")     
+        # logging.info(f"Time taken to return mapping table multithread: {end-start}")     
         return return_table
     
     
@@ -366,31 +366,35 @@ def setup_db(model_name = 'text-embedding-3-small', multi_thread = True):
     }
     print(conn['db_name'])
     
-    conn = connect_to_db(**conn)
+    # conn = connect_to_db(**conn)
     current_directory = os.path.dirname(__file__)
     
+    local_model = False
+    if not isinstance(model_name, str):
+        local_model = True
+    
     collection_chromadb = 'category_bank_chroma'
-    persist_directory = os.path.join(current_directory, '../data/category_bank_chroma2')
+    persist_directory = os.path.join(current_directory, f'../data/category_bank_chroma{"2" if local_model else ""}')
     bank_vector_store = create_chroma_db(collection_chromadb, persist_directory, model_name)
     
     collection_chromadb = 'category_non_bank_chroma'
-    persist_directory = os.path.join(current_directory, '../data/category_non_bank_chroma2')
+    persist_directory = os.path.join(current_directory, f'../data/category_non_bank_chroma{"2" if local_model else ""}')
     none_bank_vector_store = create_chroma_db(collection_chromadb, persist_directory, model_name)
     
     collection_chromadb = 'category_sec_chroma'
-    persist_directory = os.path.join(current_directory, '../data/category_sec_chroma2')
+    persist_directory = os.path.join(current_directory, f'../data/category_sec_chroma{"2" if local_model else ""}')
     sec_vector_store = create_chroma_db(collection_chromadb, persist_directory, model_name)
     
     collection_chromadb = 'category_ratio_chroma'
-    persist_directory = os.path.join(current_directory, '../data/category_ratio_chroma2')
+    persist_directory = os.path.join(current_directory, f'../data/category_ratio_chroma{"2" if local_model else ""}')
     ratio_vector_store = create_chroma_db(collection_chromadb, persist_directory, model_name)
     
     collection_chromadb = 'company_name_chroma'
-    persist_directory = os.path.join(current_directory, '../data/company_name_chroma2')
+    persist_directory = os.path.join(current_directory, f'../data/company_name_chroma{"2" if local_model else ""}')
     vector_db_company = create_chroma_db(collection_chromadb, persist_directory, model_name)
     
     collection_chromadb = 'sql_query'
-    persist_directory = os.path.join(current_directory, '../data/sql_query2')
+    persist_directory = os.path.join(current_directory, f'../data/sql_query{"2" if local_model else ""}')
     vector_db_sql = create_chroma_db(collection_chromadb, persist_directory, model_name)
     
     return DBHUB(conn, bank_vector_store, none_bank_vector_store, sec_vector_store, ratio_vector_store, vector_db_company, vector_db_sql, multi_thread)
@@ -406,7 +410,7 @@ def setup_db_openai(model_name = 'text-embedding-3-small', multi_thread = True):
     }
     print(conn['db_name'])
     
-    conn = connect_to_db(**conn)
+    # conn = connect_to_db(**conn)
     current_directory = os.path.dirname(__file__)
     
     collection_chromadb = 'category_bank_chroma'

@@ -1,15 +1,17 @@
-from setup_db import DBHUB, create_chroma_db, connect_to_db
 from concurrent.futures import ThreadPoolExecutor, as_completed
-
+import sys
+sys.path.append('..')
 from llm_test import reasoning_text2SQL
+from branch_reasoning import llm_branch_reasoning
+import utils
+
 
 from llm.llm_utils import get_json_from_text_response, get_code_from_text_response
 from llm.llm.chatgpt import ChatGPT, OpenAIWrapper
+from langchain_huggingface import HuggingFaceEmbeddings
 from llm.llm.gemini import Gemini
-import pandas as pd
-import utils
+from ETL import setup_db
 
-import sys
 import os
 import json
 from dotenv import load_dotenv
@@ -30,7 +32,7 @@ def llm_judge(llm, task, answer, ground_truth):
         </task>
         
         <answer>
-        {answer[:5000]}
+        {answer[:8000]}
         </answer>
         
         <ground_truth>
@@ -56,8 +58,6 @@ Return in JSON format.
             }}      
         
 """}]
-    
-    response = llm(messages)
     
     response = llm(messages)
     
@@ -99,23 +99,29 @@ def get_answer(func, qa, **kwargs):
 
 def get_prediction_answer(func, qa, **kwargs):
     task = qa['question']
+    start = time.time()
+    
     try:
         history, error_messages, execution_tables = func(task = task, **kwargs)
         get_tables = execution_tables[-3:]
-        table_text = ""
+        
     except Exception as e:
         print(e)
         qa['response'] = "Error in getting the answer"
         qa['code_response'] = "Error in getting the code"
         return qa
     
+    table_text = ""
+    end = time.time()
+    
     for i,table in enumerate(get_tables):
         table_text += f"Table {i+1}\n"
         table_text += utils.df_to_markdown(table)
         table_text += "\n\n"
         
-    qa['response'] = table_text[:5000]
+    qa['response'] = table_text[:8000]
     qa['code_response'] = get_code_from_text_response(history[-1]['content'])
+    qa['time'] = end - start
     return qa
 
 def scoring_a_task(judge_llm, llm, qa, db, function, **kwargs):
@@ -140,33 +146,34 @@ def get_llm(llm_obj, model_name, **kwargs):
 
 import time    
 
-def scoring_a_task_parallel(judge_llm_obj, llm_obj, qa, db, function, model_name = None, judge_model_name = None, **kwargs):
+def scoring_a_task_parallel(judge_llm, llm, qa, db, function, **kwargs):
     """
     Score a task based on the qa and the function.
     """
-    judge_llm = get_llm(judge_llm_obj, judge_model_name, **kwargs)
-    llm = get_llm(llm_obj, model_name, **kwargs)    
+    # judge_llm = get_llm(judge_llm_obj, judge_model_name, **kwargs)
+    # llm = get_llm(llm_obj, model_name, **kwargs)    
     qa = scoring_a_task(judge_llm, llm, qa, db, function, **kwargs)
     usage = llm.usage()
     
     qa['input_token'] = usage['input_token']
     qa['output_token'] = usage['output_token']
+    llm.reset_token()
     
-    time.sleep(5)
+    time.sleep(2)
     return qa
 
 
-def get_a_answer_parallel(llm_obj, qa, db, func, model_name = None, **kwargs):
-    llm = get_llm(llm_obj, model_name, **kwargs)
+def get_a_answer_parallel(llm, qa, db, func, **kwargs):
+    # llm = get_llm(llm_obj, model_name, **kwargs)
     answer = get_answer(func, qa, llm=llm, db=db, **kwargs)
-    time.sleep(5)
+    time.sleep(2)
     return answer
 
 
-def get_answers_parallel(llm_obj, tasks, db, func, **kwargs):
+def get_answers_parallel(llm, tasks, db, func, **kwargs):
     answers = []
     with ThreadPoolExecutor(max_workers=4) as executor:
-        future_to_task = {executor.submit(get_a_answer_parallel, llm_obj, task, db, func, **kwargs): task for task in tasks}
+        future_to_task = {executor.submit(get_a_answer_parallel, llm, task, db, func, **kwargs): task for task in tasks}
         
         for future in as_completed(future_to_task):
             answers.append(future.result())
@@ -174,180 +181,70 @@ def get_answers_parallel(llm_obj, tasks, db, func, **kwargs):
     return answers
 
 
-def scoring_parallel(judge_llm_obj, llm_obj, qas, db, function, **kwargs):
+def scoring_parallel(judge_llm, llm, qas, db, function, **kwargs):
     results = []
     with ThreadPoolExecutor(max_workers=4) as executor:
-        future_to_qa = {executor.submit(scoring_a_task_parallel, judge_llm_obj, llm_obj, qa, db, function, **kwargs): qa for qa in qas}
+        future_to_qa = {executor.submit(scoring_a_task_parallel, judge_llm, llm, qa, db, function, **kwargs): qa for qa in qas}
         
         for future in as_completed(future_to_qa):
             results.append(future.result())
             
     return results
 
-
-def single_process_scoring(model_obj, model_name, **kwargs):
-    db_name = 'test_db'
-    user = 'postgres'
-    password = '12345678'
-    port = '5433'
-    host = 'localhost'
-    
+def scoring(judge_llm, llm, qas, db, function, **kwargs):
+    results = []
+    for qa in qas:
+        result = scoring_a_task_parallel(judge_llm, llm, qa, db, function, **kwargs)
+        results.append(result)
         
-    collection_chromadb = 'category_bank_chroma'
-    persist_directory = 'data/category_bank_chroma'
-    bank_vector_store = create_chroma_db(collection_chromadb, persist_directory)
-
-    collection_chromadb = 'category_non_bank_chroma'
-    persist_directory = 'data/category_non_bank_chroma'
-    none_bank_vector_store = create_chroma_db(collection_chromadb, persist_directory)
-
-    collection_chromadb = 'category_sec_chroma'
-    persist_directory = 'data/category_sec_chroma'
-    sec_vector_store = create_chroma_db(collection_chromadb, persist_directory)
-
-    collection_chromadb = 'category_ratio_chroma'
-    persist_directory = 'data/category_ratio_chroma'
-    ratio_vector_store = create_chroma_db(collection_chromadb, persist_directory)
-
-    collection_chromadb = 'company_name_chroma'
-    persist_directory = 'data/company_name_chroma'
-    vector_db_company = create_chroma_db(collection_chromadb, persist_directory)
-
-    collection_chromadb = 'sql_query'
-    persist_directory = 'data/sql_query'
-    vector_db_sql = create_chroma_db(collection_chromadb, persist_directory)
-    
-    conn = {
-        'db_name': db_name,
-        'user': user,
-        'password': password,
-        'host': host,
-        'port': port
-        
-    }
-    
-
-    judge_llm_obj = Gemini
-    judge_model_name = 'gemini-1.5-pro-002'
-    
-    with open('../synthetic/gpt-4o-generated-v2-scored-pass.json', 'r') as f:
-        questions = json.load(f)
-
-    save_name = model_name.replace('/', '_')
-    
-    batch_size = 12
-    for i in range(0, len(questions), batch_size):
-        bs_questions = questions[i:i+batch_size]
-        
-        try:
-            result = scoring_parallel(judge_llm_obj, llm_obj, bs_questions, db, reasoning_text2SQL, model_name=model_name, api_key=api_key, host = host , judge_model_name=judge_model_name)
-            
-            if i == 0:
-                with open(f'../synthetic/gpt-4o-v2-{save_name}.json', 'w') as f:
-                    json.dump(result, f, indent=4)
-            else:
-                with open(f'../synthetic/gpt-4o-v2-{save_name}.json', 'r') as f:
-                    old_result = json.load(f)
-                
-                old_result.extend(result)
-                with open(f'../synthetic/gpt-4o-v2-{save_name}.json', 'w') as f:
-                    json.dump(old_result, f, indent=4)
-            
-        except Exception as e:
-            print(e)
-            
-# from concurrent.futures import ProcessPoolExecutor    
-# def multi_process_scoring():
-#     args = [(OpenAIWrapper, )]
-    
-#     with ProcessPoolExecutor(max_workers=4) as executor:
-#         future = executor.submit(single_process_scoring, model_obj, model_name, **kwargs)
-        # result = future.result()
+    return results
 
 if __name__ == '__main__':
     
-    db_name = 'test_db'
-    user = 'postgres'
-    password = '12345678'
-    port = '5433'
-    host = 'localhost'
+    model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': 'cuda'})
     
-        
-    collection_chromadb = 'category_bank_chroma'
-    persist_directory = 'data/category_bank_chroma'
-    bank_vector_store = create_chroma_db(collection_chromadb, persist_directory)
-
-    collection_chromadb = 'category_non_bank_chroma'
-    persist_directory = 'data/category_non_bank_chroma'
-    none_bank_vector_store = create_chroma_db(collection_chromadb, persist_directory)
-
-    collection_chromadb = 'category_sec_chroma'
-    persist_directory = 'data/category_sec_chroma'
-    sec_vector_store = create_chroma_db(collection_chromadb, persist_directory)
-
-    collection_chromadb = 'category_ratio_chroma'
-    persist_directory = 'data/category_ratio_chroma'
-    ratio_vector_store = create_chroma_db(collection_chromadb, persist_directory)
-
-    collection_chromadb = 'company_name_chroma'
-    persist_directory = 'data/company_name_chroma'
-    vector_db_company = create_chroma_db(collection_chromadb, persist_directory)
-
-    collection_chromadb = 'sql_query'
-    persist_directory = 'data/sql_query'
-    vector_db_sql = create_chroma_db(collection_chromadb, persist_directory)
-    
-    conn = {
-        'db_name': db_name,
-        'user': user,
-        'password': password,
-        'host': host,
-        'port': port
-        
-    }
-    
-    db = DBHUB(conn, bank_vector_store, none_bank_vector_store, sec_vector_store, ratio_vector_store, vector_db_company, vector_db_sql)
+    db = setup_db(model)
     
     print("DB initialized")
     
-    with open('../synthetic/gpt-4o-generated-v2-scored-pass.json', 'r') as f:
+    with open('../synthetic/gpt-4o-generated-v2-scored.json', 'r') as f:
         questions = json.load(f)
     
-    # with open('../synthetic/gpt-4o-generated-v2.json', 'r') as f:
-    #         old_result = json.load(f)
-    # # Test
+    
     questions = questions
     
     # Change LLM here
-    llm_obj = OpenAIWrapper #ChatGPT
-    model_name = 'nvidia/Llama-3.1-Nemotron-70B-Instruct' #'gpt-4o'
-    api_key = os.getenv('DEEPINFRA_TOKEN')
-    host = 'https://api.deepinfra.com/v1/openai'
+    llm = Gemini() #ChatGPT, OpenAIWrapper
+    # model_name = 'nvidia/Llama-3.1-Nemotron-70B-Instruct' #'gpt-4o'
+    # api_key = os.getenv('DEEPINFRA_TOKEN')
+    # host = 'https://api.deepinfra.com/v1/openai'
     
-    judge_llm_obj = Gemini
-    judge_model_name = 'gemini-1.5-pro-002'
+    judge_llm = Gemini('gemini-1.5-pro-002')
     
-    # result = scoring_parallel(judge_llm_obj, llm_obj, questions, db, reasoning_text2SQL, model_name=model_name, judge_model_name=judge_model_name)
-    # print(result)
-    # table = get_answer(reasoning_text2SQL, llm=llm, task=questions[0], db=db)
-    save_name = 'Nemotron_70B'
+    print(os.getenv('GENAI_API_KEY'))
+    
+    save_name = 'gemini-branching'
     batch_size = 12
-    for i in range(0, len(questions), batch_size):
-        bs_questions = questions[i:i+batch_size]
-        
-        try:
-            result = scoring_parallel(judge_llm_obj, llm_obj, bs_questions, db, reasoning_text2SQL, model_name=model_name, api_key=api_key, host = host , judge_model_name=judge_model_name)
+    results = []
+    loop = 1
+    
+    for _ in range(loop):
+        flag = False
+        for i in range(0, len(questions), batch_size):
+            bs_questions = questions[i:i+batch_size]
             
-            if i == 0:
-                with open(f'../synthetic/gpt-4o-v2-{save_name}.json', 'w') as f:
-                    json.dump(result, f, indent=4)
-            else:
-                with open(f'../synthetic/gpt-4o-v2-{save_name}.json', 'r') as f:
-                    old_result = json.load(f)
+            try:
+                result = scoring_parallel(judge_llm, llm, bs_questions, db, llm_branch_reasoning, branch_reasoning = True, self_debug = True)    
+                results.extend(result)
                 
-                old_result.extend(result)
                 with open(f'../synthetic/gpt-4o-v2-{save_name}.json', 'w') as f:
-                    json.dump(old_result, f, indent=4)
-            
-        except Exception as e:
-            print(e)
+                    json.dump(results, f, indent=4)
+
+                
+            except Exception as e:
+                print(e)
+                flag = True
+                break
+        if flag:
+            print("Error in the loop")
+            break

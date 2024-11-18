@@ -4,6 +4,7 @@ from agent.const import (
     Config,
     Text2SQLConfig,
     GEMINI_FAST_CONFIG,
+    TEXT2SQL_MEDIUM_OPENAI_CONFIG,
     TEXT2SQL_MEDIUM_GEMINI_CONFIG,
     TEXT2SQL_FASTEST_CONFIG,
     TEXT2SQL_SWEET_SPOT_CONFIG
@@ -19,7 +20,7 @@ if __name__ == "__main__":
     db = setup_db(model)
     # db = setup_db_openai(multi_thread=False)
     config = Config(**GEMINI_FAST_CONFIG)
-    text2sql_config = Text2SQLConfig(**TEXT2SQL_FASTEST_CONFIG)
+    text2sql_config = Text2SQLConfig(**TEXT2SQL_MEDIUM_GEMINI_CONFIG)
     
     text2sql = Text2SQL(text2sql_config, db)
     

@@ -174,7 +174,7 @@ Snapshot of the mapping table:
         if len(error_message) > 0 and self_debug:
             while count_debug < 3:
                 
-                response, error_message, execute_table = debug_SQL(response, db, verbose=verbose)
+                response, error_message, execute_table = debug_SQL(llm, response, db, verbose=verbose)
                 error_messages.extend(error_message)
                 execution_tables.extend(execute_table)
             

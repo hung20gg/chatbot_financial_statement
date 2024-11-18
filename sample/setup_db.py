@@ -3,10 +3,18 @@ import pandas as pd
 import os
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
+from concurrent.futures import ThreadPoolExecutor
 import dotenv
 import re
+import time
 
 dotenv.load_dotenv()
+
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 # Step 1: Connect to PostgreSQL
 def connect_to_db(db_name, user, password, host='localhost', port='5432'):
@@ -231,6 +239,7 @@ def setup_chroma_db_sql_query(collection_name, persist_directory, txt_path):
 class DBHUB:
     """
     This will be the hub for both similarity search and rational DB
+    A Centralized DB for all the queries
     """
 
     def __init__(self, conn, 
@@ -239,7 +248,8 @@ class DBHUB:
                  vector_db_securities: Chroma, 
                  vector_db_ratio: Chroma, 
                  vector_db_company: Chroma, 
-                 vector_db_sql: Chroma):
+                 vector_db_sql: Chroma,
+                 multi_thread = True): # Multi-thread only useful for online embedding
         
         
         self.conn = conn
@@ -250,7 +260,7 @@ class DBHUB:
         
         self.vector_db_company = vector_db_company
         self.vector_db_sql = vector_db_sql
-
+        self.multi_thread = multi_thread
     
     
     # Search for columns in bank and non_bank financial report
@@ -274,12 +284,49 @@ class DBHUB:
             for item in result:
                 try:
                     collect_code.add(item.metadata['code'])
-                except:
-                    pass
+                except Exception as e:
+                    print(e)
         return list(collect_code)
     
+    
+    def search_multithread(self, texts, top_k, type_):
+        collect_code = set()
+        if not isinstance(texts, list):
+            texts = [texts]
+
+        # Define a function for parallel execution
+        def search_text(text):
+            if type_ == 'bank':
+                result = self.vector_db_bank.similarity_search(text, top_k)
+            elif type_ == 'non_bank':
+                result = self.vector_db_non_bank.similarity_search(text, top_k)
+            elif type_ == 'securities':
+                result = self.vector_db_securities.similarity_search(text, top_k)
+            elif type_ == 'ratio':
+                result = self.vector_db_ratio.similarity_search(text, top_k)
+            else:
+                raise ValueError("Query table not supported")
+            
+            # Extract the stock codes from the search result
+            return [item.metadata['code'] for item in result]
+        
+        with ThreadPoolExecutor() as executor:
+            results = executor.map(search_text, texts)
+
+        # Collect and combine results
+        for codes in results:
+            collect_code.update(codes)
+
+        return list(collect_code)
+        
+    
     def search_return_df(self, text, top_k, type_ = 'non_bank') -> pd.DataFrame:
-        collect_code = self.search(text, top_k, type_)
+        # print('search', text)
+        if self.multi_thread:
+            collect_code = self.search_multithread(text, top_k, type_)
+        else:
+            collect_code = self.search(text, top_k, type_)
+        # print(collect_code)
         collect_code = [f"'{code}'" for code in collect_code]
         if type_ == 'ratio':
             query = f"SELECT ratio_code, ratio_name FROM map_category_code_ratio WHERE ratio_code IN ({', '.join(collect_code)})"
@@ -292,6 +339,7 @@ class DBHUB:
         return execute_query(query, self.conn, return_type)
     
     def find_stock_code_similarity(self, company_name, top_k=2):
+        start = time.time()
         if isinstance(company_name, str):
             company_name = [company_name]
         stock_codes = set()
@@ -299,8 +347,39 @@ class DBHUB:
             result = self.vector_db_company.similarity_search(name, top_k)
             for item in result:
                 stock_codes.add(item.metadata['stock_code'])
-            
+        
+        end = time.time()
+        logging.info(f"Time taken to find stock code similarity: {end-start}")
         return list(stock_codes)
+    
+    def find_stock_code_similarity_multithread(self, company_name, top_k=2):
+        start = time.time()
+        
+        # Override the original multi_thread
+        original_multi_thread = self.multi_thread
+        self.multi_thread = True
+        
+        if isinstance(company_name, str):
+            company_name = [company_name]
+        stock_codes = set()
+        
+        def search_name(name):
+            result = self.vector_db_company.similarity_search(name, top_k)
+            return [item.metadata['stock_code'] for item in result]
+        
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            results = executor.map(search_name, company_name)
+        
+        for codes in results:
+            stock_codes.update(codes)
+
+        # Reset the multi_thread
+        self.multi_thread = original_multi_thread
+        
+        end = time.time()
+        logging.info(f"Time taken to find stock code similarity multithread: {end-start}")
+        return list(stock_codes)
+    
     
     
     def return_company_from_stock_codes(self, stock_codes):
@@ -316,8 +395,13 @@ class DBHUB:
         return self.query(query, return_type='dataframe')
     
     
+    
     def return_company_info(self, company_name, top_k=2):
-        stock_codes = self.find_stock_code_similarity(company_name, top_k)
+        
+        if self.multi_thread:
+            stock_codes = self.find_stock_code_similarity_multithread(company_name, top_k)
+        else:
+            stock_codes = self.find_stock_code_similarity(company_name, top_k)
         
         df = self.return_company_from_stock_codes(stock_codes)
         if isinstance(df, str):
@@ -338,47 +422,13 @@ class DBHUB:
                 
         return few_shot
     
-    def return_mapping_table(self, bank_column = [], non_bank_column = [], top_k = 5):
-        bank_column_table = ""
-        bank_exact_column = []
-        for col in bank_column:
-            result = self.vector_db_bank.similarity_search(col, top_k)
-            for item in result:
-                bank_exact_column.append(item.metadata['code'])
-        
-        # Get into PostgreSQL to get the exact column name. Should be moved to the Chroma DB
-        if len(bank_exact_column) > 0:
-            bank_exact_column = [f"'{code}'" for code in bank_exact_column]
-            query = f"SELECT category_code, en_caption FROM map_category_code_bank WHERE category_code IN ({', '.join(bank_exact_column)})"
-            bank_column_table = self.query(query, return_type='dataframe')
-                
-        non_bank_column_table = ""
-        non_bank_exact_column = []
-        for col in non_bank_column:
-            result = self.vector_db_non_bank.similarity_search(col, top_k)
-            for item in result:
-                non_bank_exact_column.append(item.metadata['code'])
-        
-        if len(non_bank_exact_column) > 0:
-            non_bank_exact_column = [f"'{code}'" for code in non_bank_exact_column]
-            query = f"SELECT category_code, en_caption FROM map_category_code_non_bank WHERE category_code IN ({', '.join(non_bank_exact_column)})"
-            non_bank_column_table = self.query(query, return_type='dataframe')   
-        
-        return bank_column_table, non_bank_column_table
-    
-    def return_mapping_table_v1(self, 
-                                bank_column=[], 
-                                non_bank_column=[], 
-                                sec_bank_column=[], 
-                                financial_ratio_row=[], top_k=5, *args, **kwargs):
-        
-        raise NotImplementedError("This function is not implemented yet")
     
     def __get_exact_industry_bm25(self, industries):
         query = """
         SELECT distinct (industry)
 FROM company_info
-WHERE industry_tsvector @@ to_tsquery('english', '{industry}');
+WHERE industry_tsvector @@ plainto_tsquery('english', '{industry}')
+LIMIT 50;
         """
         if not isinstance(industries, list):
             industries = [industries]
@@ -387,12 +437,13 @@ WHERE industry_tsvector @@ to_tsquery('english', '{industry}');
             df = self.query(query.format(industry=industry))
             result = df['industry'].values.tolist()
             for item in result:
-                exact_industries.add(item[0])
+                exact_industries.add(item)
         return list(exact_industries)
             
     
-    def return_mapping_table_v2(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = True):
+    def return_mapping_table_v1(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = True):
         
+        start = time.time()
         check_status_table = {
             'map_category_code_non_bank': True,
             'map_category_code_bank': True,
@@ -402,13 +453,16 @@ WHERE industry_tsvector @@ to_tsquery('english', '{industry}');
         
         if len(stock_code) != 0 and not get_all_tables:
             company_df = self.return_company_from_stock_codes(stock_code)
-            
-            if company_df['is_bank'].sum() == 0:
-                check_status_table['map_category_code_bank'] = False
-            if company_df['is_securities'].sum() == 0:
-                check_status_table['map_category_code_securities'] = False
-            if company_df['is_bank'].sum() + company_df['is_securities'].sum() == len(company_df):
-                check_status_table['map_category_code_non_bank'] = False     
+            try:
+                if company_df['is_bank'].sum() == 0:
+                    check_status_table['map_category_code_bank'] = False
+                if company_df['is_securities'].sum() == 0:
+                    check_status_table['map_category_code_securities'] = False
+                if company_df['is_bank'].sum() + company_df['is_securities'].sum() == len(company_df):
+                    check_status_table['map_category_code_non_bank'] = False  
+            except Exception as e:
+                print(e)
+                pass   
          
         # Avoid override from the previous check
         if len(industry) != 0 and not get_all_tables:
@@ -438,7 +492,84 @@ WHERE industry_tsvector @@ to_tsquery('english', '{industry}');
                 
         if len(financial_ratio_row) != 0:
             return_table['map_category_code_ratio'] = self.search_return_df(financial_ratio_row, top_k, type_='ratio')
+           
+        end = time.time()
+        logging.info(f"Time taken to return mapping table: {end-start}") 
+        return return_table
+    
+    def return_mapping_table_v2(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = True):
+        
+        if not self.multi_thread:
+            logging.info("Multi-thread is disabled. Using single thread (v1)")
+            return self.return_mapping_table_v1(financial_statement_row, financial_ratio_row, industry, stock_code, top_k, get_all_tables)
+        
+        start = time.time()
+        
+        check_status_table = {
+            'map_category_code_non_bank': True,
+            'map_category_code_bank': True,
+            'map_category_code_securities': True,
+            'map_category_code_ratio': True
+        }
+        
+        if len(stock_code) != 0 and not get_all_tables:
+            company_df = self.return_company_from_stock_codes(stock_code)
+            try:
+                if company_df['is_bank'].sum() == 0:
+                    check_status_table['map_category_code_bank'] = False
+                if company_df['is_securities'].sum() == 0:
+                    check_status_table['map_category_code_securities'] = False
+                if company_df['is_bank'].sum() + company_df['is_securities'].sum() == len(company_df):
+                    check_status_table['map_category_code_non_bank'] = False  
+            except Exception as e:
+                print(e)
+                pass   
+         
+        # Avoid override from the previous check
+        if len(industry) != 0 and not get_all_tables:
+            exact_industries = self.__get_exact_industry_bm25(industry)
+            for ind in exact_industries:
+                if ind == 'Banking':
+                    check_status_table['map_category_code_non_bank'] = True
+                if ind == 'Financial Services':
+                    check_status_table['map_category_code_securities'] = True
+                else:
+                    check_status_table['map_category_code_bank'] = True
+                
+        return_table = {
+            'map_category_code_non_bank': None,
+            'map_category_code_bank': None,
+            'map_category_code_securities': None,
+            'map_category_code_ratio': None
+        }   
+        
+        tasks = []     
+                
+        if len(financial_statement_row) != 0:  
+            if check_status_table['map_category_code_non_bank']:
+                tasks.append(('map_category_code_non_bank', financial_statement_row, top_k, 'non_bank'))
+                
+            if check_status_table['map_category_code_bank']:
+                tasks.append(('map_category_code_bank', financial_statement_row, top_k, 'bank'))
+                
+            if check_status_table['map_category_code_securities']:
+                tasks.append(('map_category_code_securities', financial_statement_row, top_k, 'securities'))
+                
+        if len(financial_ratio_row) != 0:
+            tasks.append(('map_category_code_ratio', financial_ratio_row, top_k, 'ratio'))
             
+        def process_task(task):
+            table_name, financial_statement_row, top_k, type_ = task
+            return table_name, self.search_return_df(financial_statement_row, top_k, type_)
+        
+        with ThreadPoolExecutor() as executor:
+            results = executor.map(process_task, tasks)
+            
+        for table_name, result in results:
+            return_table[table_name] = result
+            
+        end = time.time()
+        logging.info(f"Time taken to return mapping table multithread: {end-start}")     
         return return_table
 
 
