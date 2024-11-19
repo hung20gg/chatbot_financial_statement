@@ -214,19 +214,20 @@ if __name__ == '__main__':
     questions = questions
     
     # Change LLM here
-    llm = Gemini() #ChatGPT, OpenAIWrapper
-    # model_name = 'nvidia/Llama-3.1-Nemotron-70B-Instruct' #'gpt-4o'
-    # api_key = os.getenv('DEEPINFRA_TOKEN')
-    # host = 'https://api.deepinfra.com/v1/openai'
+    # llm = Gemini() #ChatGPT, OpenAIWrapper
+    model_name = 'nvidia/Llama-3.1-Nemotron-70B-Instruct' #'gpt-4o'
+    api_key = os.getenv('DEEPINFRA_TOKEN')
+    host = 'https://api.deepinfra.com/v1/openai'
+    llm = OpenAIWrapper(model_name = model_name, api_key = api_key, host = host)
     
     judge_llm = Gemini('gemini-1.5-pro-002')
     
     print(os.getenv('GENAI_API_KEY'))
     
-    save_name = 'gemini-branching'
+    save_name = 'nemetron-simple-v2'
     batch_size = 12
     results = []
-    loop = 1
+    loop = 2
     
     for _ in range(loop):
         flag = False
@@ -234,7 +235,7 @@ if __name__ == '__main__':
             bs_questions = questions[i:i+batch_size]
             
             try:
-                result = scoring_parallel(judge_llm, llm, bs_questions, db, llm_branch_reasoning, branch_reasoning = True, self_debug = True)    
+                result = scoring_parallel(judge_llm, llm, bs_questions, db, reasoning_text2SQL)    
                 results.extend(result)
                 
                 with open(f'../synthetic/gpt-4o-v2-{save_name}.json', 'w') as f:
