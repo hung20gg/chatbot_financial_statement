@@ -49,7 +49,7 @@ CREATE TABLE map_category_code_securities(
 CREATE TABLE bank_financial_report(
     stock_code VARCHAR(255) references company_info(stock_code),
     year int, -- The reported financial year
-    quarter int, --  The quarter reported (contain value either 1, 2, 3, 4). If the value is 0, that mean the report is for annual report.
+    quarter int, --  The quarter reported (contain value either 0, 1, 2, 3, 4). If the value is 0, that mean the report is for annual report.
     category_code VARCHAR(255) references map_category_code_bank(category_code),
     data float -- The value of the recorded category (in Million VND)
 );
