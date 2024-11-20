@@ -274,7 +274,6 @@ def evaluate_difficult_qa():
     results = []
     with ThreadPoolExecutor(max_workers=2) as executor:
         future_to_task = {executor.submit(parallel_evaluate_difficult, qa): qa for qa in data}
-        
         for future in as_completed(future_to_task):
             qa = future_to_task[future]
             results.append(qa)

@@ -5,6 +5,7 @@ from llm_test import reasoning_text2SQL
 from branch_reasoning import llm_branch_reasoning
 import utils
 
+from llm_test import reasoning_text2SQL
 
 from llm.llm_utils import get_json_from_text_response, get_code_from_text_response
 from llm.llm.chatgpt import ChatGPT, OpenAIWrapper

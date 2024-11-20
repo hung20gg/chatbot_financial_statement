@@ -8,7 +8,7 @@
                 "language": "sql",
                 "code": "SELECT stock_code, data AS dter\nFROM financial_ratio\nWHERE ratio_code = 'DTER'\nAND stock_code IN ('VCB', 'TCB')\nAND year = 2022\nAND quarter = 0;\n"
             }
-        ],
+        ]
         "score": 1,
         "difficulty": 1
     },
@@ -60,7 +60,7 @@
                 "language": "sql",
                 "code": "SELECT \n    bfr.stock_code,\n    bfr.year,\n    bfr.quarter,\n    SUM(CASE WHEN bfr.category_code = 'CF_009' THEN bfr.data ELSE 0 END) AS operating_cash_flow,\n    SUM(CASE WHEN bfr.category_code = 'CF_025' THEN bfr.data ELSE 0 END) AS capital_expenditures,\n    SUM(CASE WHEN bfr.category_code = 'CF_009' THEN bfr.data ELSE 0 END) - \n    SUM(CASE WHEN bfr.category_code = 'CF_025' THEN bfr.data ELSE 0 END) AS free_cash_flow\nFROM \n    bank_financial_report bfr\nWHERE \n    bfr.stock_code IN ('VCB', 'TCB', 'VPB') AND\n    bfr.year = 2024 AND\n    bfr.quarter = 2 AND\n    bfr.category_code IN ('CF_009', 'CF_025')\nGROUP BY \n    bfr.stock_code, bfr.year, bfr.quarter;\n"
             }
-        ],
+        ]
         "score": 1,
         "difficulty": 2
     },
