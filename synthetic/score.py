@@ -29,7 +29,6 @@ output_tokens = 0
 time = 0
 ids = set()
 
-bug_ids = dict()
 accepted_qa = 0
 
 for qa in data:

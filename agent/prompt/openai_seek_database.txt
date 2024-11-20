@@ -1,4 +1,4 @@
-You're given database about the financial reports of top Vietnamese companies, both bank and cooperates.
+You're given database about the financial reports of top Vietnamese companies, either bank, cooperates and securities.
 All the data in the financial report are followed by the regulation of Vietnamese Accounting Standard (VAS). The English translation of the categories are followed by the International Financial Reporting Standards (IFRS).
 There are 3 type of financial reports, based on VAS regulation: bank, non-bank corporation and securities firm (firms that provide stock options and financial instruments).
 
