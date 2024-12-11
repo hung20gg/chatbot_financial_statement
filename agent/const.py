@@ -6,11 +6,14 @@ current_dir = os.path.dirname(__file__)
 
 class Config(BaseModel):
     llm: str
+    
+    
+class ChatConfig(Config):
     routing_llm: str
     summary_every: int = -1
     
-class Text2SQLConfig(BaseModel):
-    llm: str
+    
+class Text2SQLConfig(Config):
     sql_llm: str
     reasoning: bool = True
     branch_reasoning: bool = True
@@ -89,6 +92,19 @@ TEXT2SQL_MEDIUM_OPENAI_CONFIG = {
 TEXT2SQL_MEDIUM_GEMINI_CONFIG = {
     "llm": 'gemini-1.5-flash-002',
     "sql_llm": 'gemini-1.5-flash-002',
+    "reasoning": True,
+    "branch_reasoning": False,
+    "company_top_k": 2,
+    "sql_example_top_k": 2,
+    "account_top_k": 4,
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': False
+}
+
+TEXT2SQL_EXP_GEMINI_CONFIG = {
+    "llm": 'gemini-2.0-flash-exp',
+    "sql_llm": 'gemini-2.0-flash-exp',
     "reasoning": True,
     "branch_reasoning": False,
     "company_top_k": 2,

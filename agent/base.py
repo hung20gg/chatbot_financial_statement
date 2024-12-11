@@ -1,7 +1,9 @@
 from .const import Config
-class BaseAgent:
-    def __init__(self, config : Config):
-        self.config = config
+from pydantic import BaseModel, ConfigDict
+class BaseAgent(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    
+    config: Config
 
     def get_response(self, user_input):
         return {

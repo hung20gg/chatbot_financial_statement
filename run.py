@@ -22,7 +22,7 @@ if __name__ == "__main__":
     config = Config(**GEMINI_FAST_CONFIG)
     text2sql_config = Text2SQLConfig(**TEXT2SQL_MEDIUM_GEMINI_CONFIG)
     
-    text2sql = Text2SQL(text2sql_config, db)
+    text2sql = Text2SQL(config = text2sql_config, db = db, max_steps=2)
     
     db.search_return_df('total assets', 2, 'bank')
     prompt = "Compare the Return on Assets (ROA) and Return on Equity (ROE) of Vinamilk and Masan Group for the fiscal year 2023.  Additionally, provide the total assets and total equity for both companies for the same period."

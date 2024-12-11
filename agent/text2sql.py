@@ -11,6 +11,9 @@ from . import const
 import pandas as pd
 import logging
 import time
+from pydantic import SkipValidation, Field
+from typing import Any
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
@@ -23,10 +26,20 @@ def steps_to_strings(steps):
     return steps_string
 
 class Text2SQL(BaseAgent):
-    def __init__(self, config: Text2SQLConfig, db: DBHUB, max_steps: int = 2, **kwargs):
-        super().__init__(config)
+    
+    db: SkipValidation
+    max_steps: int
+    history: list = []
+    llm_responses: list = []
+    
+    llm: Any = Field(default=None)
+    sql_llm: Any = Field(default=None)
+    
+    def __init__(self, config: Config, db, max_steps: int = 2, **kwargs):
+        super().__init__(config=config, db = db, max_steps = max_steps)
         
         self.db = db
+        self.max_steps = max_steps
         
         # LLM
         self.llm = utils.get_llm_wrapper(model_name=config.llm, **kwargs)
@@ -35,16 +48,7 @@ class Text2SQL(BaseAgent):
         else:
             logging.warning("SQL LLM is not provided. Use the same LLM model for SQL")
             self.sql_llm = self.sql_llm
-            
-        # Reasoning
-        self.reasoning = config.reasoning
-        self.branch_reasoning = config.branch_reasoning
-        self.max_steps = max_steps
-        
-        self.self_debug = config.self_debug
-        
-        self.history = []
-        self.llm_responses = []
+
         
     def reset(self):
         self.history = []
@@ -56,7 +60,6 @@ class Text2SQL(BaseAgent):
         Simplify the branch reasoning response
         """
         
-        assert self.branch_reasoning, "Branch reasoning is not implemented"
         assert self.max_steps > 0, "Max steps must be greater than 0"
         
         brief_database = const.BREAKDOWN_NOTE_PROMPT
@@ -358,13 +361,13 @@ class Text2SQL(BaseAgent):
         start = time.time()
         steps = []
         str_task = task
-        if self.branch_reasoning:
+        if self.config.branch_reasoning or self.config.reasoning:
             steps = self.simplify_branch_reasoning(task)
             str_task = steps_to_strings(steps)
             
         company_info, suggest_table = self.get_stock_code_and_suitable_row(str_task, format='markdown')
         
-        if not self.branch_reasoning:
+        if not self.config.branch_reasoning:
             
             # If steps are broken down
             if len(steps) == 0:
