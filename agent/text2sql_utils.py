@@ -1,10 +1,10 @@
 import pandas as pd
+import os
 
 from llm.llm.chatgpt import ChatGPT, OpenAIWrapper
 from llm.llm.gemini import Gemini
 
 from llm.llm_utils import get_code_from_text_response
-from ETL.hub import DBHUB
 
 def get_llm_wrapper(model_name, **kwargs):
     if 'gpt' in model_name:
@@ -18,6 +18,10 @@ def get_llm_wrapper(model_name, **kwargs):
 
 
 def read_file_without_comments(file_path, start=["#", "//"]):
+    if not os.path.exists(file_path):
+        Warning(f"File {file_path} not found")
+        return ""
+    
     with open(file_path, 'r') as f:
         lines = f.readlines()
         new_lines = []
@@ -27,6 +31,10 @@ def read_file_without_comments(file_path, start=["#", "//"]):
         return '\n'.join(new_lines)
     
 def read_file(file_path):
+    if not os.path.exists(file_path):
+        Warning(f"File {file_path} not found")
+        return ""
+    
     with open(file_path, 'r') as f:
         return f.read()
     
@@ -38,7 +46,7 @@ def df_to_markdown(df):
     return markdown
 
 
-def company_name_to_stock_code(db : DBHUB, names, method = 'similarity', top_k = 2) -> pd.DataFrame:
+def company_name_to_stock_code(db, names, method = 'similarity', top_k = 2) -> pd.DataFrame:
     """
     Get the stock code based on the company name
     """
@@ -113,7 +121,7 @@ def is_sql_full_of_comments(sql_text):
     
     
     
-def TIR_reasoning(response, db: DBHUB, verbose=False):
+def TIR_reasoning(response, db, verbose=False):
     codes = get_code_from_text_response(response)
         
     TIR_response = ""
@@ -157,7 +165,7 @@ def TIR_reasoning(response, db: DBHUB, verbose=False):
     return response, execution_error, execution_table
 
     
-def get_company_detail_from_df(dfs, db: DBHUB, method = 'similarity') -> pd.DataFrame:
+def get_company_detail_from_df(dfs, db, method = 'similarity') -> pd.DataFrame:
     stock_code = set()
     if not isinstance(dfs, list):
         dfs = [dfs]

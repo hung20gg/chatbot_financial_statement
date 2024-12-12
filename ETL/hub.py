@@ -1,3 +1,6 @@
+# No longer used
+# Use dbmanager instead
+
 from langchain_chroma import Chroma
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Pool

@@ -2,11 +2,13 @@ from .base import BaseAgent
 from . import text2sql_utils as utils
 import sys 
 sys.path.append('..')
-from ETL.hub import DBHUB
+
+from ETL.dbmanager import BaseDBHUB
 from llm.llm.abstract import LLM
 from llm.llm_utils import get_json_from_text_response, get_code_from_text_response
 from .const import Text2SQLConfig, Config
 from . import const
+from .prompt.prompt_controller import PromptConfig, VERTICAL_PROMPT_BASE, VERTICAL_PROMPT_UNIVERSAL
 
 import pandas as pd
 import logging
@@ -27,19 +29,22 @@ def steps_to_strings(steps):
 
 class Text2SQL(BaseAgent):
     
-    db: SkipValidation
-    max_steps: int
-    history: list = []
-    llm_responses: list = []
+    db: BaseDBHUB # The database connection.
+    max_steps: int # The maximum number of steps to break down the task
+    prompt_config: PromptConfig # The prompt configuration. This is for specify prompt for horizontal or vertical database design
     
-    llm: Any = Field(default=None)
-    sql_llm: Any = Field(default=None)
+    history: list = [] # The history of the conversation
+    llm_responses: list = [] # All the responses from the LLM model
     
-    def __init__(self, config: Config, db, max_steps: int = 2, **kwargs):
-        super().__init__(config=config, db = db, max_steps = max_steps)
+    llm: Any = Field(default=None) # The LLM model
+    sql_llm: Any = Field(default=None) # The SQL LLM model
+    
+    def __init__(self, config: Config, prompt_config: PromptConfig, db, max_steps: int = 2, **kwargs):
+        super().__init__(config=config, db = db, max_steps = max_steps, prompt_config = prompt_config)
         
         self.db = db
         self.max_steps = max_steps
+        self.prompt_config = prompt_config
         
         # LLM
         self.llm = utils.get_llm_wrapper(model_name=config.llm, **kwargs)
@@ -62,7 +67,7 @@ class Text2SQL(BaseAgent):
         
         assert self.max_steps > 0, "Max steps must be greater than 0"
         
-        brief_database = const.BREAKDOWN_NOTE_PROMPT
+        brief_database = self.prompt_config.BREAKDOWN_NOTE_PROMPT
         messages = [
             {
                 "role": "system",
@@ -70,7 +75,7 @@ class Text2SQL(BaseAgent):
             },
             {
                 "role": "user",
-                "content": const.BRANCH_REASONING_PROMPT.format(task = task, brief_database = brief_database)
+                "content": self.prompt_config.BRANCH_REASONING_PROMPT.format(task = task, brief_database = brief_database)
             }
         ]
     
@@ -106,7 +111,7 @@ class Text2SQL(BaseAgent):
         messages = [
         {
             "role": "user",
-            "content": const.GET_STOCK_CODE_AND_SUITABLE_ROW_PROMPT.format(task = task)
+            "content": self.prompt_config.GET_STOCK_CODE_AND_SUITABLE_ROW_PROMPT.format(task = task)
         }]
         
         
@@ -130,8 +135,8 @@ class Text2SQL(BaseAgent):
         # Get data from JSON response
         industry = json_response.get("industry", [])
         company_names = json_response.get("company_name", [])
-        financial_statement_row = json_response.get("financial_statement_row", [])
-        financial_ratio_row = json_response.get("financial_ratio_row", [])
+        financial_statement_account = json_response.get("financial_statement_account", [])
+        financial_ratio = json_response.get("financial_ratio", [])
         
         
         # Get company data stock code
@@ -139,7 +144,12 @@ class Text2SQL(BaseAgent):
         stock_code = company_df['stock_code'].values.tolist()
         
         # Get mapping table
-        dict_dfs = self.db.return_mapping_table_v2(financial_statement_row = financial_statement_row, financial_ratio_row = financial_ratio_row, industry = industry, stock_code = stock_code, top_k =self.config.account_top_k, get_all_tables=self.config.get_all_acount)    
+        dict_dfs = self.db.return_mapping_table(financial_statement_row = financial_statement_account, 
+                                                financial_ratio_row = financial_ratio, 
+                                                industry = industry, 
+                                                stock_code = stock_code, 
+                                                top_k =self.config.account_top_k, 
+                                                get_all_tables=self.config.get_all_acount)    
         
         # Return data
         if format == 'dataframe':
@@ -170,6 +180,24 @@ class Text2SQL(BaseAgent):
         return utils.TIR_reasoning(response, self.db, verbose=self.config.verbose)
     
     def debug_sql_code(self, history):
+        
+        """
+        The debug_sql_code method is designed to debug SQL queries by iteratively refining them up 
+        to a maximum of three times. It uses the SQL language model to identify and fix errors in the 
+        SQL queries.
+        
+        Parameters:
+
+            history (list): A list of the conversation history, including previous SQL queries and responses.
+        
+        Returns:
+
+            history (list): Updated conversation history with debugging attempts.
+            error_messages (list): A list of error messages encountered during the debugging process.
+            execution_tables (list): A list of execution tables generated during the debugging process.
+        
+        """
+        
         error_messages = []
         execution_tables = []
         count_debug = 1
@@ -197,16 +225,16 @@ class Text2SQL(BaseAgent):
     def reasoning_text2SQL(self, task: str, company_info: pd.DataFrame, suggest_table: str, history: list = None):
         
         """
-        Reasoning with Text2SQL
+        Reasoning with Text2SQL without branch reasoning.
         
         Input:
-            - task: str
-            - company_info: pd.DataFrame
-            - suggest_table: str
+            - task: str. The task to be solved, provided as a natural language string.
+            - company_info: pd.DataFrame. Information about the company relevant to the task.
+            - suggest_table: str. The suggested table for the task.
             - history: list
         Output:
-            - history: list
-            - error_messages: list
+            - history: list.
+            - error_messages: list.
             - execution_tables: list
             
         This function will convert the natural language query into SQL query and execute the SQL query
@@ -216,11 +244,11 @@ class Text2SQL(BaseAgent):
         system_prompt = """
     You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query.
     """
-        database_description = const.OPENAI_SEEK_DATABASE_PROMPT
+        database_description = self.prompt_config.OPENAI_SEEK_DATABASE_PROMPT
         
         few_shot = self.db.find_sql_query(text=task, top_k=self.config.sql_example_top_k)
         
-        prompt = const.REASONING_TEXT2SQL_PROMPT.format(database_description = database_description, task = task, stock_code_table = stock_code_table, suggestions_table = suggest_table, few_shot = few_shot)
+        prompt = self.prompt_config.REASONING_TEXT2SQL_PROMPT.format(database_description = database_description, task = task, stock_code_table = stock_code_table, suggestions_table = suggest_table, few_shot = few_shot)
         
         if history is None:
             history = [
@@ -276,6 +304,17 @@ class Text2SQL(BaseAgent):
         Branch reasoning with Text2SQL 
         Instead of solving the task directly, it will break down the task into steps and solve each step
         
+        Input:
+            - task: str. The task to be solved, provided as a natural language string.
+            - steps: list[str]. The steps to break down the task.
+            - company_info: pd.DataFrame. Information about the company relevant to the task.
+            - suggest_table: str. The suggested table for the task.
+            - history: list
+        Output:
+            - history: list.
+            - error_messages: list.
+            - execution_tables: list
+        
         Future work:
             - Simulate with Monte Carlo Tree Search
         """
@@ -283,8 +322,8 @@ class Text2SQL(BaseAgent):
         stock_code_table = utils.df_to_markdown(company_info)
         look_up_stock_code = f"\nHere are the detail of the companies: \n\n{stock_code_table}"
 
-        database_description = const.OPENAI_SEEK_DATABASE_PROMPT
-        content = const.BRANCH_REASONING_TEXT2SQL_PROMPT.format(database_description = database_description, task = task, steps_string = steps_to_strings(steps), suggestions_table = suggest_table)
+        database_description = self.prompt_config.OPENAI_SEEK_DATABASE_PROMPT
+        content = self.prompt_config.BRANCH_REASONING_TEXT2SQL_PROMPT.format(database_description = database_description, task = task, steps_string = steps_to_strings(steps), suggestions_table = suggest_table)
     
         if history is None:
             task_index = 1
@@ -357,7 +396,20 @@ class Text2SQL(BaseAgent):
     def solve(self, task: str):
         """
         Solve the task with Text2SQL
+        The solve method is designed to solve a given task by converting it into SQL queries using the Text2SQL model. It handles both simple and complex tasks by breaking them down into steps if necessary.
+
+        Parameters:
+
+            task (str): The task to be solved, provided as a natural language string.
+
+        Returns:
+
+            history (list): A list of the conversation history.
+            error_messages (list): A list of error messages from SQL query.
+            execution_tables (list): A list of execution tables generated during the process.
+            
         """
+        
         start = time.time()
         steps = []
         str_task = task

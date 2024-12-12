@@ -131,7 +131,7 @@ def load_csv_to_postgres(table_name, csv_path, primary_key=None, foreign_key: di
         
         
         
-def execute_query(query, conn=None, return_type='tuple'):
+def execute_query(query, conn=None, params = None, return_type='dataframe'):
     if conn is None:
         raise ValueError("Connection is not provided")
     
@@ -141,7 +141,8 @@ def execute_query(query, conn=None, return_type='tuple'):
         conn = connect_to_db(**conn)
     try:
         with conn.cursor() as cur:
-            cur.execute(query)
+            
+            cur.execute(query, params)
             result = cur.fetchall()
             
             if return_type == 'dataframe':
@@ -272,13 +273,22 @@ RDB_SETUP_CONFIG = {
     'financial_ratio' : ['../csv/financial_ratio.csv', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}],
 }
 
-VECTOR_DB_SETUP_CONFIG = {
-    'company_name_chroma': ['../data/company_name_chroma', 'company_info'],
-    'category_bank_chroma': ['../data/category_bank_chroma', 'map_category_code_bank'],
-    'category_non_bank_chroma': ['../data/category_non_bank_chroma', 'map_category_code_non_bank'],
-    'category_sec_chroma': ['../data/category_sec_chroma', 'map_category_code_securities'],
-    'category_ratio_chroma': ['../data/category_ratio_chroma', 'map_category_code_ratio'],
-    'sql_query': ['../data/sql_query', '../agent/prompt/simple_query_v2.txt'],
+LOCAL_VERTICAL_BASE_VECTORDB_SETUP_CONFIG = {
+    'company_name_chroma': ['../data/company_name_chroma_local', 'company_info'],
+    'category_bank_chroma': ['../data/category_bank_chroma_local', 'map_category_code_bank'],
+    'category_non_bank_chroma': ['../data/category_non_bank_chroma_local', 'map_category_code_non_bank'],
+    'category_sec_chroma': ['../data/category_sec_chroma_local', 'map_category_code_securities'],
+    'category_ratio_chroma': ['../data/category_ratio_chroma_local', 'map_category_code_ratio'],
+    'sql_query': ['../data/sql_query_local', '../agent/prompt/vertical/base/simple_query_v2.txt'],
+}
+
+OPENAI_VERTICAL_BASE_VECTORDB_SETUP_CONFIG = {
+    'company_name_chroma': ['../data/company_name_chroma_openai', 'company_info'],
+    'category_bank_chroma': ['../data/category_bank_chroma_openai', 'map_category_code_bank'],
+    'category_non_bank_chroma': ['../data/category_non_bank_chroma_openai', 'map_category_code_non_bank'],
+    'category_sec_chroma': ['../data/category_sec_chroma_openai', 'map_category_code_securities'],
+    'category_ratio_chroma': ['../data/category_ratio_chroma_openai', 'map_category_code_ratio'],
+    'sql_query': ['../data/sql_query_openai', '../agent/prompt/vertical/base/simple_query_v2.txt'],
 }
 
 def setup_rdb(config, **db_conn):
@@ -309,12 +319,12 @@ def main():
         
     }
     
-    # model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': 'cuda'})
+    model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': 'cuda'})
     
     # setup_rdb(RDB_SETUP_CONFIG, **db_conn)
     # logging.info("RDB setup completed")
-    setup_vector_db(VECTOR_DB_SETUP_CONFIG, **db_conn)
-    # setup_vector_db(VECTOR_DB_SETUP_CONFIG, model, **db_conn)
+    # setup_vector_db(VECTOR_DB_SETUP_CONFIG, **db_conn)
+    setup_vector_db(LOCAL_VERTICAL_BASE_VECTORDB_SETUP_CONFIG, model, **db_conn)
     logging.info("Vector DB setup completed")
             
 if __name__ == '__main__':

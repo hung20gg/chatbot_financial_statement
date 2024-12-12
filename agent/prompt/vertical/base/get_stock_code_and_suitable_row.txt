@@ -12,8 +12,8 @@ Return in JSON format, followed by this schema.
 {{
     "industry": list[str],
     "company_name": list[str],
-    "financial_statement_row": list[str],
-    "financial_ratio_row": list[str]
+    "financial_statement_account": list[str],
+    "financial_ratio": list[str]
 }}
 ```
 Return an empty list if no related data is found.
