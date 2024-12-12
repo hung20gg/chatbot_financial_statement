@@ -23,7 +23,8 @@ from ETL.dbmanager.setup import (
 )
 
 from langchain_huggingface import HuggingFaceEmbeddings
-
+import json
+import torch
 
 
 
@@ -39,7 +40,8 @@ if __name__ == "__main__":
     text2sql_config = Text2SQLConfig(**TEXT2SQL_MEDIUM_OPENAI_CONFIG)
     prompt_config = PromptConfig(**VERTICAL_PROMPT_BASE)
     
-    embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': 'cuda'})
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
     db_config.embedding = embedding_model
     
     db = setup_db(db_config)
@@ -55,3 +57,6 @@ if __name__ == "__main__":
     
     for t in tab:
         print(t)
+        
+    with open('history.json', 'w') as f:
+        json.dump(his, f, indent=4)
