@@ -11,6 +11,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_huggingface  import (
     HuggingFaceEmbeddings,
 )
+import torch
 
 import logging
 import time
@@ -309,7 +310,9 @@ def setup_vector_db(config, model_name = 'text-embedding-3-small', **db_conn):
             setup_chroma_db_fs(table, *params, **db_conn)
             
             
+            
 def main():
+    
     db_conn = {
         'db_name': 'test_db',
         'user': 'postgres',
@@ -319,7 +322,9 @@ def main():
         
     }
     
-    model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': 'cuda'})
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    
+    model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
     
     # setup_rdb(RDB_SETUP_CONFIG, **db_conn)
     # logging.info("RDB setup completed")
