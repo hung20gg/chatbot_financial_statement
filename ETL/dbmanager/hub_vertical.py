@@ -140,9 +140,6 @@ class HubVerticalBase(BaseDBHUB):
     
     def _return_mapping_table(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = True):
         
-        
-        
-        
         start = time.time()
         check_status_table = {
             'map_category_code_non_bank': True,

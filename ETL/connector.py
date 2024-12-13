@@ -252,7 +252,7 @@ def setup_chroma_db_company_name(collection_name, persist_directory, table, mode
     
     def process_company(chroma_db, company):
         print(company)
-        chroma_db.add_texts(list(company), metadatas=[{'lang': 'vi', 'code': company[0]}] * 4)
+        chroma_db.add_texts(list(company), metadatas=[{'lang': 'vi', 'stock_code': company[0]}] * 4)
     
     with ThreadPoolExecutor() as executor:
         executor.map(lambda company: process_company(chroma_db, company), companies)
@@ -269,8 +269,10 @@ def setup_chroma_db_sql_query(collection_name, persist_directory, txt_path, mode
         sql_code = heading[i]+ s
         task = sql_code.split('\n')[0]
         task = re.sub(r'--\s*\d+\.?', '', task).strip()
-        print(task)
         
+        codes.append((task, sql_code))
+        print(task)
+        # print(sql_code)
         print('====================')
         
                 
@@ -344,20 +346,20 @@ def main():
         
     }
     
-    client = PersistentClient(settings = Settings(persist_directory = '../data/vector_db_openai'))
+    client = PersistentClient(path = '../data/vector_db_vertical_local', settings = Settings())
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
+    model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
     
     # setup_rdb(RDB_SETUP_CONFIG, **db_conn)
     # logging.info("RDB setup completed")
-    setup_vector_db(OPENAI_VERTICAL_BASE_VECTORDB_SETUP_CONFIG, client, **db_conn)
-    # setup_vector_db(LOCAL_VERTICAL_BASE_VECTORDB_SETUP_CONFIG, model, **db_conn)
+    # setup_vector_db(OPENAI_VERTICAL_BASE_VECTORDB_SETUP_CONFIG, client, **db_conn)
+    setup_vector_db(LOCAL_VERTICAL_BASE_VECTORDB_SETUP_CONFIG, client, model, **db_conn)
     logging.info("Vector DB setup completed")
             
 if __name__ == '__main__':
     main()
-
+    
 
 
     
