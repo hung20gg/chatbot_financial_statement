@@ -115,10 +115,9 @@ class BaseDBHUB(BaseModel):
             
         return list(stock_codes)
     
+    
+    
     def find_stock_code_similarity(self, company_name, top_k=2) -> list[str]:
-        
-        
-        
         
         if self.multi_threading:
             return self.__find_stock_code_similarity_multithread(company_name, top_k)
@@ -166,7 +165,7 @@ class BaseDBHUB(BaseModel):
         few_shot = ""
         for result in results:
             if result.metadata.get('sql_code', None) is not None:
-                few_shot += '#### '+result.page_content + '\n\n'
+                few_shot += '#### ' + result.page_content + '\n\n'
                 few_shot += f"```sql\n\n{result.metadata['sql_code']}```"
                 
         return few_shot

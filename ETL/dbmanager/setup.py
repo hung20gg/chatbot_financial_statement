@@ -3,6 +3,9 @@ from pydantic import BaseModel, Field
 from typing import Union
 from langchain_huggingface import HuggingFaceEmbeddings
 
+from chromadb import Client, PersistentClient
+from chromadb.config import Settings
+
 import os
 
 from ..connector import *
@@ -76,30 +79,28 @@ def setup_db(config: DBConfig, multi_thread = True):
         local_model = True
     elif config.embedding != 'text-embedding-3-small':
         local_model = True
+        
+    db_type = 'vertical' if 'vertical' in config.database_choice else 'horizontal'
+    
+    persist_client = PersistentClient(path = os.path.join(current_directory, f'../../data/vector_db_{db_type}_{"local" if local_model else "openai"}'), settings = Settings())
     
     collection_chromadb = 'category_bank_chroma'
-    persist_directory = os.path.join(current_directory, f'../../data/category_bank_chroma_{"local" if local_model else "openai"}')
-    bank_vector_store = create_chroma_db(collection_chromadb, persist_directory, config.embedding)
+    bank_vector_store = create_chroma_db(collection_chromadb, persist_client, config.embedding)
     
     collection_chromadb = 'category_non_bank_chroma'
-    persist_directory = os.path.join(current_directory, f'../../data/category_non_bank_chroma_{"local" if local_model else "openai"}')
-    none_bank_vector_store = create_chroma_db(collection_chromadb, persist_directory, config.embedding)
+    none_bank_vector_store = create_chroma_db(collection_chromadb, persist_client, config.embedding)
     
     collection_chromadb = 'category_sec_chroma'
-    persist_directory = os.path.join(current_directory, f'../../data/category_sec_chroma_{"local" if local_model else "openai"}')
-    sec_vector_store = create_chroma_db(collection_chromadb, persist_directory, config.embedding)
+    sec_vector_store = create_chroma_db(collection_chromadb, persist_client, config.embedding)
     
     collection_chromadb = 'category_ratio_chroma'
-    persist_directory = os.path.join(current_directory, f'../../data/category_ratio_chroma_{"local" if local_model else "openai"}')
-    ratio_vector_store = create_chroma_db(collection_chromadb, persist_directory, config.embedding)
+    ratio_vector_store = create_chroma_db(collection_chromadb, persist_client, config.embedding)
     
     collection_chromadb = 'company_name_chroma'
-    persist_directory = os.path.join(current_directory, f'../../data/company_name_chroma_{"local" if local_model else "openai"}')
-    vector_db_company = create_chroma_db(collection_chromadb, persist_directory, config.embedding)
+    vector_db_company = create_chroma_db(collection_chromadb, persist_client, config.embedding)
     
     collection_chromadb = 'sql_query'
-    persist_directory = os.path.join(current_directory, f'../../data/sql_query_{"local" if local_model else "openai"}')
-    vector_db_sql = create_chroma_db(collection_chromadb, persist_directory, config.embedding)
+    vector_db_sql = create_chroma_db(collection_chromadb, persist_client, config.embedding)
     
     if config.database_choice == 'vertical_base':
         return HubVerticalBase(conn, 

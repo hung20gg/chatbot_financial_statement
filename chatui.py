@@ -1,3 +1,7 @@
+# Copy this file to other directory and run it to see the chat interface
+# There is some conflict between steamlit and chroma
+
+
 import streamlit as st
 import json
 

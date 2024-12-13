@@ -5,7 +5,6 @@ from . import text2sql_utils as utils
 import sys
 sys.path.append('..')
 
-from ETL.hub import DBHUB
 from .text2sql import Text2SQL
 
 from copy import deepcopy
@@ -19,7 +18,7 @@ logging.basicConfig(
 )
 
 class Chatbot(BaseAgent):
-    def __init__(self, config: Config, text2sql_config: Text2SQLConfig, db: DBHUB, max_steps: int = 2, **kwargs):
+    def __init__(self, config: Config, text2sql_config: Text2SQLConfig, db, max_steps: int = 2, **kwargs):
         super().__init__(config)
         self.db = db
         self.text2sql = Text2SQL(text2sql_config, db, max_steps, **kwargs)
