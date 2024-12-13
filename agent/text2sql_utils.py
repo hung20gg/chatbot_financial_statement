@@ -28,7 +28,7 @@ def read_file_without_comments(file_path, start=["#", "//"]):
         for line in lines:
             if not any([line.startswith(s) for s in start]):
                 new_lines.append(line)
-        return '\n'.join(new_lines)
+        return ''.join(new_lines)
     
 def read_file(file_path):
     if not os.path.exists(file_path):

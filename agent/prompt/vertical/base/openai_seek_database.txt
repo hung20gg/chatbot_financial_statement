@@ -98,13 +98,13 @@ Note:
  - `company_info`
 
 |stock_code|is_bank|industry|issue_share|
-|----|----|----|----|
+|:----|:----|:----|:----|
 |VIC|False|Real Estate|3823700000|
 
 - `sub_and_shareholder`
 
 |stock_code|invest_on|
-|---|---|
+|:---|:---|
 |MSN|TCB|
 
 Explain:
@@ -113,7 +113,7 @@ This mean MSN is a shareholder of TCB.
 - `bank_financial_report`
 
 |stock_code|year|quarter|category_code|data|
-|---|----|----|----|----|----|
+|:---|:----|:----|:----|:----|:----|
 |VCB|2023|  0 | BS_300 | 1839613.198 |
 |LPB|2024|  2 | CF_045 | 68522.835|
 |BID|2024|  1 | IS_014 | 5392.606 |
@@ -121,7 +121,7 @@ This mean MSN is a shareholder of TCB.
 - `map_category_code_bank`
 
 |category_code|en_caption|report_type|
-|----|----|----|
+|:----|:----|:----|
 |IS_003| Net Interest Income | income_statement |
 
 ### Note
