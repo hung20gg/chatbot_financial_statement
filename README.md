@@ -2,6 +2,7 @@
 
 ## Major Update 2
 
+- Streamlit is conflict with similarity search ???
 - Done evaluation for ML1
 - For fastest inference, use `llm = Gemini('gemini-1.5-flash-8b')` and `sql_llm = Gemini('gemini-1.5-flash-002')`
 
@@ -34,14 +35,23 @@ In total, there are 13 tables:
 
 Clone my separate library for LLM
 
-For sample folder
 
 ```
-cd group_2_chatbot_financial_statement/sample && git clone https://github.com/hung20gg/llm.git
+cd group_2_chatbot_financial_statement && git clone https://github.com/hung20gg/llm.git
 
 ```
 
 Create a `.env` file in folder `sample` and add `OPENAI_API_KEY = sk-...`
+
+Also add config for database
+
+```
+DB_NAME=test_db
+DB_USER=postgres
+DB_PASSWORD=12345678
+DB_HOST=localhost
+DB_PORT=5433
+```
 
 ## Database setup (run only the first time)
 
@@ -68,12 +78,12 @@ docker run bitnami/postgresql \
 		-d postgres
 ```
 
-run docker in another port `5433` to avoid conflict with local port
+Run docker in another port `5433` to avoid conflict with local port
 
 Then run the python scripts to connect and add data to the database
 
 ```
-cd sample && python setup_db.py
+cd ETL && python connector.py
 ```
 
-You can test the chat ability in `chatbot.ipynb`
+Check and add the index for full-text search in [ETL\index_full_text_search.md](ETL\index_full_text_search.md)
