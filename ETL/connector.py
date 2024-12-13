@@ -2,12 +2,18 @@ import os
 import dotenv
 dotenv.load_dotenv()
 
+from chromadb import Client, PersistentClient
+from chromadb.config import Settings
+
+
 import psycopg2
 import pandas as pd
 import re
 
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
+from concurrent.futures import ThreadPoolExecutor
+
 from langchain_huggingface  import (
     HuggingFaceEmbeddings,
 )
@@ -170,10 +176,15 @@ def create_chroma_db(collection_name, persist_directory, model_name='text-embedd
             embedding_function = HuggingFaceEmbeddings(model_name=model_name)
     else:
         embedding_function = model_name
-    
-    return Chroma(collection_name=collection_name, 
-                  embedding_function=embedding_function, 
-                  persist_directory=persist_directory)
+        
+    if isinstance(persist_directory, str):
+        return Chroma(collection_name=collection_name, 
+                    embedding_function=embedding_function, 
+                    persist_directory=persist_directory)
+    else:
+        return Chroma(collection_name=collection_name, 
+                    embedding_function=embedding_function, 
+                    client=persist_directory)
 
 
 #==================#
@@ -194,10 +205,13 @@ def setup_chroma_db_fs(collection_name, persist_directory, table, model_name='te
     
     chroma_db = create_chroma_db(collection_name, persist_directory, model_name)
     
-    for category in categories:
+    def process_category(chroma_db, category):
         print(category)
         chroma_db.add_texts([category[0]], metadatas=[{'lang': 'vi', 'code': category[2]}])
         chroma_db.add_texts([category[1]], metadatas=[{'lang': 'en', 'code': category[2]}])
+        
+    with ThreadPoolExecutor() as executor:
+        executor.map(lambda category: process_category(chroma_db, category), categories)
         
         
 def setup_chroma_db_ratio(collection_name, persist_directory, table, model_name='text-embedding-3-small', **db_conn):
@@ -213,9 +227,15 @@ def setup_chroma_db_ratio(collection_name, persist_directory, table, model_name=
     
     chroma_db = create_chroma_db(collection_name, persist_directory, model_name)
     
-    for category in categories:
+    def process_category(chroma_db, category):
         print(category)
-        chroma_db.add_texts([category[0]], metadatas=[{'lang': 'en', 'code': category[1]}])
+        chroma_db.add_texts([category[0]], metadatas=[{'lang': 'vi', 'code': category[1]}])
+    
+    with ThreadPoolExecutor() as executor:
+        executor.map(lambda category: process_category(chroma_db, category), categories)
+        
+
+    
         
 def setup_chroma_db_company_name(collection_name, persist_directory, table, model_name='text-embedding-3-small', **db_conn):
     conn = connect_to_db(**db_conn)
@@ -230,12 +250,13 @@ def setup_chroma_db_company_name(collection_name, persist_directory, table, mode
     
     chroma_db = create_chroma_db(collection_name, persist_directory, model_name)
     
-    for company in companies:
+    def process_company(chroma_db, company):
         print(company)
-        chroma_db.add_texts([company[0]], metadatas=[{'lang': 'vi', 'stock_code': company[0]}])
-        chroma_db.add_texts([company[1]], metadatas=[{'lang': 'vi', 'stock_code': company[0]}])
-        chroma_db.add_texts([company[2]], metadatas=[{'lang': 'en', 'stock_code': company[0]}])
-        chroma_db.add_texts([company[3]], metadatas=[{'lang': 'en', 'stock_code': company[0]}])
+        chroma_db.add_texts(list(company), metadatas=[{'lang': 'vi', 'code': company[0]}] * 4)
+    
+    with ThreadPoolExecutor() as executor:
+        executor.map(lambda company: process_company(chroma_db, company), companies)
+
         
 def setup_chroma_db_sql_query(collection_name, persist_directory, txt_path, model_name='text-embedding-3-small'):
     with open(txt_path, 'r') as f:
@@ -249,7 +270,7 @@ def setup_chroma_db_sql_query(collection_name, persist_directory, txt_path, mode
         task = sql_code.split('\n')[0]
         task = re.sub(r'--\s*\d+\.?', '', task).strip()
         print(task)
-        print(sql_code)
+        
         print('====================')
         
                 
@@ -275,21 +296,21 @@ RDB_SETUP_CONFIG = {
 }
 
 LOCAL_VERTICAL_BASE_VECTORDB_SETUP_CONFIG = {
-    'company_name_chroma': ['../data/company_name_chroma_local', 'company_info'],
-    'category_bank_chroma': ['../data/category_bank_chroma_local', 'map_category_code_bank'],
-    'category_non_bank_chroma': ['../data/category_non_bank_chroma_local', 'map_category_code_non_bank'],
-    'category_sec_chroma': ['../data/category_sec_chroma_local', 'map_category_code_securities'],
-    'category_ratio_chroma': ['../data/category_ratio_chroma_local', 'map_category_code_ratio'],
-    'sql_query': ['../data/sql_query_local', '../agent/prompt/vertical/base/simple_query_v2.txt'],
+    'company_name_chroma': ['company_info'],
+    'category_bank_chroma': ['map_category_code_bank'],
+    'category_non_bank_chroma': ['map_category_code_non_bank'],
+    'category_sec_chroma': ['map_category_code_securities'],
+    'category_ratio_chroma': ['map_category_code_ratio'],
+    'sql_query': ['../agent/prompt/vertical/base/simple_query_v2.txt'],
 }
 
 OPENAI_VERTICAL_BASE_VECTORDB_SETUP_CONFIG = {
-    'company_name_chroma': ['../data/company_name_chroma_openai', 'company_info'],
-    'category_bank_chroma': ['../data/category_bank_chroma_openai', 'map_category_code_bank'],
-    'category_non_bank_chroma': ['../data/category_non_bank_chroma_openai', 'map_category_code_non_bank'],
-    'category_sec_chroma': ['../data/category_sec_chroma_openai', 'map_category_code_securities'],
-    'category_ratio_chroma': ['../data/category_ratio_chroma_openai', 'map_category_code_ratio'],
-    'sql_query': ['../data/sql_query_openai', '../agent/prompt/vertical/base/simple_query_v2.txt'],
+    'company_name_chroma': ['company_info'],
+    'category_bank_chroma': ['map_category_code_bank'],
+    'category_non_bank_chroma': ['map_category_code_non_bank'],
+    'category_sec_chroma': ['map_category_code_securities'],
+    'category_ratio_chroma': ['map_category_code_ratio'],
+    'sql_query': ['../agent/prompt/vertical/base/simple_query_v2.txt'],
 }
 
 def setup_rdb(config, **db_conn):
@@ -297,17 +318,18 @@ def setup_rdb(config, **db_conn):
         args = [table] + params
         load_csv_to_postgres(*args, **db_conn)
         
-def setup_vector_db(config, model_name = 'text-embedding-3-small', **db_conn):
+def setup_vector_db(config, persist_directory, model_name = 'text-embedding-3-small', **db_conn):
     for table, params in config.items():
         params.append(model_name)
         if table == 'sql_query':
-            setup_chroma_db_sql_query(table, *params)
+            setup_chroma_db_sql_query(table, persist_directory, *params)
         elif table == 'company_name_chroma':
-            setup_chroma_db_company_name(table, *params, **db_conn)
+            setup_chroma_db_company_name(table, persist_directory, *params, **db_conn)
         elif table == 'category_ratio_chroma':
-            setup_chroma_db_ratio(table, *params, **db_conn)
+            setup_chroma_db_ratio(table, persist_directory, *params, **db_conn)
         else:
-            setup_chroma_db_fs(table, *params, **db_conn)
+            setup_chroma_db_fs(table, persist_directory, *params, **db_conn)
+        print(f'{table} vectordb setup completed')
             
             
             
@@ -322,14 +344,15 @@ def main():
         
     }
     
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    client = PersistentClient(settings = Settings(persist_directory = '../data/vector_db_openai'))
     
-    model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
     
     # setup_rdb(RDB_SETUP_CONFIG, **db_conn)
     # logging.info("RDB setup completed")
-    # setup_vector_db(VECTOR_DB_SETUP_CONFIG, **db_conn)
-    setup_vector_db(LOCAL_VERTICAL_BASE_VECTORDB_SETUP_CONFIG, model, **db_conn)
+    setup_vector_db(OPENAI_VERTICAL_BASE_VECTORDB_SETUP_CONFIG, client, **db_conn)
+    # setup_vector_db(LOCAL_VERTICAL_BASE_VECTORDB_SETUP_CONFIG, model, **db_conn)
     logging.info("Vector DB setup completed")
             
 if __name__ == '__main__':
