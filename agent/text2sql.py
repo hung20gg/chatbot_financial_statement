@@ -352,11 +352,11 @@ class Text2SQL(BaseAgent):
         for i, step in enumerate(steps):
             logging.info(f"Step {i+1}: {step}")
             if i == 0:
-                history[-1]["content"] += f"<instruction>\nThink step-by-step and do the {step}\n</instruction>\n\nHere are the samples SQL you might need\n\n{self.db.find_sql_query(step, top_k=self.config.sql_example_top_k)}"
+                history[-1]["content"] += f"<instruction>\n\nThink step-by-step and do the {step}\n\n</instruction>\n\nHere are the samples SQL you might need\n\n{self.db.find_sql_query(step, top_k=self.config.sql_example_top_k)}\n\n"
             else:
                 history.append({
                     "role": "user",
-                    "content": f"<instruction>\nThink step-by-step and do the {step}\n</instruction>\n\nHere are the samples SQL you might need\n\n{self.db.find_sql_query(step, top_k=self.config.sql_example_top_k)}"
+                    "content": f"<instruction>\n\nThink step-by-step and do the {step}\n\n</instruction>\n\nHere are the samples SQL you might need\n\n{self.db.find_sql_query(step, top_k=self.config.sql_example_top_k)}\n\n"
                 })
             
             response = self.sql_llm(history)

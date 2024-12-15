@@ -152,15 +152,15 @@ def TIR_reasoning(response, db, verbose=False):
             
             execution_table.append(table)
             table_markdown = df_to_markdown(table)
-            TIR_response += f"SQL result for {i+1}: \n{table_markdown}\n\n"
+            TIR_response += f"*SQL result for {i+1}:* \n\n{table_markdown}\n\n"
     
-    response += f"\n\n### The result of the given SQL:\n\n{TIR_response}"
+    response += f"\n\n#### The result of the given SQL:\n\n{TIR_response}"
     
     error_message = ""
     if len(execution_error) > 0:
         for i, error in execution_error:
             error_message += f"Error in SQL {i+1}: {error}\n\n"
-            response += f"\n\n### Error in SQL {i+1}:\n\n{error}"
+            response += f"\n\n#### Error in SQL {i+1}:\n\n{error}"
     
     return response, execution_error, execution_table
 
