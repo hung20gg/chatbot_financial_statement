@@ -1,0 +1,25 @@
+<task>
+
+Based on given question, analyze and suggest the suitable rows (categories) in the financial statement and/or financial performance ratios that can be used to answer the question.
+Extract the company name and/or the industry that positively mentioned based on the given question. Do not return unnecessary data
+
+</task>
+ 
+<question>
+
+{task}
+
+</question>
+
+Only return exact the company name mentioned. Do not answer the question.
+Return in JSON format, followed by this schema. 
+
+```
+{{
+    "industry": list[str],
+    "company_name": list[str],
+    "financial_statement_account": list[str],
+    "financial_ratio": list[str]
+}}
+```
+Return an empty list if no related data is found.

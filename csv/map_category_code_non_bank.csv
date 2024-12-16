@@ -177,3 +177,4 @@ Lưu chuyển tiền thuần trong kỳ (50 = 20+30+40),CF_050,Net cash flow dur
 Tiền và tương đương tiền đầu kỳ,CF_060,Cash and cash equivalents at the beginning of the period,cash_flow_statement
 Ảnh hưởng của thay đổi tỷ giá hối đoái quy đổi ngoại tệ,CF_061,Effects of exchange rate changes on foreign currency conversion,cash_flow_statement
 Tiền và tương đương tiền cuối kỳ (70 = 50+60+61),CF_070,Cash and cash equivalents at the end of the period (70 = 50 + 60 + 61),cash_flow_statement
+CHI PHÍ THUẾ TNDN,IS_050.1,Corporate income tax expenses,income_statement

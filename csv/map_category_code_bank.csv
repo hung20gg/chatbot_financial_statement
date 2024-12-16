@@ -149,3 +149,5 @@ IV.Lưu chuyển tiền thuần trong kỳ,CF_042,Net cash flow during the perio
 V. Tiền và các khoản tương đương tiền tại thời điểm đầu kỳ,CF_043,Cash and cash equivalents at the beginning of the period,cash_flow_statement
 VI. Điều chỉnh ảnh hưởng của thay đổi tỷ giá,CF_044,Effect of exchange rate changes,cash_flow_statement
 VII. Tiền và các khoản tương đương tiền tại thời điểm cuối kỳ,CF_045,Cash and cash equivalents at the end of the period,cash_flow_statement
+I. Nợ ngắn hạn,BS_361,I. Current liabilities,balance_sheet
+"Đầu tư vào công ty liên kết, liên doanh",BS_211.1,Investment in associates and joint ventures,balance_sheet

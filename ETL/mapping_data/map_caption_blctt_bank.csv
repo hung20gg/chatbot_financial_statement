@@ -1,0 +1,46 @@
+vi_caption,category_code,en_caption,report_type
+1. Thu nhập lãi và các khoản thu nhập tương tự nhận được,CF_001,Interest income and similar income received,cash_flow_statement
+2. Chi phí lãi và các chi phí tương tự đã trả,CF_002,Interest expenses and similar charges paid,cash_flow_statement
+3. Thu nhập từ hoạt động dịch vụ nhận được,CF_003,Income from service activities received,cash_flow_statement
+"4. Chênh lệch số tiền thực thu/thực chi từ hoạt động kinh doanh(ngoại tệ,vàng bạc,chứng khoán)",CF_004,"Difference between actual receipts/payments from business activities (foreign exchange, gold, securities)",cash_flow_statement
+5. Thu nhập khác,CF_005,Other income,cash_flow_statement
+"6. Tiền thu các khoản nợ đã được xử lý xóa, bù đắp bằng nguồn rủi ro",CF_006,Cash received from debts that have been written off or covered by risk provisions,cash_flow_statement
+"7. Tiền chi trả cho nhân viên và hoạt động quản lý, công vụ(*)",CF_007,"Payments to employees and for administrative, public services",cash_flow_statement
+8. Tiền thuế thu nhập thực nộp trong kỳ(*),CF_008,Corporate income tax actually paid during the period,cash_flow_statement
+B. Lưu chuyển tiền thuần từ hoạt động kinh doanh trước những thay đổi về tài sản và vốn lưu động,CF_009,Net cash flow from operating activities before changes in assets and working capital,cash_flow_statement
+9. (Tăng)/Giảm các khoản tiền gửi và cho vay các TCTD khác,CF_010,(Increase)/Decrease in deposits and loans to other credit institutions,cash_flow_statement
+10. (Tăng)/Giảm các khoản về kinh doanh chứng khoán,CF_011,(Increase)/Decrease in securities trading,cash_flow_statement
+11. (Tăng)/Giảm các công cụ tài chính phái sinh và các tài sản tài chính khác,CF_012,(Increase)/Decrease in derivative financial instruments and other financial assets,cash_flow_statement
+12. (Tăng)/Giảm các khoản cho vay khách hàng,CF_013,(Increase)/Decrease in loans to customers,cash_flow_statement
+13. Giảm nguồn dự phòng để bù đắp tổn thất các khoản,CF_014,Decrease in provisions for covering losses,cash_flow_statement
+14. (Tăng)/Giảm khác về tài sản hoạt động,CF_015,(Increase)/Decrease in other operating assets,cash_flow_statement
+15. Tăng/(Giảm) các khoản nợ chính phủ và NHNN,CF_016,Increase/(Decrease) in government and central bank debts,cash_flow_statement
+"16. Tăng/(Giảm) các khoản tiền gửi, tiền vay các tổ chức tín dụng",CF_017,Increase/(Decrease) in deposits and loans from credit institutions,cash_flow_statement
+17. Tăng/(Giảm) tiền gửi của khách hàng(bao gồm cả kho bạc nhà nước),CF_018,Increase/(Decrease) in customer deposits (including the state treasury),cash_flow_statement
+18. Tăng(/Giảm) phát hành giấy tờ có giá(ngoại trừ giấy tờ có giá phát hành được tính vào hoạt động tài chính),CF_019,Increase/(Decrease) in issuance of valuable papers (excluding those recognized as financial activities),cash_flow_statement
+"19. Tăng/(Giảm) vốn tài trợ, ủy thác đầu tư, cho vay TCTD chịu rủi ro",CF_020,"Increase/(Decrease) in grants, investment trusts, loans to risk-bearing credit institutions",cash_flow_statement
+20. Tăng/ (Giảm) các công cụ tài chính phái sinh và các khoản nợ tài chính khác,CF_021,Increase/(Decrease) in derivative financial instruments and other financial liabilities,cash_flow_statement
+21. Tăng/ (Giảm) khác về công nợ hoạt động,CF_022,Increase/(Decrease) in other operating liabilities,cash_flow_statement
+22. Chi từ các quỹ của TCTD(*),CF_023,Payments from the funds of credit institutions,cash_flow_statement
+I. Lưu chuyển tiền thuần từ hoạt động kinh doanh,CF_024,Net cash flow from investing activities,cash_flow_statement
+1. Mua sắm tài sản cố định(*),CF_025,Purchase of fixed assets,cash_flow_statement
+"2. Tiền thu từ thanh lý, nhượng bán TSCĐ",CF_026,"Cash received from liquidation, sale of fixed assets",cash_flow_statement
+"3. Tiền chi từ thanh lý, nhượng bán TSCĐ(*)",CF_027,"Cash paid for liquidation, sale of fixed assets",cash_flow_statement
+4. Mua sắm bất động sản đầu tư(*),CF_028,Purchase of investment property,cash_flow_statement
+"5. Tiền thu từ bán, thanh lý bất động sản đầu tư",CF_029,"Cash received from sale, liquidation of investment property",cash_flow_statement
+"6. Tiền chi ra do bán, thanh lý bất động sản đầu tư (*)",CF_030,"Cash paid for sale, liquidation of investment property",cash_flow_statement
+"7. Tiền chi đầu t­ư, góp vốn vào các đơn vị khác (Chi đầu tư mua công ty con, góp vốn liên doanh, liên kết, và các khoản đầu tư dài hạn khác) (*)",CF_031,"Cash invested in capital contributions to other entities (investment in subsidiaries, joint ventures, affiliates, and other long-term investments)",cash_flow_statement
+"8. Tiền thu đầu t­ư, góp vốn vào các đơn vị khác (Thu bán, thanh lý công ty con, góp vốn liên doanh, liên kết, các khoản đầu tư dài hạn khác)",CF_032,"Cash received from capital contributions to other entities (proceeds from sale, liquidation of subsidiaries, joint ventures, affiliates, and other long-term investments)",cash_flow_statement
+"9. Tiền thu cổ tức và lợi nhuận được chia từ các khoản đầu tư, góp vốn dài hạn",CF_033,Dividends and profits received from long-term capital contributions,cash_flow_statement
+II. Lưu chuyển tiền thuần từ hoạt động đầu tư,CF_034,Net cash flow from investment activities,cash_flow_statement
+1. Tăng vốn cổ phần từ góp vốn và/hoặc phát hành cổ phiếu,CF_035,Increase in share capital from contributions and/or issuance of shares,cash_flow_statement
+2. Tiền thu từ phát hành giấy tờ có giá dài hạn có đủ điều kiện tính vào vốn tự có và các khoản vốn vay dài hạn khác,CF_036,Cash received from the issuance of long-term valuable papers eligible for equity capital and other long-term loans,cash_flow_statement
+3. Tiền chi thanh toán giấy tờ có giá dài hạn có đủ điều kiện tính vào vốn tự có và các khoản vốn vay dài hạn khác(*),CF_037,Cash paid for the redemption of long-term valuable papers eligible for equity capital and other long-term loans,cash_flow_statement
+"4. Cổ tức trả cho cổ đông, lợi nhuận đã chia(*)",CF_038,"Dividends paid to shareholders, profits distributed",cash_flow_statement
+5. Tiền chi ra mua cổ phiếu quỹ (*),CF_039,Cash paid for repurchase of treasury shares,cash_flow_statement
+6. Tiền thu được do bán cổ phiếu quỹ,CF_040,Proceeds from the sale of treasury shares,cash_flow_statement
+III.Lưu chuyển tiền thuần từ hoạt động tài chính,CF_041,Net cash flow from financial activities,cash_flow_statement
+IV.Lưu chuyển tiền thuần trong kỳ,CF_042,Net cash flow during the period,cash_flow_statement
+V. Tiền và các khoản tương đương tiền tại thời điểm đầu kỳ,CF_043,Cash and cash equivalents at the beginning of the period,cash_flow_statement
+VI. Điều chỉnh ảnh hưởng của thay đổi tỷ giá,CF_044,Effect of exchange rate changes,cash_flow_statement
+VII. Tiền và các khoản tương đương tiền tại thời điểm cuối kỳ,CF_045,Cash and cash equivalents at the end of the period,cash_flow_statement

@@ -188,3 +188,4 @@ CF_080,Cash flow from financing activities,Lưu chuyển tiền tệ từ hoạt
 CF_090,Net cash flow for the period,LƯU CHUYỂN TIỀN THUẦN TRONG KỲ,cash_flow_statement
 CF_101,Cash and cash equivalents at the beginning of the period,TIỀN VÀ TƯƠNG ĐƯƠNG TIỀN ĐẦU KỲ,cash_flow_statement
 CF_103,Cash and cash equivalents at the end of the period,TIỀN VÀ TƯƠNG ĐƯƠNG TIỀN CUỐI KỲ,cash_flow_statement
+IS_040.1,Gross profit from sales and services rendered,Lợi nhuận gộp về bán hàng và cung cấp dịch vụ,income_statement

@@ -1,5 +1,6 @@
 from .base import BaseAgent
 from . import text2sql_utils as utils
+from .text2sql_utils import Table
 import sys 
 sys.path.append('..')
 
@@ -33,9 +34,8 @@ class Text2SQL(BaseAgent):
     max_steps: int # The maximum number of steps to break down the task
     prompt_config: PromptConfig # The prompt configuration. This is for specify prompt for horizontal or vertical database design
     
-    history: list = [] # The history of the conversation
+    history: list = [] # The conversation history
     llm_responses: list = [] # All the responses from the LLM model
-    
     llm: Any = Field(default=None) # The LLM model
     sql_llm: Any = Field(default=None) # The SQL LLM model
     
@@ -56,9 +56,8 @@ class Text2SQL(BaseAgent):
 
         
     def reset(self):
-        self.history = []
         self.llm_responses = []
-        
+        self.history = []
         
     def simplify_branch_reasoning(self, task):
         """
@@ -86,7 +85,15 @@ class Text2SQL(BaseAgent):
             print(response)
             print("====================================")
         
-        self.llm_responses.append(response)
+        messages.append(
+            {
+                "role": "assistant",
+                "content": response
+            }
+        )
+        messages = utils.reformat_messages(messages)
+        
+        self.llm_responses.extend(messages)
         return get_json_from_text_response(response, new_method=True)['steps']
      
      
@@ -126,7 +133,9 @@ class Text2SQL(BaseAgent):
             print("Get stock code based on company name response: ")
             print(response)
             print("====================================")
-        self.llm_responses.append(messages)
+            
+        messages = utils.reformat_messages(messages)
+        self.llm_responses.extend(messages)
             
         json_response = get_json_from_text_response(response, new_method=True)
         if self.db is None:
@@ -161,8 +170,19 @@ class Text2SQL(BaseAgent):
                 text += f"\n\nTable `{title}`\n\n{utils.df_to_markdown(df)}"
             return company_df, text
         
+        elif format == 'table':
+            company_df = Table(table=company_df, description="Company Info")
+            tables = []
+            for title, df in dict_dfs.items():
+                
+                if df is None:
+                    continue
+                
+                table = Table(table=df, description=title)
+                tables.append(table)
+            return company_df, tables
         else:
-            raise ValueError("Format not supported")
+            raise ValueError("Format must be either 'markdown', 'dataframe' or 'table'")
         
     def __debug_sql(self, history):
         
@@ -222,7 +242,7 @@ class Text2SQL(BaseAgent):
         return history, error_messages, execution_tables
     
     
-    def reasoning_text2SQL(self, task: str, company_info: pd.DataFrame, suggest_table: str, history: list = None):
+    def reasoning_text2SQL(self, task: str, company_info, suggest_table, history: list = None):
         
         """
         Reasoning with Text2SQL without branch reasoning.
@@ -240,7 +260,7 @@ class Text2SQL(BaseAgent):
         This function will convert the natural language query into SQL query and execute the SQL query
         """
         
-        stock_code_table = utils.df_to_markdown(company_info)
+        stock_code_table = utils.table_to_markdown(company_info)
         system_prompt = """
     You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query.
     """
@@ -248,9 +268,22 @@ class Text2SQL(BaseAgent):
         
         few_shot = self.db.find_sql_query(text=task, top_k=self.config.sql_example_top_k)
         
-        prompt = self.prompt_config.REASONING_TEXT2SQL_PROMPT.format(database_description = database_description, task = task, stock_code_table = stock_code_table, suggestions_table = suggest_table, few_shot = few_shot)
+        init_prompt = self.prompt_config.REASONING_TEXT2SQL_PROMPT.format(database_description = database_description, 
+                                                                     task = task, 
+                                                                     stock_code_table = stock_code_table, 
+                                                                     suggestions_table = utils.table_to_markdown(suggest_table), 
+                                                                     few_shot = few_shot)
+        
+        
+        new_prompt = self.prompt_config.CONTINUE_REASONING_TEXT2SQL_PROMPT.format(task = task, 
+                                                                                    stock_code_table = stock_code_table,
+                                                                                    suggestions_table = utils.table_to_markdown(suggest_table), 
+                                                                                    few_shot = few_shot)
         
         if history is None:
+            history = self.history.copy()
+        
+        if len(history) == 0:
             history = [
                 {
                     "role": "system",
@@ -258,13 +291,13 @@ class Text2SQL(BaseAgent):
                 },
                 {
                     "role": "user",
-                    "content": prompt
+                    "content": init_prompt
                 }
             ]
         else:
             history.append({
                 "role": "user",
-                "content": prompt
+                "content": new_prompt
             })
             
         response = self.sql_llm(history)
@@ -293,12 +326,14 @@ class Text2SQL(BaseAgent):
             error_messages.extend(debug_error_messages)
             execution_tables.extend(debug_execution_tables)
         
-        self.llm_responses.append(history)    
+        messages = utils.reformat_messages(history.copy())
+        self.llm_responses.extend(messages)   
+        self.history.extend(history)
         
         return history, error_messages, execution_tables
     
         
-    def branch_reasoning_text2SQL(self, task: str, steps: list[str], company_info: pd.DataFrame, suggest_table: str, history: list = None):
+    def branch_reasoning_text2SQL(self, task: str, steps: list[str], company_info, suggest_table, history: list = None):
         
         """
         Branch reasoning with Text2SQL 
@@ -307,8 +342,8 @@ class Text2SQL(BaseAgent):
         Input:
             - task: str. The task to be solved, provided as a natural language string.
             - steps: list[str]. The steps to break down the task.
-            - company_info: pd.DataFrame. Information about the company relevant to the task.
-            - suggest_table: str. The suggested table for the task.
+            - company_info. Information about the company relevant to the task.
+            - suggest_table. The suggested table for the task.
             - history: list
         Output:
             - history: list.
@@ -319,13 +354,19 @@ class Text2SQL(BaseAgent):
             - Simulate with Monte Carlo Tree Search
         """
         
-        stock_code_table = utils.df_to_markdown(company_info)
+        stock_code_table = utils.table_to_markdown(company_info)
         look_up_stock_code = f"\nHere are the detail of the companies: \n\n{stock_code_table}"
 
         database_description = self.prompt_config.OPENAI_SEEK_DATABASE_PROMPT
-        content = self.prompt_config.BRANCH_REASONING_TEXT2SQL_PROMPT.format(database_description = database_description, task = task, steps_string = steps_to_strings(steps), suggestions_table = suggest_table)
+        content = self.prompt_config.BRANCH_REASONING_TEXT2SQL_PROMPT.format(database_description = database_description, 
+                                                                             task = task, 
+                                                                             steps_string = steps_to_strings(steps), 
+                                                                             suggestions_table = utils.table_to_markdown(suggest_table))
     
         if history is None:
+            history = self.history.copy()
+        
+        if len(history) == 0:
             task_index = 1
             
             history = [
@@ -386,11 +427,15 @@ class Text2SQL(BaseAgent):
             
             # Prepare for the next step
             company_info = utils.get_company_detail_from_df(execution_tables, self.db)
-            stock_code_table = utils.df_to_markdown(company_info)
+            
+            stock_code_table = utils.table_to_markdown(company_info)
             look_up_stock_code = f"\nHere are the detail of the companies: \n\n{stock_code_table}"
             history[task_index]["content"] = content + look_up_stock_code
                    
-        self.llm_responses.append(history)
+        messages = utils.reformat_messages(history.copy())
+        self.llm_responses.extend(messages) 
+        self.history.extend(history) 
+        
         return history, error_messages, execution_tables
     
     def solve(self, task: str):
@@ -417,7 +462,9 @@ class Text2SQL(BaseAgent):
             steps = self.simplify_branch_reasoning(task)
             str_task = steps_to_strings(steps)
             
-        company_info, suggest_table = self.get_stock_code_and_suitable_row(str_task, format='markdown')
+        company_info, suggest_table = self.get_stock_code_and_suitable_row(str_task, format='table')
+        tables = [company_info]
+        tables.extend(suggest_table)
         
         if not self.config.branch_reasoning:
             
@@ -430,9 +477,12 @@ class Text2SQL(BaseAgent):
         else:
             history, error_messages, execution_tables = self.branch_reasoning_text2SQL(task, steps, company_info, suggest_table)
         
+        tables.extend(execution_tables)
+        
+        
         end = time.time()
         logging.info(f"Time taken: {end-start}s")
-        return history, error_messages, execution_tables
+        return history, error_messages, tables
     
     
     

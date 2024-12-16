@@ -1,0 +1,24 @@
+vi_caption,category_code,en_caption,report_type
+1.Thu nhập lãi và các khoản thu nhập tương tự,IS_001,Interest income and similar income,income_statement
+2. Chi phí lãi và các chi phí tương tự,IS_002,Interest expenses and similar charges,income_statement
+I. Thu nhập lãi thuần,IS_003,Net interest income,income_statement
+3. Thu nhập từ hoạt động dịch vụ,IS_004,Income from service activities,income_statement
+4. Chi phí hoạt động dịch vụ,IS_005,Service activity expenses,income_statement
+II. Lãi/lỗ thuần từ hoạt động dịch vụ,IS_006,Net profit/(loss) from service activities,income_statement
+III. Lãi/lỗ thuần từ hoạt động kinh doanh ngoại hối,IS_007,Net profit/(loss) from foreign exchange trading,income_statement
+IV. Lãi /lỗ thuần từ mua bán chứng khoán kinh doanh,IS_008,Net profit/(loss) from trading of trading securities,income_statement
+V. Lãi/lỗ thuần từ mua bán chứng khoán đầu tư,IS_009,Net profit/(loss) from trading of investment securities,income_statement
+5. Thu nhập từ hoạt động khác,IS_010,Other operating income,income_statement
+6. Chi phí hoạt động khác,IS_011,Other operating expenses,income_statement
+VI. Lãi/lỗ thuần từ hoạt động khác,IS_012,Net profit/(loss) from other activities,income_statement
+"VII. Thu nhập từ góp vốn, mua cổ phần",IS_013,"Income from capital contributions, share purchases",income_statement
+VIII. Chi phí hoạt động,IS_014,Operating expenses,income_statement
+IX. Lợi nhuận thuần từ hoạt động kinh doanh trước chi phí dự phòng rủi ro tín dụng,IS_015,Net profit from operating activities before provision for credit losses,income_statement
+X. Chi phí dự phòng rủi ro tín dụng,IS_016,Provision for credit losses,income_statement
+XI. Tổng lợi nhuận trước thuế,IS_017,Total profit before tax,income_statement
+7. Chi phí thuế TNDN hiện hành,IS_018,Current corporate income tax expense,income_statement
+8. Chi phí thuế TNDN hoãn lại,IS_019,Deferred corporate income tax expense,income_statement
+XII. Chi phí thuế TNDN,IS_020,Corporate income tax expenses,income_statement
+XIII. Lợi nhuận sau thuế,IS_021,Profit after tax,income_statement
+XIV. Lợi ích của cổ đông thiểu số,IS_022,Minority interest,income_statement
+XV. Lãi cơ bản trên cổ phiếu,IS_023,Basic earnings per share,income_statement
