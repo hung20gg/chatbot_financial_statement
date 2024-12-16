@@ -5,6 +5,45 @@ from llm.llm.chatgpt import ChatGPT, OpenAIWrapper
 from llm.llm.gemini import Gemini
 
 from llm.llm_utils import get_code_from_text_response
+from pydantic import BaseModel, ConfigDict
+from typing import Union
+
+
+class Table(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    
+    table: Union[pd.DataFrame, str, None]
+    sql: str = ""
+    description: str = ""
+    
+    def __str__(self):
+        return f"Table(desc = {self.description})"
+    
+    def __repr__(self):
+        return f"Table(desc = {self.description})"
+    
+
+def table_to_markdown(table: Table|pd.DataFrame|str) -> str:
+    
+    # If it's a string
+    if isinstance(table, str):
+        return table
+    
+    # If it's a dataframe
+    if isinstance(table, pd.DataFrame):
+        return df_to_markdown(table)
+    
+    if not isinstance(table, list):
+        table = [table]
+        
+    markdown = ""
+    for t in table:
+        markdown += f"**{t.description}**\n\n"
+        markdown += df_to_markdown(t.table) + "\n\n"
+    
+    return markdown
+    
+
 
 def get_llm_wrapper(model_name, **kwargs):
     if 'gpt' in model_name:
@@ -150,7 +189,9 @@ def TIR_reasoning(response, db, verbose=False):
                 execution_error.append((i, table))
                 continue
             
-            execution_table.append(table)
+            table_obj = Table(table=table, sql=code, description=f"SQL {i+1}")
+            
+            execution_table.append(table_obj)
             table_markdown = df_to_markdown(table)
             TIR_response += f"*SQL result for {i+1}:* \n\n{table_markdown}\n\n"
     
@@ -170,6 +211,9 @@ def get_company_detail_from_df(dfs, db, method = 'similarity') -> pd.DataFrame:
     if not isinstance(dfs, list):
         dfs = [dfs]
     
+    if isinstance(dfs[0], Table):
+        dfs = [df.table for df in dfs]
+    
     for df in dfs:
         for col in df.columns:
             if col == 'stock_code':
@@ -183,3 +227,49 @@ def get_company_detail_from_df(dfs, db, method = 'similarity') -> pd.DataFrame:
     
     return company_name_to_stock_code(db, list_stock_code, method)
     
+ 
+def check_openai_response(messages):
+    if len(messages) == 0:
+        return False
+    
+    for message in messages:
+        if message.get('role', '') not in ['assistant', 'system', 'user']:
+            return False
+    
+    return True
+    
+    
+def reformat_messages(messages):
+    
+    if not check_openai_response(messages):
+        raise ValueError("Invalid messages")
+    
+    flag_system = False
+    system_message = ""
+    if messages[0].get('role','') == 'system':
+        flag_system = True
+        system_message = messages[0]['content']
+        messages = messages[1:]
+        
+    new_messages = []
+    for i, message in enumerate(messages):
+        role = message.get('role', 'user')
+        content = message.get('content', '')
+        
+        if i == 0 and flag_system:
+            content =  f"<<SYS>>\n\n{system_message}\n\n<<SYS>>\n\n" + content
+        
+        new_messages.append({
+            'role': role,
+            'content': content
+        })
+    if new_messages[-1].get('role', '') == 'user':
+        new_messages.append(
+            {
+                'role': 'assistant',
+                'content': "Something went wrong, please try again"
+            }
+        )
+        
+    return new_messages
+            

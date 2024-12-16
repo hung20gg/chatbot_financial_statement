@@ -84,14 +84,25 @@ def setup_db(config: DBConfig, multi_thread = True):
     
     persist_client = PersistentClient(path = os.path.join(current_directory, f'../../data/vector_db_{db_type}_{"local" if local_model else "openai"}'), settings = Settings())
     
-    collection_chromadb = 'category_bank_chroma'
-    bank_vector_store = create_chroma_db(collection_chromadb, persist_client, config.embedding)
+    if 'base' in config.database_choice:
+        collection_chromadb = 'category_bank_chroma'
+        bank_vector_store = create_chroma_db(collection_chromadb, persist_client, config.embedding)
+        
+        collection_chromadb = 'category_non_bank_chroma'
+        none_bank_vector_store = create_chroma_db(collection_chromadb, persist_client, config.embedding)
+        
+        collection_chromadb = 'category_sec_chroma'
+        sec_vector_store = create_chroma_db(collection_chromadb, persist_client, config.embedding)
     
-    collection_chromadb = 'category_non_bank_chroma'
-    none_bank_vector_store = create_chroma_db(collection_chromadb, persist_client, config.embedding)
+        collection_chromadb = 'sql_query'
+        vector_db_sql = create_chroma_db(collection_chromadb, persist_client, config.embedding)
     
-    collection_chromadb = 'category_sec_chroma'
-    sec_vector_store = create_chroma_db(collection_chromadb, persist_client, config.embedding)
+    elif 'universal' in config.database_choice:
+        collection_chromadb = 'category_universal_chroma'
+        universal_vector_store = create_chroma_db(collection_chromadb, persist_client, config.embedding)
+        
+        collection_chromadb = 'sql_query_universal'
+        vector_db_sql = create_chroma_db(collection_chromadb, persist_client, config.embedding)
     
     collection_chromadb = 'category_ratio_chroma'
     ratio_vector_store = create_chroma_db(collection_chromadb, persist_client, config.embedding)
@@ -99,8 +110,6 @@ def setup_db(config: DBConfig, multi_thread = True):
     collection_chromadb = 'company_name_chroma'
     vector_db_company = create_chroma_db(collection_chromadb, persist_client, config.embedding)
     
-    collection_chromadb = 'sql_query'
-    vector_db_sql = create_chroma_db(collection_chromadb, persist_client, config.embedding)
     
     if config.database_choice == 'vertical_base':
         return HubVerticalBase(conn, 
@@ -111,6 +120,14 @@ def setup_db(config: DBConfig, multi_thread = True):
                                  vector_db_company, 
                                  vector_db_sql, 
                                  multi_thread)
+        
+    elif config.database_choice == 'vertical_universal':
+        return HubVerticalUniversal(conn, 
+                                     ratio_vector_store,
+                                     universal_vector_store, 
+                                     vector_db_company, 
+                                     vector_db_sql, 
+                                     multi_thread)
         
     else:
         raise ValueError("Database choice not supported")

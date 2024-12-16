@@ -43,9 +43,16 @@ def connect_to_db(db_name, user, password, host='localhost', port='5432'):
     return conn
 
 
-def create_table_if_not_exists(conn, table_name, df, primary_key=None, foreign_key: dict = {},long_text=True):
+def create_table_if_not_exists(conn, table_name, df_path, primary_key=None, foreign_key: dict = {}, long_text=False, date_time = []):
+    
+    df = pd.read_csv(df_path)
+    
     columns = df.columns
     col_type = []
+    
+    for col in date_time:
+        if col in columns:
+            df[col] = pd.to_datetime(df[col])
     
     if primary_key is None:
         primary_key = set()
@@ -81,8 +88,14 @@ def create_table_if_not_exists(conn, table_name, df, primary_key=None, foreign_k
             column_definitions += f'{col} {type_} '
             if col in primary_key:
                 column_definitions += 'PRIMARY KEY '
+            
+            # if col in allow_null:
+            #     column_definitions += 'NULL '
+                
             if foreign_key.get(col):
                 column_definitions += f'REFERENCES {foreign_key[col]} '
+                
+            
                 
             column_definitions += ', '
         
@@ -117,21 +130,20 @@ def upsert_data(conn, table_name, df, log_gap = 1000):
         conn.commit()
         
         
-def load_csv_to_postgres(table_name, csv_path, primary_key=None, foreign_key: dict = {}, **db_conn):
+def load_csv_to_postgres(*args, **db_conn):
     # Load CSV into pandas DataFrame
-    df = pd.read_csv(csv_path)
-    
+    df = pd.read_csv(args[1])
     # Connect to the PostgreSQL database
     conn = connect_to_db(**db_conn)
     
     try:
         # Create the table if it doesn't exist
         print('Creating table in database...')
-        create_table_if_not_exists(conn, table_name, df, primary_key, foreign_key)
+        create_table_if_not_exists(conn, *args)
         
         # Upsert the data into the table
         print('Upserting data into the table...')
-        upsert_data(conn, table_name, df)
+        upsert_data(conn, args[0], df)
     finally:
         print('Closing connection to database...')
         conn.close()
@@ -213,6 +225,28 @@ def setup_chroma_db_fs(collection_name, persist_directory, table, model_name='te
     with ThreadPoolExecutor() as executor:
         executor.map(lambda category: process_category(chroma_db, category), categories)
         
+
+def setup_chroma_db_universal(collection_name, persist_directory, table, model_name='text-embedding-3-small', **db_conn):
+    conn = connect_to_db(**db_conn)
+    print("Connected to database")
+    try:
+        with conn.cursor() as cur:
+            cur.execute(f"SELECT universal_caption, universal_code FROM {table}")
+            categories = cur.fetchall()
+            categories = [(category[0], category[1]) for category in categories]
+    finally:
+        conn.close()
+    
+    chroma_db = create_chroma_db(collection_name, persist_directory, model_name)
+    
+    def process_category(chroma_db, category):
+        print(category)
+        chroma_db.add_texts([category[0]], metadatas=[{'lang': 'en', 'code': category[1]}])
+        # chroma_db.add_texts([category[1]], metadatas=[{'lang': 'en', 'code': category[2]}])
+        
+    with ThreadPoolExecutor() as executor:
+        executor.map(lambda category: process_category(chroma_db, category), categories)
+        
         
 def setup_chroma_db_ratio(collection_name, persist_directory, table, model_name='text-embedding-3-small', **db_conn):
     conn = connect_to_db(**db_conn)
@@ -284,35 +318,43 @@ def setup_chroma_db_sql_query(collection_name, persist_directory, txt_path, mode
 #================#
 
 RDB_SETUP_CONFIG = {
-    'company_info' : ['../csv/df_company_info.csv', ['stock_code']],
+    # 'company_info' : ['../csv/df_company_info.csv', ['stock_code'], {}, True],
+    'sub_and_shareholder': ['../csv/df_sub_and_shareholders.csv', None, {'stock_code': 'company_info(stock_code)'}],
     'map_category_code_bank': ['../csv/map_category_code_bank.csv', ['category_code']],
     'map_category_code_non_bank': ['../csv/map_category_code_non_bank.csv', ['category_code']],
     'map_category_code_securities': ['../csv/map_category_code_sec.csv', ['category_code']],
     'map_category_code_ratio': ['../csv/map_ratio_code.csv', ['ratio_code']],
-    'sub_and_shareholder': ['../csv/df_sub_and_shareholder.csv', None, {'stock_code': 'company_info(stock_code)'}],
+    'map_category_code_universal': ['../csv/map_category_code_universal.csv', ['universal_code']],
     
-    'bank_financial_report' : ['../csv/bank_financial_report_v2_1.csv', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}],
-    'non_bank_financial_report' : ['../csv/non_bank_financial_report_v2_1.csv', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}],
-    'securities_financial_report' : ['../csv/securities_financial_report_v2_1.csv', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}],
-    'financial_ratio' : ['../csv/financial_ratio.csv', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}],
+    
+    'bank_financial_report' : ['../csv/bank_financial_report_v2_2.csv', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'non_bank_financial_report' : ['../csv/non_bank_financial_report_v2_2.csv', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'securities_financial_report' : ['../csv/securities_financial_report_v2_2.csv', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'financial_ratio' : ['../csv/financial_ratio.csv', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'financial_statement': ['../csv/financial_statement.csv', None, {'universal_code': 'map_category_code_universal(universal_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+
 }
 
-LOCAL_VERTICAL_BASE_VECTORDB_SETUP_CONFIG = {
+LOCAL_VERTICAL_VECTORDB_SETUP_CONFIG = {
     'company_name_chroma': ['company_info'],
     'category_bank_chroma': ['map_category_code_bank'],
     'category_non_bank_chroma': ['map_category_code_non_bank'],
     'category_sec_chroma': ['map_category_code_securities'],
     'category_ratio_chroma': ['map_category_code_ratio'],
     'sql_query': ['../agent/prompt/vertical/base/simple_query_v2.txt'],
+    'sql_query_universal': ['../agent/prompt/vertical/universal/simple_query_v2.txt'],
+    'category_universal_chroma': ['map_category_code_universal'],
 }
 
-OPENAI_VERTICAL_BASE_VECTORDB_SETUP_CONFIG = {
+OPENAI_VERTICAL_VECTORDB_SETUP_CONFIG = {
     'company_name_chroma': ['company_info'],
     'category_bank_chroma': ['map_category_code_bank'],
     'category_non_bank_chroma': ['map_category_code_non_bank'],
     'category_sec_chroma': ['map_category_code_securities'],
     'category_ratio_chroma': ['map_category_code_ratio'],
     'sql_query': ['../agent/prompt/vertical/base/simple_query_v2.txt'],
+    'sql_query_universal': ['../agent/prompt/vertical/universal/simple_query_v2.txt'],
+    'category_universal_chroma': ['map_category_code_universal'],
 }
 
 def setup_rdb(config, **db_conn):
@@ -323,12 +365,14 @@ def setup_rdb(config, **db_conn):
 def setup_vector_db(config, persist_directory, model_name = 'text-embedding-3-small', **db_conn):
     for table, params in config.items():
         params.append(model_name)
-        if table == 'sql_query':
+        if 'sql_query' in table:
             setup_chroma_db_sql_query(table, persist_directory, *params)
         elif table == 'company_name_chroma':
             setup_chroma_db_company_name(table, persist_directory, *params, **db_conn)
         elif table == 'category_ratio_chroma':
             setup_chroma_db_ratio(table, persist_directory, *params, **db_conn)
+        elif table == 'category_universal_chroma':
+            setup_chroma_db_universal(table, persist_directory, *params, **db_conn)
         else:
             setup_chroma_db_fs(table, persist_directory, *params, **db_conn)
         print(f'{table} vectordb setup completed')
@@ -347,14 +391,15 @@ def main():
     }
     
     client = PersistentClient(path = '../data/vector_db_vertical_local', settings = Settings())
+    client2 = PersistentClient(path = '../data/vector_db_vertical_openai', settings = Settings())
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
     
     # setup_rdb(RDB_SETUP_CONFIG, **db_conn)
     # logging.info("RDB setup completed")
-    # setup_vector_db(OPENAI_VERTICAL_BASE_VECTORDB_SETUP_CONFIG, client, **db_conn)
-    setup_vector_db(LOCAL_VERTICAL_BASE_VECTORDB_SETUP_CONFIG, client, model, **db_conn)
+    setup_vector_db(OPENAI_VERTICAL_VECTORDB_SETUP_CONFIG, client2, **db_conn)
+    setup_vector_db(LOCAL_VERTICAL_VECTORDB_SETUP_CONFIG, client, model, **db_conn)
     logging.info("Vector DB setup completed")
             
 if __name__ == '__main__':

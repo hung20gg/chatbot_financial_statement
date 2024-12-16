@@ -194,13 +194,13 @@ WITH total_assets AS (
         AND bfr.quarter = 2
         AND ci.is_bank = TRUE
     LEFT JOIN non_bank_financial_report nbfr ON ci.stock_code = nbfr.stock_code
-        AND nbfr.category_code = 'BS_200'
+        AND nbfr.category_code = 'BS_270'
         AND nbfr.year = 2024
         AND nbfr.quarter = 2
         AND ci.is_bank = FALSE
         AND ci.is_securities = FALSE
     LEFT JOIN securities_financial_report sfr ON ci.stock_code = sfr.stock_code
-        AND sfr.category_code = 'BS_200'
+        AND sfr.category_code = 'BS_270'
         AND sfr.year = 2024
         AND sfr.quarter = 2
         AND ci.is_securities = TRUE
@@ -239,9 +239,9 @@ WITH financial_data AS (
         year,
         quarter,
         CASE
-            WHEN category_code IN ('BS_200', 'BS_300') THEN 'total_assets'
-            WHEN category_code = 'BS_400' THEN 'total_liabilities'
-            WHEN category_code = 'IS_200' THEN 'net_income'
+            WHEN category_code = 'BS_270' THEN 'total_assets'
+            WHEN category_code = 'BS_300' THEN 'total_liabilities'
+            WHEN category_code = 'IS_060' THEN 'net_income'
         END AS metric,
         data
     FROM
@@ -250,7 +250,7 @@ WITH financial_data AS (
         stock_code IN ('VNM', 'MSN')
         AND year IN (2020, 2024)
         AND quarter = 2
-        AND category_code IN ('BS_200', 'BS_300', 'BS_400', 'IS_200')
+        AND category_code IN ('BS_270', 'BS_300', 'IS_060')
 )
 SELECT
     stock_code,
@@ -295,7 +295,7 @@ WHERE
     stock_code = 'VCB'
     AND year = 2023
     AND quarter = 2
-    AND category_code = 'IS_001';
+    AND category_code = 'IS_017';
 
 -- Total Revenue for Vietcombank's subsidiaries and invested partner
 SELECT 
@@ -309,7 +309,7 @@ WHERE
     s.stock_code = 'VCB'
     AND bfr.year = 2022
     AND bfr.quarter = 2
-    AND bfr.category_code = 'IS_001'
+    AND bfr.category_code = 'IS_017'
 GROUP BY 
     s.invest_on;
 

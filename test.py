@@ -21,6 +21,7 @@ from agent.prompt.prompt_controller import (
 from ETL.dbmanager.setup import (
     DBConfig,
     BGE_VERTICAL_BASE_CONFIG,
+    BGE_VERTICAL_UNIVERSAL_CONFIG,
     BGE_HORIZONTAL_BASE_CONFIG,
     setup_db
 )
@@ -39,10 +40,10 @@ logging.basicConfig(
 if __name__ == "__main__":
     
     
-    db_config = DBConfig(**BGE_VERTICAL_BASE_CONFIG)
+    db_config = DBConfig(**BGE_VERTICAL_UNIVERSAL_CONFIG)
     chat_config = ChatConfig(**GEMINI_FAST_CONFIG)
     text2sql_config = Text2SQLConfig(**TEXT2SQL_MEDIUM_OPENAI_CONFIG)
-    prompt_config = PromptConfig(**VERTICAL_PROMPT_BASE)
+    prompt_config = PromptConfig(**VERTICAL_PROMPT_UNIVERSAL)
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
@@ -62,12 +63,12 @@ if __name__ == "__main__":
     print(db.vector_db_company.similarity_search('Vinamilk', 2))
     logging.info('Test search company')
     
-    prompt = "Compare the Return on Assets (ROA) and Return on Equity (ROE) of Vinamilk and Masan Group for the fiscal year 2023.  Additionally, provide the total assets and total equity for both companies for the same period."
+    prompt = "Amount of customer deposits in BIDV and Vietcombank in Q2 2023"
     his, err, tab = text2sql.solve(prompt)
 
     
     for t in tab:
-        print(t)
+        print(t.table)
         
     with open('history.json', 'w') as f:
-        json.dump(his, f, indent=4)
+        json.dump(text2sql.llm_responses, f, indent=4)

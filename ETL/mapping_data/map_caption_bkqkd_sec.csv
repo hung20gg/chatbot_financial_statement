@@ -1,0 +1,61 @@
+category_code,vi_caption,en_caption,report_type
+IS_001,1.1. Lãi từ các tài sản tài chính ghi nhận thông qua lãi/lỗ (FVTPL),1.1. Interest from financial assets measured at fair value through profit or loss (FVTPL),income_statement
+IS_001.1,a. Lãi bán các tài sản tài chính,a. Gain on sale of financial assets,income_statement
+IS_001.2,b. Chênh lệch tăng đánh giá lại các TSTC thông qua lãi/lỗ,b. Revaluation gain on financial assets measured at fair value through profit or loss (FVTPL),income_statement
+IS_001.3,"c. Cổ tức, tiền lãi phát sinh từ tài sản tài chính PVTPL","c. Dividends, interest income from financial assets (FVTPL)",income_statement
+IS_001.4,d. Chênh lệch giảm do đánh giá lại phải trả chứng quyền đang lưu hành,d. Revaluation loss on outstanding warrants payable,income_statement
+IS_010,Doanh thu hoạt động tư vấn tài chính,Revenue from financial advisory services,income_statement
+IS_100,X. CHI PHÍ THUẾ TNDN,X. CORPORATE INCOME TAX EXPENSE,income_statement
+IS_100.1,10.1. Chi phí thuế TNDN hiện hành,10.1. Current corporate income tax expense,income_statement
+IS_100.2,10.2. Chi phí thuế TNDN hoãn lại,10.2. Deferred corporate income tax expense,income_statement
+IS_011,1.11. Thu nhập hoạt động khác,1.11. Other operating income,income_statement
+IS_002,1.2. Lãi từ các khoản đầu tư nắm giữ đến ngày đáo hạn (HTM),1.2. Interest from held-to-maturity investments (HTM),income_statement
+IS_020,Cộng doanh thu hoạt động,Total operating revenue,income_statement
+IS_200,XI. LỢI NHUẬN KẾ TOÁN SAU THUẾ TNDN,XI. PROFIT AFTER CORPORATE INCOME TAX,income_statement
+IS_201,11.1. Lợi nhuận sau thuế phân bổ cho chủ sở hữu,11.1. Profit after tax attributable to owners of the company,income_statement
+IS_202,"11.2. Lợi nhuận sau thuế trích các Quỹ dự trữ điều lệ, Quỹ Dự phòng tài chính và rủi ro nghề nghiệp theo quy định của Điều lệ Công ty là %)","11.2. Profit after tax allocated to statutory reserves, financial reserves, and professional risk reserves as per the company's charter",income_statement
+IS_203,11.3. Lợi nhuận thuần phân bổ cho lợi ích của cổ đông không kiểm soát,11.3. Net profit attributable to non-controlling interests,income_statement
+IS_021,2.1. Lỗ các tài sản tài chính ghi nhận thông qua lãi/lỗ (FVTPL),2.1. Loss from financial assets measured at fair value through profit or loss (FVTPL),income_statement
+IS_021.1,a. Lỗ bán các tài sản tài chính,a. Loss on sale of financial assets,income_statement
+IS_021.2,b. Chênh lệch giảm đánh giá lại các TSTC thông qua lãi/lỗ,b. Revaluation loss on financial assets measured at fair value through profit or loss (FVTPL),income_statement
+IS_021.3,c. c.Chi phí giao dịch mua các tài sản tài chính FVTPL,c. Transaction costs for purchasing financial assets (FVTPL),income_statement
+IS_021.4,d. Chênh lệch tăng do đánh giá lại phải trả chứng quyền đang lưu hành,d. Revaluation gain on outstanding warrants payable,income_statement
+IS_023,2.2. Lỗ các khoản đầu tư nắm giữ đến ngày đáo hạn (HTM),2.2. Loss from held-to-maturity investments (HTM),income_statement
+IS_023,2.4. Lỗ bán các tài sản tài chính sẵn sàng để bán (AFS),2.4. Loss on sale of available-for-sale (AFS) financial assets,income_statement
+IS_024,"Chi phí dự phòng tài sản tài chính, xử lý tổn thất các khoản phải thu khó đòi, lỗ suy giảm tài sản tài chính và chi phí đi vay của các khoản cho vay","Provision expenses for financial assets, bad debt write-offs, financial asset impairment, and borrowing costs",income_statement
+IS_026,2.6. Chi phí hoạt động tự doanh,2.6. Proprietary trading expenses,income_statement
+IS_027,2.7. Chi phí môi giới chứng khoán,2.7. Brokerage commission expenses,income_statement
+IS_028,"2.8. Chi phí hoạt động bảo lãnh, đại lý phát hành chứng khoán",2.8. Underwriting and issuance agent expenses,income_statement
+IS_029,2.9. Chi phí tư vấn đầu tư chứng khoán,2.9. Investment advisory expenses,income_statement
+IS_003,1.3. Lãi từ các khoản cho vay và phải thu,1.3. Interest from loans and receivables,income_statement
+IS_030,2.11. Chi phí lưu ký chứng khoán,2.11. Custody expenses,income_statement
+IS_300,XII. THU NHẬP (LỖ) TOÀN DIỆN KHÁC SAU THUẾ TNDN,XII. OTHER COMPREHENSIVE INCOME (LOSS) AFTER TAX,income_statement
+IS_032,2.12. Chi phí khác,2.12. Other expenses,income_statement
+IS_004,1.4. Lãi từ các tài sản tài chính sẵn sàng để bán (AFS),1.4. Interest from available-for-sale (AFS) financial assets,income_statement
+IS_040,Cộng chi phí hoạt động,Total operating expenses,income_statement
+IS_400,Tổng thu nhập toàn diện,Total comprehensive income,income_statement
+IS_401,Thu nhập toàn diện phân bổ cho chủ sở hữu,Comprehensive income attributable to owners of the company,income_statement
+IS_041,3.1. Chênh lệch lãi tỷ giá hối đoái đã và chưa thực hiện,3.1. Exchange rate gain (realized and unrealized),income_statement
+IS_042,"3.2. Doanh thu, dự thu cổ tức, lãi tiền gửi không cố định phát sinh trong kỳ","3.2. Revenue, accrued dividend, and interest from non-fixed deposits generated during the period",income_statement
+IS_043,"3.3. Lãi bán, thanh lý các khoản đầu tư vào công ty con, liên kết, liên doanh","3.3. Gain on sale and liquidation of investments in subsidiaries, associates, and joint ventures",income_statement
+IS_044,3.4. Doanh thu khác về đầu tư,3.4. Other investment revenue,income_statement
+IS_050,Cộng doanh thu hoạt động tài chính,Total financial revenue,income_statement
+IS_500,XIII. THU NHẬP THUẦN TRÊN CỔ PHIẾU PHỔ THÔNG,XIII. EARNINGS PER COMMON SHARE,income_statement
+IS_501,13.1. Lãi cơ bản trên cổ phiếu (Đồng/1 cổ phiếu),13.1. Basic earnings per share (VND/share),income_statement
+IS_502,13.2. Thu nhập pha loãng trên cổ phiếu (Đồng/1 cổ phiếu),13.2. Diluted earnings per share (VND/share),income_statement
+IS_051,4.1. Chênh lệch lỗ tỷ giá hối đoái đã và chưa thực hiện,4.1. Exchange rate loss (realized and unrealized),income_statement
+IS_052,4.2. Chi phí lãi vay,4.2. Interest expenses,income_statement
+IS_053,Chi phí dự phòng suy giảm giá trị các khoản đầu tư tài chính dài hạn,Provision expenses for impairment of long-term financial investments,income_statement
+IS_054,4.4. chi phí tài chính khác,4.4. Other financial expenses,income_statement
+IS_006,1.6. Doanh thu môi giới chứng khoán,1.6. Brokerage commission revenue,income_statement
+IS_060,Cộng chi phí tài chính,Total financial expenses,income_statement
+IS_007,"1.7. Doanh thu bảo lãnh, đại lý phát hành chứng khoán",1.7. Underwriting and issuance agent revenue,income_statement
+IS_071,8.1. Thu nhập khác,8.1. Other income,income_statement
+IS_072,8.2. Chi phí khác,8.2. Other expenses,income_statement
+IS_008,1.8. Doanh thu nghiệp vụ tư vấn đầu tư chứng khoán,1.8. Investment advisory revenue,income_statement
+IS_080,Cộng kết quả hoạt động khác,Total other operating results,income_statement
+IS_009,1.10. Doanh thu lưu ký chứng khoán,1.10. Custody revenue,income_statement
+IS_090,IX. TỔNG LỢI NHUẬN KẾ TOÁN TRƯỚC THUẾ,IX. TOTAL ACCOUNTING PROFIT BEFORE TAX,income_statement
+IS_091,9.1. Lợi nhuận đã thực hiện,9.1. Realized profit,income_statement
+IS_092,9.2. Lợi nhuận chưa thực hiện,9.2. Unrealized profit,income_statement
+IS_024,"2.3. Chi phí lãi vay, lỗ từ các khoản cho vay và phải thu","Provision expenses for financial assets, bad debt write-offs, financial asset impairment, and borrowing costs",income_statement

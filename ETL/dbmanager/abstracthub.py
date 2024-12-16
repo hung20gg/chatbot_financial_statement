@@ -166,7 +166,7 @@ class BaseDBHUB(BaseModel):
         for result in results:
             if result.metadata.get('sql_code', None) is not None:
                 few_shot += '#### ' + result.page_content + '\n\n'
-                few_shot += f"```sql\n\n{result.metadata['sql_code']}```"
+                few_shot += f"```sql\n\n{result.metadata['sql_code']}```\n\n"
                 
         return few_shot
     

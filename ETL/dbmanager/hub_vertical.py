@@ -57,6 +57,7 @@ class HubVerticalBase(BaseDBHUB):
             vector_db_securities = vector_db_securities,
             vector_db_ratio = vector_db_ratio,
         )
+        logging.info('Finish setup for Vertical Base')
         
         
     # ================== Search for suitable content (account) ================== #
@@ -132,7 +133,7 @@ class HubVerticalBase(BaseDBHUB):
         else:
             query = f"SELECT category_code, en_caption FROM map_category_code_{type_} WHERE category_code IN ({placeholder})"
         
-        return self.query(query, params=collect_code)
+        return self.query(query, params=collect_code, return_type='dataframe')
     
     
 
@@ -272,5 +273,133 @@ class HubVerticalBase(BaseDBHUB):
 
 
 class HubVerticalUniversal(BaseDBHUB):
+    
+    # Required from BaseDBHUB
+    conn: SkipValidation
+    vector_db_company: Chroma
+    vector_db_sql: Chroma
+    multi_threading: bool = False
+    
     vector_db_ratio : Chroma
     vector_db_fs : Chroma
+    
+    def __init__(self, conn, 
+                 vector_db_ratio: Chroma, 
+                 vector_db_fs: Chroma, 
+                 vector_db_company: Chroma, 
+                 vector_db_sql: Chroma,
+                 multi_threading = True):
+        super().__init__(
+            conn=conn,
+            vector_db_company=vector_db_company,
+            vector_db_sql=vector_db_sql,
+            multi_threading=multi_threading,
+            
+            vector_db_ratio = vector_db_ratio,
+            vector_db_fs = vector_db_fs
+        )
+        logging.info('Finish setup for Vertical Universal')
+        
+    # ================== Search for suitable content (account) ================== #
+    def _accounts_search(self, texts, top_k, **kwargs):
+        collect_code = set()
+        if not isinstance(texts, list):
+            texts = [texts]
+            
+        for text in texts:
+            result = self.vector_db_fs.similarity_search(text, top_k)
+            
+            for item in result:
+                try:
+                    collect_code.add(item.metadata['code'])
+                except Exception as e:
+                    print(e)
+        return list(collect_code)
+    
+    
+    def _accounts_search_multithread(self, texts, top_k, **kwargs):
+        collect_code = set()
+        if not isinstance(texts, list):
+            texts = [texts]
+
+        # Define a function for parallel execution
+        def search_text(text):
+            result = self.vector_db_fs.similarity_search(text, top_k)
+            return [item.metadata['code'] for item in result]
+        
+        with ThreadPoolExecutor() as executor:
+            results = executor.map(search_text, texts)
+            
+
+        # Collect and combine results
+        for codes in results:
+            collect_code.update(codes)
+
+        return list(collect_code)
+    
+    def search_return_df(self, texts, top_k, type_ = None, **kwargs) -> pd.DataFrame:
+        
+        """
+        Perform a search for the most similar account codes based on the provided text.
+        
+        Return the result as a DataFrame.
+        """
+        collect_code = self.accounts_search(texts, top_k)
+        
+        placeholder = ', '.join(['%s' for _ in collect_code])
+        query = f"SELECT universal_code, universal_caption FROM map_category_code_universal WHERE universal_code IN ({placeholder})"
+        
+        return self.query(query, params=collect_code)
+    
+    # ================== Search for suitable Mapping table ================== #
+    
+    def _return_mapping_table(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = True):
+        
+        start = time.time()
+        
+        return_table = {
+            'map_category_code_universal': None,
+            'map_category_code_ratio': None
+        }        
+                
+        if len(financial_statement_row) != 0:  
+            return_table['map_category_code_universal'] = self.search_return_df(financial_statement_row, top_k)
+                
+        if len(financial_ratio_row) != 0:
+            return_table['map_category_code_ratio'] = self.search_return_df(financial_ratio_row, top_k)
+           
+        end = time.time()
+        logging.info(f"Time taken to return mapping table: {end-start}") 
+        return return_table
+    
+    
+    def _return_mapping_table_multithread(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = True):
+                
+        start = time.time()
+        
+        return_table = {
+            'map_category_code_universal': None,
+            'map_category_code_ratio': None
+        }   
+        
+        tasks = []     
+                
+        if len(financial_statement_row) != 0:  
+            tasks.append(('map_category_code_universal', financial_statement_row, top_k))
+                
+        if len(financial_ratio_row) != 0:
+            tasks.append(('map_category_code_ratio', financial_ratio_row, top_k))
+            
+        def process_task(task):
+            table_name, financial_statement_row, top_k = task
+            return table_name, self.search_return_df(financial_statement_row, top_k)
+        
+        with ThreadPoolExecutor() as executor:
+            results = executor.map(process_task, tasks)
+            
+        for table_name, result in results:
+            return_table[table_name] = result
+            
+        end = time.time()
+        logging.info(f"Time taken to return mapping table multithread: {end-start}")     
+        return return_table
