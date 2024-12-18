@@ -132,7 +132,15 @@ def upsert_data(conn, table_name, df, log_gap = 1000):
         
 def load_csv_to_postgres(*args, **db_conn):
     # Load CSV into pandas DataFrame
-    df = pd.read_csv(args[1])
+    if args[1].endswith('.csv'):
+        df = pd.read_csv(args[1])
+    elif args[1].endswith('.xlsx'):
+        df = pd.read_excel(args[1])
+    elif args[1].endswith('.parquet'):
+        df = pd.read_parquet(args[1])
+    else:
+        raise ValueError("File format not supported")    
+    
     # Connect to the PostgreSQL database
     conn = connect_to_db(**db_conn)
     
@@ -318,20 +326,20 @@ def setup_chroma_db_sql_query(collection_name, persist_directory, txt_path, mode
 #================#
 
 RDB_SETUP_CONFIG = {
-    # 'company_info' : ['../csv/df_company_info.csv', ['stock_code'], {}, True],
-    # 'sub_and_shareholder': ['../csv/df_sub_and_shareholders.csv', None, {'stock_code': 'company_info(stock_code)'}],
-    # 'map_category_code_bank': ['../csv/map_category_code_bank.csv', ['category_code']],
-    # 'map_category_code_non_bank': ['../csv/map_category_code_non_bank.csv', ['category_code']],
-    # 'map_category_code_securities': ['../csv/map_category_code_sec.csv', ['category_code']],
+    'company_info' : ['../csv/df_company_info.csv', ['stock_code'], {}, True],
+    'sub_and_shareholder': ['../csv/df_sub_and_shareholders.csv', None, {'stock_code': 'company_info(stock_code)'}],
+    'map_category_code_bank': ['../csv/map_category_code_bank.csv', ['category_code']],
+    'map_category_code_non_bank': ['../csv/map_category_code_non_bank.csv', ['category_code']],
+    'map_category_code_securities': ['../csv/map_category_code_sec.csv', ['category_code']],
     'map_category_code_ratio': ['../csv/map_ratio_code.csv', ['ratio_code']],
-    # 'map_category_code_universal': ['../csv/map_category_code_universal.csv', ['universal_code']],
+    'map_category_code_universal': ['../csv/map_category_code_universal.csv', ['universal_code']],
     
     
-    # 'bank_financial_report' : ['../csv/bank_financial_report_v2_2.csv', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'non_bank_financial_report' : ['../csv/non_bank_financial_report_v2_2.csv', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    # 'securities_financial_report' : ['../csv/securities_financial_report_v2_2.csv', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'financial_ratio' : ['../csv/financial_ratio.csv', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    # 'financial_statement': ['../csv/financial_statement.csv', None, {'universal_code': 'map_category_code_universal(universal_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'bank_financial_report' : ['../csv/bank_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'non_bank_financial_report' : ['../csv/non_bank_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'securities_financial_report' : ['../csv/securities_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'financial_ratio' : ['../csv/financial_ratio.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'financial_statement': ['../csv/financial_statement.parquet', None, {'universal_code': 'map_category_code_universal(universal_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
 
 }
 

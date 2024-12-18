@@ -450,7 +450,7 @@ if __name__ == '__main__':
     
     for type_ in types:
         print(f"Processing {type_} data")
-        data_df = pd.read_csv(os.path.join(current_path, f'../csv/{type_}_financial_report_v2_2.csv'))
+        data_df = pd.read_parquet(os.path.join(current_path, f'../csv/{type_}_financial_report_v2_2.parquet'))
         print(data_df.columns)
         df = get_financial_ratios(data_df, type_)
         
@@ -468,7 +468,7 @@ if __name__ == '__main__':
     assert dfs['ratio_code'].isna().sum()==0 , "Null value in ratio_code"
     
     dfs.drop_duplicates(inplace=True)
-    dfs.to_csv(os.path.join(current_path, '../csv/financial_ratio.csv'), index=False)
+    dfs.to_parquet(os.path.join(current_path, '../csv/financial_ratio.parquet'), index=False)
     
     ratio = dfs['ratio_code'].unique()
     

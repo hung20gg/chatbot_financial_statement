@@ -438,7 +438,7 @@ class Text2SQL(BaseAgent):
         
         return history, error_messages, execution_tables
     
-    def solve(self, task: str):
+    def solve(self, task: str, history: list = []):
         """
         Solve the task with Text2SQL
         The solve method is designed to solve a given task by converting it into SQL queries using the Text2SQL model. It handles both simple and complex tasks by breaking them down into steps if necessary.
@@ -472,9 +472,9 @@ class Text2SQL(BaseAgent):
                 task += "\nBreak down the task into steps:\n\n" + steps_to_strings(steps)         
         
         
-            history, error_messages, execution_tables = self.reasoning_text2SQL(task, company_info, suggest_table)
+            history, error_messages, execution_tables = self.reasoning_text2SQL(task, company_info, suggest_table, history = history)
         else:
-            history, error_messages, execution_tables = self.branch_reasoning_text2SQL(task, steps, company_info, suggest_table)
+            history, error_messages, execution_tables = self.branch_reasoning_text2SQL(task, steps, company_info, suggest_table, history = history)
         
         tables = [company_info]
         tables.extend(suggest_table)
