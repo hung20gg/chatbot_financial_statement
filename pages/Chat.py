@@ -49,8 +49,8 @@ st.set_page_config(
 
 @st.cache_resource
 def initialize():
-    db_config = DBConfig(**OPENAI_VERTICAL_UNIVERSAL_CONFIG)
-    chat_config = ChatConfig(**GPT4O_CONFIG)
+    db_config = DBConfig(**BGE_VERTICAL_UNIVERSAL_CONFIG)
+    chat_config = ChatConfig(**GPT4O_MINI_CONFIG)
     text2sql_config = Text2SQLConfig(**TEXT2SQL_FAST_OPENAI_CONFIG)
     prompt_config = PromptConfig(**VERTICAL_PROMPT_UNIVERSAL)
     
@@ -71,10 +71,17 @@ def initialize():
 
 chatbot = initialize()
 
-with st.chat_message( name="system"):
-    st.markdown("© 2024 Nguyen Quang Hung. All rights reserved.")
+
     
 st.session_state.chatbot = chatbot
+
+with st.container():     
+    if st.button("Clear Chat"):
+        st.session_state.chatbot.setup()
+
+with st.chat_message( name="system"):
+    st.markdown("© 2024 Nguyen Quang Hung. All rights reserved.")
+
 for message in st.session_state.chatbot.display_history:
     if message['role'] == 'user':
         with st.chat_message(name="user", avatar="graphics/user.jpg"):
@@ -96,3 +103,4 @@ if input_text:
         if isinstance(chunk, str):
             streamed_text += chunk
             assistant_message.write(streamed_text)
+     

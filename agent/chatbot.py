@@ -52,18 +52,21 @@ class Chatbot(BaseAgent):
         
         system_instruction = """
 You are a financial analyst and you have access to a database of financial statements of companies from 2019 to 2024.
-Only answer questions related to finance and accounting.
+Only confident to answer questions related to finance and accounting.
 
 Note: the money unit is Million VND. Do not discuss about number format (e.g. 1e9).
 
-If the question is not related to finance and accounting, say You are only allowed to ask questions related to finance and accounting.
 """
+# Only answer questions related to finance and accounting.
+# If the question is not related to finance and accounting, say You are only allowed to ask questions related to finance and accounting.
         self.history.append(
             {
                 'role': 'system',
                 'content': system_instruction
             }
         )
+        
+        
         
     def routing(self, user_input):
         routing_log = deepcopy(self.display_history)
@@ -139,6 +142,7 @@ If the question is not related to finance and accounting, say You are only allow
             logging.error(f"Routing error: {e}")
             routing = False
         
+        table_strings = ""
         if routing:
             logging.info("Routing triggered")
             
@@ -148,15 +152,17 @@ If the question is not related to finance and accounting, say You are only allow
                 task = self.summarize_and_get_task(self.history)
             
             self.sql_history, error_messages, execution_tables =  self.text2sql.solve(task, history=self.sql_history)
-
-            table_strings = ""
+            with open('sql_history.json', 'w') as file:
+                json.dump(self.text2sql.llm_responses, file)
+            
+            
             for i, table in enumerate(execution_tables):
-                table_strings += f"Table {i+1}\n+{utils.table_to_markdown(table)}\n\n"
+                table_strings += f"Table {i+1}: {utils.table_to_markdown(table)}\n\n"
             
             self.history.append(
                 {
                     'role': 'user',
-                    'content': f'You are provided with the following data:\n\n{table_strings}\n\nAnalyze and answer the following question:\n\n{user_input}'
+                    'content': f'You are provided with the following data:\n\n<table>\n\n{table_strings}\n\n<table>\n\nAnalyze and answer the following question:\n\n<input>\n\n{user_input}\n\n<input>\n\nYou should provide the answer based on the provided data, ignore if some data is missing.'
                 }
             )
             self.sql_index = len(self.history)
@@ -169,13 +175,17 @@ If the question is not related to finance and accounting, say You are only allow
                     'content': user_input
                 }
             )
+        return table_strings
         
         # return response
         
     def stream(self, user_input):
         start = time.time()
         
-        self.__reasoning(user_input)
+        table_strings = self.__reasoning(user_input)
+        yield table_strings
+        yield '\n\nAnalyzing\n\n'
+        
         
         end = time.time()
         logging.info(f"Reasoning time with streaming: {end - start}s")
