@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import os
 
 from llm.llm.chatgpt import ChatGPT, OpenAIWrapper
@@ -7,6 +8,7 @@ from llm.llm.gemini import Gemini
 from llm.llm_utils import get_code_from_text_response
 from pydantic import BaseModel, ConfigDict
 from typing import Union
+import re
 
 
 class Table(BaseModel):
@@ -273,3 +275,58 @@ def reformat_messages(messages):
         
     return new_messages
             
+            
+def _prune_entity(table: pd.DataFrame, entities: list[str]):
+    entities = np.array(entities)
+    if not isinstance(entities, list):
+        entities = [entities]
+
+    cols = table.columns
+    table['mask'] = 0
+    
+    for col in cols:
+        print(col)
+        if col in ['is_bank','is_securities'] and col in table.columns:
+            table.drop(col, axis=1, inplace=True)
+            continue
+            
+        mask_contain_entities = np.isin(table[col].values, entities)
+        table.loc[mask_contain_entities, 'mask'] += 1
+        
+    table = table[table['mask'] > 0]
+    table.drop('mask', axis=1, inplace=True)
+    
+    return table
+            
+            
+def prune_unnecessary_data_from_sql(tables: list[Table], messages: list[dict]): 
+    is_list = True
+    if not isinstance(tables, list):
+        is_list = False
+        tables = [tables]
+        
+    assistant_messages = []
+    for message in messages:
+        if message.get('role', '') == 'assistant':
+            assistant_messages.append(message.get('content', ''))
+            
+    sql_codes = []
+    for message in assistant_messages:
+        codes = get_code_from_text_response(message)
+        for code in codes:
+            if code['language'] == 'sql':
+                sql_codes.append(code['code'])
+    
+    metioned_entities = set()
+    
+    for code in sql_codes:
+        matches = re.findall(r"'(.*?)'", code)
+        metioned_entities.update(matches)
+    
+    for table in tables:
+        table.table = _prune_entity(table.table.copy(), list(metioned_entities))
+        
+    if not is_list:
+        return tables[0]
+    return tables
+    
