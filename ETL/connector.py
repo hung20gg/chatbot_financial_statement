@@ -319,19 +319,19 @@ def setup_chroma_db_sql_query(collection_name, persist_directory, txt_path, mode
 
 RDB_SETUP_CONFIG = {
     # 'company_info' : ['../csv/df_company_info.csv', ['stock_code'], {}, True],
-    'sub_and_shareholder': ['../csv/df_sub_and_shareholders.csv', None, {'stock_code': 'company_info(stock_code)'}],
-    'map_category_code_bank': ['../csv/map_category_code_bank.csv', ['category_code']],
-    'map_category_code_non_bank': ['../csv/map_category_code_non_bank.csv', ['category_code']],
-    'map_category_code_securities': ['../csv/map_category_code_sec.csv', ['category_code']],
+    # 'sub_and_shareholder': ['../csv/df_sub_and_shareholders.csv', None, {'stock_code': 'company_info(stock_code)'}],
+    # 'map_category_code_bank': ['../csv/map_category_code_bank.csv', ['category_code']],
+    # 'map_category_code_non_bank': ['../csv/map_category_code_non_bank.csv', ['category_code']],
+    # 'map_category_code_securities': ['../csv/map_category_code_sec.csv', ['category_code']],
     'map_category_code_ratio': ['../csv/map_ratio_code.csv', ['ratio_code']],
-    'map_category_code_universal': ['../csv/map_category_code_universal.csv', ['universal_code']],
+    # 'map_category_code_universal': ['../csv/map_category_code_universal.csv', ['universal_code']],
     
     
-    'bank_financial_report' : ['../csv/bank_financial_report_v2_2.csv', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'bank_financial_report' : ['../csv/bank_financial_report_v2_2.csv', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'non_bank_financial_report' : ['../csv/non_bank_financial_report_v2_2.csv', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'securities_financial_report' : ['../csv/securities_financial_report_v2_2.csv', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'securities_financial_report' : ['../csv/securities_financial_report_v2_2.csv', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'financial_ratio' : ['../csv/financial_ratio.csv', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'financial_statement': ['../csv/financial_statement.csv', None, {'universal_code': 'map_category_code_universal(universal_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'financial_statement': ['../csv/financial_statement.csv', None, {'universal_code': 'map_category_code_universal(universal_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
 
 }
 
@@ -396,8 +396,8 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
     
-    # setup_rdb(RDB_SETUP_CONFIG, **db_conn)
-    # logging.info("RDB setup completed")
+    setup_rdb(RDB_SETUP_CONFIG, **db_conn)
+    logging.info("RDB setup completed")
     setup_vector_db(OPENAI_VERTICAL_VECTORDB_SETUP_CONFIG, client2, **db_conn)
     setup_vector_db(LOCAL_VERTICAL_VECTORDB_SETUP_CONFIG, client, model, **db_conn)
     logging.info("Vector DB setup completed")

@@ -463,19 +463,23 @@ class Text2SQL(BaseAgent):
             str_task = steps_to_strings(steps)
             
         company_info, suggest_table = self.get_stock_code_and_suitable_row(str_task, format='table')
-        tables = [company_info]
-        tables.extend(suggest_table)
+        
         
         if not self.config.branch_reasoning:
             
             # If steps are broken down
-            if len(steps) == 0:
+            if len(steps) != 0:
                 task += "\nBreak down the task into steps:\n\n" + steps_to_strings(steps)         
         
         
             history, error_messages, execution_tables = self.reasoning_text2SQL(task, company_info, suggest_table)
         else:
             history, error_messages, execution_tables = self.branch_reasoning_text2SQL(task, steps, company_info, suggest_table)
+        
+        tables = [company_info]
+        tables.extend(suggest_table)
+        
+        tables = utils.prune_unnecessary_data_from_sql(tables, history)
         
         tables.extend(execution_tables)
         
