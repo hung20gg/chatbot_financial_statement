@@ -220,6 +220,8 @@ class Text2SQL(BaseAgent):
         
         error_messages = []
         execution_tables = []
+        debug_messages = []
+        
         count_debug = 1
         
         while count_debug < 3: # Maximum 3 times to debug
@@ -234,15 +236,17 @@ class Text2SQL(BaseAgent):
                 "content": response
             })
             
+            debug_messages.append(history[-1])
+            
             # If there is no error, break the loop
             if len(error_message) == 0:
                 break
             count_debug += 1
         
-        return history, error_messages, execution_tables
+        return debug_messages, error_messages, execution_tables
     
     
-    def reasoning_text2SQL(self, task: str, company_info, suggest_table, history: list = None):
+    def reasoning_text2SQL(self, task: str, company_info, suggest_table, history: list = []):
         
         """
         Reasoning with Text2SQL without branch reasoning.
@@ -280,9 +284,6 @@ class Text2SQL(BaseAgent):
                                                                                     suggestions_table = utils.table_to_markdown(suggest_table), 
                                                                                     few_shot = few_shot)
         
-        if history is None:
-            history = self.history.copy()
-        
         if len(history) == 0:
             history = [
                 {
@@ -294,11 +295,13 @@ class Text2SQL(BaseAgent):
                     "content": init_prompt
                 }
             ]
+            temp_message = history.copy()
         else:
             history.append({
                 "role": "user",
                 "content": new_prompt
             })
+            temp_message = [history[-1]]
             
         response = self.sql_llm(history)
         if self.config.verbose:
@@ -319,21 +322,23 @@ class Text2SQL(BaseAgent):
                 "content": response
             }
         )
+        temp_message.append(history[-1])
         
         # Self-debug the SQL code
         if self.config.self_debug:
-            history, debug_error_messages, debug_execution_tables = self.debug_sql_code(history)
+            debug_messages, debug_error_messages, debug_execution_tables = self.debug_sql_code(history)
+            
             error_messages.extend(debug_error_messages)
             execution_tables.extend(debug_execution_tables)
-        
-        messages = utils.reformat_messages(history.copy())
-        self.llm_responses.extend(messages)   
-        self.history.extend(history)
+            history.extend(debug_messages)
+            temp_message.extend(debug_messages)
+            
+        self.llm_responses.extend(utils.reformat_messages(temp_message))   
         
         return history, error_messages, execution_tables
     
         
-    def branch_reasoning_text2SQL(self, task: str, steps: list[str], company_info, suggest_table, history: list = None):
+    def branch_reasoning_text2SQL(self, task: str, steps: list[str], company_info, suggest_table, history: list = []):
         
         """
         Branch reasoning with Text2SQL 
@@ -363,8 +368,6 @@ class Text2SQL(BaseAgent):
                                                                              steps_string = steps_to_strings(steps), 
                                                                              suggestions_table = utils.table_to_markdown(suggest_table))
     
-        if history is None:
-            history = self.history.copy()
         
         if len(history) == 0:
             task_index = 1
@@ -420,7 +423,9 @@ class Text2SQL(BaseAgent):
             
             # Self-debug the SQL code
             if self.config.self_debug:
-                history, debug_error_messages, debug_execution_tables = self.debug_sql_code(history)
+                debug_messages, debug_error_messages, debug_execution_tables = self.debug_sql_code(history)
+                
+                history.extend(debug_messages)
                 error_messages.extend(debug_error_messages)
                 execution_tables.extend(debug_execution_tables)
             

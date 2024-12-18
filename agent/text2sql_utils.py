@@ -25,7 +25,7 @@ class Table(BaseModel):
         return f"Table(desc = {self.description})"
     
 
-def table_to_markdown(table: Table|pd.DataFrame|str) -> str:
+def table_to_markdown(table: Table|pd.DataFrame|str, max_string = 1000) -> str:
     
     # If it's a string
     if isinstance(table, str):
@@ -41,7 +41,7 @@ def table_to_markdown(table: Table|pd.DataFrame|str) -> str:
     markdown = ""
     for t in table:
         markdown += f"**{t.description}**\n\n"
-        markdown += df_to_markdown(t.table) + "\n\n"
+        markdown += df_to_markdown(t.table)[:max_string] + "\n\n"
     
     return markdown
     
