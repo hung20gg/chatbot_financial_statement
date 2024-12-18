@@ -30,6 +30,30 @@ GEMINI_FAST_CONFIG = {
     "summary_every": -1
 }
 
+GEMINI_EXP_CONFIG = {
+    "llm": 'gemini-2.0-flash-exp',
+    "routing_llm": 'gemini-2.0-flash-exp',
+    "summary_every": -1
+}
+
+INBETWEEN_CHAT_CONFIG = {
+    "llm": 'gpt-4o-mini',
+    "routing_llm": 'gemini-1.5-flash-002',
+    "summary_every": -1
+}
+
+GPT4O_MINI_CONFIG = {
+    "llm": 'gpt-4o-mini',
+    "routing_llm": 'gpt-4o-mini',
+    "summary_every": -1
+}
+
+GPT4O_CONFIG = {
+    "llm": 'gpt-4o',
+    "routing_llm": 'gpt-4o-mini',
+    "summary_every": -1
+}
+
 GEMINI_BEST_CONFIG = {
     "llm": 'gemini-1.5-pro-002',
     "routing_llm": 'gemini-1.5-flash-002',
@@ -70,11 +94,25 @@ TEXT2SQL_SWEET_SPOT_CONFIG = {
     "branch_reasoning": False,
     "company_top_k": 2,
     "sql_example_top_k": 2,
-    "account_top_k": 4,
+    "account_top_k": 5,
     "verbose": False,
     'get_all_acount': False,
     'self_debug': False
 }
+
+TEXT2SQL_FAST_OPENAI_CONFIG = {
+    "llm": 'gpt-4o-mini',
+    "sql_llm": 'gpt-4o-mini',
+    "reasoning": False,
+    "branch_reasoning": False,
+    "company_top_k": 2,
+    "sql_example_top_k": 2,
+    "account_top_k": 5,
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': False
+}
+
 
 TEXT2SQL_MEDIUM_OPENAI_CONFIG = {
     "llm": 'gpt-4o-mini',
@@ -83,7 +121,7 @@ TEXT2SQL_MEDIUM_OPENAI_CONFIG = {
     "branch_reasoning": False,
     "company_top_k": 2,
     "sql_example_top_k": 2,
-    "account_top_k": 4,
+    "account_top_k": 5,
     "verbose": False,
     'get_all_acount': False,
     'self_debug': False
@@ -96,7 +134,7 @@ TEXT2SQL_MEDIUM_GEMINI_CONFIG = {
     "branch_reasoning": False,
     "company_top_k": 2,
     "sql_example_top_k": 2,
-    "account_top_k": 4,
+    "account_top_k": 5,
     "verbose": False,
     'get_all_acount': False,
     'self_debug': False
@@ -109,7 +147,7 @@ TEXT2SQL_EXP_GEMINI_CONFIG = {
     "branch_reasoning": False,
     "company_top_k": 2,
     "sql_example_top_k": 2,
-    "account_top_k": 4,
+    "account_top_k": 5,
     "verbose": False,
     'get_all_acount': False,
     'self_debug': False
@@ -120,9 +158,9 @@ TEXT2SQL_FASTEST_CONFIG = {
     "sql_llm": 'gemini-1.5-flash-002',
     "reasoning": False,
     "branch_reasoning": False,
-    "company_top_k": 1,
+    "company_top_k": 2,
     "sql_example_top_k": 2,
-    "account_top_k": 3,
+    "account_top_k": 5,
     "verbose": True,
     'get_all_acount': False,
     'self_debug': False
