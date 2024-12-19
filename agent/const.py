@@ -11,6 +11,7 @@ class Config(BaseModel):
 class ChatConfig(Config):
     routing_llm: str
     summary_every: int = -1
+    get_task: bool = False
     
     
 class Text2SQLConfig(Config):
@@ -27,19 +28,22 @@ class Text2SQLConfig(Config):
 GEMINI_FAST_CONFIG = {
     "llm": 'gemini-1.5-flash-002',
     "routing_llm": 'gemini-1.5-flash-002',
-    "summary_every": -1
+    "summary_every": -1,
+    "get_task": True
 }
 
 GEMINI_EXP_CONFIG = {
     "llm": 'gemini-2.0-flash-exp',
     "routing_llm": 'gemini-2.0-flash-exp',
-    "summary_every": -1
+    "summary_every": -1,
+    "get_task": True
 }
 
 INBETWEEN_CHAT_CONFIG = {
     "llm": 'gpt-4o-mini',
     "routing_llm": 'gemini-1.5-flash-002',
-    "summary_every": -1
+    "summary_every": -1,
+    "get_task": True
 }
 
 GPT4O_MINI_CONFIG = {

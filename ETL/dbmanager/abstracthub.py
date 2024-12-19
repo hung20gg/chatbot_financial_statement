@@ -170,6 +170,16 @@ class BaseDBHUB(BaseModel):
                 
         return few_shot
     
+    def find_sql_query_v2(self, text, top_k=1):
+        results = self.vector_db_sql.similarity_search(text, top_k)
+        
+        sql_dict = {}
+        for result in results:
+            if result.metadata.get('sql_code', None) is not None:
+                sql_dict[result.page_content] = result.metadata['sql_code']
+                
+        
+        return sql_dict
     
     def get_exact_industry_bm25(self, industries):
         query = """

@@ -16,7 +16,7 @@ st.set_page_config(
 
 st.markdown("### Chat Messages")
 
-with open('sql_history.json', 'r') as file:
+with open('temp/sql_history.json', 'r') as file:
     chat_data = json.load(file)
 
 

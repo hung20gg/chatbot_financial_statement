@@ -38,6 +38,7 @@ class Text2SQL(BaseAgent):
     llm_responses: list = [] # All the responses from the LLM model
     llm: Any = Field(default=None) # The LLM model
     sql_llm: Any = Field(default=None) # The SQL LLM model
+    sql_dict: dict = {} # The SQL dictionary
     
     def __init__(self, config: Config, prompt_config: PromptConfig, db, max_steps: int = 2, **kwargs):
         super().__init__(config=config, db = db, max_steps = max_steps, prompt_config = prompt_config)
@@ -70,7 +71,7 @@ class Text2SQL(BaseAgent):
         messages = [
             {
                 "role": "system",
-                "content": f"You are an expert in financial statement and database management. You are tasked to break down the given task to {self.max_steps-1}-{self.max_steps} simpler steps. Please provide the steps."
+                "content": f"You are an expert in financial statement and database management. You are tasked to break down the given task to {self.max_steps-1}-{self.max_steps} simpler steps. If time not mentioned, assume Q3 2024."
             },
             {
                 "role": "user",
@@ -245,6 +246,13 @@ class Text2SQL(BaseAgent):
         
         return debug_messages, error_messages, execution_tables
     
+    @staticmethod
+    def sql_dict_to_markdown(sql_dict):
+        text = ""
+        for key, value in sql_dict.items():
+            text += f"**{key}** \n\n```sql\n\n{value}```\n\n"
+        return text
+    
     
     def reasoning_text2SQL(self, task: str, company_info, suggest_table, history: list = []):
         
@@ -266,11 +274,20 @@ class Text2SQL(BaseAgent):
         
         stock_code_table = utils.table_to_markdown(company_info)
         system_prompt = """
-    You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query.
+    You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query. If time not mentioned, assume collecting data in Q3 2024.
     """
         database_description = self.prompt_config.OPENAI_SEEK_DATABASE_PROMPT
         
-        few_shot = self.db.find_sql_query(text=task, top_k=self.config.sql_example_top_k)
+        RAG_sql = self.db.find_sql_query_v2(text=task, top_k=self.config.sql_example_top_k)
+        few_shot_dict = dict()
+        
+        # Reduce the number of SQL examples
+        for key, value in RAG_sql.items():
+            if key not in self.sql_dict:
+                few_shot_dict[key] = value
+                self.sql_dict[key] = value
+        
+        few_shot = self.sql_dict_to_markdown(few_shot_dict)
         
         init_prompt = self.prompt_config.REASONING_TEXT2SQL_PROMPT.format(database_description = database_description, 
                                                                      task = task, 

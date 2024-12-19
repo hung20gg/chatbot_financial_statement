@@ -2,6 +2,7 @@
 
 ## Major Update 3
 - Having universal code 
+- Ready to deploy 
 
 ## Major Update 2
 

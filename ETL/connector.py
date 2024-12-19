@@ -45,7 +45,12 @@ def connect_to_db(db_name, user, password, host='localhost', port='5432'):
 
 def create_table_if_not_exists(conn, table_name, df_path, primary_key=None, foreign_key: dict = {}, long_text=False, date_time = []):
     
-    df = pd.read_csv(df_path)
+    if df_path.endswith('.csv'):
+        df = pd.read_csv(df_path)
+    elif df_path.endswith('.xlsx'):
+        df = pd.read_excel(df_path)
+    elif df_path.endswith('.parquet'):
+        df = pd.read_parquet(df_path)
     
     columns = df.columns
     col_type = []
@@ -272,6 +277,7 @@ def setup_chroma_db_ratio(collection_name, persist_directory, table, model_name=
     def process_category(chroma_db, category):
         print(category)
         chroma_db.add_texts([category[0]], metadatas=[{'lang': 'vi', 'code': category[1]}])
+        chroma_db.add_texts([category[1]], metadatas=[{'lang': 'vi', 'code': category[1]}])
     
     with ThreadPoolExecutor() as executor:
         executor.map(lambda category: process_category(chroma_db, category), categories)
@@ -326,35 +332,24 @@ def setup_chroma_db_sql_query(collection_name, persist_directory, txt_path, mode
 #================#
 
 RDB_SETUP_CONFIG = {
-    'company_info' : ['../csv/df_company_info.csv', ['stock_code'], {}, True],
-    'sub_and_shareholder': ['../csv/df_sub_and_shareholders.csv', None, {'stock_code': 'company_info(stock_code)'}],
-    'map_category_code_bank': ['../csv/map_category_code_bank.csv', ['category_code']],
-    'map_category_code_non_bank': ['../csv/map_category_code_non_bank.csv', ['category_code']],
-    'map_category_code_securities': ['../csv/map_category_code_sec.csv', ['category_code']],
-    'map_category_code_ratio': ['../csv/map_ratio_code.csv', ['ratio_code']],
-    'map_category_code_universal': ['../csv/map_category_code_universal.csv', ['universal_code']],
+    # 'company_info' : ['../csv/df_company_info.csv', ['stock_code'], {}, True],
+    # 'sub_and_shareholder': ['../csv/df_sub_and_shareholders.csv', None, {'stock_code': 'company_info(stock_code)'}],
+    # 'map_category_code_bank': ['../csv/map_category_code_bank.csv', ['category_code']],
+    # 'map_category_code_non_bank': ['../csv/map_category_code_non_bank.csv', ['category_code']],
+    # 'map_category_code_securities': ['../csv/map_category_code_sec.csv', ['category_code']],
+    # 'map_category_code_ratio': ['../csv/map_ratio_code.csv', ['ratio_code']],
+    # 'map_category_code_universal': ['../csv/map_category_code_universal.csv', ['universal_code']],
     
     
-    'bank_financial_report' : ['../csv/bank_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'non_bank_financial_report' : ['../csv/non_bank_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'securities_financial_report' : ['../csv/securities_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'bank_financial_report' : ['../csv/bank_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'non_bank_financial_report' : ['../csv/non_bank_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'securities_financial_report' : ['../csv/securities_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'financial_ratio' : ['../csv/financial_ratio.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'financial_statement': ['../csv/financial_statement.parquet', None, {'universal_code': 'map_category_code_universal(universal_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'financial_statement': ['../csv/financial_statement.parquet', None, {'universal_code': 'map_category_code_universal(universal_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
 
 }
 
-LOCAL_VERTICAL_VECTORDB_SETUP_CONFIG = {
-    'company_name_chroma': ['company_info'],
-    'category_bank_chroma': ['map_category_code_bank'],
-    'category_non_bank_chroma': ['map_category_code_non_bank'],
-    'category_sec_chroma': ['map_category_code_securities'],
-    'category_ratio_chroma': ['map_category_code_ratio'],
-    'sql_query': ['../agent/prompt/vertical/base/simple_query_v2.txt'],
-    'sql_query_universal': ['../agent/prompt/vertical/universal/simple_query_v2.txt'],
-    'category_universal_chroma': ['map_category_code_universal'],
-}
-
-OPENAI_VERTICAL_VECTORDB_SETUP_CONFIG = {
+VERTICAL_VECTORDB_SETUP_CONFIG = {
     'company_name_chroma': ['company_info'],
     'category_bank_chroma': ['map_category_code_bank'],
     'category_non_bank_chroma': ['map_category_code_non_bank'],
@@ -373,6 +368,7 @@ def setup_rdb(config, **db_conn):
 def setup_vector_db(config, persist_directory, model_name = 'text-embedding-3-small', **db_conn):
     for table, params in config.items():
         params.append(model_name)
+        print(len(params))
         if 'sql_query' in table:
             setup_chroma_db_sql_query(table, persist_directory, *params)
         elif table == 'company_name_chroma':
@@ -402,12 +398,15 @@ def main():
     client2 = PersistentClient(path = '../data/vector_db_vertical_openai', settings = Settings())
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
+    model = HuggingFaceEmbeddings(model_name='BAAI/bge-base-en-v1.5', model_kwargs = {'device': device})
+    # model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
     
-    setup_rdb(RDB_SETUP_CONFIG, **db_conn)
-    logging.info("RDB setup completed")
-    setup_vector_db(OPENAI_VERTICAL_VECTORDB_SETUP_CONFIG, client2, **db_conn)
-    setup_vector_db(LOCAL_VERTICAL_VECTORDB_SETUP_CONFIG, client, model, **db_conn)
+    # setup_rdb(RDB_SETUP_CONFIG, **db_conn)
+    # logging.info("RDB setup completed")
+    # setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client2, **db_conn)
+    setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client, model, **db_conn)
+    
+    # bge 
     logging.info("Vector DB setup completed")
             
 if __name__ == '__main__':

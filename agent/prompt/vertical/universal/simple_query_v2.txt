@@ -487,7 +487,6 @@ income_2024_q2 AS (
         and year = 2024
         AND quarter = 2 -- data q2 for 2024
 )
---income_growth AS (
     SELECT 
         i20.stock_code,
         ((i24.net_income_2024_q2 - i20.net_income_2020) / NULLIF(i20.net_income_2020, 0)) * 100 AS growth_rate
@@ -498,3 +497,96 @@ income_2024_q2 AS (
     ORDER BY 
     	growth_rate DESC
 LIMIT 10;
+
+-- 22. ROA of MBBank in Q1 2023
+
+SELECT
+    stock_code,
+    data AS roa_percentage
+FROM financial_ratio
+WHERE ratio_code = 'ROA'
+  AND year = 2023
+  AND quarter = 1
+  AND stock_code = 'MBB'
+LIMIT 100;
+
+-- 23. Let me know the cash, gemstones, and bank BID for each quarter in 2023.
+
+SELECT
+    stock_code,
+    year,
+    quarter,
+    universal_code,
+    data AS amount
+FROM financial_statement
+WHERE universal_code = 'BS_111' -- Bank register gems, gold along with cash
+  AND stock_code = 'BID'
+  AND year = 2023
+  AND quarter IN (1, 2, 3, 4)
+ORDER BY quarter;
+
+
+-- 24. Total asset of VCB in 2020
+
+SELECT 
+    fs.stock_code,
+    fs.year,
+    fs.data AS total_assets
+FROM 
+    financial_statement fs
+WHERE 
+    fs.stock_code = 'VCB'
+    AND fs.year = 2020
+    AND fs.quarter = 0
+    AND fs.universal_code = 'BS_270'
+LIMIT 1;
+
+
+-- 25. company with highest ROI in 2023
+
+SELECT
+    fr.stock_code,
+    ci.company_name,
+    fr.data AS roi
+FROM
+    financial_ratio fr
+JOIN
+    company_info ci ON fr.stock_code = ci.stock_code
+WHERE
+    fr.ratio_code = 'ROI'  -- Assuming 'ROI' is the ratio code for Return on Investment
+    AND fr.year = 2023      -- Assuming we want the most recent year available
+    AND fr.quarter = 0      -- Annual report
+ORDER BY
+    roi desc 
+LIMIT 1;
+
+
+-- 26. Total liabilities of FPT in 2023
+
+SELECT 
+    fs.stock_code,
+    fs.year,
+    fs.data AS total_liabilities
+FROM 
+    financial_statement fs
+WHERE 
+    fs.stock_code = 'FPT'
+    AND fs.year = 2023
+    AND fs.quarter = 0  -- Annual report
+    AND fs.universal_code = 'BS_300'  -- Total liabilities
+LIMIT 1;
+
+
+-- 27. Return on Equity (ROE) and Return on Asset (ROA) of HPG in 2023 
+
+SELECT 
+    fr.stock_code,
+    fr.ratio_code,
+    ROUND(fr.data::numeric * 100, 2) AS ratio_percentage
+FROM 
+    financial_ratio fr
+WHERE 
+    fr.stock_code = 'HPG'
+    AND fr.year = 2023
+    AND fr.quarter = 0
+    AND fr.ratio_code IN ('ROE', 'ROA');
