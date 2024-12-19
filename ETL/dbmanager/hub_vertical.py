@@ -301,13 +301,16 @@ class HubVerticalUniversal(BaseDBHUB):
         logging.info('Finish setup for Vertical Universal')
         
     # ================== Search for suitable content (account) ================== #
-    def _accounts_search(self, texts, top_k, **kwargs):
+    def _accounts_search(self, texts, top_k, type_ = None, **kwargs):
         collect_code = set()
         if not isinstance(texts, list):
             texts = [texts]
             
         for text in texts:
-            result = self.vector_db_fs.similarity_search(text, top_k)
+            if type_ == 'ratio':
+                result = self.vector_db_ratio.similarity_search(text, top_k)
+            else:
+                result = self.vector_db_fs.similarity_search(text, top_k)
             
             for item in result:
                 try:
@@ -317,14 +320,18 @@ class HubVerticalUniversal(BaseDBHUB):
         return list(collect_code)
     
     
-    def _accounts_search_multithread(self, texts, top_k, **kwargs):
+    def _accounts_search_multithread(self, texts, top_k, type_ = None, **kwargs):
         collect_code = set()
         if not isinstance(texts, list):
             texts = [texts]
 
         # Define a function for parallel execution
         def search_text(text):
-            result = self.vector_db_fs.similarity_search(text, top_k)
+            if type_ == 'ratio':
+                result = self.vector_db_ratio.similarity_search(text, top_k)
+            else:
+                result = self.vector_db_fs.similarity_search(text, top_k)
+            
             return [item.metadata['code'] for item in result]
         
         with ThreadPoolExecutor() as executor:
@@ -344,10 +351,15 @@ class HubVerticalUniversal(BaseDBHUB):
         
         Return the result as a DataFrame.
         """
-        collect_code = self.accounts_search(texts, top_k)
+        collect_code = self.accounts_search(texts, top_k, type_ = type_)
+        print(collect_code)
         
         placeholder = ', '.join(['%s' for _ in collect_code])
-        query = f"SELECT universal_code, universal_caption FROM map_category_code_universal WHERE universal_code IN ({placeholder})"
+        
+        if type_ == 'ratio':
+            query = f"SELECT ratio_code, ratio_name FROM map_category_code_ratio WHERE ratio_code IN ({placeholder})"
+        else:
+            query = f"SELECT universal_code, universal_caption FROM map_category_code_universal WHERE universal_code IN ({placeholder})"
         
         return self.query(query, params=collect_code)
     
@@ -363,10 +375,10 @@ class HubVerticalUniversal(BaseDBHUB):
         }        
                 
         if len(financial_statement_row) != 0:  
-            return_table['map_category_code_universal'] = self.search_return_df(financial_statement_row, top_k)
+            return_table['map_category_code_universal'] = self.search_return_df(financial_statement_row, top_k, type_='fs')
                 
         if len(financial_ratio_row) != 0:
-            return_table['map_category_code_ratio'] = self.search_return_df(financial_ratio_row, top_k)
+            return_table['map_category_code_ratio'] = self.search_return_df(financial_ratio_row, top_k, type_='ratio')
            
         end = time.time()
         logging.info(f"Time taken to return mapping table: {end-start}") 
@@ -385,14 +397,14 @@ class HubVerticalUniversal(BaseDBHUB):
         tasks = []     
                 
         if len(financial_statement_row) != 0:  
-            tasks.append(('map_category_code_universal', financial_statement_row, top_k))
+            tasks.append(('map_category_code_universal', financial_statement_row, top_k, 'fs'))
                 
         if len(financial_ratio_row) != 0:
-            tasks.append(('map_category_code_ratio', financial_ratio_row, top_k))
+            tasks.append(('map_category_code_ratio', financial_ratio_row, top_k, 'ratio'))
             
         def process_task(task):
-            table_name, financial_statement_row, top_k = task
-            return table_name, self.search_return_df(financial_statement_row, top_k)
+            table_name, financial_statement_row, top_k, type_ = task
+            return table_name, self.search_return_df(financial_statement_row, top_k, type_=type_)
         
         with ThreadPoolExecutor() as executor:
             results = executor.map(process_task, tasks)

@@ -468,6 +468,9 @@ if __name__ == '__main__':
     assert dfs['ratio_code'].isna().sum()==0 , "Null value in ratio_code"
     
     dfs.drop_duplicates(inplace=True)
+    dfs.fillna(0, inplace=True)
+    
+    
     dfs.to_parquet(os.path.join(current_path, '../csv/financial_ratio.parquet'), index=False)
     
     ratio = dfs['ratio_code'].unique()

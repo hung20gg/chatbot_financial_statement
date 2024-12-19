@@ -53,6 +53,8 @@ if __name__ == "__main__":
     prompt_config = PromptConfig(**VERTICAL_PROMPT_UNIVERSAL)
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    
+    # embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-base-en-v1.5', model_kwargs = {'device': device})
     embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
     db_config.embedding = embedding_model
     logging.info('Finish setup embedding')
