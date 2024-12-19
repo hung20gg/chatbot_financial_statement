@@ -590,3 +590,46 @@ WHERE
     AND fr.year = 2023
     AND fr.quarter = 0
     AND fr.ratio_code IN ('ROE', 'ROA');
+
+-- 28. Rank the top 5 companies with the highest Current Ratio from 2020 to 2023, based on their financial reports.
+-- Step 1: Get the Current Ratio data for the period 2020 to 2023
+SELECT
+    fr.stock_code,
+    ci.industry,
+    fr.data AS current_ratio
+FROM
+    financial_ratio fr
+JOIN
+    company_info ci ON fr.stock_code = ci.stock_code
+WHERE
+    fr.ratio_code = 'CurrentR' -- Assuming 'CurrentR' represents the Current Ratio
+    AND fr.year between 2020 and 2023
+    AND fr.quarter = 0 -- Annual reports
+ORDER BY
+    fr.data DESC
+LIMIT 5;
+
+-- 29. Calculate the Debt-to-Equity ratio for Masan Group and its subsidiaries for the year 2021.
+
+-- Step 1: Get the stock codes for Masan Group and its subsidiaries
+WITH subsidiaries AS (
+    SELECT invest_on AS stock_code
+    FROM sub_and_shareholder
+    WHERE stock_code = 'MSN'
+    UNION ALL
+    SELECT 'MSN' AS stock_code
+)
+
+-- Step 2: Get the financial data for Total Liabilities and Total Equity for the year 2021
+SELECT 
+    fr.stock_code,
+    fr.data AS Debt_to_Equity_Ratio
+FROM 
+    financial_ratio fr 
+JOIN 
+    subsidiaries s ON fr.stock_code = s.stock_code
+WHERE 
+    fr.year = 2021
+    AND fr.quarter = 0 -- Annual report
+    and fr.ratio_code = 'DTER'
+LIMIT 100;

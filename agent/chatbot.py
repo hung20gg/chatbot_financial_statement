@@ -34,7 +34,6 @@ class Chatbot(BaseAgent):
     history: List[dict] = []
     display_history: List[dict] = []
     sql_history: List[dict] = []
-    sql_request: List = []
     
     tables: List = [] 
     sql_index: int = 0
@@ -50,6 +49,7 @@ class Chatbot(BaseAgent):
         
         self.history = []
         self.display_history = []
+        self.sql_history = []
         self.sql_index = 0
         
         system_instruction = """
@@ -279,6 +279,7 @@ Note: the money unit is Million VND. Do not discuss about number format (e.g. 1e
         })
         
         
+        
 class ChatbotSematic(Chatbot):
     
     text2sql: Text2SQL
@@ -290,7 +291,6 @@ class ChatbotSematic(Chatbot):
     history: List[dict] = []
     display_history: List[dict] = []
     sql_history: List[dict] = []
-    sql_request: List = []
     
     tables: List = [] 
     sql_index: int = 0
