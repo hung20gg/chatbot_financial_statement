@@ -1,17 +1,11 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import sys
 sys.path.append('..')
-from llm_test import reasoning_text2SQL
-from branch_reasoning import llm_branch_reasoning
-import utils
-
-from llm_test import reasoning_text2SQL
 
 from llm.llm_utils import get_json_from_text_response, get_code_from_text_response
 from llm.llm.chatgpt import ChatGPT, OpenAIWrapper
 from langchain_huggingface import HuggingFaceEmbeddings
 from llm.llm.gemini import Gemini
-from ETL import setup_db
 
 import os
 import json
