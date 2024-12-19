@@ -101,7 +101,7 @@ TEXT2SQL_SWEET_SPOT_CONFIG = {
     "account_top_k": 5,
     "verbose": False,
     'get_all_acount': False,
-    'self_debug': False
+    'self_debug': True
 }
 
 TEXT2SQL_FAST_OPENAI_CONFIG = {
@@ -114,7 +114,7 @@ TEXT2SQL_FAST_OPENAI_CONFIG = {
     "account_top_k": 5,
     "verbose": False,
     'get_all_acount': False,
-    'self_debug': False
+    'self_debug': True
 }
 
 
@@ -128,7 +128,7 @@ TEXT2SQL_MEDIUM_OPENAI_CONFIG = {
     "account_top_k": 5,
     "verbose": False,
     'get_all_acount': False,
-    'self_debug': False
+    'self_debug': True
 }
 
 TEXT2SQL_MEDIUM_GEMINI_CONFIG = {
@@ -141,7 +141,7 @@ TEXT2SQL_MEDIUM_GEMINI_CONFIG = {
     "account_top_k": 5,
     "verbose": False,
     'get_all_acount': False,
-    'self_debug': False
+    'self_debug': True
 }
 
 TEXT2SQL_EXP_GEMINI_CONFIG = {
@@ -154,7 +154,7 @@ TEXT2SQL_EXP_GEMINI_CONFIG = {
     "account_top_k": 5,
     "verbose": False,
     'get_all_acount': False,
-    'self_debug': False
+    'self_debug': True
 }
 
 TEXT2SQL_FASTEST_CONFIG = {
