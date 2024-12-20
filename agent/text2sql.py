@@ -342,7 +342,7 @@ class Text2SQL(BaseAgent):
         temp_message.append(history[-1])
         
         # Self-debug the SQL code
-        if self.config.self_debug:
+        if self.config.self_debug and len(error_message) > 0:
             debug_messages, debug_error_messages, debug_execution_tables = self.debug_sql_code(history)
             
             error_messages.extend(debug_error_messages)
@@ -439,7 +439,7 @@ class Text2SQL(BaseAgent):
             
             
             # Self-debug the SQL code
-            if self.config.self_debug:
+            if self.config.self_debug and len(error_message) > 0:
                 debug_messages, debug_error_messages, debug_execution_tables = self.debug_sql_code(history)
                 
                 history.extend(debug_messages)
