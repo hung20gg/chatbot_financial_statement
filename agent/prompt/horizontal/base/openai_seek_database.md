@@ -34,75 +34,59 @@ CREATE TABLE sub_and_shareholder(
     PRIMARY KEY (stock_code, invest_on) 
 );
 
--- Table: map_category_code_bank
-CREATE TABLE map_category_code_bank(
-    category_code VARCHAR(255) primary key, --The category_code recorded in the financial report.
-    en_caption VARCHAR(255), --The Caption for the `category_code`.
-    report_type VARCHAR(255) --Report type recorded for each line (balance_sheet, cash_flow_statement or income_statement)
-);
 
--- Table: map_category_code_non_bank. Same as `map_category_code_bank`
-CREATE TABLE map_category_code_non_bank(
-    category_code VARCHAR(255) primary key,
-    en_caption VARCHAR(255),
-    report_type VARCHAR(255)
-);
-
--- Table: map_category_code_securities. Same as `map_category_code_bank`
-CREATE TABLE map_category_code_securities(
-    category_code VARCHAR(255) primary key,
-    en_caption VARCHAR(255),
-    report_type VARCHAR(255)
-);
-
--- Table: bank_financial_report: Financial report of banks
-CREATE TABLE bank_financial_report(
+-- Table: bank_financial_report_hori: Financial report of banks
+CREATE TABLE bank_financial_report_hori(
     stock_code VARCHAR(255) references company_info(stock_code),
     year int, -- The reported financial year
     quarter int, --  The quarter reported (contain value either 0, 1, 2, 3, 4). If the value is 0, that mean the report is for annual report.
-    category_code VARCHAR(255) references map_category_code_bank(category_code),
-    data float -- The value of the recorded category (in Million VND)
+    "BS_110" float, -- The column name corresponds to the code in the Vietnamese balance sheet banking standard. The unit of data in this column is always in million (1.000.000) VND.
+    -- ... 
+    "CF_001" float, -- The column name corresponds to the code in the Vietnamese cashflow statement banking standard. The unit of data in this column is always in million (1.000.000) VND.
+    --- ...
+    "IS_001" float -- The column name corresponds to the code in the Vietnamese income statement banking standard. The unit of data in this column is always in million (1.000.000) VND.
+    -- ...
 );
 
--- Table non_bank_financial_report: Financial report of corporation. Same structure as `bank_financial_report`
-CREATE TABLE non_bank_financial_report(
+-- Table non_bank_financial_report_hori: Financial report of corporation. 
+CREATE TABLE non_bank_financial_report_hori(
     stock_code VARCHAR(255) references company_info(stock_code),
     year int,
     quarter int,
-    category_code VARCHAR(255) references map_category_code_non_bank(category_code),
-    data float
+    "BS_110" float, -- The column name corresponds to the code in the Vietnamese balance sheet corporation standard. The unit of data in this column is always in million (1.000.000) VND.
+    -- ... 
+    "CF_001" float, -- The column name corresponds to the code in the Vietnamese cashflow statement corporation standard. The unit of data in this column is always in million (1.000.000) VND.
+    --- ...
+    "IS_001" float -- The column name corresponds to the code in the Vietnamese income statement corporation standard. The unit of data in this column is always in million (1.000.000) VND.
+    -- ...
 );
 
--- Table securities_financial_report: Financial report of securities firms. Same structure as `bank_financial_report`
-CREATE TABLE securities_financial_report(
+-- Table sec_financial_report_hori: Financial report of securities firms.
+CREATE TABLE sec_financial_report_hori(
     stock_code VARCHAR(255) references company_info(stock_code),
     year int,
     quarter int,
-    category_code VARCHAR(255) references map_category_code_securities(category_code),
-    data float
+    "BS_110" float, -- The column name corresponds to the code in the Vietnamese balance sheet securities standard. The unit of data in this column is always in million (1.000.000) VND.
+    -- ... 
+    "CF_001" float, -- The column name corresponds to the code in the Vietnamese cashflow statement securities standard.The unit of data in this column is always in million (1.000.000) VND.
+    --- ...
+    "IS_001" float -- The column name corresponds to the code in the Vietnamese income statement securities standard. The unit of data in this column is always in million (1.000.000) VND.
+    -- ...
 );
 
--- Table map_category_code_ratio
-CREATE TABLE map_category_code_ratio(
-    ratio_code VARCHAR(255) primary key,
-    ratio_name VARCHAR(255)
-);
-
--- Table financial_ratio: This table will have pre-calculated common Financial Ratio such as ROA, ROE, FCF, etc
--- Same structure as `bank_financial_report`
-CREATE TABLE financial_ratio(
-    ratio_code VARCHAR(255) references map_category_code_ratio(ratio_code),
+-- Table financial_ratios_hori: This table will have pre-calculated common Financial Ratio such as ROA, ROE, FCF, etc
+CREATE TABLE financial_ratios_hori(
     stock_code VARCHAR(255) references company_info(stock_code),
     year int,
     quarter int,
-    data float
+    "ROE" float -- financial ratio
+    -- ...
 )
 
 ```
 
 Note: 
-- For each value in `category_code` column, the prefix tell which report does that code refer to, BS is Balance sheet IS is for Income statement and CF is Cash flow.
-- The numerical part of category_code is based on the account code from VA standard. If 2 row might have same meaning, prefer to use a rounder code
+- For column name in bank_financial_report_hori, non_bank_financial_report_hori, and sec_financial_report_hori the prefix tell which report does that code refer to, BS is Balance sheet IS is for Income statement and CF is Cash flow. The numerical part of them is based on the account code from VA standard. If 2 columns might have same meaning, prefer to use a rounder code
 
 ### Peek view of the schema
  - `company_info`
@@ -120,27 +104,22 @@ Note:
 Explain:
 This mean MSN is a shareholder of TCB. 
 
-- `bank_financial_report`
+- `bank_financial_report_hori`
 
-|stock_code|year|quarter|category_code|data|
-|:---|:----|:----|:----|:----|
-|VCB|2023|  0 | BS_300 | 1839613.198 |
-|LPB|2024|  2 | CF_045 | 68522.835|
-|BID|2024|  1 | IS_014 | 5392.606 |
+|stock_code|year|quarter|BS_110|...|IS_001|...|CF_001|
+|:---|:----|:----|:----|:----|:----|:----|:----|
+|VCB|2023|  0 | 110000|...|7837|...| 1839613.198 |
 
-- `map_category_code_bank`
-
-|category_code|en_caption|report_type|
-|:----|:----|:----|
-|IS_003| Net Interest Income | income_statement |
 
 ### Note
 - You can access the database by using
 ```sql
-SELECT * FROM bank_financial_report
+SELECT * FROM bank_financial_report_hori
 
 LIMIT 100;
 ```
+- Column name like "BS_110" needs to be in "" when query.
+- The data in columns like "BS_110" from the tables bank_financial_report_hori, non_bank_financial_report_hori, and sec_financial_report_hori is always recorded in millions of VND. Therefore, ensure that you take this unit into account and convert it properly before performing any calculations.
 - When asking for data in financial report (not financial ratio) in top 5, top 10 companies or subsidiary/invest_on, if not specified, you must union join all bank, non-bank and securities tables
 - For any financial ratio, it must be selected from the database rather than being calculated manually.
 - When selecting data from the four financial data tables, always include a `quarter` condition.

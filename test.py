@@ -42,7 +42,7 @@ if __name__ == "__main__":
     
     db_config = DBConfig(**BGE_VERTICAL_UNIVERSAL_CONFIG)
     chat_config = ChatConfig(**GEMINI_FAST_CONFIG)
-    text2sql_config = Text2SQLConfig(**TEXT2SQL_MEDIUM_OPENAI_CONFIG)
+    text2sql_config = Text2SQLConfig(**TEXT2SQL_FASTEST_CONFIG)
     prompt_config = PromptConfig(**VERTICAL_PROMPT_UNIVERSAL)
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     print(db.vector_db_company.similarity_search('Vinamilk', 2))
     logging.info('Test search company')
     
-    prompt = "Amount of customer deposits in BIDV and Vietcombank in Q2 2023"
+    prompt = "ROA of Vinamilk in q3 2022"
     his, err, tab = text2sql.solve(prompt)
 
     
