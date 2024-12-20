@@ -69,7 +69,7 @@ Note: the money unit is Million VND. Do not discuss about number format (e.g. 1e
                 'content': system_instruction
             }
         )
-        
+        self.text2sql.reset()
         
     def create_new_chat(self, **kwargs):
         self.setup()
