@@ -40,6 +40,9 @@ class Text2SQL(BaseAgent):
     sql_llm: Any = Field(default=None) # The SQL LLM model
     sql_dict: dict = {} # The SQL dictionary
     
+    suggest_table: list = [] # The suggested table for the task
+    company_info: Table = None # The company information
+    
     def __init__(self, config: Config, prompt_config: PromptConfig, db, max_steps: int = 2, **kwargs):
         super().__init__(config=config, db = db, max_steps = max_steps, prompt_config = prompt_config)
         
@@ -98,14 +101,14 @@ class Text2SQL(BaseAgent):
      
      
        
-    def get_stock_code_and_suitable_row(self, task, format = 'markdown'):
+    def get_stock_code_and_suitable_row(self, task):
         """
         Prompt and get stock code and suitable row
         Input:
             - task: str
             - format: str
         Output:
-            format = 'markdown':
+            format = 'table':
                 - company_info_df: str
                 - suggestions_table: str
                 
@@ -161,28 +164,18 @@ class Text2SQL(BaseAgent):
                                                 get_all_tables=self.config.get_all_acount)    
         
         # Return data
-        if format == 'dataframe':
-            return company_df, dict_dfs.values()
         
-        elif format == 'markdown':
-            text = ""
-            for title, df in dict_dfs.items():
-                text += f"\n\nTable `{title}`\n\n{utils.df_to_markdown(df)}"
-            return company_df, text
-        
-        elif format == 'table':
-            company_df = Table(table=company_df, description="Company Info")
-            tables = []
-            for title, df in dict_dfs.items():
-                
-                if df is None:
-                    continue
-                
-                table = Table(table=df, description=title)
-                tables.append(table)
-            return company_df, tables
-        else:
-            raise ValueError("Format must be either 'markdown', 'dataframe' or 'table'")
+        company_df = Table(table=company_df, description="Company Info")
+        tables = []
+        for title, df in dict_dfs.items():
+            
+            if df is None:
+                continue
+            
+            table = Table(table=df, description=title)
+            tables.append(table)
+        return company_df, tables
+
         
     def __debug_sql(self, history):
         
@@ -458,6 +451,35 @@ class Text2SQL(BaseAgent):
         
         return history, error_messages, execution_tables
     
+    
+    def update_suggest_data(self, company_info, suggest_table):
+        """
+        Update the suggest data. Avoid duplicate suggestions and reduce prompt token
+        """
+        
+        if self.company_info is None:
+            self.company_info = company_info
+        else:
+            self.company_info.table, company_info.table = utils.join_and_get_diffence(self.company_info.table, company_info.table)
+        
+        if len(self.suggest_table) == 0:
+            self.suggest_table = suggest_table
+        
+        else:
+            avaliable_tables = [table.description for table in self.suggest_table]
+            
+            for table in suggest_table:
+                if table.description not in avaliable_tables:
+                    self.suggest_table.append(table)
+                
+                else:
+                    index = avaliable_tables.index(table.description)
+                    self.suggest_table[index].table, table.table = utils.join_and_get_diffence(self.suggest_table[index].table, table.table)
+                    
+        return company_info, suggest_table
+    
+    
+    
     def solve(self, task: str, history: list = []):
         """
         Solve the task with Text2SQL
@@ -482,8 +504,9 @@ class Text2SQL(BaseAgent):
             steps = self.simplify_branch_reasoning(task)
             str_task = steps_to_strings(steps)
             
-        company_info, suggest_table = self.get_stock_code_and_suitable_row(str_task, format='table')
+        company_info, suggest_table = self.get_stock_code_and_suitable_row(str_task)
         
+        company_info, suggest_table = self.update_suggest_data(company_info, suggest_table)
         
         if not self.config.branch_reasoning:
             
@@ -495,7 +518,7 @@ class Text2SQL(BaseAgent):
             history, error_messages, execution_tables = self.reasoning_text2SQL(task, company_info, suggest_table, history = history)
         else:
             history, error_messages, execution_tables = self.branch_reasoning_text2SQL(task, steps, company_info, suggest_table, history = history)
-        
+
         tables = [company_info]
         tables.extend(suggest_table)
         

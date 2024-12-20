@@ -34,7 +34,7 @@ from ETL.dbmanager.setup import (
 )
 
 from langchain_huggingface import HuggingFaceEmbeddings
-from ETL.mongodb import get_semantic_layer
+from ETL.dbmanager import get_semantic_layer
 import json
 import torch
 

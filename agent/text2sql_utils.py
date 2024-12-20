@@ -45,6 +45,22 @@ def table_to_markdown(table: Table|pd.DataFrame|str, max_string = 10000) -> str:
     
     return markdown
     
+    
+def join_and_get_diffence(df1, df2):
+    
+    main_cols = ''
+    for col in df1.columns:
+        if col in ['category_code', 'universal_code', 'stock_code', 'ratio_code']:
+            main_cols = col
+            break
+    if main_cols == '':
+        return df1, df2
+    
+    # If find main column
+    
+    diff = df2[~df2[main_cols].isin(df1[main_cols])]
+    df1 = pd.concat([df1, diff])
+    return df1, diff
 
 
 def get_llm_wrapper(model_name, **kwargs):

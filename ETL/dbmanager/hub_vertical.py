@@ -1,4 +1,4 @@
-from langchain_chroma import Chroma
+from langchain_core.vectorstores import VectorStore
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Pool
 from pydantic import BaseModel, SkipValidation
@@ -27,23 +27,25 @@ from .abstracthub import BaseDBHUB
 class HubVerticalBase(BaseDBHUB):
     # Required from BaseDBHUB
     conn: SkipValidation
-    vector_db_company: Chroma
-    vector_db_sql: Chroma
+    vector_db_company: VectorStore
+    vector_db_sql: VectorStore
     multi_threading: bool = False
     
     # Additional attributes
-    vector_db_bank: Chroma 
-    vector_db_non_bank: Chroma
-    vector_db_securities: Chroma
-    vector_db_ratio: Chroma
+    vector_db_bank: VectorStore 
+    vector_db_non_bank: VectorStore
+    vector_db_securities: VectorStore
+    vector_db_ratio: VectorStore
+    
+    hub_name: str = "HubVerticalBase"
     
     def __init__(self, conn, 
-                 vector_db_bank: Chroma, 
-                 vector_db_non_bank: Chroma, 
-                 vector_db_securities: Chroma, 
-                 vector_db_ratio: Chroma, 
-                 vector_db_company: Chroma, 
-                 vector_db_sql: Chroma,
+                 vector_db_bank: VectorStore, 
+                 vector_db_non_bank: VectorStore, 
+                 vector_db_securities: VectorStore, 
+                 vector_db_ratio: VectorStore, 
+                 vector_db_company: VectorStore, 
+                 vector_db_sql: VectorStore,
                  multi_threading = True): # Multi-thread only useful for online embedding
         
         super().__init__(
@@ -276,18 +278,20 @@ class HubVerticalUniversal(BaseDBHUB):
     
     # Required from BaseDBHUB
     conn: SkipValidation
-    vector_db_company: Chroma
-    vector_db_sql: Chroma
+    vector_db_company: VectorStore
+    vector_db_sql: VectorStore
     multi_threading: bool = False
     
-    vector_db_ratio : Chroma
-    vector_db_fs : Chroma
+    vector_db_ratio : VectorStore
+    vector_db_fs : VectorStore
+    
+    hub_name: str = "HubVerticalUniversal"
     
     def __init__(self, conn, 
-                 vector_db_ratio: Chroma, 
-                 vector_db_fs: Chroma, 
-                 vector_db_company: Chroma, 
-                 vector_db_sql: Chroma,
+                 vector_db_ratio: VectorStore, 
+                 vector_db_fs: VectorStore, 
+                 vector_db_company: VectorStore, 
+                 vector_db_sql: VectorStore,
                  multi_threading = True):
         super().__init__(
             conn=conn,

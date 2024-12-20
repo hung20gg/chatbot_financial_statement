@@ -2,7 +2,7 @@ import os
 import dotenv
 dotenv.load_dotenv()
 
-from chromadb import Client, PersistentClient
+from chromadb import PersistentClient
 from chromadb.config import Settings
 
 
@@ -11,11 +11,15 @@ import pandas as pd
 import re
 
 from langchain_chroma import Chroma
+from langchain_milvus import Milvus
+
+
 from langchain_openai import OpenAIEmbeddings
 from concurrent.futures import ThreadPoolExecutor
 
 from langchain_huggingface  import (
     HuggingFaceEmbeddings,
+    HuggingFaceEndpointEmbeddings
 )
 import torch
 
@@ -25,6 +29,8 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
+
+BATCH_SIZE = 32
 
 #=================#
 #       RDB       #
@@ -193,15 +199,24 @@ def execute_query(query, conn=None, params = None, return_type='dataframe'):
 #    Vector DB    #
 #=================#
 
-def create_chroma_db(collection_name, persist_directory, model_name='text-embedding-3-small'):
+def create_embedding_function(model_name):
     if isinstance(model_name, str):
         if 'text-embedding' in model_name:
             embedding_function = OpenAIEmbeddings(api_key=os.getenv('OPENAI_API_KEY'), model="text-embedding-3-small")
+        
+        elif model_name[:4] == 'http':
+            embedding_function = HuggingFaceEndpointEmbeddings(model=model_name)
+        
         else:
             embedding_function = HuggingFaceEmbeddings(model_name=model_name)
     else:
         embedding_function = model_name
         
+    return embedding_function
+    
+
+
+def create_chroma_db(collection_name, persist_directory, embedding_function):        
     if isinstance(persist_directory, str):
         return Chroma(collection_name=collection_name, 
                     embedding_function=embedding_function, 
@@ -212,12 +227,30 @@ def create_chroma_db(collection_name, persist_directory, model_name='text-embedd
                     client=persist_directory)
 
 
+def create_milvus_db(collection_name, persist_directory, embedding_function):
+    return Milvus(
+        collection_name=collection_name,
+        embedding_function=embedding_function,
+        connection_args={"uri": persist_directory}
+    )
+    
+def create_vector_db(collection_name, persist_directory, model_name, vectordb):
+    
+    embedding_function = create_embedding_function(model_name)
+    
+    if vectordb == 'milvus':
+        return create_milvus_db(collection_name, persist_directory, embedding_function)
+    elif vectordb == 'chromadb':
+        return create_chroma_db(collection_name, persist_directory, embedding_function)
+    else:
+        raise ValueError("vectordb should be either 'milvus' or 'chromadb'")
+
 #==================#
 #  Setup VectorDB  #
 #==================#
 
 
-def setup_chroma_db_fs(collection_name, persist_directory, table, model_name='text-embedding-3-small', **db_conn):
+def setup_vector_db_fs(collection_name, persist_directory, table, model_name, vectordb, **db_conn):
     conn = connect_to_db(**db_conn)
     print("Connected to database")
     try:
@@ -228,18 +261,25 @@ def setup_chroma_db_fs(collection_name, persist_directory, table, model_name='te
     finally:
         conn.close()
     
-    chroma_db = create_chroma_db(collection_name, persist_directory, model_name)
+    vector_db = create_vector_db(collection_name, persist_directory, model_name, vectordb)
     
-    def process_category(chroma_db, category):
-        print(category)
-        chroma_db.add_texts([category[0]], metadatas=[{'lang': 'vi', 'code': category[2]}])
-        chroma_db.add_texts([category[1]], metadatas=[{'lang': 'en', 'code': category[2]}])
+    def process_category(vector_db, batch_category):
+        print(batch_category[0])
+        
+        categories_0 = [category[0] for category in batch_category]
+        categories_1 = [category[1] for category in batch_category]
+        metadatas = [{'lang': 'vi', 'code': category[2]} for category in batch_category]
+        
+        vector_db.add_texts(categories_0, metadatas=metadatas)
+        vector_db.add_texts(categories_1, metadatas=metadatas)
+        
+    batch_categories = [categories[i:i+BATCH_SIZE] for i in range(0, len(categories), BATCH_SIZE)]
         
     with ThreadPoolExecutor() as executor:
-        executor.map(lambda category: process_category(chroma_db, category), categories)
+        executor.map(lambda category: process_category(vector_db, category), batch_categories)
         
 
-def setup_chroma_db_universal(collection_name, persist_directory, table, model_name='text-embedding-3-small', **db_conn):
+def setup_vector_db_universal(collection_name, persist_directory, table, model_name, vectordb, **db_conn):
     conn = connect_to_db(**db_conn)
     print("Connected to database")
     try:
@@ -250,18 +290,24 @@ def setup_chroma_db_universal(collection_name, persist_directory, table, model_n
     finally:
         conn.close()
     
-    chroma_db = create_chroma_db(collection_name, persist_directory, model_name)
+    vector_db = create_vector_db(collection_name, persist_directory, model_name, vectordb)
     
-    def process_category(chroma_db, category):
-        print(category)
-        chroma_db.add_texts([category[0]], metadatas=[{'lang': 'en', 'code': category[1]}])
+    def process_category(vector_db, batch_category):
+        print(batch_category[0])
+        
+        categories_0 = [category[0] for category in batch_category]
+        metadatas = [{'lang': 'vi', 'code': category[1]} for category in batch_category]
+        
+        vector_db.add_texts(categories_0, metadatas=metadatas)
         # chroma_db.add_texts([category[1]], metadatas=[{'lang': 'en', 'code': category[2]}])
         
+    batch_categories = [categories[i:i+BATCH_SIZE] for i in range(0, len(categories), BATCH_SIZE)]
+        
     with ThreadPoolExecutor() as executor:
-        executor.map(lambda category: process_category(chroma_db, category), categories)
+        executor.map(lambda category: process_category(vector_db, category), batch_categories)
         
         
-def setup_chroma_db_ratio(collection_name, persist_directory, table, model_name='text-embedding-3-small', **db_conn):
+def setup_vector_db_ratio(collection_name, persist_directory, table, model_name, vectordb, **db_conn):
     conn = connect_to_db(**db_conn)
     print("Connected to database")
     try:
@@ -272,20 +318,28 @@ def setup_chroma_db_ratio(collection_name, persist_directory, table, model_name=
     finally:
         conn.close()
     
-    chroma_db = create_chroma_db(collection_name, persist_directory, model_name)
+    vector_db = create_vector_db(collection_name, persist_directory, model_name, vectordb)
     
-    def process_category(chroma_db, category):
-        print(category)
-        chroma_db.add_texts([category[0]], metadatas=[{'lang': 'vi', 'code': category[1]}])
-        chroma_db.add_texts([category[1]], metadatas=[{'lang': 'vi', 'code': category[1]}])
+    def process_category(vector_db, batch_category):
+        print(batch_category[0])
+        
+        categories_0 = [category[0] for category in batch_category]
+        categories_1 = [category[1] for category in batch_category]
+        
+        metadatas = [{'lang': 'vi', 'code': category[1]} for category in batch_category]
+        
+        vector_db.add_texts(categories_0, metadatas=metadatas)
+        vector_db.add_texts(categories_1, metadatas=metadatas)
+    
+    batch_categories = [categories[i:i+BATCH_SIZE] for i in range(0, len(categories), BATCH_SIZE)]
     
     with ThreadPoolExecutor() as executor:
-        executor.map(lambda category: process_category(chroma_db, category), categories)
+        executor.map(lambda category: process_category(vector_db, category), batch_categories)
         
 
     
         
-def setup_chroma_db_company_name(collection_name, persist_directory, table, model_name='text-embedding-3-small', **db_conn):
+def setup_vector_db_company_name(collection_name, persist_directory, table, model_name, vectordb, **db_conn):
     conn = connect_to_db(**db_conn)
     print("Connected to database")
     try:
@@ -296,20 +350,22 @@ def setup_chroma_db_company_name(collection_name, persist_directory, table, mode
     finally:
         conn.close()
     
-    chroma_db = create_chroma_db(collection_name, persist_directory, model_name)
+    vector_db = create_vector_db(collection_name, persist_directory, model_name, vectordb)
     
-    def process_company(chroma_db, company):
+    def process_company(vector_db, company):
         print(company)
-        chroma_db.add_texts(list(company), metadatas=[{'lang': 'vi', 'stock_code': company[0]}] * 4)
+        vector_db.add_texts(list(company), metadatas=[{'lang': 'vi', 'stock_code': company[0]}] * 4)
+        
     
     with ThreadPoolExecutor() as executor:
-        executor.map(lambda company: process_company(chroma_db, company), companies)
+        executor.map(lambda company: process_company(vector_db, company), companies)
 
         
-def setup_chroma_db_sql_query(collection_name, persist_directory, txt_path, model_name='text-embedding-3-small'):
+def setup_vector_db_sql_query(collection_name, persist_directory, txt_path, model_name, vectordb, **db_conn):
     with open(txt_path, 'r') as f:
         content = f.read()
-    chroma_db = create_chroma_db(collection_name, persist_directory, model_name)
+    vector_db = create_vector_db(collection_name, persist_directory, model_name, vectordb)
+    
     sql = re.split(r'--\s*\d+', content)
     heading = re.findall(r'--\s*\d+', content)
     codes = []
@@ -325,7 +381,7 @@ def setup_chroma_db_sql_query(collection_name, persist_directory, txt_path, mode
         
                 
     for code in codes:
-        chroma_db.add_texts([code[0]], metadatas=[{'lang': 'sql', 'sql_code': code[1]}])
+        vector_db.add_texts([code[0]], metadatas=[{'lang': 'sql', 'sql_code': code[1]}])
 
 #================#
 #  Setup config  #
@@ -365,20 +421,26 @@ def setup_rdb(config, **db_conn):
         args = [table] + params
         load_csv_to_postgres(*args, **db_conn)
         
-def setup_vector_db(config, persist_directory, model_name = 'text-embedding-3-small', **db_conn):
+def setup_vector_db(config, persist_directory, model_name = 'text-embedding-3-small', vectordb = 'chromadb', **db_conn):
+    
+    if not isinstance(persist_directory, str):
+        vectordb = 'chromadb'
+    
     for table, params in config.items():
         params.append(model_name)
+        params.append(vectordb)
+        
         print(len(params))
         if 'sql_query' in table:
-            setup_chroma_db_sql_query(table, persist_directory, *params)
+            setup_vector_db_sql_query(table, persist_directory, *params)
         elif table == 'company_name_chroma':
-            setup_chroma_db_company_name(table, persist_directory, *params, **db_conn)
+            setup_vector_db_company_name(table, persist_directory, *params, **db_conn)
         elif table == 'category_ratio_chroma':
-            setup_chroma_db_ratio(table, persist_directory, *params, **db_conn)
+            setup_vector_db_ratio(table, persist_directory, *params, **db_conn)
         elif table == 'category_universal_chroma':
-            setup_chroma_db_universal(table, persist_directory, *params, **db_conn)
+            setup_vector_db_universal(table, persist_directory, *params, **db_conn)
         else:
-            setup_chroma_db_fs(table, persist_directory, *params, **db_conn)
+            setup_vector_db_fs(table, persist_directory, *params, **db_conn)
         print(f'{table} vectordb setup completed')
             
             
@@ -397,14 +459,17 @@ def main():
     client = PersistentClient(path = '../data/vector_db_vertical_local', settings = Settings())
     client2 = PersistentClient(path = '../data/vector_db_vertical_openai', settings = Settings())
     
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = HuggingFaceEmbeddings(model_name='BAAI/bge-base-en-v1.5', model_kwargs = {'device': device})
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # model = HuggingFaceEmbeddings(model_name='BAAI/bge-base-en-v1.5', model_kwargs = {'device': device})
+    
+    embedding_server = 'http://localhost:8080'
     # model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
     
     # setup_rdb(RDB_SETUP_CONFIG, **db_conn)
     # logging.info("RDB setup completed")
     # setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client2, **db_conn)
-    setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client, model, **db_conn)
+    # setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client, model, **db_conn)
+    setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client, embedding_server, **db_conn)
     
     # bge 
     logging.info("Vector DB setup completed")

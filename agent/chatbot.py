@@ -6,7 +6,7 @@ from .text2sql import Text2SQL
 import sys
 sys.path.append('..')
 from llm.llm_utils import flatten_conversation, get_json_from_text_response, get_code_from_text_response
-from ETL.mongodb import BaseSemantic
+from ETL.dbmanager import BaseSemantic
 
 
 from pydantic import SkipValidation, Field

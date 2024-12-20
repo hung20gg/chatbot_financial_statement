@@ -7,6 +7,7 @@ from ETL.dbmanager.setup import (
     BGE_VERTICAL_UNIVERSAL_CONFIG,
     BGE_HORIZONTAL_BASE_CONFIG,
     BGE_HORIZONTAL_UNIVERSAL_CONFIG,
+    TEI_HORIZONTAL_UNIVERSAL_CONFIG,
     setup_db
 )
 
@@ -23,11 +24,11 @@ logging.basicConfig(
 
 
 if __name__ == "__main__":
-    db_config = DBConfig(**BGE_VERTICAL_UNIVERSAL_CONFIG)
+    db_config = DBConfig(**TEI_HORIZONTAL_UNIVERSAL_CONFIG)
     
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-base-en-v1.5', model_kwargs = {'device': device})
-    db_config.embedding = embedding_model
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-base-en-v1.5', model_kwargs = {'device': device})
+    # db_config.embedding = embedding_model
     logging.info('Finish setup embedding')
     
     db = setup_db(db_config)

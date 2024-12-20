@@ -10,11 +10,11 @@ from agent.const import (
     GEMINI_FAST_CONFIG,
     GPT4O_MINI_CONFIG,
     GPT4O_CONFIG,
-    TEXT2SQL_MEDIUM_OPENAI_CONFIG,
     TEXT2SQL_MEDIUM_GEMINI_CONFIG,
     TEXT2SQL_FASTEST_CONFIG,
     TEXT2SQL_FAST_OPENAI_CONFIG,
-    TEXT2SQL_SWEET_SPOT_CONFIG
+    TEXT2SQL_SWEET_SPOT_CONFIG,
+    TEXT2SQL_EXP_GEMINI_CONFIG,
 )
 
 from agent.prompt.prompt_controller import (
@@ -30,6 +30,7 @@ from ETL.dbmanager.setup import (
     BGE_VERTICAL_BASE_CONFIG,
     BGE_VERTICAL_UNIVERSAL_CONFIG,
     BGE_HORIZONTAL_BASE_CONFIG,
+    TEI_HORIZONTAL_UNIVERSAL_CONFIG,
     setup_db
 )
 
@@ -47,16 +48,16 @@ logging.basicConfig(
 if __name__ == "__main__":
     
     
-    db_config = DBConfig(**BGE_VERTICAL_UNIVERSAL_CONFIG)
-    chat_config = ChatConfig(**GPT4O_CONFIG)
+    db_config = DBConfig(**TEI_HORIZONTAL_UNIVERSAL_CONFIG)
+    chat_config = ChatConfig(**GPT4O_MINI_CONFIG)
     text2sql_config = Text2SQLConfig(**TEXT2SQL_FAST_OPENAI_CONFIG)
     prompt_config = PromptConfig(**VERTICAL_PROMPT_UNIVERSAL)
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     # embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-base-en-v1.5', model_kwargs = {'device': device})
-    embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
-    db_config.embedding = embedding_model
+    # embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
+    # db_config.embedding = embedding_model
     logging.info('Finish setup embedding')
     
     db = setup_db(db_config)
