@@ -15,7 +15,8 @@ from agent.const import (
     GEMINI_EXP_CONFIG,
     TEXT2SQL_MEDIUM_OPENAI_CONFIG,
     TEXT2SQL_FAST_OPENAI_CONFIG,
-    TEXT2SQL_SWEET_SPOT_CONFIG
+    TEXT2SQL_SWEET_SPOT_CONFIG,
+    TEXT2SQL_4O_CONFIG
 )
 
 from agent.prompt.prompt_controller import (
@@ -57,7 +58,7 @@ if "username" not in st.session_state:
 @st.cache_resource
 def initialize(user_name):
     db_config = DBConfig(**OPENAI_VERTICAL_UNIVERSAL_CONFIG)
-    chat_config = ChatConfig(**GEMINI_EXP_CONFIG)
+    chat_config = ChatConfig(**GPT4O_MINI_CONFIG)
     text2sql_config = Text2SQLConfig(**TEXT2SQL_FAST_OPENAI_CONFIG)
     prompt_config = PromptConfig(**VERTICAL_PROMPT_UNIVERSAL)
     

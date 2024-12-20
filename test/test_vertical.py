@@ -26,7 +26,7 @@ if __name__ == "__main__":
     db_config = DBConfig(**BGE_VERTICAL_UNIVERSAL_CONFIG)
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
+    embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-base-en-v1.5', model_kwargs = {'device': device})
     db_config.embedding = embedding_model
     logging.info('Finish setup embedding')
     

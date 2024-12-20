@@ -81,8 +81,22 @@ TEXT2SQL_BEST_CONFIG = {
     "llm": 'gpt-4o',
     "sql_llm": 'gpt-4o',
     "self_debug": True,
-    "reasoning": True,
+    "reasoning": False,
     "branch_reasoning": True,
+    "company_top_k": 2,
+    "sql_example_top_k": 2,
+    "account_top_k": 5,
+    "verbose": False,
+    'get_all_acount': True,
+    'self_debug': True
+}
+
+TEXT2SQL_4O_CONFIG = {
+    "llm": 'gpt-4o',
+    "sql_llm": 'gpt-4o',
+    "self_debug": True,
+    "reasoning": False,
+    "branch_reasoning": False,
     "company_top_k": 2,
     "sql_example_top_k": 2,
     "account_top_k": 5,
