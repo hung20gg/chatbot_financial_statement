@@ -58,7 +58,6 @@ class Text2SQL(BaseAgent):
         
     def reset(self):
         self.llm_responses = []
-        self.history = []
         
     def simplify_branch_reasoning(self, task):
         """
@@ -456,7 +455,6 @@ class Text2SQL(BaseAgent):
                    
         messages = utils.reformat_messages(history.copy())
         self.llm_responses.extend(messages) 
-        self.history.extend(history) 
         
         return history, error_messages, execution_tables
     

@@ -633,3 +633,53 @@ WHERE
     AND fr.quarter = 0 -- Annual report
     and fr.ratio_code = 'DTER'
 LIMIT 100;
+
+
+-- 30. Calculate the Debt-to-Equity Ratio for Vinamilk, Masan Group, and Hoa Phat Group annually from 2020 to 2023
+
+SELECT 
+    fr.stock_code,
+    ci.industry,
+    fr.year,
+    fr.data AS debt_to_equity_ratio
+FROM 
+    financial_ratio fr
+JOIN 
+    company_info ci ON fr.stock_code = ci.stock_code
+WHERE 
+    fr.ratio_code = 'DTER' -- Assuming 'DTER' represents the Debt-to-Equity ratio
+    AND fr.year IN (2020, 2021, 2022, 2023)
+    AND fr.stock_code IN ('VNM', 'MSN', 'HPG') -- Stock codes for Vinamilk, Masan Group, and Hoa Phat Group
+    AND fr.quarter = 0 -- Annual data
+ORDER BY 
+    fr.year, fr.stock_code;
+
+-- 31. Calculate the Long Term Debt-to-Equity ratio for ABB in Q2 2023.
+
+SELECT 
+    stock_code,
+    year,
+    quarter,
+    data AS long_term_debt_to_equity_ratio
+FROM 
+    financial_ratio
+WHERE 
+    ratio_code = 'LTDTER' -- Long Term Debt-to-Equity ratio code
+    AND stock_code = 'ABB' -- Company stock code
+    AND year = 2023
+    AND quarter = 2; -- Q2 2023
+
+-- 32. Return On Fixed Assets of Techcombank in financial year 2019.
+
+SELECT 
+    fr.stock_code,
+    fr.year,
+    fr.data AS return_on_fixed_assets
+FROM 
+    financial_ratio fr
+WHERE 
+    fr.stock_code = 'TCB'
+    AND fr.year = 2019
+    AND fr.quarter = 0
+    AND fr.ratio_code = 'ROFA'
+LIMIT 1;
