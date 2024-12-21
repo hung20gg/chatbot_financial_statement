@@ -8,7 +8,6 @@ sys.path.append('..')
 from llm.llm_utils import flatten_conversation, get_json_from_text_response, get_code_from_text_response
 from ETL.dbmanager import BaseSemantic
 
-
 from pydantic import SkipValidation, Field
 from typing import Any, Union, List
 from copy import deepcopy
@@ -182,7 +181,6 @@ Note: the money unit is Million VND. Do not discuss about number format (e.g. 1e
             
             
             If the provided data is not enough, try your best.
-
             Answer the question as natural as possible. Answer based on user's language.
             
             """

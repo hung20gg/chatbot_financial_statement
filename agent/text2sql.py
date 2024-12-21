@@ -261,6 +261,13 @@ class Text2SQL(BaseAgent):
             text += f"**{key}** \n\n```sql\n\n{value}```\n\n"
         return text
     
+    @staticmethod
+    def sql_dict_to_markdown(sql_dict):
+        text = ""
+        for key, value in sql_dict.items():
+            text += f"**{key}** \n\n```sql\n\n{value}```\n\n"
+        return text
+    
     
     def reasoning_text2SQL(self, task: str, company_info: Table = None, suggest_table: List[Table] = []):
         
