@@ -151,7 +151,7 @@ Note: the money unit is Million VND. Do not discuss about number format (e.g. 1e
         if not os.path.exists('temp'):
             os.makedirs('temp')
         with open('temp/sql_history.json', 'w') as file:
-            json.dump(self.text2sql.llm_responses, file)
+            json.dump(self.sql_history, file)
         
         
         for i, table in enumerate(execution_tables):
@@ -169,7 +169,7 @@ Note: the money unit is Million VND. Do not discuss about number format (e.g. 1e
             
             <table>
             
-            Analyze and answer the following question:
+            However, your user cannot see this database. Analyze and answer the following question:
             
             <input>
             
@@ -178,9 +178,11 @@ Note: the money unit is Million VND. Do not discuss about number format (e.g. 1e
             <input>
             
             You should provide the answer based on the provided data. 
-            The data often has unclear column names, but you can assume the data is correct and relevant to the task.
-            If the provided data is not enough, try your best.
+            The data often has unclear column names and datetime, but you can assume the data is correct and relevant to the task.
             
+            
+            If the provided data is not enough, try your best.
+
             Answer the question as natural as possible. Answer based on user's language.
             
             """

@@ -13,6 +13,7 @@ from agent.const import (
     GPT4O_MINI_CONFIG,
     GPT4O_CONFIG,
     GEMINI_EXP_CONFIG,
+    INBETWEEN_CHAT_CONFIG,
     TEXT2SQL_MEDIUM_OPENAI_CONFIG,
     TEXT2SQL_FAST_OPENAI_CONFIG,
     TEXT2SQL_SWEET_SPOT_CONFIG,
@@ -30,6 +31,7 @@ from ETL.dbmanager.setup import (
     BGE_VERTICAL_BASE_CONFIG,
     BGE_VERTICAL_UNIVERSAL_CONFIG,
     OPENAI_VERTICAL_UNIVERSAL_CONFIG,
+    TEI_HORIZONTAL_UNIVERSAL_CONFIG,
     setup_db
 )
 
@@ -57,8 +59,8 @@ if "username" not in st.session_state:
 
 @st.cache_resource
 def initialize(user_name):
-    db_config = DBConfig(**OPENAI_VERTICAL_UNIVERSAL_CONFIG)
-    chat_config = ChatConfig(**GPT4O_MINI_CONFIG)
+    db_config = DBConfig(**TEI_HORIZONTAL_UNIVERSAL_CONFIG)
+    chat_config = ChatConfig(**INBETWEEN_CHAT_CONFIG)
     text2sql_config = Text2SQLConfig(**TEXT2SQL_FAST_OPENAI_CONFIG)
     prompt_config = PromptConfig(**VERTICAL_PROMPT_UNIVERSAL)
     

@@ -16,6 +16,7 @@ import logging
 import time
 from pydantic import SkipValidation, Field
 from typing import Any, List
+from copy import deepcopy
 
 logging.basicConfig(
     level=logging.INFO,
@@ -181,10 +182,19 @@ class Text2SQL(BaseAgent):
             tables.append(table)
         return company_df, tables
 
+    
+    @staticmethod 
+    def __flatten_list(list_of_str, prefix = "error"):
+        text = ""
+        for i, item in enumerate(list_of_str):
+            text += f"{prefix} {i+1}: {item}\n\n"
+    
+    
+    def __debug_sql(self, history, error_messages: List[str]):
         
-    def __debug_sql(self, history):
+        error_message = self.__flatten_list(error_messages, prefix="Error")
         
-        new_query = "You have some error in the previous SQL query. Please fix the error and try again."
+        new_query = f"You have some error in the previous SQL query:\n\n <log>\n\n{error_message}\n\n</log>\n\n. Please fix the error and try again."
         history.append(
             {
                 "role": "assistant",
@@ -195,9 +205,10 @@ class Text2SQL(BaseAgent):
         response = self.sql_llm(history)
         if self.config.verbose:
             print(response)
-        return utils.TIR_reasoning(response, self.db, verbose=self.config.verbose)
+        error_messages, execution_table = utils.TIR_reasoning(response, self.db, verbose=self.config.verbose)
+        return response, error_messages, execution_table
     
-    def debug_sql_code(self, history: List[dict]):
+    def debug_sql_code(self, history: List[dict], error_messages: List[str] = []):
         
         """
         The debug_sql_code method is designed to debug SQL queries by iteratively refining them up 
@@ -216,7 +227,7 @@ class Text2SQL(BaseAgent):
         
         """
         
-        error_messages = []
+        all_error_messages = []
         execution_tables = []
         debug_messages = []
         
@@ -225,8 +236,8 @@ class Text2SQL(BaseAgent):
         while count_debug < 3: # Maximum 3 times to debug
             
             logging.info(f"Debug SQL code round {count_debug}")
-            response, error_message, execute_table = self.__debug_sql(history)
-            error_messages.extend(error_message)
+            response, error_messages, execute_table = self.__debug_sql(history, error_messages[-1])
+            all_error_messages.extend(error_messages)
             execution_tables.extend(execute_table)
             
             history.append({
@@ -237,11 +248,11 @@ class Text2SQL(BaseAgent):
             debug_messages.append(history[-1])
             
             # If there is no error, break the loop
-            if len(error_message) == 0:
+            if len(error_messages) == 0:
                 break
             count_debug += 1
         
-        return debug_messages, error_messages, execution_tables
+        return debug_messages, all_error_messages, execution_tables
     
     @staticmethod
     def sql_dict_to_markdown(sql_dict):
@@ -268,8 +279,11 @@ class Text2SQL(BaseAgent):
             
         This function will convert the natural language query into SQL query and execute the SQL query
         """
+        if company_info is None or company_info.table.empty:
+            stock_code_table = ""
+        else:
+            stock_code_table = utils.table_to_markdown(company_info)
         
-        stock_code_table = utils.table_to_markdown(company_info)
         system_prompt = """
     You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query. If time not mentioned, assume collecting data in Q3 2024.
     """
@@ -320,13 +334,13 @@ class Text2SQL(BaseAgent):
         response = self.sql_llm(self.history)
         if self.config.verbose:
             print(response)
-         
         
         # Execute SQL Query with TIR reasoning    
         error_messages = []
         execution_tables = []
         
-        response, error_message, execution_table = utils.TIR_reasoning(response, self.db, verbose=self.config.verbose)
+        error_message, execution_table = utils.TIR_reasoning(response, self.db, verbose=self.config.verbose)
+        
         error_messages.extend(error_message)
         execution_tables.extend(execution_table)
         
@@ -340,7 +354,7 @@ class Text2SQL(BaseAgent):
         
         # Self-debug the SQL code
         if self.config.self_debug and len(error_message) > 0:
-            debug_messages, debug_error_messages, debug_execution_tables = self.debug_sql_code(self.history)
+            debug_messages, debug_error_messages, debug_execution_tables = self.debug_sql_code(self.history, error_message)
             
             error_messages.extend(debug_error_messages)
             execution_tables.extend(debug_execution_tables)
@@ -393,19 +407,20 @@ class Text2SQL(BaseAgent):
                 },
                 {
                     "role": "user",
-                    "content": init_prompt + look_up_stock_code
+                    "content": init_prompt + '\n\n' + look_up_stock_code
                 }
             ]
         else:
             task_index = len(self.history)
             self.history.append({
                 "role": "user",
-                "content": init_prompt + look_up_stock_code
+                "content": init_prompt + '\n\n' + look_up_stock_code
             })
             
         error_messages = []
         execution_tables = []
         
+        previous_result = ""
         
         for i, step in enumerate(steps):
             logging.info(f"Step {i+1}: {step}")
@@ -414,7 +429,7 @@ class Text2SQL(BaseAgent):
             else:
                 self.history.append({
                     "role": "user",
-                    "content": f"<instruction>\n\nThink step-by-step and do the {step}\n\n</instruction>\n\nHere are the samples SQL you might need\n\n{self.db.find_sql_query(step, top_k=self.config.sql_example_top_k)}\n\n"
+                    "content": f"The previous result of is \n\n<result>\n\n{previous_result}\n\n<result>\n\n <instruction>\n\nThink step-by-step and do the {step}\n\n</instruction>\n\nHere are the samples SQL you might need\n\n{self.db.find_sql_query(step, top_k=self.config.sql_example_top_k)}\n\n"
                 })
             
             response = self.sql_llm(self.history)
@@ -422,7 +437,7 @@ class Text2SQL(BaseAgent):
                 print(response)
             
             # Add TIR to the SQL query
-            response, error_message, execute_table = utils.TIR_reasoning(response, self.db, verbose=self.config.verbose)
+            error_message, execute_table = utils.TIR_reasoning(response, self.db, verbose=self.config.verbose)
             
             error_messages.extend(error_message)
             execution_tables.extend(execute_table)
@@ -442,14 +457,18 @@ class Text2SQL(BaseAgent):
                 self.history.extend(debug_messages)
                 error_messages.extend(debug_error_messages)
                 execution_tables.extend(debug_execution_tables)
+                
+                previous_result = utils.table_to_markdown(debug_execution_tables)
             
+            else:
+                previous_result = utils.table_to_markdown(execute_table)
             
             # Prepare for the next step
             company_info = utils.get_company_detail_from_df(execution_tables, self.db) # dataframe
             
             stock_code_table = utils.table_to_markdown(company_info)
             look_up_stock_code = f"\nHere are the detail of the companies: \n\n{stock_code_table}"
-            self.history[task_index]["content"] = init_prompt + look_up_stock_code
+            self.history[task_index]["content"] = init_prompt + '\n\n' + look_up_stock_code
                    
         messages = utils.reformat_messages(self.history.copy())
         self.llm_responses.extend(messages) 
@@ -527,11 +546,13 @@ class Text2SQL(BaseAgent):
         tables = [company_info]
         tables.extend(suggest_table)
         
-        tables = utils.prune_unnecessary_data_from_sql(tables, self.history)
+        tables = utils.prune_unnecessary_data_from_sql(deepcopy(tables), self.history)
+        
+        tables = utils.prune_null_table(tables) # Remove null table
         
         tables.extend(execution_tables)
         
-        tables = utils.prune_null_table(tables) # Remove null table
+        
         
         end = time.time()
         logging.info(f"Time taken: {end-start}s")

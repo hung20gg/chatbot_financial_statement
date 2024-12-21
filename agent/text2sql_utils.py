@@ -42,11 +42,11 @@ def table_to_markdown(table: Table|pd.DataFrame|str, max_string = 10000) -> str:
         if isinstance(table, pd.DataFrame):
             markdown += df_to_markdown(t)[:max_string] + "\n\n"
         
-        elif isinstance(table, Table):
+        try:
             markdown += f"**{t.description}**\n\n"
             markdown += df_to_markdown(t.table)[:max_string] + "\n\n"
         
-        else:
+        except:
             raise ValueError("Invalid table type")
     
     return markdown
@@ -184,7 +184,7 @@ def is_sql_full_of_comments(sql_text):
     
     
 def get_table_name_from_sql(sql_text):
-    pattern = r"-- ### \{(.*?)\}"
+    pattern = r"-- ###\s*(.+)"
     matches = re.findall(pattern, sql_text)
     if len(matches) > 0:
         return matches[0]
@@ -212,7 +212,7 @@ def TIR_reasoning(response, db, verbose=False):
         if verbose:    
             print(f"SQL Code {i+1}: \n{code}")
         
-        if not is_sql_full_of_comments(code):  
+        if not is_sql_full_of_comments(code): 
             name = get_table_name_from_sql(code)
               
             table = db.query(code, return_type='dataframe')
@@ -225,18 +225,9 @@ def TIR_reasoning(response, db, verbose=False):
             table_obj = Table(table=table, sql=code, description=f"SQL Result {i+1}: {name}")
             
             execution_table.append(table_obj)
-            table_markdown = df_to_markdown(table)
-            TIR_response += f"*SQL result for {i+1} {name}:* \n\n{table_markdown}\n\n"
     
-    response += f"\n\n#### The result of the given SQL:\n\n{TIR_response}"
     
-    error_message = ""
-    if len(execution_error) > 0:
-        for i, error in execution_error:
-            error_message += f"Error in SQL {i+1}: {error}\n\n"
-            response += f"\n\n#### Error in SQL {i+1}:\n\n{error}"
-    
-    return response, execution_error, execution_table
+    return execution_error, execution_table
 
     
 def get_company_detail_from_df(dfs, db, method = 'similarity') -> pd.DataFrame:

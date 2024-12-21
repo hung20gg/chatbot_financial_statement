@@ -11,7 +11,7 @@ class Config(BaseModel):
 class ChatConfig(Config):
     routing_llm: str
     summary_every: int = -1
-    get_task: bool = False
+    get_task: bool = True
     
     
 class Text2SQLConfig(Config):
