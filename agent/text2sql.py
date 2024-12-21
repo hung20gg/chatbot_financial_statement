@@ -34,7 +34,6 @@ class Text2SQL(BaseAgent):
     max_steps: int # The maximum number of steps to break down the task
     prompt_config: PromptConfig # The prompt configuration. This is for specify prompt for horizontal or vertical database design
     
-    history: list = [] # The conversation history
     llm_responses: list = [] # All the responses from the LLM model
     llm: Any = Field(default=None) # The LLM model
     sql_llm: Any = Field(default=None) # The SQL LLM model
@@ -61,6 +60,10 @@ class Text2SQL(BaseAgent):
         
     def reset(self):
         self.llm_responses = []
+        self.suggest_table = []
+        self.company_info = None
+        self.sql_dict = {}
+        
         
     def simplify_branch_reasoning(self, task):
         """
