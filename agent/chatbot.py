@@ -146,7 +146,7 @@ Note: the money unit is Million VND. Do not discuss about number format (e.g. 1e
         
         table_strings = ""
         
-        self.sql_history, error_messages, execution_tables =  self.text2sql.solve(task, history=self.sql_history)
+        self.sql_history, error_messages, execution_tables =  self.text2sql.solve(task)
         
         if not os.path.exists('temp'):
             os.makedirs('temp')

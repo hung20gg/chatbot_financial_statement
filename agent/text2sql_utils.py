@@ -27,26 +27,32 @@ class Table(BaseModel):
 
 def table_to_markdown(table: Table|pd.DataFrame|str, max_string = 10000) -> str:
     
+    if table is None:
+        return ""
+    
     # If it's a string
     if isinstance(table, str):
         return table
-    
-    # If it's a dataframe
-    if isinstance(table, pd.DataFrame):
-        return df_to_markdown(table)
-    
+
     if not isinstance(table, list):
         table = [table]
         
     markdown = ""
     for t in table:
-        markdown += f"**{t.description}**\n\n"
-        markdown += df_to_markdown(t.table)[:max_string] + "\n\n"
+        if isinstance(table, pd.DataFrame):
+            markdown += df_to_markdown(t)[:max_string] + "\n\n"
+        
+        elif isinstance(table, Table):
+            markdown += f"**{t.description}**\n\n"
+            markdown += df_to_markdown(t.table)[:max_string] + "\n\n"
+        
+        else:
+            raise ValueError("Invalid table type")
     
     return markdown
     
     
-def join_and_get_diffence(df1, df2):
+def join_and_get_difference(df1, df2):
     
     main_cols = ''
     for col in df1.columns:
@@ -177,6 +183,13 @@ def is_sql_full_of_comments(sql_text):
     return comment_lines >= total_lines  
     
     
+def get_table_name_from_sql(sql_text):
+    pattern = r"-- ### \{(.*?)\}"
+    matches = re.findall(pattern, sql_text)
+    if len(matches) > 0:
+        return matches[0]
+    return ""
+    
     
 def TIR_reasoning(response, db, verbose=False):
     codes = get_code_from_text_response(response)
@@ -199,7 +212,9 @@ def TIR_reasoning(response, db, verbose=False):
         if verbose:    
             print(f"SQL Code {i+1}: \n{code}")
         
-        if not is_sql_full_of_comments(code):    
+        if not is_sql_full_of_comments(code):  
+            name = get_table_name_from_sql(code)
+              
             table = db.query(code, return_type='dataframe')
             
             # If it see an error in the SQL code
@@ -207,11 +222,11 @@ def TIR_reasoning(response, db, verbose=False):
                 execution_error.append((i, table))
                 continue
             
-            table_obj = Table(table=table, sql=code, description=f"SQL {i+1}")
+            table_obj = Table(table=table, sql=code, description=f"SQL Result {i+1}: {name}")
             
             execution_table.append(table_obj)
             table_markdown = df_to_markdown(table)
-            TIR_response += f"*SQL result for {i+1}:* \n\n{table_markdown}\n\n"
+            TIR_response += f"*SQL result for {i+1} {name}:* \n\n{table_markdown}\n\n"
     
     response += f"\n\n#### The result of the given SQL:\n\n{TIR_response}"
     
@@ -333,16 +348,38 @@ def prune_unnecessary_data_from_sql(tables: list[Table], messages: list[dict]):
             if code['language'] == 'sql':
                 sql_codes.append(code['code'])
     
-    metioned_entities = set()
+    mentioned_entities = set()
     
     for code in sql_codes:
         matches = re.findall(r"'(.*?)'", code)
-        metioned_entities.update(matches)
+        mentioned_entities.update(matches)
     
     for table in tables:
-        table.table = _prune_entity(table.table.copy(), list(metioned_entities))
+        table.table = _prune_entity(table.table.copy(), list(mentioned_entities))
         
     if not is_list:
         return tables[0]
     return tables
     
+def check_null_table(tables: Table|pd.DataFrame):
+    
+    if isinstance(tables, pd.DataFrame):
+        if tables is None or tables.empty:
+            return True
+        return False
+    
+    if isinstance(tables, Table):
+        if tables.table is None or tables.table.empty:
+            return True
+        return False
+    
+    
+def prune_null_table(tables: list[Table|pd.DataFrame]):
+    new_tables = []
+    for table in tables:
+        
+        if check_null_table(table):
+            continue
+        new_tables.append(table)
+        
+    return new_tables

@@ -15,7 +15,7 @@ import pandas as pd
 import logging
 import time
 from pydantic import SkipValidation, Field
-from typing import Any
+from typing import Any, List
 
 logging.basicConfig(
     level=logging.INFO,
@@ -34,12 +34,13 @@ class Text2SQL(BaseAgent):
     max_steps: int # The maximum number of steps to break down the task
     prompt_config: PromptConfig # The prompt configuration. This is for specify prompt for horizontal or vertical database design
     
-    llm_responses: list = [] # All the responses from the LLM model
+    llm_responses: List = [] # All the responses from the LLM model
+    history: List = [] # The conversation history
     llm: Any = Field(default=None) # The LLM model
     sql_llm: Any = Field(default=None) # The SQL LLM model
     sql_dict: dict = {} # The SQL dictionary
     
-    suggest_table: list = [] # The suggested table for the task
+    suggest_table: List = [] # The suggested table for the task
     company_info: Table = None # The company information
     
     def __init__(self, config: Config, prompt_config: PromptConfig, db, max_steps: int = 2, **kwargs):
@@ -61,6 +62,7 @@ class Text2SQL(BaseAgent):
     def reset(self):
         self.llm_responses = []
         self.suggest_table = []
+        self.history = []
         self.company_info = None
         self.sql_dict = {}
         
@@ -195,7 +197,7 @@ class Text2SQL(BaseAgent):
             print(response)
         return utils.TIR_reasoning(response, self.db, verbose=self.config.verbose)
     
-    def debug_sql_code(self, history):
+    def debug_sql_code(self, history: List[dict]):
         
         """
         The debug_sql_code method is designed to debug SQL queries by iteratively refining them up 
@@ -204,7 +206,7 @@ class Text2SQL(BaseAgent):
         
         Parameters:
 
-            history (list): A list of the conversation history, including previous SQL queries and responses.
+            history (List[dict]): A list of the conversation history, including previous SQL queries and responses.
         
         Returns:
 
@@ -249,7 +251,7 @@ class Text2SQL(BaseAgent):
         return text
     
     
-    def reasoning_text2SQL(self, task: str, company_info, suggest_table, history: list = []):
+    def reasoning_text2SQL(self, task: str, company_info: Table = None, suggest_table: List[Table] = []):
         
         """
         Reasoning with Text2SQL without branch reasoning.
@@ -296,8 +298,8 @@ class Text2SQL(BaseAgent):
                                                                                     suggestions_table = utils.table_to_markdown(suggest_table), 
                                                                                     few_shot = few_shot)
         
-        if len(history) == 0:
-            history = [
+        if len(self.history) == 0:
+            self.history = [
                 {
                     "role": "system",
                     "content": system_prompt
@@ -307,15 +309,15 @@ class Text2SQL(BaseAgent):
                     "content": init_prompt
                 }
             ]
-            temp_message = history.copy()
+            temp_message = self.history.copy()
         else:
-            history.append({
+            self.history.append({
                 "role": "user",
                 "content": new_prompt
             })
-            temp_message = [history[-1]]
+            temp_message = [self.history[-1]]
             
-        response = self.sql_llm(history)
+        response = self.sql_llm(self.history)
         if self.config.verbose:
             print(response)
          
@@ -328,29 +330,30 @@ class Text2SQL(BaseAgent):
         error_messages.extend(error_message)
         execution_tables.extend(execution_table)
         
-        history.append(
+        self.history.append(
             {
                 "role": "assistant",
                 "content": response
             }
         )
-        temp_message.append(history[-1])
+        temp_message.append(self.history[-1])
         
         # Self-debug the SQL code
         if self.config.self_debug and len(error_message) > 0:
-            debug_messages, debug_error_messages, debug_execution_tables = self.debug_sql_code(history)
+            debug_messages, debug_error_messages, debug_execution_tables = self.debug_sql_code(self.history)
             
             error_messages.extend(debug_error_messages)
             execution_tables.extend(debug_execution_tables)
-            history.extend(debug_messages)
+            
+            self.history.extend(debug_messages)
             temp_message.extend(debug_messages)
             
         self.llm_responses.extend(utils.reformat_messages(temp_message))   
         
-        return history, error_messages, execution_tables
+        return self.history, error_messages, execution_tables
     
         
-    def branch_reasoning_text2SQL(self, task: str, steps: list[str], company_info, suggest_table, history: list = []):
+    def branch_reasoning_text2SQL(self, task: str, steps: list[str], company_info, suggest_table):
         
         """
         Branch reasoning with Text2SQL 
@@ -361,7 +364,6 @@ class Text2SQL(BaseAgent):
             - steps: list[str]. The steps to break down the task.
             - company_info. Information about the company relevant to the task.
             - suggest_table. The suggested table for the task.
-            - history: list
         Output:
             - history: list.
             - error_messages: list.
@@ -372,33 +374,33 @@ class Text2SQL(BaseAgent):
         """
         
         stock_code_table = utils.table_to_markdown(company_info)
-        look_up_stock_code = f"\nHere are the detail of the companies: \n\n{stock_code_table}"
+        look_up_stock_code = f"\n\nHere are the detail of the companies: \n\n{stock_code_table}"
 
         database_description = self.prompt_config.OPENAI_SEEK_DATABASE_PROMPT
-        content = self.prompt_config.BRANCH_REASONING_TEXT2SQL_PROMPT.format(database_description = database_description, 
+        init_prompt = self.prompt_config.BRANCH_REASONING_TEXT2SQL_PROMPT.format(database_description = database_description, 
                                                                              task = task, 
                                                                              steps_string = steps_to_strings(steps), 
                                                                              suggestions_table = utils.table_to_markdown(suggest_table))
     
         
-        if len(history) == 0:
+        if len(self.history) == 0:
             task_index = 1
             
-            history = [
+            self.history = [
                 {
                     "role": "system",
                     "content": "You are an expert in financial statement and database management. You will be asked to convert a natural language query into a PostgreSQL query."
                 },
                 {
                     "role": "user",
-                    "content": content + look_up_stock_code
+                    "content": init_prompt + look_up_stock_code
                 }
             ]
         else:
-            task_index = len(history)
-            history.append({
+            task_index = len(self.history)
+            self.history.append({
                 "role": "user",
-                "content": content + look_up_stock_code
+                "content": init_prompt + look_up_stock_code
             })
             
         error_messages = []
@@ -408,14 +410,14 @@ class Text2SQL(BaseAgent):
         for i, step in enumerate(steps):
             logging.info(f"Step {i+1}: {step}")
             if i == 0:
-                history[-1]["content"] += f"<instruction>\n\nThink step-by-step and do the {step}\n\n</instruction>\n\nHere are the samples SQL you might need\n\n{self.db.find_sql_query(step, top_k=self.config.sql_example_top_k)}\n\n"
+                self.history[-1]["content"] += f"<instruction>\n\nThink step-by-step and do the {step}\n\n</instruction>\n\nHere are the samples SQL you might need\n\n{self.db.find_sql_query(step, top_k=self.config.sql_example_top_k)}\n\n"
             else:
-                history.append({
+                self.history.append({
                     "role": "user",
                     "content": f"<instruction>\n\nThink step-by-step and do the {step}\n\n</instruction>\n\nHere are the samples SQL you might need\n\n{self.db.find_sql_query(step, top_k=self.config.sql_example_top_k)}\n\n"
                 })
             
-            response = self.sql_llm(history)
+            response = self.sql_llm(self.history)
             if self.config.verbose:
                 print(response)
             
@@ -425,7 +427,7 @@ class Text2SQL(BaseAgent):
             error_messages.extend(error_message)
             execution_tables.extend(execute_table)
             
-            history.append(
+            self.history.append(
                 {
                     "role": "assistant",
                     "content": response
@@ -435,27 +437,27 @@ class Text2SQL(BaseAgent):
             
             # Self-debug the SQL code
             if self.config.self_debug and len(error_message) > 0:
-                debug_messages, debug_error_messages, debug_execution_tables = self.debug_sql_code(history)
+                debug_messages, debug_error_messages, debug_execution_tables = self.debug_sql_code(self.history)
                 
-                history.extend(debug_messages)
+                self.history.extend(debug_messages)
                 error_messages.extend(debug_error_messages)
                 execution_tables.extend(debug_execution_tables)
             
             
             # Prepare for the next step
-            company_info = utils.get_company_detail_from_df(execution_tables, self.db)
+            company_info = utils.get_company_detail_from_df(execution_tables, self.db) # dataframe
             
             stock_code_table = utils.table_to_markdown(company_info)
             look_up_stock_code = f"\nHere are the detail of the companies: \n\n{stock_code_table}"
-            history[task_index]["content"] = content + look_up_stock_code
+            self.history[task_index]["content"] = init_prompt + look_up_stock_code
                    
-        messages = utils.reformat_messages(history.copy())
+        messages = utils.reformat_messages(self.history.copy())
         self.llm_responses.extend(messages) 
         
-        return history, error_messages, execution_tables
+        return self.history, error_messages, execution_tables
     
     
-    def update_suggest_data(self, company_info, suggest_table):
+    def update_suggest_data(self, company_info: Table, suggest_table: list[Table]):
         """
         Update the suggest data. Avoid duplicate suggestions and reduce prompt token
         """
@@ -463,27 +465,27 @@ class Text2SQL(BaseAgent):
         if self.company_info is None:
             self.company_info = company_info
         else:
-            self.company_info.table, company_info.table = utils.join_and_get_diffence(self.company_info.table, company_info.table)
+            self.company_info.table, company_info.table = utils.join_and_get_difference(self.company_info.table, company_info.table)
         
         if len(self.suggest_table) == 0:
             self.suggest_table = suggest_table
         
         else:
-            avaliable_tables = [table.description for table in self.suggest_table]
+            available_tables = [table.description for table in self.suggest_table]
             
             for table in suggest_table:
-                if table.description not in avaliable_tables:
+                if table.description not in available_tables:
                     self.suggest_table.append(table)
                 
                 else:
-                    index = avaliable_tables.index(table.description)
-                    self.suggest_table[index].table, table.table = utils.join_and_get_diffence(self.suggest_table[index].table, table.table)
+                    index = available_tables.index(table.description)
+                    self.suggest_table[index].table, table.table = utils.join_and_get_difference(self.suggest_table[index].table, table.table)
                     
         return company_info, suggest_table
     
     
     
-    def solve(self, task: str, history: list = []):
+    def solve(self, task: str):
         """
         Solve the task with Text2SQL
         The solve method is designed to solve a given task by converting it into SQL queries using the Text2SQL model. It handles both simple and complex tasks by breaking them down into steps if necessary.
@@ -515,28 +517,22 @@ class Text2SQL(BaseAgent):
             
             # If steps are broken down
             if len(steps) != 0:
-                task += "\nBreak down the task into steps:\n\n" + steps_to_strings(steps)         
+                task += "\n\nBreak down the task into steps:\n\n" + steps_to_strings(steps)         
         
         
-            history, error_messages, execution_tables = self.reasoning_text2SQL(task, company_info, suggest_table, history = history)
+            self.history, error_messages, execution_tables = self.reasoning_text2SQL(task, company_info, suggest_table)
         else:
-            history, error_messages, execution_tables = self.branch_reasoning_text2SQL(task, steps, company_info, suggest_table, history = history)
+            self.history, error_messages, execution_tables = self.branch_reasoning_text2SQL(task, steps, company_info, suggest_table)
 
         tables = [company_info]
         tables.extend(suggest_table)
         
-        tables = utils.prune_unnecessary_data_from_sql(tables, history)
+        tables = utils.prune_unnecessary_data_from_sql(tables, self.history)
         
         tables.extend(execution_tables)
         
+        tables = utils.prune_null_table(tables) # Remove null table
         
         end = time.time()
         logging.info(f"Time taken: {end-start}s")
-        return history, error_messages, tables
-    
-    
-    
-        
-        
-        
-    
+        return self.history, error_messages, tables
