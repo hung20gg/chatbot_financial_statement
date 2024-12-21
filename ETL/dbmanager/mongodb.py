@@ -39,16 +39,34 @@ class MessageSaver(BaseSemantic):
         
         user_name = os.getenv('MONGO_DB_USER')
         password = os.getenv('MONGO_DB_PASSWORD')
-        host = os.getenv('DB_HOST') # Share same host with the app
+        host = os.getenv('MONGO_DB_HOST') # Share same host with the app
         port = os.getenv('MONGO_DB_PORT')
         
         url = f"mongodb://{user_name}:{password}@{host}:{port}"
         
         self.client = MongoClient(url)
+        self.ensure_database_and_collections(db_name, chat_collection, sql_collection)
+        
+        
         self.db = self.client[db_name]
         self.chat_collection = self.db[chat_collection]
         self.sql_collection = self.db[sql_collection]
         
+    def ensure_database_and_collections(self, db_name, *collections):
+        try:
+            # Access the database
+            db = self.client[db_name]
+            existing_collections = db.list_collection_names()
+
+            # Check and create collections
+            for collection in collections:
+                if collection not in existing_collections:
+                    db.create_collection(collection)
+                    logging.info(f"Collection '{collection}' created in database '{db_name}'.")
+                else:
+                    logging.info(f"Collection '{collection}' already exists in database '{db_name}'.")
+        except Exception as e:
+            raise Exception(f"Error in creating database and collections: {e}")
         
     def switch_collection(self, collection_name):
         self.collection = self.db[collection_name]    

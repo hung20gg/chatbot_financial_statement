@@ -316,7 +316,7 @@ def _prune_entity(table: pd.DataFrame, entities: list[str]):
         table.loc[mask_contain_entities, 'mask'] += 1
         
     table = table[table['mask'] > 0]
-    table.drop('mask', axis=1, inplace=True)
+    table = table.drop('mask', axis=1)
     
     return table
             

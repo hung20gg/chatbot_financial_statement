@@ -1,10 +1,14 @@
 import os
+
+import sys 
+sys.path.append('..')
+
 import dotenv
 dotenv.load_dotenv()
 
 from chromadb import PersistentClient
 from chromadb.config import Settings
-
+import subprocess
 
 import psycopg2
 import pandas as pd
@@ -21,15 +25,18 @@ from langchain_huggingface  import (
     HuggingFaceEmbeddings,
     HuggingFaceEndpointEmbeddings
 )
-import torch
 
 import logging
+import requests
 import time
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
+
+current_dir = os.path.dirname(os.path.abspath(__file__))    
 BATCH_SIZE = 32
 
 #=================#
@@ -37,7 +44,7 @@ BATCH_SIZE = 32
 #=================#
 
 def connect_to_db(db_name, user, password, host='localhost', port='5432'):
-    print(f'Connecting to database {db_name}, {user}...')
+    logging.info(f'Connecting to database {db_name}, {user}...')
     
     conn = psycopg2.connect(
         dbname=db_name,
@@ -49,7 +56,69 @@ def connect_to_db(db_name, user, password, host='localhost', port='5432'):
     return conn
 
 
+def check_table_exists(connection, table_name):
+    query = """
+    SELECT EXISTS (
+        SELECT 1
+        FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = %s
+    );
+    """
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(query, (table_name,))
+            result = cursor.fetchone()[0]
+            return result
+    except Exception as e:
+        print(f"Error checking table existence: {e}")
+        return False
+    
+
+def insert_row_if_not_exists(connection, table_name, row_data):
+    # Generate the column names and placeholders dynamically
+    columns = ", ".join(row_data.keys())
+    placeholders = ", ".join(["%s"] * len(row_data))
+    
+    # Build the SQL query to check if the row exists
+    check_query = f"""
+    SELECT EXISTS (
+        SELECT 1 FROM {table_name} 
+        WHERE ({columns}) = ({placeholders})
+    );
+    """
+    
+    # Build the SQL query to insert the row
+    insert_query = f"""
+    INSERT INTO {table_name} ({columns}) 
+    VALUES ({placeholders});
+    """
+    
+    try:
+        with connection.cursor() as cursor:
+            # Check if the row exists
+            cursor.execute(check_query, tuple(row_data.values()))
+            exists = cursor.fetchone()[0]
+            
+            if not exists:
+                # Insert the row if it doesn't exist
+                cursor.execute(insert_query, tuple(row_data.values()))
+
+    except Exception as e:
+        print(f"Error: {e}")
+        
+# Step 3.1: Insert data into table savely
+def upsert_data_save(conn, table_name, df, log_gap = 5000):
+    for i, row in df.iterrows():
+        insert_row_if_not_exists(conn, table_name, row)
+        
+        if i%log_gap == 0:
+            logging.info(f'Upserted row: {row}')
+        
+
+
 def create_table_if_not_exists(conn, table_name, df_path, primary_key=None, foreign_key: dict = {}, long_text=False, date_time = []):
+    
+    df_path = os.path.join(current_dir, df_path)
     
     if df_path.endswith('.csv'):
         df = pd.read_csv(df_path)
@@ -114,7 +183,7 @@ def create_table_if_not_exists(conn, table_name, df_path, primary_key=None, fore
         cur.execute(f"""
             DROP TABLE IF EXISTS {table_name};        
                     
-            CREATE TABLE {table_name} (
+            CREATE TABLE IF NOT EXISTS {table_name} (
                 {column_definitions}
             );
         """)
@@ -122,7 +191,7 @@ def create_table_if_not_exists(conn, table_name, df_path, primary_key=None, fore
         conn.commit()
 
 # Step 3: Insert data into table (upsert logic)
-def upsert_data(conn, table_name, df, log_gap = 1000):
+def upsert_data(conn, table_name, df, log_gap = 5000):
     with conn.cursor() as cur:
         # Define a placeholder for the insert values
         placeholders = ', '.join(['%s'] * len(df.columns))
@@ -135,20 +204,22 @@ def upsert_data(conn, table_name, df, log_gap = 1000):
                 INSERT INTO {table_name} VALUES ({placeholders})
             """
             cur.execute(upsert_query, row)
-            if i%log_gap == 0:
-                print(f'Upserted row: {row}')
+            if i % log_gap == 0:
+                logging.info(f'Upserted row: {row}')
         
         conn.commit()
         
         
-def load_csv_to_postgres(*args, **db_conn):
+def load_csv_to_postgres(force = False, *args, **db_conn):
     # Load CSV into pandas DataFrame
+    path = os.path.join(current_dir, args[1])
+    
     if args[1].endswith('.csv'):
-        df = pd.read_csv(args[1])
+        df = pd.read_csv(path)
     elif args[1].endswith('.xlsx'):
-        df = pd.read_excel(args[1])
+        df = pd.read_excel(path)
     elif args[1].endswith('.parquet'):
-        df = pd.read_parquet(args[1])
+        df = pd.read_parquet(path)
     else:
         raise ValueError("File format not supported")    
     
@@ -157,16 +228,34 @@ def load_csv_to_postgres(*args, **db_conn):
     
     try:
         # Create the table if it doesn't exist
-        print('Creating table in database...')
-        create_table_if_not_exists(conn, *args)
-        
-        # Upsert the data into the table
-        print('Upserting data into the table...')
-        upsert_data(conn, args[0], df)
+        if not check_table_exists(conn, args[0]):
+            logging.info('Creating table in database...')
+            create_table_if_not_exists(conn, *args)
+            
+            # Upsert the data into the table
+            upsert_data(conn, args[0], df)
+            
+        elif force:
+            logging.info('Table already exists in database. Inserting data...')
+            upsert_data_save(conn, args[0], df)
+        else:
+            logging.info('Table already exists in database. Skipping data insertion...')
+            
     finally:
-        print('Closing connection to database...')
         conn.close()
         
+        
+def delete_table(conn, table_name):
+    with conn.cursor() as cur:
+        cur.execute(f"DROP TABLE {table_name}")
+        conn.commit()
+        logging.info(f'Table {table_name} deleted successfully.')
+
+
+def delete_tables(conn, table_names):
+    for table_name in table_names:
+        delete_table(conn, table_name)
+    
         
         
 def execute_query(query, conn=None, params = None, return_type='dataframe'):
@@ -252,7 +341,7 @@ def create_vector_db(collection_name, persist_directory, model_name, vectordb):
 
 def setup_vector_db_fs(collection_name, persist_directory, table, model_name, vectordb, **db_conn):
     conn = connect_to_db(**db_conn)
-    print("Connected to database")
+    logging.info("Connected to database")
     try:
         with conn.cursor() as cur:
             cur.execute(f"SELECT vi_caption, en_caption, category_code FROM {table}")
@@ -264,7 +353,6 @@ def setup_vector_db_fs(collection_name, persist_directory, table, model_name, ve
     vector_db = create_vector_db(collection_name, persist_directory, model_name, vectordb)
     
     def process_category(vector_db, batch_category):
-        print(batch_category[0])
         
         categories_0 = [category[0] for category in batch_category]
         categories_1 = [category[1] for category in batch_category]
@@ -281,7 +369,7 @@ def setup_vector_db_fs(collection_name, persist_directory, table, model_name, ve
 
 def setup_vector_db_universal(collection_name, persist_directory, table, model_name, vectordb, **db_conn):
     conn = connect_to_db(**db_conn)
-    print("Connected to database")
+    logging.info("Connected to database")
     try:
         with conn.cursor() as cur:
             cur.execute(f"SELECT universal_caption, universal_code FROM {table}")
@@ -293,7 +381,6 @@ def setup_vector_db_universal(collection_name, persist_directory, table, model_n
     vector_db = create_vector_db(collection_name, persist_directory, model_name, vectordb)
     
     def process_category(vector_db, batch_category):
-        print(batch_category[0])
         
         categories_0 = [category[0] for category in batch_category]
         metadatas = [{'lang': 'vi', 'code': category[1]} for category in batch_category]
@@ -309,7 +396,7 @@ def setup_vector_db_universal(collection_name, persist_directory, table, model_n
         
 def setup_vector_db_ratio(collection_name, persist_directory, table, model_name, vectordb, **db_conn):
     conn = connect_to_db(**db_conn)
-    print("Connected to database")
+    logging.info("Connected to database")
     try:
         with conn.cursor() as cur:
             cur.execute(f"SELECT ratio_name, ratio_code FROM {table}")
@@ -321,7 +408,6 @@ def setup_vector_db_ratio(collection_name, persist_directory, table, model_name,
     vector_db = create_vector_db(collection_name, persist_directory, model_name, vectordb)
     
     def process_category(vector_db, batch_category):
-        print(batch_category[0])
         
         categories_0 = [category[0] for category in batch_category]
         categories_1 = [category[1] for category in batch_category]
@@ -337,11 +423,14 @@ def setup_vector_db_ratio(collection_name, persist_directory, table, model_name,
         executor.map(lambda category: process_category(vector_db, category), batch_categories)
         
 
+#==================#
+#   Setup Utils    #
+#==================#
     
         
 def setup_vector_db_company_name(collection_name, persist_directory, table, model_name, vectordb, **db_conn):
     conn = connect_to_db(**db_conn)
-    print("Connected to database")
+    logging.info("Connected to database")
     try:
         with conn.cursor() as cur:
             cur.execute(f"SELECT  stock_code, company_name, en_company_name, en_short_name  FROM {table}")
@@ -353,7 +442,6 @@ def setup_vector_db_company_name(collection_name, persist_directory, table, mode
     vector_db = create_vector_db(collection_name, persist_directory, model_name, vectordb)
     
     def process_company(vector_db, company):
-        print(company)
         vector_db.add_texts(list(company), metadatas=[{'lang': 'vi', 'stock_code': company[0]}] * 4)
         
     
@@ -362,6 +450,9 @@ def setup_vector_db_company_name(collection_name, persist_directory, table, mode
 
         
 def setup_vector_db_sql_query(collection_name, persist_directory, txt_path, model_name, vectordb, **db_conn):
+    
+    txt_path = os.path.join(current_dir, txt_path)
+    
     with open(txt_path, 'r') as f:
         content = f.read()
     vector_db = create_vector_db(collection_name, persist_directory, model_name, vectordb)
@@ -375,9 +466,6 @@ def setup_vector_db_sql_query(collection_name, persist_directory, txt_path, mode
         task = re.sub(r'--\s*\d+\.?', '', task).strip()
         
         codes.append((task, sql_code))
-        print(task)
-        # print(sql_code)
-        print('====================')
         
                 
     for code in codes:
@@ -387,23 +475,28 @@ def setup_vector_db_sql_query(collection_name, persist_directory, txt_path, mode
 #  Setup config  #
 #================#
 
+
 RDB_SETUP_CONFIG = {
-    # 'company_info' : ['../csv/df_company_info.csv', ['stock_code'], {}, True],
-    # 'sub_and_shareholder': ['../csv/df_sub_and_shareholders.csv', None, {'stock_code': 'company_info(stock_code)'}],
-    # 'map_category_code_bank': ['../csv/map_category_code_bank.csv', ['category_code']],
-    # 'map_category_code_non_bank': ['../csv/map_category_code_non_bank.csv', ['category_code']],
-    # 'map_category_code_securities': ['../csv/map_category_code_sec.csv', ['category_code']],
-    # 'map_category_code_ratio': ['../csv/map_ratio_code.csv', ['ratio_code']],
-    # 'map_category_code_universal': ['../csv/map_category_code_universal.csv', ['universal_code']],
+    'company_info' : ['../csv/df_company_info.csv', ['stock_code'], {}, True],
+    'sub_and_shareholder': ['../csv/df_sub_and_shareholders.csv', None, {'stock_code': 'company_info(stock_code)'}],
+    'map_category_code_bank': ['../csv/map_category_code_bank.csv', ['category_code']],
+    'map_category_code_non_bank': ['../csv/map_category_code_non_bank.csv', ['category_code']],
+    'map_category_code_securities': ['../csv/map_category_code_sec.csv', ['category_code']],
+    'map_category_code_ratio': ['../csv/map_ratio_code.csv', ['ratio_code']],
+    'map_category_code_universal': ['../csv/map_category_code_universal.csv', ['universal_code']],
     
     
-    # 'bank_financial_report' : ['../csv/bank_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    # 'non_bank_financial_report' : ['../csv/non_bank_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    # 'securities_financial_report' : ['../csv/securities_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'bank_financial_report' : ['../csv/bank_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'non_bank_financial_report' : ['../csv/non_bank_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'securities_financial_report' : ['../csv/securities_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'financial_ratio' : ['../csv/financial_ratio.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    # 'financial_statement': ['../csv/financial_statement.parquet', None, {'universal_code': 'map_category_code_universal(universal_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'financial_statement': ['../csv/financial_statement.parquet', None, {'universal_code': 'map_category_code_universal(universal_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
 
 }
+
+
+DELETE_ORDER = list(RDB_SETUP_CONFIG.keys())[::-1] # delete in reverse order
+
 
 VERTICAL_VECTORDB_SETUP_CONFIG = {
     'company_name_chroma': ['company_info'],
@@ -416,10 +509,10 @@ VERTICAL_VECTORDB_SETUP_CONFIG = {
     'category_universal_chroma': ['map_category_code_universal'],
 }
 
-def setup_rdb(config, **db_conn):
+def setup_rdb(force, config, **db_conn):
     for table, params in config.items():
         args = [table] + params
-        load_csv_to_postgres(*args, **db_conn)
+        load_csv_to_postgres(force, *args, **db_conn)
         
 def setup_vector_db(config, persist_directory, model_name = 'text-embedding-3-small', vectordb = 'chromadb', **db_conn):
     
@@ -429,8 +522,7 @@ def setup_vector_db(config, persist_directory, model_name = 'text-embedding-3-sm
     for table, params in config.items():
         params.append(model_name)
         params.append(vectordb)
-        
-        print(len(params))
+
         if 'sql_query' in table:
             setup_vector_db_sql_query(table, persist_directory, *params)
         elif table == 'company_name_chroma':
@@ -441,41 +533,121 @@ def setup_vector_db(config, persist_directory, model_name = 'text-embedding-3-sm
             setup_vector_db_universal(table, persist_directory, *params, **db_conn)
         else:
             setup_vector_db_fs(table, persist_directory, *params, **db_conn)
-        print(f'{table} vectordb setup completed')
+        logging.info(f'{table} vectordb setup completed')
             
+    
+def delete_embedding_db():
+    vector_db_path = os.path.join(current_dir, '../data')
+    
+    if os.path.exists('../data'):
+        subprocess.run(['rm', '-rf', vector_db_path])
+        logging.info("Local vector db deleted successfully")
+    else:
+        logging.info("Local vector db does not exist")
+    
             
+def delete_everything(conn):
+    delete_tables(conn, DELETE_ORDER)
+    
+    logging.info("All tables deleted successfully")
+    
+    delete_embedding_db()
+    
+    
+
+def check_embedding_server(embedding_server):
+    
+    uri = f"{embedding_server}/embed"
+    logging.info(f"Checking embedding server at {uri}")
+    
+    try:
+        payload = {'inputs': 'test'}
+        headers = {"Content-Type": "application/json"}
+        
+        response = requests.post(uri, json=payload, headers=headers)
+        
+        logging.info(f"Response embedding server: {response}")
+        if response.status_code == 200:
+            return True
+    except Exception as e:
+        print(e)
+        return False
+    
+    return False
+
             
-def main():
+def setup_everything(config: dict):
     
     db_conn = {
-        'db_name': 'test_db',
-        'user': 'postgres',
-        'password': '12345678',
-        'host': 'localhost',
-        'port': '5433'
+        'db_name': os.getenv('DB_NAME'),
+        'user': os.getenv('DB_USER'),
+        'password': os.getenv('DB_PASSWORD'),
+        'host': os.getenv('DB_HOST'),
+        'port': os.getenv('DB_PORT')
         
     }
     
-    client = PersistentClient(path = '../data/vector_db_vertical_local', settings = Settings())
-    client2 = PersistentClient(path = '../data/vector_db_vertical_openai', settings = Settings())
+    # Check available embedding server
     
-    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # model = HuggingFaceEmbeddings(model_name='BAAI/bge-base-en-v1.5', model_kwargs = {'device': device})
+    embedding_server = os.getenv('EMBEDDING_SERVER_URL')
+    local_model = os.getenv('EMBEDDING_MODEL')
     
-    embedding_server = 'http://localhost:8080'
-    # model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
+    if not (check_embedding_server(embedding_server) or config.get('openai', False) or not os.getenv('LOCAL_EMBEDDING')):
+        raise ValueError("No available embedding server")
     
-    # setup_rdb(RDB_SETUP_CONFIG, **db_conn)
-    # logging.info("RDB setup completed")
-    # setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client2, **db_conn)
-    # setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client, model, **db_conn)
-    setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client, embedding_server, **db_conn)
+    print(os.path.join(current_dir, '../data/vector_db_vertical_local'))
+    
+    client = PersistentClient(path = os.path.join(current_dir, '../data/vector_db_vertical_local'), settings = Settings())
+    
+    # delete everything
+    if config.get('force', False):
+        conn = connect_to_db(**db_conn)
+        delete_everything(conn)
+        conn.close()
+    elif config.get('reset_vector_db', False):
+        delete_embedding_db()
+      
+    
+    if not config.get('force', False):
+        setup_rdb(not config.get('ignore_rdb', False), RDB_SETUP_CONFIG, **db_conn)
+        logging.info("RDB setup completed")
+    
+    
+    # Check if embedding server is running, if not use local model
+    if config.get('local', False):
+        
+        if check_embedding_server(embedding_server):
+            logging.info("Embedding server is running")
+            setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG.copy(), client, embedding_server, **db_conn)
+            
+        elif os.getenv('LOCAL_EMBEDDING'):
+            
+            try:
+                import torch
+            
+                logging.warning("Embedding server is not running, using local model")
+                device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+                model = HuggingFaceEmbeddings(model_name=local_model, model_kwargs = {'device': device})
+                setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG.copy(), client, model, **db_conn)
+                
+            except Exception as e:
+                logging.error("Configured local model is not available")
+                raise e
+    
+    if config.get('openai', False):
+        client_openai = PersistentClient(path = os.path.join(current_dir, '../data/vector_db_vertical_openai'), settings = Settings())
+        setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG.copy(), client_openai, **db_conn)
+        logging.info("OpenAI Embedding setup completed")
+    
     
     # bge 
     logging.info("Vector DB setup completed")
             
 if __name__ == '__main__':
-    main()
+    
+    env_path = os.path.join(current_dir, '../.env')
+    dotenv.load_dotenv(env_path)
+    
     
 
 

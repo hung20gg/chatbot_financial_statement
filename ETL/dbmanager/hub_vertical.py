@@ -356,7 +356,6 @@ class HubVerticalUniversal(BaseDBHUB):
         Return the result as a DataFrame.
         """
         collect_code = self.accounts_search(texts, top_k, type_ = type_)
-        print(collect_code)
         
         placeholder = ', '.join(['%s' for _ in collect_code])
         
