@@ -1,7 +1,8 @@
 import sys 
 # sys.path.append('..')
 from pydantic import BaseModel, SkipValidation, ConfigDict
-from langchain_chroma import Chroma
+
+from langchain_core.vectorstores import VectorStore
 from concurrent.futures import ThreadPoolExecutor
 from ..connector import *
 
@@ -17,9 +18,10 @@ class BaseDBHUB(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
     conn: SkipValidation
-    vector_db_company: Chroma
-    vector_db_sql: Chroma
+    vector_db_company: VectorStore
+    vector_db_sql: VectorStore
     multi_threading: bool = False
+    hub_name: str = "BaseDBHUB"
         
     def rasie_multi_threading_error(self):
         if not self.multi_threading:

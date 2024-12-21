@@ -683,3 +683,20 @@ WHERE
     AND fr.quarter = 0
     AND fr.ratio_code = 'ROFA'
 LIMIT 1;
+
+-- 33. Analyze the changes in Cash Flow from Investing activities specifically related to investments in and divestments from subsidiaries for Masan Group, VinGroup, and PetroVietnam Gas in 2023.
+
+SELECT
+    stock_code,
+    year,
+    quarter,
+    data,
+    universal_code
+FROM
+    financial_statement
+WHERE
+    stock_code IN ('MSN', 'VIC', 'GAS')
+    AND year = 2023
+    AND quarter = 0
+    AND universal_code IN ('CF_006', 'CF_070')
+LIMIT 100;
