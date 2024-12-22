@@ -22,6 +22,8 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
+current_dir = os.path.dirname(os.path.realpath(__file__))
+
 class Chatbot(BaseAgent):
     
     text2sql: Text2SQL
@@ -51,15 +53,7 @@ class Chatbot(BaseAgent):
         self.sql_history = []
         self.sql_index = 0
         
-        system_instruction = """
-You are a financial analyst and you have access to a database of financial statements of companies from 2019 to Q3 2024.
-Only confident to answer questions related to finance and accounting.
-
-The provided data often in the form of tables inside <table> tag. However, the user cannot see the table in the prompt, so answer the question as natural as possible.
-
-Note: the money unit is Million VND. Do not discuss about number format (e.g. 1e9 or percentage approximation). Always multiply ratio by 100 to get percentage and do not show this calculation step.
-
-"""
+        system_instruction = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/chat/chat.txt'))
 # Only answer questions related to finance and accounting.
 # If the question is not related to finance and accounting, say You are only allowed to ask questions related to finance and accounting.
         self.history.append(
@@ -76,32 +70,15 @@ Note: the money unit is Million VND. Do not discuss about number format (e.g. 1e
         
     def routing(self, user_input):
         routing_log = deepcopy(self.display_history)
+        routing_instruction = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/chat/routing.txt'))
+        
         if len(routing_log) < 1:
             routing_log = []
         
         routing_log.append(
             {
                 'role': 'user',
-                'content': f"""
-    You are now tasked to trigger the function to collect data from financial reports.
-    You can only trigger the function only if the user question is related to financial reports and cannot be answered based on previous conversation.       
-    
-    Here is the user input:
-    
-    <input>
-    
-    {user_input}
-    
-    </input>
-    
-    Return your decision in JSON format.
-        
-        ```json
-        {{
-            "trigger": false
-        }}
-        ```
-    """
+                'content': routing_instruction.format(user_input = user_input)
             }
         )
         
@@ -152,9 +129,7 @@ Note: the money unit is Million VND. Do not discuss about number format (e.g. 1e
         with open('temp/sql_history.json', 'w') as file:
             json.dump(self.sql_history, file)
         
-        
-        for i, table in enumerate(execution_tables):
-            table_strings += f"Table {i+1}: {utils.table_to_markdown(table)}\n\n"
+        table_strings = utils.table_to_markdown(execution_tables)
         
         self.history.append(
             {
@@ -187,10 +162,11 @@ Note: the money unit is Million VND. Do not discuss about number format (e.g. 1e
             }
         )
         self.sql_index = len(self.history)
+        return table_strings
         
     
     def solve_text2sql(self, user_input):
-        self._solve_text2sql(user_input)
+        return self._solve_text2sql(user_input)
         
         
     def __reasoning(self, user_input):
@@ -201,11 +177,8 @@ Note: the money unit is Million VND. Do not discuss about number format (e.g. 1e
         })
         
         try:
-            task = user_input
-            if self.config.get_task:
-                logging.info("Summarizing and getting task")
-                task = self.summarize_and_get_task(self.display_history.copy())
-            routing = self.routing(task)
+            routing = self.routing(user_input)
+            
             
         except Exception as e:
             logging.error(f"Routing error: {e}")
@@ -214,8 +187,12 @@ Note: the money unit is Million VND. Do not discuss about number format (e.g. 1e
         table_strings = ""
         if routing:
             logging.info("Routing triggered")
+            task = user_input
+            if self.config.get_task:
+                logging.info("Summarizing and getting task")
+                task = self.summarize_and_get_task(self.display_history.copy())
             
-            self.solve_text2sql(task)
+            table_strings = self.solve_text2sql(task)
         
         else:
             logging.info("Routing not triggered")
@@ -249,15 +226,16 @@ Note: the money unit is Million VND. Do not discuss about number format (e.g. 1e
             if isinstance(chunk, str):
                 text_response.append(chunk)
             
-        self.get_generated_response(''.join(text_response))
+        self.get_generated_response(table_strings + '\n\n' + ''.join(text_response))
         
             
         
     def chat(self, user_input):
         start = time.time()
         
-        self.__reasoning(user_input)
-        response = self.llm(self.history)
+        table_strings = self.__reasoning(user_input)
+        text_response = self.llm(self.history)
+        response = table_strings + '\n\n' + text_response
         
         end = time.time()
         logging.info(f"Reasoning time without streaming: {end - start}s")
@@ -307,7 +285,7 @@ class ChatbotSematic(Chatbot):
         # self.setup()
         
     def solve_text2sql(self, task):
-        self._solve_text2sql(task)
+        table_strings = self._solve_text2sql(task)
         response = self.sql_history[-1]['content']  
         codes = get_code_from_text_response(response)
         sqls = []
@@ -316,6 +294,7 @@ class ChatbotSematic(Chatbot):
                 sqls.append(code['code'])
                 
         self.message_saver.add_sql(self.conversation_id, task, sqls)
+        return table_strings
         
         
     def create_new_chat(self, user_id: str = "test_user"):

@@ -1,0 +1,8 @@
+You have a financial statement database. 
+You are given the conversation history between user and ai assistance and you are tasked to get the most current SQL-related task from the conversation. 
+
+Return the most current task in English.
+    
+If the time is not mentioned, assume Q3 2024. 
+
+Do not return SQL

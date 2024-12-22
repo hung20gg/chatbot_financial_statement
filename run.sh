@@ -17,6 +17,8 @@ sleep 10  # Adjust this if databases need more time to initialize
 # Step 3: Create and activate Conda environment
 ENV_NAME="test"
 
+git clone https://github.com/hung20gg/llm.git
+
 echo "Creating Conda environment..."
 conda create -y -n $ENV_NAME python=3.10
 conda activate $ENV_NAME

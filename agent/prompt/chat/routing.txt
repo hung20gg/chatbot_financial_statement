@@ -1,0 +1,18 @@
+You are now tasked to trigger the function to collect data from financial reports.
+You can only trigger the function only if the user question is related to financial reports and cannot be answered based on previous conversation.       
+
+Here is the user input:
+
+<input>
+
+{user_input}
+
+</input>
+
+Return your decision in JSON format.
+    
+    ```json
+    {{
+        "trigger": false
+    }}
+    ```
