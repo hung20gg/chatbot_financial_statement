@@ -29,6 +29,7 @@ from langchain_huggingface  import (
 import logging
 import requests
 import time
+import copy
 
 logging.basicConfig(
     level=logging.INFO,
@@ -516,6 +517,8 @@ def setup_rdb(force, config, **db_conn):
         
 def setup_vector_db(config, persist_directory, model_name = 'text-embedding-3-small', vectordb = 'chromadb', **db_conn):
     
+    config = copy.deepcopy(config)
+    
     if not isinstance(persist_directory, str):
         vectordb = 'chromadb'
     
@@ -618,7 +621,7 @@ def setup_everything(config: dict):
         
         if check_embedding_server(embedding_server):
             logging.info("Embedding server is running")
-            setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG.copy(), client, embedding_server, **db_conn)
+            setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client, embedding_server, **db_conn)
             
         elif os.getenv('LOCAL_EMBEDDING'):
             
@@ -636,7 +639,7 @@ def setup_everything(config: dict):
     
     if config.get('openai', False):
         client_openai = PersistentClient(path = os.path.join(current_dir, '../data/vector_db_vertical_openai'), settings = Settings())
-        setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG.copy(), client_openai, **db_conn)
+        setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client_openai, **db_conn)
         logging.info("OpenAI Embedding setup completed")
     
     

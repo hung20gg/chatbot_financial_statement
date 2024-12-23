@@ -37,7 +37,7 @@ class Chatbot(BaseAgent):
     sql_history: List[dict] = []
     
     tables: List = [] 
-    sql_index: int = 0
+    is_routing: bool = False
     
     def __init__(self, config: ChatConfig, text2sql: Text2SQL, **kwargs):
         super().__init__(config = config, text2sql = text2sql, **kwargs)
@@ -51,7 +51,7 @@ class Chatbot(BaseAgent):
         self.history = []
         self.display_history = []
         self.sql_history = []
-        self.sql_index = 0
+        self.is_routing = False
         
         system_instruction = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/chat/chat.txt'))
 # Only answer questions related to finance and accounting.
@@ -69,22 +69,28 @@ class Chatbot(BaseAgent):
     
         
     def routing(self, user_input):
-        routing_log = deepcopy(self.display_history)
-        routing_instruction = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/chat/routing.txt'))
+        try:
+            
+            routing_log = deepcopy(self.display_history)
+            routing_instruction = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/chat/routing.txt'))
+            
+            if len(routing_log) < 1:
+                routing_log = []
+            
+            routing_log.append(
+                {
+                    'role': 'user',
+                    'content': routing_instruction.format(user_input = user_input)
+                }
+            )
+            
+            response = self.routing_llm(routing_log)
+            routing = get_json_from_text_response(response, new_method=True)['trigger']
+            return routing
         
-        if len(routing_log) < 1:
-            routing_log = []
-        
-        routing_log.append(
-            {
-                'role': 'user',
-                'content': routing_instruction.format(user_input = user_input)
-            }
-        )
-        
-        response = self.routing_llm(routing_log)
-        routing = get_json_from_text_response(response, new_method=True)['trigger']
-        return routing
+        except Exception as e:
+            logging.error(f"Routing error: {e}")
+            return False
     
     
     def summarize_and_get_task(self, messages):
@@ -93,19 +99,12 @@ class Chatbot(BaseAgent):
         task = short_messages[-1]['content']
         short_messages.pop()
         
+        system_instruction = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/chat/summarize.txt'))
+        
         prompt = [
             {
                 'role': 'system',
-                'content': """
-        You have a financial statement database. 
-        You are given the conversation history between user and ai assistance and you are tasked to get the most current SQL-related task from the conversation. 
-        
-        Return the most current task in English.
-         
-        If the time is not mentioned, assume Q3 2024. 
-        
-        Do not return SQL
-        """
+                'content': system_instruction
             },
             {
                 'role': 'user',
@@ -118,7 +117,12 @@ class Chatbot(BaseAgent):
         return response
         
         
-    def _solve_text2sql(self, task):
+    def _solve_text2sql(self, user_input):
+        
+        task = user_input
+        if self.config.get_task:
+            logging.info("Summarizing and getting task")
+            task = self.summarize_and_get_task(self.display_history.copy())
         
         table_strings = ""
         
@@ -130,11 +134,13 @@ class Chatbot(BaseAgent):
             json.dump(self.sql_history, file)
         
         table_strings = utils.table_to_markdown(execution_tables)
-        
+
         self.history.append(
             {
                 'role': 'user',
                 'content': f"""
+                
+            <task>    
             You are provided with the following data:
             
             <table>
@@ -143,25 +149,26 @@ class Chatbot(BaseAgent):
             
             <table>
             
-            However, your user cannot see this database. Analyze and answer the following question:
+            However, your user cannot see this database. Think step-by-step Analyze and answer the following user question:
             
             <input>
             
-            {task}
+            {user_input}
             
             <input>
             
             You should provide the answer based on the provided data. 
             The data often has unclear column names and datetime, but you can assume the data is correct and relevant to the task.
             
-            
             If the provided data is not enough, try your best.
-            Answer the question as natural as possible. Answer based on user's language.
+            Answer the question as natural as possible. 
             
+            </task>
             """
             }
         )
-        self.sql_index = len(self.history)
+
+        
         return table_strings
         
     
@@ -169,30 +176,12 @@ class Chatbot(BaseAgent):
         return self._solve_text2sql(user_input)
         
         
-    def __reasoning(self, user_input):
-        
-        self.display_history.append({
-            'role': 'user',
-            'content': user_input
-        })
-        
-        try:
-            routing = self.routing(user_input)
-            
-            
-        except Exception as e:
-            logging.error(f"Routing error: {e}")
-            routing = False
+    def __reasoning(self, user_input, routing = False):
         
         table_strings = ""
         if routing:
             logging.info("Routing triggered")
-            task = user_input
-            if self.config.get_task:
-                logging.info("Summarizing and getting task")
-                task = self.summarize_and_get_task(self.display_history.copy())
-            
-            table_strings = self.solve_text2sql(task)
+            table_strings = self.solve_text2sql(user_input)
         
         else:
             logging.info("Routing not triggered")
@@ -207,14 +196,31 @@ class Chatbot(BaseAgent):
         # return response
         
     def stream(self, user_input):
+        
+        self.is_routing = False # Reset the routing flag
+        
+        self.display_history.append({
+            'role': 'user',
+            'content': user_input
+        })
+        
         start = time.time()
         
-        table_strings = self.__reasoning(user_input)
-        yield table_strings
-        yield '\n\nAnalyzing\n\n'
+        # Routing
+        self.is_routing = self.routing(user_input)
+        if self.is_routing:
+            yield '\n\nAnalyzing '
         
+            table_strings = self.__reasoning(user_input, self.is_routing)
+            end = time.time()
+            
+            yield 'in {:.2f}s\n\n'.format(end - start)
+            yield table_strings + '\n\n'
         
-        end = time.time()
+        else:
+            table_strings = self.__reasoning(user_input, self.is_routing)
+            end = time.time()
+        
         logging.info(f"Reasoning time with streaming: {end - start}s")
         
         # return self.llm.stream(self.history)
@@ -226,30 +232,47 @@ class Chatbot(BaseAgent):
             if isinstance(chunk, str):
                 text_response.append(chunk)
             
-        self.get_generated_response(table_strings + '\n\n' + ''.join(text_response))
+        self.get_generated_response(''.join(text_response), table_strings)
         
             
         
     def chat(self, user_input):
+        
+        self.is_routing = False # Reset the routing flag
+        
+        self.display_history.append({
+            'role': 'user',
+            'content': user_input
+        })
+        
         start = time.time()
         
-        table_strings = self.__reasoning(user_input)
-        text_response = self.llm(self.history)
-        response = table_strings + '\n\n' + text_response
+        self.is_routing = self.routing(user_input)
+        table_strings = self.__reasoning(user_input, self.is_routing)
+        response = self.llm(self.history)
         
         end = time.time()
         logging.info(f"Reasoning time without streaming: {end - start}s")
         
-        self.get_generated_response(response)
-        return response
+        self.get_generated_response(response, table_strings)
+        return table_strings + '\n\n' + response
     
     
     
-    def get_generated_response(self, assistant_response):
-        self.display_history.append({
-            'role': 'assistant',
-            'content': assistant_response
-        })
+    def get_generated_response(self, assistant_response, table_strings = ""):
+        
+        if table_strings == "":
+            
+            self.display_history.append({
+                'role': 'assistant',
+                'content': assistant_response
+            })
+        
+        else:
+            self.display_history.append({
+                'role': 'assistant',
+                'content': table_strings + "\n\n" + assistant_response
+            })
         
         self.history.append({
             'role': 'assistant',
@@ -271,7 +294,8 @@ class ChatbotSematic(Chatbot):
     sql_history: List[dict] = []
     
     tables: List = [] 
-    sql_index: int = 0
+    is_routing: bool = False
+    last_sql_id: str = ""
     
     message_saver: BaseSemantic
     
@@ -284,8 +308,7 @@ class ChatbotSematic(Chatbot):
         # self.routing_llm = utils.get_llm_wrapper(model_name=config.routing_llm, **kwargs)
         # self.setup()
         
-    def solve_text2sql(self, task):
-        table_strings = self._solve_text2sql(task)
+    def save_sql(self, task):
         response = self.sql_history[-1]['content']  
         codes = get_code_from_text_response(response)
         sqls = []
@@ -293,7 +316,13 @@ class ChatbotSematic(Chatbot):
             if code['language'] == 'sql':
                 sqls.append(code['code'])
                 
-        self.message_saver.add_sql(self.conversation_id, task, sqls)
+        self.last_sql_id = self.message_saver.add_sql(self.conversation_id, task, sqls)
+        self.sql_history[-1]['sql_id'] = self.last_sql_id
+        
+        
+    def solve_text2sql(self, task):
+        table_strings = self._solve_text2sql(task)
+        self.save_sql(task)
         return table_strings
         
         
@@ -302,18 +331,32 @@ class ChatbotSematic(Chatbot):
         self.conversation_id = self.message_saver.create_conversation(user_id)
         
         
-    def get_generated_response(self, assistant_response):
-        self.display_history.append({
-            'role': 'assistant',
-            'content': assistant_response
-        })
+    def get_generated_response(self, assistant_response, table_strings = ""):
         
-        self.history.append({
-            'role': 'assistant',
-            'content': assistant_response
-        })
         
-        self.message_saver.add_message(self.conversation_id, self.display_history, self.sql_history)
+            # self.sql_index = len(self.history) - 1
+        super().get_generated_response(assistant_response, table_strings)
+        
+        if self.is_routing: # Previous message triggered the text2sql
+            self.history[-1]['sql_id'] = self.last_sql_id
+        
+        self.message_saver.add_message(self.conversation_id, self.history, self.sql_history)
+        
+        
+    def update_feedback(self, feedback):
+        
+        score = 0
+        if feedback.lower() in {'good', 'like' }:
+            score = 1
+        elif feedback.lower() in {'bad', 'dislike'}:
+            score = -1
+            
+        self.history[-1]['feedback'] = score
+            
+        if self.is_routing:
+            self.message_saver.sql_feedback(self.last_sql_id, score)
+        self.message_saver.add_message(self.conversation_id, self.history, self.sql_history)
+            
         
         
     

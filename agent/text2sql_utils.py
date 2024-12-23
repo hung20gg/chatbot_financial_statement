@@ -25,7 +25,7 @@ class Table(BaseModel):
         return f"Table(desc = {self.description})"
     
 
-def table_to_markdown(table: Table|pd.DataFrame|str, max_string = 10000) -> str:
+def table_to_markdown(table: Table|pd.DataFrame|str, max_string = 5000) -> str:
     
     if table is None:
         return ""

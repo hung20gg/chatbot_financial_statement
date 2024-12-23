@@ -86,6 +86,7 @@ class MessageSaver(BaseSemantic):
             "date_created": date_created
         }
         self.sql_collection.insert_one(sql_log)
+        return sql_id
 
     def create_conversation(self, user_id):
         """Create a new conversation with OpenAI-style messages."""
@@ -122,6 +123,21 @@ class MessageSaver(BaseSemantic):
 
     def get_messages(self, conversation_id):
         return self.chat_collection.find_one({"_id": conversation_id})
+    
+    # def message_feedback(self, conversation_id, feedback):
+    #     self.chat_collection.update_one(
+    #         {"_id": conversation_id},  # Match your document
+    #         {"$set": {"messages.$[last].feedback": feedback}},  # Update the last message
+    #         array_filters=[{"last": {"$exists": True}}],  # Apply condition to the last item
+    #         sort={"messages": -1}  # Optional: ensure correct ordering
+    #     )
+        
+    def sql_feedback(self, sql_id, feedback):
+        self.sql_collection.update_one(
+            {"_id": sql_id},  # Match your document
+            {"$set": {"feedback": feedback}},  # Update the last message
+        )
+            
     
 def get_semantic_layer(**kwargs):
     try:

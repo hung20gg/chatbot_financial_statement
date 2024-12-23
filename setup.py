@@ -19,7 +19,7 @@ def get_args():
     
     paser = argparse.ArgumentParser()
     paser.add_argument('--force', default=False, type=str2bool)
-    paser.add_argument('--reset_vector_db', default=True, type=str2bool)
+    paser.add_argument('--reset_vector_db', default=False, type=str2bool)
     paser.add_argument('--openai', default=False, type=str2bool)
     paser.add_argument('--local', default=False, type=str2bool)
     paser.add_argument('--ignore_rdb', default=False, type=str2bool)

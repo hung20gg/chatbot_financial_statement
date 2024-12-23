@@ -121,6 +121,20 @@ def chat(user_name):
             if isinstance(chunk, str):
                 streamed_text += chunk
                 assistant_message.write(streamed_text)
+                
+    st.write("Provide feedback on the response:")
+    feedback = st.radio(
+        "Did you find this response helpful?",
+        ("Like", "Dislike"),
+        horizontal=True
+    )
+        
+    if st.button("Submit Feedback"):
+        st.session_state.chatbot.update_feedback(feedback)
+        st.success("Feedback submitted!")
+          
+        
+
      
 
 users = {

@@ -700,3 +700,42 @@ WHERE
     AND quarter = 0
     AND universal_code IN ('CF_006', 'CF_070')
 LIMIT 100;
+
+-- 34. Get company VIC and its subsidiaries:
+
+SELECT sas.stock_code AS stock_code
+FROM sub_and_shareholder sas
+WHERE sas.stock_code = 'VIC'
+UNION
+SELECT sas2.invest_on AS stock_code
+FROM sub_and_shareholder sas2
+WHERE sas2.stock_code = 'VIC';
+
+
+-- 35. Total Asset of Vingroup and its subsidiaries Q1 2023
+
+WITH vingroup_subsidiaries as (
+	SELECT sas.stock_code AS stock_code
+	FROM sub_and_shareholder sas
+	WHERE sas.stock_code = 'VIC'
+	UNION
+	SELECT sas2.invest_on AS stock_code
+	FROM sub_and_shareholder sas2
+	WHERE sas2.stock_code = 'VIC'
+)
+
+SELECT 
+    vs.stock_code AS stock_code,
+    fs.universal_code AS universal_code,
+    fs.year AS year,
+    fs.data AS total_assets
+FROM 
+    vingroup_subsidiaries vs
+JOIN 
+    financial_statement fs ON fs.stock_code = vs.stock_code
+WHERE 
+    fs.quarter = 1
+    AND fs.universal_code = 'BS_270'
+    and fs.year = 2023
+ORDER BY 
+    fs.year DESC;
