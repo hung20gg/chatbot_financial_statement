@@ -97,12 +97,12 @@ def insert_row_if_not_exists(connection, table_name, row_data):
     try:
         with connection.cursor() as cursor:
             # Check if the row exists
-            cursor.execute(check_query, tuple(row_data.values()))
+            cursor.execute(check_query, tuple(row_data.values))
             exists = cursor.fetchone()[0]
             
             if not exists:
                 # Insert the row if it doesn't exist
-                cursor.execute(insert_query, tuple(row_data.values()))
+                cursor.execute(insert_query, tuple(row_data.values))
 
     except Exception as e:
         print(f"Error: {e}")
@@ -114,7 +114,6 @@ def upsert_data_save(conn, table_name, df, log_gap = 5000):
         
         if i%log_gap == 0:
             logging.info(f'Upserted row: {row}')
-        
 
 
 def create_table_if_not_exists(conn, table_name, df_path, primary_key=None, foreign_key: dict = {}, long_text=False, date_time = []):
@@ -207,7 +206,6 @@ def upsert_data(conn, table_name, df, log_gap = 5000):
             cur.execute(upsert_query, row)
             if i % log_gap == 0:
                 logging.info(f'Upserted row: {row}')
-        
         conn.commit()
         
         
@@ -247,10 +245,18 @@ def load_csv_to_postgres(force = False, *args, **db_conn):
         
         
 def delete_table(conn, table_name):
-    with conn.cursor() as cur:
-        cur.execute(f"DROP TABLE {table_name}")
-        conn.commit()
-        logging.info(f'Table {table_name} deleted successfully.')
+    
+    conn = connect_to_db(**conn)
+    
+    try:
+        with conn.cursor() as cur:
+            cur.execute(f"DROP TABLE {table_name}")
+            conn.commit()
+            logging.info(f'Table {table_name} deleted successfully.')
+    except Exception as e:
+        logging.error(f'Error deleting table {table_name}: {e}. Perhaps the table does not exist.')
+    
+    conn.close()
 
 
 def delete_tables(conn, table_names):
@@ -397,6 +403,7 @@ def setup_vector_db_universal(collection_name, persist_directory, table, model_n
         
 def setup_vector_db_ratio(collection_name, persist_directory, table, model_name, vectordb, **db_conn):
     conn = connect_to_db(**db_conn)
+    print(conn)
     logging.info("Connected to database")
     try:
         with conn.cursor() as cur:
@@ -498,9 +505,9 @@ RDB_SETUP_CONFIG = {
 FIIN_RDB_SETUP_CONFIG = {
     'company_info' : ['../csv/df_company_info.csv', ['stock_code'], {}, True],
     'sub_and_shareholder': ['../csv/df_sub_and_shareholders.csv', None, {'stock_code': 'company_info(stock_code)'}],
-    'map_category_code_bank': ['../csv/map_category_code_bank_v3.csv', ['category_code']],
-    'map_category_code_non_bank': ['../csv/map_category_code_non_bank_v3.csv', ['category_code']],
-    'map_category_code_securities': ['../csv/map_category_code_sec_v3.csv', ['category_code']],
+    'map_category_code_bank': ['../csv/map_category_bank_v3.csv', ['category_code']],
+    'map_category_code_non_bank': ['../csv/map_category_corp_v3.csv', ['category_code']],
+    'map_category_code_securities': ['../csv/map_category_sec_v3.csv', ['category_code']],
     'map_category_code_ratio': ['../csv/map_ratio_code.csv', ['ratio_code']],
     'map_category_code_universal': ['../csv/map_category_code_universal_v3.csv', ['universal_code']],
     
@@ -569,11 +576,11 @@ def delete_embedding_db():
     
             
 def delete_everything(conn):
-    delete_tables(conn, DELETE_ORDER)
+    delete_tables(conn, FIIN_DELETE_ORDER)
     
     logging.info("All tables deleted successfully")
     
-    delete_embedding_db()
+    # delete_embedding_db()
     
     
 
@@ -608,6 +615,7 @@ def setup_everything(config: dict):
         'port': os.getenv('DB_PORT')
         
     }
+    print(db_conn)
     
     # Check available embedding server
     
@@ -623,16 +631,16 @@ def setup_everything(config: dict):
     
     # delete everything
     if config.get('force', False):
-        conn = connect_to_db(**db_conn)
-        delete_everything(conn)
-        conn.close()
+        delete_everything(db_conn)
     elif config.get('reset_vector_db', False):
         delete_embedding_db()
       
     
     if not config.get('force', False):
-        setup_rdb(not config.get('ignore_rdb', False), RDB_SETUP_CONFIG, **db_conn)
+        setup_rdb(not config.get('ignore_rdb', False), FIIN_RDB_SETUP_CONFIG, **db_conn)
         logging.info("RDB setup completed")
+    else:
+        setup_rdb(False, FIIN_RDB_SETUP_CONFIG, **db_conn)
     
     
     # Check if embedding server is running, if not use local model
@@ -650,7 +658,7 @@ def setup_everything(config: dict):
                 logging.warning("Embedding server is not running, using local model")
                 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
                 model = HuggingFaceEmbeddings(model_name=local_model, model_kwargs = {'device': device})
-                setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG.copy(), client, model, **db_conn)
+                setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client, model, **db_conn)
                 
             except Exception as e:
                 logging.error("Configured local model is not available")
