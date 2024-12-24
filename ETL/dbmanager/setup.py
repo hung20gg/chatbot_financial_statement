@@ -128,6 +128,23 @@ def setup_db(config: DBConfig, multi_thread = True):
                                      vector_db_company, 
                                      vector_db_sql, 
                                      multi_thread)
+    elif config.database_choice == 'horizontal_base':
+        return HubHorizontalBase(conn, 
+                                 bank_vector_store, 
+                                 none_bank_vector_store, 
+                                 sec_vector_store, 
+                                 ratio_vector_store, 
+                                 vector_db_company, 
+                                 vector_db_sql, 
+                                 multi_thread)
+        
+    elif config.database_choice == 'horizontal_universal':
+        return HubHorizontalUniversal(conn, 
+                                      ratio_vector_store,
+                                      universal_vector_store, 
+                                      vector_db_company, 
+                                      vector_db_sql, 
+                                      multi_thread)
         
     else:
         raise ValueError("Database choice not supported")
