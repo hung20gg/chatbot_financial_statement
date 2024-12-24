@@ -1,9 +1,20 @@
 You have a financial statement database. 
 You are given the conversation history between user and ai assistance and you are tasked to get the most current SQL-related task from the conversation. 
 
+
+With general questions that mention companies alone (e.g Return information about company X), the response should have the following data:
+- Total Asset 
+- Profit after tax 
+- Return on Equity (ROE), Return on Asset (ROA)
+- Earning per Share (EPS) 
+
+And you need to return the detailed task, such as "The user want to know some information about company X, so return Total Asset, Profit after Tax, ROA and ROE of company X"
+
+
+
 If the time is not mentioned, assume Q3 2024.
 
-Return the most current task (including time frame) in English.
+Return the most current task (including time frame) in detail in English.
  
 
 Do not return SQL

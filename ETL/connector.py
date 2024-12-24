@@ -495,8 +495,27 @@ RDB_SETUP_CONFIG = {
 
 }
 
+FIIN_RDB_SETUP_CONFIG = {
+    'company_info' : ['../csv/df_company_info.csv', ['stock_code'], {}, True],
+    'sub_and_shareholder': ['../csv/df_sub_and_shareholders.csv', None, {'stock_code': 'company_info(stock_code)'}],
+    'map_category_code_bank': ['../csv/map_category_code_bank_v3.csv', ['category_code']],
+    'map_category_code_non_bank': ['../csv/map_category_code_non_bank_v3.csv', ['category_code']],
+    'map_category_code_securities': ['../csv/map_category_code_sec_v3.csv', ['category_code']],
+    'map_category_code_ratio': ['../csv/map_ratio_code.csv', ['ratio_code']],
+    'map_category_code_universal': ['../csv/map_category_code_universal_v3.csv', ['universal_code']],
+    
+    
+    'bank_financial_report' : ['../csv/bank_financial_report_v3.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'non_bank_financial_report' : ['../csv/non_bank_financial_report_v3.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'securities_financial_report' : ['../csv/securities_financial_report_v3.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'financial_ratio' : ['../csv/financial_ratio_v3.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'financial_statement': ['../csv/financial_statement_v3.parquet', None, {'universal_code': 'map_category_code_universal(universal_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+
+}
+
 
 DELETE_ORDER = list(RDB_SETUP_CONFIG.keys())[::-1] # delete in reverse order
+FIIN_DELETE_ORDER = list(FIIN_RDB_SETUP_CONFIG.keys())[::-1] # delete in reverse order
 
 
 VERTICAL_VECTORDB_SETUP_CONFIG = {
