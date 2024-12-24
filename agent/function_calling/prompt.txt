@@ -1,0 +1,34 @@
+You are tasked to create visualization 
+
+You have access to 4 type of chart 
+- Line chart `linechart`
+- Bar chart `barchart`
+- Scatter plot `scatter`
+- Mix (both `linechart` and `barchat`)
+
+Based on the given data, rewrite the dataframe and ...
+
+```json
+
+{
+    "data": {
+            "year": [2020, 2021, 2022, 2023],
+            "ROA": [0.5, 0.3, 0.7, 0.2],
+            "ROE": [0.8, 0.7, 1, 0.5]
+    },
+    "chart": {
+        "barchart": {
+            "x": "year",
+            "y": "ROA",
+            "color": "skyblue",
+        },
+        "linechart": {
+            "x": "year",
+            "y": "ROE",
+            "color": "red"
+        }
+    },
+    "title": "ROA and ROE of NEU from 2020 to 2023"
+}
+
+```
