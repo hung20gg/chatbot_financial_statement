@@ -450,8 +450,7 @@ if __name__ == '__main__':
     
     for type_ in types:
         print(f"Processing {type_} data")
-        data_df = pd.read_parquet(os.path.join(current_path, f'../csv/{type_}_financial_report_v2_2.parquet'))
-        print(data_df.columns)
+        data_df = pd.read_parquet(os.path.join(current_path, f'../csv/{type_}_financial_report_v3.parquet'))
         df = get_financial_ratios(data_df, type_)
         
         data_df['time_code'] = data_df['stock_code'] + data_df['year'].astype(str) + data_df['quarter'].astype(str)
@@ -471,7 +470,7 @@ if __name__ == '__main__':
     dfs.fillna(0, inplace=True)
     
     
-    dfs.to_parquet(os.path.join(current_path, '../csv/financial_ratio.parquet'), index=False)
+    dfs.to_parquet(os.path.join(current_path, '../csv/financial_ratio_v3.parquet'), index=False)
     
     ratio = dfs['ratio_code'].unique()
     

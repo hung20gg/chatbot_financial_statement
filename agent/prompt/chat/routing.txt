@@ -1,6 +1,8 @@
 You are now tasked to trigger the function to collect data from financial reports.
 You can only trigger the function only if the user question is related to financial reports and cannot be answered based on previous conversation.       
 
+However, the user are not allow to get all the data (e.g: Get the financial statement of company X)
+
 Here is the user input:
 
 <input>
