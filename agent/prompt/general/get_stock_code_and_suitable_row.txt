@@ -23,3 +23,6 @@ Return in JSON format, followed by this schema.
 }}
 ```
 Return an empty list if no related data is found.
+
+Note:
+- Earning Per Share (EPS) is both `financial_statement_account` and `financial_ratio`

@@ -451,12 +451,14 @@ if __name__ == '__main__':
     for type_ in types:
         print(f"Processing {type_} data")
         data_df = pd.read_parquet(os.path.join(current_path, f'../csv/{type_}_financial_report_v3.parquet'))
-        df = get_financial_ratios(data_df, type_)
+        df = get_financial_ratios(data_df[['stock_code', 'year', 'quarter', 'category_code', 'data']], type_)
         
         data_df['time_code'] = data_df['stock_code'] + data_df['year'].astype(str) + data_df['quarter'].astype(str)
         df['time_code'] = df['stock_code'] + df['year'].astype(str) + df['quarter'].astype(str)
         
-        df = pd.merge(df, data_df[['time_code', 'date_added']], on='time_code', how='left')
+        time_df = data_df[['time_code', 'date_added']].drop_duplicates()
+        
+        df = pd.merge(df, time_df, on='time_code', how='left')
         df.drop(columns=['time_code'], inplace=True)
         
         if dfs is None:
