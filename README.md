@@ -1,5 +1,12 @@
 # Chatbot_financial_statement
 
+## Major Update 3
+- Having universal code 
+- Ready to deploy
+- Setup 2 Docker image, MongoDB and Text2SQL
+- If you have gpu, you can also use Text Embedding Inference (TEI) image for fast embedding
+- Gonna make an image in the future 
+
 ## Major Update 2
 
 - Streamlit is conflict with similarity search ???

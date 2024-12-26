@@ -1,2 +1,2 @@
 from .text2sql import Text2SQL
-from .chatbot import Chatbot
+from .chatbot import Chatbot, ChatbotSematic

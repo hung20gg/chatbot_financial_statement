@@ -1,0 +1,340 @@
+-- 1. Get all companies owned by MSN 
+SELECT invest_on
+FROM sub_and_shareholder
+WHERE stock_code = 'MSN'
+LIMIT 100;
+
+-- 2. Get all the shareholder of TCB 
+SELECT stock_code
+FROM sub_and_shareholder
+WHERE invest_on = 'TCB'
+LIMIT 100;
+
+-- 3. Get all the real-estate companies own by VIC 
+SELECT ci.stock_code, ci.industry
+FROM sub_and_shareholder ss
+JOIN company_info ci ON ss.invest_on = ci.stock_code
+WHERE ss.stock_code = 'VIC' AND ci.industry = 'Real Estate'
+LIMIT 100;
+
+-- 4. Get all Food and Beverage companies
+SELECT stock_code, industry
+FROM company_info
+WHERE industry = 'Food and Beverage'
+LIMIT 100;
+
+-- 5. What is the Return on Equity (ROE) for Masan Group (MSN) in Q2 2023?  Provide the ROE as a percentage.
+SELECT 
+    "ROE" * 100 AS ROE_percentage -- Convert ROE to percentage
+FROM 
+    financial_ratios_hori
+WHERE 
+    stock_code = 'MSN' 
+    AND year = 2023 
+    AND quarter = 2
+LIMIT 1;
+
+-- 6. What were the current ratio and quick ratio for Vinamilk (VHM) and Masan Group (MSN) in 2023?
+SELECT stock_code, year, quarter, "CurrentR", "QR"
+FROM financial_ratios_hori
+WHERE stock_code IN ('VHM', 'MSN') 
+  AND year = 2023 
+  AND quarter = 0
+LIMIT 10;
+
+-- 7. Get the total asset of all child company of viettel
+-- Get the total asset of all child companies of Viettel
+SELECT 
+    s.invest_on AS child_company,
+    SUM(
+        COALESCE(bfr."BS_300", 0) + 
+        COALESCE(nbfr."BS_270", 0) + 
+        COALESCE(sfr."BS_270", 0)
+    ) AS total_asset
+FROM 
+    sub_and_shareholder s
+LEFT JOIN 
+    bank_financial_report_hori bfr ON s.invest_on = bfr.stock_code AND bfr.quarter = 0
+LEFT JOIN 
+    non_bank_financial_report_hori nbfr ON s.invest_on = nbfr.stock_code AND nbfr.quarter = 0
+LEFT JOIN 
+    sec_financial_report_hori sfr ON s.invest_on = sfr.stock_code AND sfr.quarter = 0
+WHERE 
+    s.stock_code = 'Viettel' -- Replace 'Viettel' with the actual stock_code of Viettel
+GROUP BY 
+    s.invest_on
+LIMIT 100;
+
+-- 8. What is the Return on Equity (ROE) for all Banking companies in Q1 2024?
+-- Get ROE for all banking companies in Q1 2024
+SELECT 
+    c.stock_code,
+    frh."ROE"
+FROM 
+    financial_ratios_hori frh
+INNER JOIN 
+    company_info c ON frh.stock_code = c.stock_code
+WHERE 
+    c.is_bank = TRUE
+    AND frh.year = 2024
+    AND frh.quarter = 1
+LIMIT 100;
+
+-- 9. For Vietcombank and Techcombank, please provide the quarterly data for the Debt-to-Equity ratio from 2020 to 2023.
+-- Quarterly Debt-to-Equity Ratio for Vietcombank and Techcombank (2020-2023)
+SELECT 
+    frh.stock_code,
+    frh.year,
+    frh.quarter,
+    frh."DTER" AS debt_to_equity_ratio
+FROM 
+    financial_ratios_hori frh
+WHERE 
+    frh.stock_code IN ('VCB', 'TCB') -- Stock codes for Vietcombank and Techcombank
+    AND frh.year BETWEEN 2020 AND 2023
+    AND frh.quarter != 0 -- Exclude annual data
+ORDER BY 
+    frh.stock_code, frh.year, frh.quarter
+LIMIT 100;
+
+-- 10. Compare the Current Ratio of Vinhomes (VIC), Vincom Retail (VRE), and Novaland (NVL) in Q1 2024.  How does this compare to their respective Current Ratios in Q1 2020?
+-- Compare Current Ratios of VIC, VRE, and NVL in Q1 2024 vs. Q1 2020
+SELECT 
+    frh.stock_code,
+    frh.year,
+    frh.quarter,
+    frh."CurrentR" AS current_ratio
+FROM 
+    financial_ratios_hori frh
+WHERE 
+    frh.stock_code IN ('VIC', 'VRE', 'NVL') -- Companies: Vinhomes, Vincom Retail, Novaland
+    AND frh.year IN (2020, 2024) -- Years: 2020 and 2024
+    AND frh.quarter = 1 -- Filter for Q1 data
+ORDER BY 
+    frh.stock_code, frh.year
+LIMIT 100;
+
+-- 11. Rank the top 5 Bank with the highest Net Interest Margin in 2023, considering only bank with total assets exceeding 100 billion VND in 2022.
+-- Rank the top 5 banks by Net Interest Margin in 2023
+SELECT 
+    frh.stock_code,
+    frh."NIM" AS net_interest_margin,
+    bfr_2022."BS_110" AS total_assets_2022
+FROM 
+    financial_ratios_hori frh
+INNER JOIN 
+    company_info ci ON frh.stock_code = ci.stock_code
+LEFT JOIN 
+    bank_financial_report_hori bfr_2022 ON ci.stock_code = bfr_2022.stock_code AND bfr_2022.year = 2022 AND bfr_2022.quarter = 0
+WHERE 
+    ci.is_bank = TRUE
+    AND frh.year = 2023
+    AND frh.quarter = 0
+    AND bfr_2022."BS_110" > 100000 -- Filter for total assets > 100 billion VND
+ORDER BY 
+    frh."NIM" DESC
+LIMIT 5;
+
+-- 12. Rank the top 5 companies with total assets greater than 100,000,000,000,000 VND as of Q2 2024 based on their Return on Equity (ROE).
+
+WITH company_assets AS (
+    -- For banks: get total assets from BS_300
+    SELECT 
+        bfrh.stock_code,
+        bfrh.year,
+        bfrh.quarter,
+        bfrh."BS_300" AS total_assets
+    FROM bank_financial_report_hori bfrh
+    WHERE bfrh.quarter = 2
+      AND bfrh.year = 2024
+      AND bfrh."BS_300" > 100000000
+    UNION ALL
+    -- For non-banks: get total assets from BS_270
+    SELECT 
+        nbfrh.stock_code,
+        nbfrh.year,
+        nbfrh.quarter,
+        nbfrh."BS_270" AS total_assets
+    FROM non_bank_financial_report_hori nbfrh
+    WHERE nbfrh.quarter = 2
+      AND nbfrh.year = 2024
+      AND nbfrh."BS_270" > 100000000
+    UNION ALL
+    -- For securities firms: get total assets from BS_270
+    SELECT 
+        sfrh.stock_code,
+        sfrh.year,
+        sfrh.quarter,
+        sfrh."BS_270" AS total_assets
+    FROM sec_financial_report_hori sfrh
+    WHERE sfrh.quarter = 2
+      AND sfrh.year = 2024
+      AND sfrh."BS_270" > 100000000
+),
+company_roe AS (
+    -- Get ROE from financial_ratios_hori table
+    SELECT 
+        frh.stock_code,
+        frh.year,
+        frh.quarter,
+        frh."ROE" 
+    FROM financial_ratios_hori frh
+    WHERE frh.quarter = 2
+      AND frh.year = 2024
+)
+-- Join the two results based on stock_code and quarter
+SELECT 
+    ca.stock_code,
+    ca.total_assets,
+    cr."ROE"
+FROM company_assets ca
+JOIN company_roe cr 
+    ON ca.stock_code = cr.stock_code
+    AND ca.year = cr.year
+    AND ca.quarter = cr.quarter
+ORDER BY cr."ROE" DESC
+LIMIT 5;
+
+-- 13. Comparing the financial statements of Vinamilk and Masan Group for Q2 2024 and Q2 2020: What are the total assets, total liabilities, and net income for each company? How do these figures reflect the financial health of each company, considering the influence of any subsidiaries or investments they hold?
+-- Compare financial statements of Vinamilk and Masan Group for Q2 2024 and Q2 2020
+SELECT 
+    fs.stock_code,
+    fs.year,
+    fs.quarter,
+    fs."BS_270" AS total_assets,  -- Total assets
+    fs."BS_300" AS total_liabilities,  -- Total liabilities
+    fs."IS_060" AS net_income  -- Net income
+FROM 
+    non_bank_financial_report_hori fs
+WHERE 
+    fs.stock_code IN ('VNM', 'MSN')  -- Vinamilk and Masan Group
+    AND fs.year IN (2020, 2024)  -- Years: 2020 and 2024
+    AND fs.quarter = 2  -- Filter for Q2 data
+ORDER BY 
+    fs.stock_code, fs.year;
+
+-- 14. Rank the top 5 companies with the highest Return on Equity (ROE) in 2023, based on their financial statements. 
+-- Rank the top 5 companies with the highest ROE in 2023
+SELECT 
+    frh.stock_code,
+    frh.year,
+    frh.quarter,
+    frh."ROE" AS return_on_equity
+FROM 
+    financial_ratios_hori frh
+WHERE 
+    frh.year = 2023  -- Filter for the year 2023
+    AND frh.quarter = 0  -- Annual data
+ORDER BY 
+    frh."ROE" DESC  -- Rank by ROE in descending order
+LIMIT 5;
+
+-- 16. Retrieve the top 10 companies by net income for 2023
+-- Retrieve the top 10 companies by net income for 2023
+SELECT 
+    bfr.stock_code AS stock_code,
+    bfr.year AS year,
+    bfr.quarter AS quarter,
+    bfr."IS_021" AS net_income
+FROM 
+    bank_financial_report_hori bfr
+WHERE 
+    bfr.year = 2023
+    AND bfr.quarter = 0
+    AND bfr."IS_021" IS NOT NULL
+
+UNION ALL
+
+SELECT 
+    nbfr.stock_code AS stock_code,
+    nbfr.year AS year,
+    nbfr.quarter AS quarter,
+    nbfr."IS_060" AS net_income
+FROM 
+    non_bank_financial_report_hori nbfr
+WHERE 
+    nbfr.year = 2023
+    AND nbfr.quarter = 0
+    AND nbfr."IS_060" IS NOT NULL
+
+UNION ALL
+
+SELECT 
+    sfr.stock_code AS stock_code,
+    sfr.year AS year,
+    sfr.quarter AS quarter,
+    sfr."IS_200" AS net_income
+FROM 
+    sec_financial_report_hori sfr
+WHERE 
+    sfr.year = 2023
+    AND sfr.quarter = 0
+    AND sfr."IS_200" IS NOT NULL
+
+ORDER BY 
+    net_income DESC
+LIMIT 10;
+
+-- 17. Current Ratio of VinGroup from 2020 to Q2 2024
+-- Current Ratio of VinGroup (VIC) from 2020 to Q2 2024
+SELECT 
+    frh.stock_code,
+    frh.year,
+    frh.quarter,
+    frh."CurrentR" AS current_ratio
+FROM 
+    financial_ratios_hori frh
+WHERE 
+    frh.stock_code = 'VIC' -- VinGroup stock code
+    AND (frh.year BETWEEN 2020 AND 2024)
+    AND (frh.year < 2024 OR frh.quarter <= 2) -- Include up to Q2 2024
+ORDER BY 
+    frh.year ASC,
+    frh.quarter ASC;
+
+-- 18. What is the average quick ratio for companies with subsidiaries/investments in other companies in Q2 2024?
+-- Average Quick Ratio for companies with subsidiaries/investments in Q2 2024
+SELECT 
+    AVG(frh."QR") AS average_quick_ratio
+FROM 
+    financial_ratios_hori frh
+WHERE 
+    frh.stock_code IN (
+        SELECT DISTINCT stock_code 
+        FROM sub_and_shareholder
+    )
+    AND frh.year = 2024
+    AND frh.quarter = 2
+    AND frh."QR" IS NOT NULL;
+
+-- 19. Average quick ratio for companies without subsidiaries/investments in Q2 2024?
+-- Average Quick Ratio for companies without subsidiaries/investments in Q2 2024
+SELECT 
+    AVG(frh."QR") AS average_quick_ratio
+FROM 
+    financial_ratios_hori frh
+WHERE 
+    frh.stock_code NOT IN (
+        SELECT DISTINCT stock_code 
+        FROM sub_and_shareholder
+    )
+    AND frh.year = 2024
+    AND frh.quarter = 2
+    AND frh."QR" IS NOT NULL;
+
+-- 20. Rank the top 5 companies with the lowest Debt-to-Equity ratio as of Q4 2023
+-- Top 5 companies with the lowest Debt-to-Equity ratio as of Q4 2023
+SELECT 
+    frh.stock_code,
+    frh.year,
+    frh.quarter,
+    frh."DTER" AS debt_to_equity_ratio
+FROM 
+    financial_ratios_hori frh
+WHERE 
+    frh.year = 2023
+    AND frh.quarter = 4
+    AND frh."DTER" IS NOT NULL
+ORDER BY 
+    frh."DTER" ASC
+LIMIT 5;

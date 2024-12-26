@@ -60,8 +60,23 @@ BGE_HORIZONTAL_UNIVERSAL_CONFIG = {
     "database_choice": 'horizontal_universal'
 }
 
+TEI_HORIZONTAL_UNIVERSAL_CONFIG = {
+    "embedding": 'http://localhost:8080',
+    "database_choice": 'horizontal_universal'
+}
 
-def setup_db(config: DBConfig, multi_thread = True):
+TEI_HORIZONTAL_BASE_CONFIG = {
+    "embedding": 'http://localhost:8080',
+    "database_choice": 'horizontal_base'
+}
+
+TEI_VERTICAL_UNIVERSAL_CONFIG = {
+    "embedding": 'http://localhost:8080',
+    "database_choice": 'vertical_universal'
+}
+
+
+def setup_db(config: DBConfig, vectordb = 'chromadb', multi_thread = True):
     conn = {
         'db_name': os.getenv('DB_NAME'),
         'user': os.getenv('DB_USER'),
@@ -82,33 +97,36 @@ def setup_db(config: DBConfig, multi_thread = True):
         
     db_type = 'vertical' if 'vertical' in config.database_choice else 'horizontal'
     
-    persist_client = PersistentClient(path = os.path.join(current_directory, f'../../data/vector_db_{db_type}_{"local" if local_model else "openai"}'), settings = Settings())
+    if vectordb == 'chromadb':
+        persist_client = PersistentClient(path = os.path.join(current_directory, f'../../data/vector_db_{db_type}_{"local" if local_model else "openai"}'), settings = Settings())
+    else:
+        persist_client = 'http://localhost:19530'
     
     if 'base' in config.database_choice:
         collection_chromadb = 'category_bank_chroma'
-        bank_vector_store = create_chroma_db(collection_chromadb, persist_client, config.embedding)
+        bank_vector_store = create_vector_db(collection_chromadb, persist_client, config.embedding, vectordb)
         
         collection_chromadb = 'category_non_bank_chroma'
-        none_bank_vector_store = create_chroma_db(collection_chromadb, persist_client, config.embedding)
+        none_bank_vector_store = create_vector_db(collection_chromadb, persist_client, config.embedding, vectordb)
         
         collection_chromadb = 'category_sec_chroma'
-        sec_vector_store = create_chroma_db(collection_chromadb, persist_client, config.embedding)
+        sec_vector_store = create_vector_db(collection_chromadb, persist_client, config.embedding, vectordb)
     
         collection_chromadb = 'sql_query'
-        vector_db_sql = create_chroma_db(collection_chromadb, persist_client, config.embedding)
+        vector_db_sql = create_vector_db(collection_chromadb, persist_client, config.embedding, vectordb)
     
     elif 'universal' in config.database_choice:
         collection_chromadb = 'category_universal_chroma'
-        universal_vector_store = create_chroma_db(collection_chromadb, persist_client, config.embedding)
+        universal_vector_store = create_vector_db(collection_chromadb, persist_client, config.embedding, vectordb)
         
         collection_chromadb = 'sql_query_universal'
-        vector_db_sql = create_chroma_db(collection_chromadb, persist_client, config.embedding)
+        vector_db_sql = create_vector_db(collection_chromadb, persist_client, config.embedding, vectordb)
     
     collection_chromadb = 'category_ratio_chroma'
-    ratio_vector_store = create_chroma_db(collection_chromadb, persist_client, config.embedding)
+    ratio_vector_store = create_vector_db(collection_chromadb, persist_client, config.embedding, vectordb)
     
     collection_chromadb = 'company_name_chroma'
-    vector_db_company = create_chroma_db(collection_chromadb, persist_client, config.embedding)
+    vector_db_company = create_vector_db(collection_chromadb, persist_client, config.embedding, vectordb)
     
     
     if config.database_choice == 'vertical_base':

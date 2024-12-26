@@ -25,3 +25,12 @@ llm/*
 data/
 data
 test_chroma_db
+
+/temp/
+temp/
+temp/*
+
+/models/
+/models
+models/*
+models/

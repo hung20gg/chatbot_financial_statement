@@ -1,7 +1,8 @@
 import sys 
 # sys.path.append('..')
 from pydantic import BaseModel, SkipValidation, ConfigDict
-from langchain_chroma import Chroma
+
+from langchain_core.vectorstores import VectorStore
 from concurrent.futures import ThreadPoolExecutor
 from ..connector import *
 
@@ -17,9 +18,10 @@ class BaseDBHUB(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
     conn: SkipValidation
-    vector_db_company: Chroma
-    vector_db_sql: Chroma
+    vector_db_company: VectorStore
+    vector_db_sql: VectorStore
     multi_threading: bool = False
+    hub_name: str = "BaseDBHUB"
         
     def rasie_multi_threading_error(self):
         if not self.multi_threading:
@@ -170,6 +172,16 @@ class BaseDBHUB(BaseModel):
                 
         return few_shot
     
+    def find_sql_query_v2(self, text, top_k=1):
+        results = self.vector_db_sql.similarity_search(text, top_k)
+        
+        sql_dict = {}
+        for result in results:
+            if result.metadata.get('sql_code', None) is not None:
+                sql_dict[result.page_content] = result.metadata['sql_code']
+                
+        
+        return sql_dict
     
     def get_exact_industry_bm25(self, industries):
         query = """

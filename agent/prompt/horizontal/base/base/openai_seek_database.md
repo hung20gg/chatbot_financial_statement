@@ -118,7 +118,7 @@ SELECT * FROM bank_financial_report_hori
 
 LIMIT 100;
 ```
-- Column name like "BS_110" needs to be in "" when query.
+- Column name like "BS_110","ROE" needs to be in "" when query.
 - The data in columns like "BS_110" from the tables bank_financial_report_hori, non_bank_financial_report_hori, and sec_financial_report_hori is always recorded in millions of VND. Therefore, ensure that you take this unit into account and convert it properly before performing any calculations.
 - When asking for data in financial report (not financial ratio) in top 5, top 10 companies or subsidiary/invest_on, if not specified, you must union join all bank, non-bank and securities tables
 - For any financial ratio, it must be selected from the database rather than being calculated manually.

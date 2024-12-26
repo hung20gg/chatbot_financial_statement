@@ -18,8 +18,6 @@ Here is a natural language query that you need to convert into a SQL query:
 
 </data>
 
-### Here is an example of a query that you can refer to:
-
 <example>
 
 {few_shot}

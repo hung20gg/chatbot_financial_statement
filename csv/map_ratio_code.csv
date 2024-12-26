@@ -39,6 +39,8 @@ Profitability Of Operating Expenses,POOE, profitability_of_operating_expenses
 Return On Sales,ROS, Return_on_sales
 Operating Profit Margin,OPM,operating_profit_margin
 Gross Profit Margin,GPM,gross_profit_margin
+Return on Invested Capital,ROIC,ROIC
+EBIT,EBIT,EBIT
 EBITDA,EBITDA,EBITDA
 Free Cash Flow,FCF,free_cash_flow
 Free Cash Flow To Operating Cash Flow Ratio,FCFTOCFR, free_cash_flow_to_operating_cash_flow_ratio

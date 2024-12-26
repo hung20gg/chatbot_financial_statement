@@ -1,0 +1,60 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb2
+    ports:
+      - "${MONGO_DB_PORT}:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_DB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_DB_PASSWORD}
+    volumes:
+      - mongo_data:/data/db
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres2
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  text-embeddings-inference:
+    image: ghcr.io/huggingface/text-embeddings-inference:1.6
+    container_name: text_embeddings_inference2
+    profiles:
+      - local-embedding
+    ports:
+      - "8080:80"
+    environment:
+      MODEL_ID: ${EMBEDDING_MODEL}
+    volumes:
+      - ./models:/data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: ["gpu"]
+    depends_on:
+      - mongodb
+      - postgres
+
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: app
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - mongodb
+  #     - postgres
+  #   volumes:
+  #     - ./code:/usr/src/app
+
+volumes:
+  mongo_data:
+  postgres_data:
