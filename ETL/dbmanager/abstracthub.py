@@ -1,10 +1,12 @@
 import sys 
 # sys.path.append('..')
 from pydantic import BaseModel, SkipValidation, ConfigDict
+from typing import Any, Union, Optional
 
 from langchain_core.vectorstores import VectorStore
 from concurrent.futures import ThreadPoolExecutor
 from ..connector import *
+from .rerank import BaseRerannk
 
 from dotenv import load_dotenv
 import os
@@ -22,12 +24,24 @@ class BaseDBHUB(BaseModel):
     vector_db_sql: VectorStore
     multi_threading: bool = False
     hub_name: str = "BaseDBHUB"
+    reranker: Optional[BaseRerannk] = None
         
     def rasie_multi_threading_error(self):
         if not self.multi_threading:
             raise Exception("This method is not supported in multi threading mode.")
 
-    
+    def _similairty_search(self, vector_db: Chroma, text: list[str], top_k: int) -> list[str]:
+        """
+        Perform a similarity search based on the provided text.
+        """
+        if self.reranker is None:
+            result = vector_db.similarity_search(text, top_k)
+            return result
+        else:
+            result = vector_db.similarity_search(text, top_k * 4) # Increase top_k to get more results
+            result = self.reranker.rerank_langchain(text, result, top_k)
+            return result
+        
     # ================== Search for suitable content (account) ================== #
     
     def _accounts_search(self, texts, top_k, **kwargs) -> list[str]:
@@ -72,7 +86,7 @@ class BaseDBHUB(BaseModel):
     
     ### Find stock code similarity using company name
     
-    def __find_stock_code_similarity(self, company_name, top_k) -> list[str]:
+    def _find_stock_code_similarity(self, company_name, top_k) -> list[str]:
         
         """
         The __find_stock_code_similarityd method performs a multi-threaded search to find stock codes 
@@ -87,7 +101,8 @@ class BaseDBHUB(BaseModel):
             company_name = [company_name]
         stock_codes = set()
         for name in company_name:
-            result = self.vector_db_company.similarity_search(name, top_k)
+            # result = self.vector_db_company.similarity_search(name, top_k)
+            result = self._similairty_search(self.vector_db_company, name, top_k)
             for item in result:
                 stock_codes.add(item.metadata['stock_code'])
         
@@ -95,7 +110,7 @@ class BaseDBHUB(BaseModel):
         logging.info(f"Time taken to find stock code similarity: {end-start}")
         return list(stock_codes)
     
-    def __find_stock_code_similarity_multithread(self, company_name, top_k) -> list[str]:
+    def _find_stock_code_similarity_multithread(self, company_name, top_k) -> list[str]:
         
         """ 
         Perform a multi-threaded search to find stock codes that are similar to the provided company names.
@@ -106,7 +121,8 @@ class BaseDBHUB(BaseModel):
         stock_codes = set()
         
         def search_name(name):
-            result = self.vector_db_company.similarity_search(name, top_k)
+            # result = self.vector_db_company.similarity_search(name, top_k)
+            result = self._similairty_search(self.vector_db_company, name, top_k)
             return [item.metadata['stock_code'] for item in result]
         
         with ThreadPoolExecutor(max_workers=4) as executor:
@@ -122,9 +138,9 @@ class BaseDBHUB(BaseModel):
     def find_stock_code_similarity(self, company_name, top_k=2) -> list[str]:
         
         if self.multi_threading:
-            return self.__find_stock_code_similarity_multithread(company_name, top_k)
+            return self._find_stock_code_similarity_multithread(company_name, top_k)
         else:
-            return self.__find_stock_code_similarity(company_name, top_k)
+            return self._find_stock_code_similarity(company_name, top_k)
         
         
     ### Return exact stock code from company name
@@ -162,7 +178,8 @@ class BaseDBHUB(BaseModel):
     # ===== Find SQL query for few shot learning ===== #
     
     def find_sql_query(self, text, top_k=1):
-        results = self.vector_db_sql.similarity_search(text, top_k)
+        results = self._similairty_search(self.vector_db_sql, text, top_k)
+        # results = self.vector_db_sql.similarity_search(text, top_k)
         
         few_shot = ""
         for result in results:
@@ -173,7 +190,8 @@ class BaseDBHUB(BaseModel):
         return few_shot
     
     def find_sql_query_v2(self, text, top_k=1):
-        results = self.vector_db_sql.similarity_search(text, top_k)
+        results = self._similairty_search(self.vector_db_sql, text, top_k)
+        # results = self.vector_db_sql.similarity_search(text, top_k)
         
         sql_dict = {}
         for result in results:

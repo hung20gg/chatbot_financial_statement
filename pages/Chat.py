@@ -31,12 +31,12 @@ from ETL.dbmanager.setup import (
     BGE_VERTICAL_BASE_CONFIG,
     BGE_VERTICAL_UNIVERSAL_CONFIG,
     OPENAI_VERTICAL_UNIVERSAL_CONFIG,
-    TEI_HORIZONTAL_UNIVERSAL_CONFIG,
+    TEI_VERTICAL_UNIVERSAL_CONFIG,
     setup_db
 )
 
 from langchain_huggingface import HuggingFaceEmbeddings
-from ETL.dbmanager import get_semantic_layer
+from ETL.dbmanager import get_semantic_layer, BaseRerannk
 import json
 import torch
 
@@ -59,7 +59,7 @@ if "username" not in st.session_state:
 
 @st.cache_resource
 def initialize(user_name):
-    db_config = DBConfig(**TEI_HORIZONTAL_UNIVERSAL_CONFIG)
+    db_config = DBConfig(**TEI_VERTICAL_UNIVERSAL_CONFIG)
     chat_config = ChatConfig(**INBETWEEN_CHAT_CONFIG)
     text2sql_config = Text2SQLConfig(**TEXT2SQL_FAST_OPENAI_CONFIG)
     prompt_config = PromptConfig(**VERTICAL_PROMPT_UNIVERSAL)
@@ -69,9 +69,11 @@ def initialize(user_name):
     # # embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})    db_config.embedding = embedding_model
     # db_config.embedding = embedding_model
     
+    reranker = BaseRerannk(name=os.getenv('RERANK_SERVER_URL'))
+    
     logging.info('Finish setup embedding')
     
-    db = setup_db(db_config)
+    db = setup_db(db_config, reranker = reranker)
     logging.info('Finish setup db')
     
     text2sql = Text2SQL(config = text2sql_config, prompt_config=prompt_config, db = db, max_steps=2)
@@ -86,6 +88,9 @@ def initialize(user_name):
     
     
     return chatbot
+
+
+
 def chat(user_name):
     user_name = str(user_name)
     
