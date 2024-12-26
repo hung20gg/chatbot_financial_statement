@@ -70,13 +70,17 @@ class HubVerticalBase(BaseDBHUB):
             texts = [texts]
         for text in texts:
             if type_ == 'bank':
-                result = self.vector_db_bank.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_bank, text, top_k)
+                # result = self.vector_db_bank.similarity_search(text, top_k)
             elif type_ == 'non_bank':
-                result = self.vector_db_non_bank.similarity_search(text, top_k)    
+                result = self._similairty_search(self.vector_db_non_bank, text, top_k)
+                # result = self.vector_db_non_bank.similarity_search(text, top_k)    
             elif type_ == 'securities':
-                result = self.vector_db_securities.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_securities, text, top_k)
+                # result = self.vector_db_securities.similarity_search(text, top_k)
             elif type_ == 'ratio':
-                result = self.vector_db_ratio.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_ratio, text, top_k)
+                # result = self.vector_db_ratio.similarity_search(text, top_k)
             else:
                 raise ValueError("Query table not supported")
             
@@ -96,13 +100,17 @@ class HubVerticalBase(BaseDBHUB):
         # Define a function for parallel execution
         def search_text(text):
             if type_ == 'bank':
-                result = self.vector_db_bank.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_bank, text, top_k)
+                # result = self.vector_db_bank.similarity_search(text, top_k)
             elif type_ == 'non_bank':
-                result = self.vector_db_non_bank.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_non_bank, text, top_k)
+                # result = self.vector_db_non_bank.similarity_search(text, top_k)    
             elif type_ == 'securities':
-                result = self.vector_db_securities.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_securities, text, top_k)
+                # result = self.vector_db_securities.similarity_search(text, top_k)
             elif type_ == 'ratio':
-                result = self.vector_db_ratio.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_ratio, text, top_k)
+                # result = self.vector_db_ratio.similarity_search(text, top_k)
             else:
                 raise ValueError("Query table not supported")
             # Extract the stock codes from the search result
@@ -312,9 +320,11 @@ class HubVerticalUniversal(BaseDBHUB):
             
         for text in texts:
             if type_ == 'ratio':
-                result = self.vector_db_ratio.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_ratio, text, top_k)
+                # result = self.vector_db_ratio.similarity_search(text, top_k)
             else:
-                result = self.vector_db_fs.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_fs, text, top_k)
+                # result = self.vector_db_fs.similarity_search(text, top_k)
             
             for item in result:
                 try:
@@ -332,9 +342,11 @@ class HubVerticalUniversal(BaseDBHUB):
         # Define a function for parallel execution
         def search_text(text):
             if type_ == 'ratio':
-                result = self.vector_db_ratio.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_ratio, text, top_k)
+                # result = self.vector_db_ratio.similarity_search(text, top_k)
             else:
-                result = self.vector_db_fs.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_fs, text, top_k)
+                # result = self.vector_db_fs.similarity_search(text, top_k)
             
             return [item.metadata['code'] for item in result]
         
