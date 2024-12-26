@@ -1,6 +1,7 @@
 import sys 
 # sys.path.append('..')
 from pydantic import BaseModel, SkipValidation, ConfigDict
+from typing import Any, Union, Optional
 
 from langchain_core.vectorstores import VectorStore
 from concurrent.futures import ThreadPoolExecutor
@@ -23,7 +24,7 @@ class BaseDBHUB(BaseModel):
     vector_db_sql: VectorStore
     multi_threading: bool = False
     hub_name: str = "BaseDBHUB"
-    reranker: BaseRerannk = None
+    reranker: Optional[BaseRerannk] = None
         
     def rasie_multi_threading_error(self):
         if not self.multi_threading:

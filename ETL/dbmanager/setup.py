@@ -60,7 +60,7 @@ BGE_HORIZONTAL_UNIVERSAL_CONFIG = {
     "database_choice": 'horizontal_universal'
 }
 
-TEI_HORIZONTAL_UNIVERSAL_CONFIG = {
+TEI_VERTICAL_UNIVERSAL_CONFIG = {
     "embedding": 'http://localhost:8080',
     "database_choice": 'vertical_universal'
 }
@@ -121,10 +121,10 @@ def setup_db(config: DBConfig, vectordb = 'chromadb', multi_thread = True, reran
     
     if config.database_choice == 'vertical_base':
         return HubVerticalBase(conn = conn, 
-                                 bank_vector_store = bank_vector_store, 
-                                 none_bank_vector_store = none_bank_vector_store, 
-                                 sec_vector_store = sec_vector_store,
-                                 ratio_vector_store = ratio_vector_store,
+                                 vector_db_bank = bank_vector_store, 
+                                 vector_db_non_bank = none_bank_vector_store, 
+                                 vector_db_securities = sec_vector_store,
+                                 vector_db_ratio = ratio_vector_store,
                                  vector_db_company = vector_db_company,
                                  vector_db_sql = vector_db_sql,
                                  multi_thread = multi_thread,
@@ -133,8 +133,8 @@ def setup_db(config: DBConfig, vectordb = 'chromadb', multi_thread = True, reran
         
     elif config.database_choice == 'vertical_universal':
         return HubVerticalUniversal(conn = conn, 
-                                     ratio_vector_store = ratio_vector_store,
-                                     universal_vector_store = universal_vector_store,
+                                     vector_db_ratio = ratio_vector_store,
+                                     vector_db_fs = universal_vector_store,
                                      vector_db_company = vector_db_company,
                                      vector_db_sql = vector_db_sql,
                                      multi_thread = multi_thread,

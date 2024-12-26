@@ -3,28 +3,63 @@ import asyncio
 from FlagEmbedding import FlagReranker
 
 from pydantic import BaseModel, SkipValidation, ConfigDict
-from typing import Any, Union
+from typing import Any, Union, Optional
 import numpy as np
+import requests
 import json
 
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+
+
+def check_rerank_server(rerank_server):
+    
+    uri = rerank_server
+    logging.info(f"Checking embedding server at {uri}")
+    
+    try:
+        payload = {"query":"What is Deep Learning?", "texts": ["Deep Learning is", "I want to eat shit"]}
+        headers = {"Content-Type": "application/json"}
+        
+        response = requests.post(uri, json=payload, headers=headers)
+        
+        logging.info(f"Response embedding server: {response}")
+        if response.status_code == 200:
+            return True
+    except Exception as e:
+        print(e)
+        return False
+    
+    return False
 
 class BaseRerannk(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
     name : str
-    reranker : Union[FlagReranker, AsyncInferenceClient] = None
-    reranker_type : str = None
+    reranker : Optional[Union[FlagReranker, AsyncInferenceClient]] = None
+    reranker_type : Optional[str] = None
     
     def __init__(self, **data: Any):
         super().__init__(**data)
         self._init_reranker()
         
     def _init_reranker(self):
-        if 'http' in self.name:
-            self.reranker = AsyncInferenceClient(self.name)
-            self.reranker_type = 'api'
+        if self.reranker is None: # No reranker provided, setup based on string name
+            
+            if 'http' in self.name:
+                if check_rerank_server(self.name):
+                    logging.info(f'Found reranking server at: {self.name}')
+                    
+                    self.reranker = AsyncInferenceClient(self.name)
+                    self.reranker_type = 'api'
+            else:
+                self.reranker = FlagReranker(self.name)
+                self.reranker_type = 'local'
+        
         else:
-            self.reranker = FlagReranker(self.name)
             self.reranker_type = 'local'
      
      
@@ -65,8 +100,12 @@ class BaseRerannk(BaseModel):
         
         if self.reranker_type == 'api':
             result = asyncio.run(self._rerank_api(query, documents, top_k, **kwargs))
-        else:
+        elif self.reranker_type == 'local':
             result = self._rerank_local(query, documents, top_k, **kwargs)
+        
+        else:
+            logging.warning('No reranker provided, return original documents')
+            result = documents
             
         return result
     

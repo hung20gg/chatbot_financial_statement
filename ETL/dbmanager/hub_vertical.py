@@ -26,13 +26,7 @@ from .rerank import BaseRerannk
 
 
 class HubVerticalBase(BaseDBHUB):
-    # Required from BaseDBHUB
-    # conn: SkipValidation
-    # vector_db_company: VectorStore
-    # vector_db_sql: VectorStore
-    # multi_threading: bool = False
-    # reranker: BaseRerannk = None
-    
+
     # Additional attributes
     vector_db_bank: VectorStore 
     vector_db_non_bank: VectorStore
@@ -40,33 +34,6 @@ class HubVerticalBase(BaseDBHUB):
     vector_db_ratio: VectorStore
     
     hub_name: str = "HubVerticalBase"
-    
-    
-    # def __init__(self, conn, 
-    #              vector_db_bank: VectorStore, 
-    #              vector_db_non_bank: VectorStore, 
-    #              vector_db_securities: VectorStore, 
-    #              vector_db_ratio: VectorStore, 
-    #              vector_db_company: VectorStore, 
-    #              vector_db_sql: VectorStore,
-    #              multi_threading = True,
-    #              reranker: BaseRerannk = None
-                 
-    #              ): # Multi-thread only useful for online embedding
-        
-    #     super().__init__(
-    #         conn=conn,
-    #         vector_db_company=vector_db_company,
-    #         vector_db_sql=vector_db_sql,
-    #         multi_threading=multi_threading,
-            
-    #         vector_db_bank = vector_db_bank,
-    #         vector_db_non_bank = vector_db_non_bank,
-    #         vector_db_securities = vector_db_securities,
-    #         vector_db_ratio = vector_db_ratio,
-    #         reranker = reranker
-    #     )
-    #     logging.info('Finish setup for Vertical Base')
         
         
     # ================== Search for suitable content (account) ================== #
@@ -291,34 +258,10 @@ class HubVerticalBase(BaseDBHUB):
 
 class HubVerticalUniversal(BaseDBHUB):
     
-    # Required from BaseDBHUB
-    # conn: SkipValidation
-    # vector_db_company: VectorStore
-    # vector_db_sql: VectorStore
-    # multi_threading: bool = False
-    # reranker: BaseRerannk = None
-    
     vector_db_ratio : VectorStore
     vector_db_fs : VectorStore
     
     hub_name: str = "HubVerticalUniversal"
-    
-    # def __init__(self, conn, 
-    #              vector_db_ratio: VectorStore, 
-    #              vector_db_fs: VectorStore, 
-    #              vector_db_company: VectorStore, 
-    #              vector_db_sql: VectorStore,
-    #              multi_threading = True):
-    #     super().__init__(
-    #         conn=conn,
-    #         vector_db_company=vector_db_company,
-    #         vector_db_sql=vector_db_sql,
-    #         multi_threading=multi_threading,
-            
-    #         vector_db_ratio = vector_db_ratio,
-    #         vector_db_fs = vector_db_fs
-    #     )
-    #     logging.info('Finish setup for Vertical Universal')
         
     # ================== Search for suitable content (account) ================== #
     def _accounts_search(self, texts, top_k, type_ = None, **kwargs):
