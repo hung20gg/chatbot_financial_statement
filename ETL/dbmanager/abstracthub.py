@@ -5,6 +5,7 @@ from pydantic import BaseModel, SkipValidation, ConfigDict
 from langchain_core.vectorstores import VectorStore
 from concurrent.futures import ThreadPoolExecutor
 from ..connector import *
+from .rerank import BaseRerannk
 
 from dotenv import load_dotenv
 import os
@@ -22,6 +23,7 @@ class BaseDBHUB(BaseModel):
     vector_db_sql: VectorStore
     multi_threading: bool = False
     hub_name: str = "BaseDBHUB"
+    reranker: BaseRerannk = None
         
     def rasie_multi_threading_error(self):
         if not self.multi_threading:
@@ -31,9 +33,14 @@ class BaseDBHUB(BaseModel):
         """
         Perform a similarity search based on the provided text.
         """
-        result = vector_db.similarity_search(text, top_k)
-        return result
-    
+        if self.reranker is None:
+            result = vector_db.similarity_search(text, top_k)
+            return result
+        else:
+            result = vector_db.similarity_search(text, top_k * 4) # Increase top_k to get more results
+            result = self.reranker.rerank_langchain(text, result, top_k)
+            return result
+        
     # ================== Search for suitable content (account) ================== #
     
     def _accounts_search(self, texts, top_k, **kwargs) -> list[str]:

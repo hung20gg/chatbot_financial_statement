@@ -66,7 +66,7 @@ TEI_HORIZONTAL_UNIVERSAL_CONFIG = {
 }
 
 
-def setup_db(config: DBConfig, vectordb = 'chromadb', multi_thread = True):
+def setup_db(config: DBConfig, vectordb = 'chromadb', multi_thread = True, reranker = None):
     conn = {
         'db_name': os.getenv('DB_NAME'),
         'user': os.getenv('DB_USER'),
@@ -120,22 +120,25 @@ def setup_db(config: DBConfig, vectordb = 'chromadb', multi_thread = True):
     
     
     if config.database_choice == 'vertical_base':
-        return HubVerticalBase(conn, 
-                                 bank_vector_store, 
-                                 none_bank_vector_store, 
-                                 sec_vector_store, 
-                                 ratio_vector_store, 
-                                 vector_db_company, 
-                                 vector_db_sql, 
-                                 multi_thread)
+        return HubVerticalBase(conn = conn, 
+                                 bank_vector_store = bank_vector_store, 
+                                 none_bank_vector_store = none_bank_vector_store, 
+                                 sec_vector_store = sec_vector_store,
+                                 ratio_vector_store = ratio_vector_store,
+                                 vector_db_company = vector_db_company,
+                                 vector_db_sql = vector_db_sql,
+                                 multi_thread = multi_thread,
+                                 reranker=reranker)
+                                 
         
     elif config.database_choice == 'vertical_universal':
-        return HubVerticalUniversal(conn, 
-                                     ratio_vector_store,
-                                     universal_vector_store, 
-                                     vector_db_company, 
-                                     vector_db_sql, 
-                                     multi_thread)
+        return HubVerticalUniversal(conn = conn, 
+                                     ratio_vector_store = ratio_vector_store,
+                                     universal_vector_store = universal_vector_store,
+                                     vector_db_company = vector_db_company,
+                                     vector_db_sql = vector_db_sql,
+                                     multi_thread = multi_thread,
+                                        reranker=reranker)
         
     else:
         raise ValueError("Database choice not supported")
