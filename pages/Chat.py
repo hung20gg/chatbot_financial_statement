@@ -39,7 +39,7 @@ from ETL.dbmanager.setup import (
 )
 
 from langchain_huggingface import HuggingFaceEmbeddings
-from ETL.dbmanager import get_semantic_layer
+from ETL.dbmanager import get_semantic_layer, BaseRerannk
 import json
 import torch
 
@@ -74,7 +74,7 @@ def initialize(user_name):
     
     logging.info('Finish setup embedding')
     
-    db = setup_db(db_config)
+    db = setup_db(db_config, reranker = reranker)
     logging.info('Finish setup db')
     
     text2sql = Text2SQL(config = text2sql_config, prompt_config=prompt_config, db = db, max_steps=2)
@@ -89,6 +89,9 @@ def initialize(user_name):
     
     
     return chatbot
+
+
+
 def chat(user_name):
     user_name = str(user_name)
     

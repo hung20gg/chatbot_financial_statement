@@ -22,15 +22,11 @@ logging.basicConfig(
 
 from ..connector import *
 from .abstracthub import BaseDBHUB
+from .rerank import BaseRerannk
 
 
 class HubVerticalBase(BaseDBHUB):
-    # Required from BaseDBHUB
-    conn: SkipValidation
-    vector_db_company: VectorStore
-    vector_db_sql: VectorStore
-    multi_threading: bool = False
-    
+
     # Additional attributes
     vector_db_bank: VectorStore 
     vector_db_non_bank: VectorStore
@@ -38,28 +34,6 @@ class HubVerticalBase(BaseDBHUB):
     vector_db_ratio: VectorStore
     
     hub_name: str = "HubVerticalBase"
-    
-    def __init__(self, conn, 
-                 vector_db_bank: VectorStore, 
-                 vector_db_non_bank: VectorStore, 
-                 vector_db_securities: VectorStore, 
-                 vector_db_ratio: VectorStore, 
-                 vector_db_company: VectorStore, 
-                 vector_db_sql: VectorStore,
-                 multi_threading = True): # Multi-thread only useful for online embedding
-        
-        super().__init__(
-            conn=conn,
-            vector_db_company=vector_db_company,
-            vector_db_sql=vector_db_sql,
-            multi_threading=multi_threading,
-            
-            vector_db_bank = vector_db_bank,
-            vector_db_non_bank = vector_db_non_bank,
-            vector_db_securities = vector_db_securities,
-            vector_db_ratio = vector_db_ratio,
-        )
-        logging.info('Finish setup for Vertical Base')
         
         
     # ================== Search for suitable content (account) ================== #
@@ -70,13 +44,17 @@ class HubVerticalBase(BaseDBHUB):
             texts = [texts]
         for text in texts:
             if type_ == 'bank':
-                result = self.vector_db_bank.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_bank, text, top_k)
+                # result = self.vector_db_bank.similarity_search(text, top_k)
             elif type_ == 'non_bank':
-                result = self.vector_db_non_bank.similarity_search(text, top_k)    
+                result = self._similairty_search(self.vector_db_non_bank, text, top_k)
+                # result = self.vector_db_non_bank.similarity_search(text, top_k)    
             elif type_ == 'securities':
-                result = self.vector_db_securities.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_securities, text, top_k)
+                # result = self.vector_db_securities.similarity_search(text, top_k)
             elif type_ == 'ratio':
-                result = self.vector_db_ratio.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_ratio, text, top_k)
+                # result = self.vector_db_ratio.similarity_search(text, top_k)
             else:
                 raise ValueError("Query table not supported")
             
@@ -96,13 +74,17 @@ class HubVerticalBase(BaseDBHUB):
         # Define a function for parallel execution
         def search_text(text):
             if type_ == 'bank':
-                result = self.vector_db_bank.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_bank, text, top_k)
+                # result = self.vector_db_bank.similarity_search(text, top_k)
             elif type_ == 'non_bank':
-                result = self.vector_db_non_bank.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_non_bank, text, top_k)
+                # result = self.vector_db_non_bank.similarity_search(text, top_k)    
             elif type_ == 'securities':
-                result = self.vector_db_securities.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_securities, text, top_k)
+                # result = self.vector_db_securities.similarity_search(text, top_k)
             elif type_ == 'ratio':
-                result = self.vector_db_ratio.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_ratio, text, top_k)
+                # result = self.vector_db_ratio.similarity_search(text, top_k)
             else:
                 raise ValueError("Query table not supported")
             # Extract the stock codes from the search result
@@ -276,33 +258,10 @@ class HubVerticalBase(BaseDBHUB):
 
 class HubVerticalUniversal(BaseDBHUB):
     
-    # Required from BaseDBHUB
-    conn: SkipValidation
-    vector_db_company: VectorStore
-    vector_db_sql: VectorStore
-    multi_threading: bool = False
-    
     vector_db_ratio : VectorStore
     vector_db_fs : VectorStore
     
     hub_name: str = "HubVerticalUniversal"
-    
-    def __init__(self, conn, 
-                 vector_db_ratio: VectorStore, 
-                 vector_db_fs: VectorStore, 
-                 vector_db_company: VectorStore, 
-                 vector_db_sql: VectorStore,
-                 multi_threading = True):
-        super().__init__(
-            conn=conn,
-            vector_db_company=vector_db_company,
-            vector_db_sql=vector_db_sql,
-            multi_threading=multi_threading,
-            
-            vector_db_ratio = vector_db_ratio,
-            vector_db_fs = vector_db_fs
-        )
-        logging.info('Finish setup for Vertical Universal')
         
     # ================== Search for suitable content (account) ================== #
     def _accounts_search(self, texts, top_k, type_ = None, **kwargs):
@@ -312,9 +271,11 @@ class HubVerticalUniversal(BaseDBHUB):
             
         for text in texts:
             if type_ == 'ratio':
-                result = self.vector_db_ratio.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_ratio, text, top_k)
+                # result = self.vector_db_ratio.similarity_search(text, top_k)
             else:
-                result = self.vector_db_fs.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_fs, text, top_k)
+                # result = self.vector_db_fs.similarity_search(text, top_k)
             
             for item in result:
                 try:
@@ -332,9 +293,11 @@ class HubVerticalUniversal(BaseDBHUB):
         # Define a function for parallel execution
         def search_text(text):
             if type_ == 'ratio':
-                result = self.vector_db_ratio.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_ratio, text, top_k)
+                # result = self.vector_db_ratio.similarity_search(text, top_k)
             else:
-                result = self.vector_db_fs.similarity_search(text, top_k)
+                result = self._similairty_search(self.vector_db_fs, text, top_k)
+                # result = self.vector_db_fs.similarity_search(text, top_k)
             
             return [item.metadata['code'] for item in result]
         

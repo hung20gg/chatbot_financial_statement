@@ -32,6 +32,7 @@ from ETL.dbmanager.setup import (
     BGE_HORIZONTAL_BASE_CONFIG,
     BGE_HORIZONTAL_UNIVERSAL_CONFIG,
     TEI_HORIZONTAL_UNIVERSAL_CONFIG,
+    TEI_VERTICAL_UNIVERSAL_CONFIG,
     OPENAI_VERTICAL_UNIVERSAL_CONFIG,
     OPENAI_HORIZONTAL_UNIVERSAL_CONFIG,
     OPENAI_HORIZONTAL_BASE_CONFIG,
@@ -48,6 +49,7 @@ logging.basicConfig(
 )
 
 from ETL.connector import check_embedding_server
+from ETL.dbmanager import get_semantic_layer, BaseRerannk
 
 def test():
     
@@ -61,6 +63,8 @@ def test():
         logging.info('Using remote embedding server')
         db_config = DBConfig(**TEI_HORIZONTAL_UNIVERSAL_CONFIG)
     elif os.path.exists('data/vector_db_horizontal_openai'):
+        db_config = DBConfig(**TEI_VERTICAL_UNIVERSAL_CONFIG)
+    elif os.path.exists('data/vector_db_vertical_openai'):
         logging.info('Using openai embedding')
         db_config = DBConfig(**OPENAI_HORIZONTAL_UNIVERSAL_CONFIG)
     
@@ -78,8 +82,12 @@ def test():
     
     logging.info('Finish setup embedding')
     
+    reranker = BaseRerannk(name=os.getenv('RERANKER_SERVER_URL'))
+    
+    logging.info(f'Finish setup reranker, using reranker {reranker.reranker_type}')
+    
     try:
-        db = setup_db(db_config)
+        db = setup_db(db_config, reranker=reranker)
         logging.info('Finish setup db')
         
         text2sql = Text2SQL(config = text2sql_config, prompt_config=prompt_config, db = db, max_steps=2)

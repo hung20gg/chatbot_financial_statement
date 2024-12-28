@@ -60,23 +60,13 @@ BGE_HORIZONTAL_UNIVERSAL_CONFIG = {
     "database_choice": 'horizontal_universal'
 }
 
-TEI_HORIZONTAL_UNIVERSAL_CONFIG = {
-    "embedding": 'http://localhost:8080',
-    "database_choice": 'horizontal_universal'
-}
-
-TEI_HORIZONTAL_BASE_CONFIG = {
-    "embedding": 'http://localhost:8080',
-    "database_choice": 'horizontal_base'
-}
-
 TEI_VERTICAL_UNIVERSAL_CONFIG = {
     "embedding": 'http://localhost:8080',
     "database_choice": 'vertical_universal'
 }
 
 
-def setup_db(config: DBConfig, vectordb = 'chromadb', multi_thread = True):
+def setup_db(config: DBConfig, vectordb = 'chromadb', multi_thread = True, reranker = None):
     conn = {
         'db_name': os.getenv('DB_NAME'),
         'user': os.getenv('DB_USER'),
@@ -130,39 +120,25 @@ def setup_db(config: DBConfig, vectordb = 'chromadb', multi_thread = True):
     
     
     if config.database_choice == 'vertical_base':
-        return HubVerticalBase(conn, 
-                                 bank_vector_store, 
-                                 none_bank_vector_store, 
-                                 sec_vector_store, 
-                                 ratio_vector_store, 
-                                 vector_db_company, 
-                                 vector_db_sql, 
-                                 multi_thread)
+        return HubVerticalBase(conn = conn, 
+                                 vector_db_bank = bank_vector_store, 
+                                 vector_db_non_bank = none_bank_vector_store, 
+                                 vector_db_securities = sec_vector_store,
+                                 vector_db_ratio = ratio_vector_store,
+                                 vector_db_company = vector_db_company,
+                                 vector_db_sql = vector_db_sql,
+                                 multi_thread = multi_thread,
+                                 reranker=reranker)
+                                 
         
     elif config.database_choice == 'vertical_universal':
-        return HubVerticalUniversal(conn, 
-                                     ratio_vector_store,
-                                     universal_vector_store, 
-                                     vector_db_company, 
-                                     vector_db_sql, 
-                                     multi_thread)
-    elif config.database_choice == 'horizontal_base':
-        return HubHorizontalBase(conn, 
-                                 bank_vector_store, 
-                                 none_bank_vector_store, 
-                                 sec_vector_store, 
-                                 ratio_vector_store, 
-                                 vector_db_company, 
-                                 vector_db_sql, 
-                                 multi_thread)
-        
-    elif config.database_choice == 'horizontal_universal':
-        return HubHorizontalUniversal(conn, 
-                                      ratio_vector_store,
-                                      universal_vector_store, 
-                                      vector_db_company, 
-                                      vector_db_sql, 
-                                      multi_thread)
+        return HubVerticalUniversal(conn = conn, 
+                                     vector_db_ratio = ratio_vector_store,
+                                     vector_db_fs = universal_vector_store,
+                                     vector_db_company = vector_db_company,
+                                     vector_db_sql = vector_db_sql,
+                                     multi_thread = multi_thread,
+                                        reranker=reranker)
         
     else:
         raise ValueError("Database choice not supported")
