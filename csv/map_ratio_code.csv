@@ -55,3 +55,5 @@ CFO To Total Equity,CFOTTE,CFO_to_total_equity
 Net Interest Margin,NIM,net_interest_margin
 Allowance for loan customers ratio,ALCR,allowance_for_loan_customers_ratio
 Net profit margin,NPM,net_profit_margin
+Current Account Saving Account Ratio,CASA,current_account_saving_account_ratio
+Bad Debt Ratio,BDR,bad_debt_ratio
