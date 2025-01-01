@@ -24,7 +24,7 @@ services:
 
   text-embeddings-inference:
     image: ghcr.io/huggingface/text-embeddings-inference:1.6
-    container_name: text_embeddings_inference2
+    container_name: text_embeddings
     profiles:
       - local-embedding
     ports:
@@ -42,18 +42,26 @@ services:
       - mongodb
       - postgres
 
-  # app:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: app
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     - mongodb
-  #     - postgres
-  #   volumes:
-  #     - ./code:/usr/src/app
+
+  text-embeddings-inference-2:
+    image: ghcr.io/huggingface/text-embeddings-inference:1.6
+    container_name: text_reranker
+    profiles:
+      - local-reranker
+    ports:
+      - "8081:80"
+    environment:
+      MODEL_ID: ${RERANKER_MODEL}
+    volumes:
+      - ./models:/data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: ["gpu"]
+    depends_on:
+      - mongodb
+      - postgres
 
 volumes:
   mongo_data:
