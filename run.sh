@@ -2,9 +2,14 @@
 
 # Step 1: Start the database containers
 # Check for the first argument
+source .env
+
 if [ "$1" = "local-embedding" ]; then
   echo "Setting up local embedding server..."
    docker-compose --profile local-embedding up -d
+elif [ "$1" = "local-model" ]; then
+  echo "Setting up both local embedding and reranker servers..."
+  docker-compose --profile local-embedding --profile local-reranker up -d
 else
   echo "Skipping embedding server setup."
   docker-compose up -d
