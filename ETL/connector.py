@@ -16,6 +16,7 @@ import re
 
 from langchain_chroma import Chroma
 from langchain_milvus import Milvus
+from langchain_elasticsearch import ElasticsearchStore
 
 
 from langchain_openai import OpenAIEmbeddings
@@ -327,7 +328,14 @@ def create_milvus_db(collection_name, persist_directory, embedding_function):
     return Milvus(
         collection_name=collection_name,
         embedding_function=embedding_function,
-        connection_args={"uri": persist_directory}
+        connection_args={"uri": persist_directory} # Either directory or an uri
+    )
+    
+def create_elastic_search_db(collection_name, es_url, embedding_function):
+    return ElasticsearchStore(
+        index_name = collection_name,
+        es_url = es_url,
+        embedding=embedding_function
     )
     
 def create_vector_db(collection_name, persist_directory, model_name, vectordb):
@@ -338,8 +346,11 @@ def create_vector_db(collection_name, persist_directory, model_name, vectordb):
         return create_milvus_db(collection_name, persist_directory, embedding_function)
     elif vectordb == 'chromadb':
         return create_chroma_db(collection_name, persist_directory, embedding_function)
+    elif vectordb == 'elastic-search':
+        return create_elastic_search_db(collection_name, persist_directory, embedding_function)
+    
     else:
-        raise ValueError("vectordb should be either 'milvus' or 'chromadb'")
+        raise ValueError(f"Vectordb format {vectordb} is not supported")
 
 #==================#
 #  Setup VectorDB  #
@@ -491,14 +502,14 @@ RDB_SETUP_CONFIG = {
     'map_category_code_non_bank': ['../csv/map_category_code_non_bank.csv', ['category_code']],
     'map_category_code_securities': ['../csv/map_category_code_sec.csv', ['category_code']],
     'map_category_code_ratio': ['../csv/map_ratio_code.csv', ['ratio_code']],
-    'map_category_code_universal': ['../csv/map_category_code_universal.csv', ['universal_code']],
+    'map_category_code_universal': ['../csv/map_category_code_universal.csv', ['category_code']],
     
     
     'bank_financial_report' : ['../csv/bank_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'non_bank_financial_report' : ['../csv/non_bank_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'securities_financial_report' : ['../csv/securities_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'financial_ratio' : ['../csv/financial_ratio.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'financial_statement': ['../csv/financial_statement.parquet', None, {'universal_code': 'map_category_code_universal(universal_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'financial_statement': ['../csv/financial_statement.parquet', None, {'category_code': 'map_category_code_universal(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
 
 }
 
@@ -509,14 +520,20 @@ FIIN_RDB_SETUP_CONFIG = {
     'map_category_code_non_bank': ['../csv/map_category_corp_v3.csv', ['category_code']],
     'map_category_code_securities': ['../csv/map_category_sec_v3.csv', ['category_code']],
     'map_category_code_ratio': ['../csv/map_ratio_code.csv', ['ratio_code']],
-    'map_category_code_universal': ['../csv/map_category_code_universal_v3.csv', ['universal_code']],
+    'map_category_code_universal': ['../csv/map_category_code_universal_v3.csv', ['category_code']],
+    
+    'map_category_code_explaination': ['../csv/map_category_code_explaination_v3.csv', ['category_code']],
     
     
     'bank_financial_report' : ['../csv/bank_financial_report_v3.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'non_bank_financial_report' : ['../csv/non_bank_financial_report_v3.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'securities_financial_report' : ['../csv/securities_financial_report_v3.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'financial_ratio' : ['../csv/financial_ratio_v3.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'financial_statement': ['../csv/financial_statement_v3.parquet', None, {'universal_code': 'map_category_code_universal(universal_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'financial_statement': ['../csv/financial_statement_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    
+    'financial_statement_explaination': ['../csv/financial_statement_explaination_v3.parquet', None, {'category_code': 'map_category_code_explaination(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'industry_financial_statement': ['../csv/industry_report_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)'}, False, ['date_added']],
+    'industry_financial_ratio': ['../csv/industry_ratio_v3.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)'}, False, ['date_added']],    
 
 }
 
@@ -534,6 +551,7 @@ VERTICAL_VECTORDB_SETUP_CONFIG = {
     'sql_query': ['../agent/prompt/vertical/base/simple_query_v2.txt'],
     'sql_query_universal': ['../agent/prompt/vertical/universal/simple_query_v2.txt'],
     'category_universal_chroma': ['map_category_code_universal'],
+    'category_universal_chroma': ['map_category_code_explaination'],
 }
 
 def setup_rdb(force, config, **db_conn):
@@ -558,7 +576,7 @@ def setup_vector_db(config, persist_directory, model_name = 'text-embedding-3-sm
             setup_vector_db_company_name(table, persist_directory, *params, **db_conn)
         elif table == 'category_ratio_chroma':
             setup_vector_db_ratio(table, persist_directory, *params, **db_conn)
-        elif table == 'category_universal_chroma':
+        elif params[0] == 'map_category_code_universal':
             setup_vector_db_universal(table, persist_directory, *params, **db_conn)
         else:
             setup_vector_db_fs(table, persist_directory, *params, **db_conn)

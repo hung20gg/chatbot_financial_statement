@@ -22,7 +22,8 @@ from agent.prompt.prompt_controller import (
     VERTICAL_PROMPT_BASE, 
     VERTICAL_PROMPT_UNIVERSAL,
     HORIZONTAL_PROMPT_BASE,
-    HORIZONTAL_PROMPT_UNIVERSAL
+    HORIZONTAL_PROMPT_UNIVERSAL,
+    FIIN_VERTICAL_PROMPT_UNIVERSAL,
 )
 
 from ETL.dbmanager.setup import (

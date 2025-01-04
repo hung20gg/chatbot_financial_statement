@@ -24,4 +24,5 @@ tabulate
 pyarrow
 streamlit
 pymongo
-langchain_milvus
+langchain-milvus
+langchain-elasticsearch

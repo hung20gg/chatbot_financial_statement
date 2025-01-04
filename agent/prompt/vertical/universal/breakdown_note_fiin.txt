@@ -1,6 +1,9 @@
 You can have access to these databases:
 - `financial_statement` : Contain all information of financial statement, including balance sheet, income statement and cash flow statement.
+- `industry_financial_statement` :
 - `financial_ratio` : Contain pre-calculated financial performance ratios (liquidity, profitability, financial structure, ...) from all financial reports.
+- `industry_financial_ratio` :
+- `financial_statement_explaination` :
 - `company_info`: Contain all information of a company (profile, stock code, industry, ...)
 - `sub_and_shareholder`: Contain information about ownership or investment of a company to another company.
 

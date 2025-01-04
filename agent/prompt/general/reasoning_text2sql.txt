@@ -33,7 +33,11 @@ Here is a natural language query that you need to convert into a SQL query:
  
 <instruction>
 
-Think step-by-step and return SQL query that suitable with the database schema based on the natural language query above
+Think step-by-step and return SQL query that suitable with the database schema based on the natural language query above.
+If possible, the table result should be in the following format:
+
+|stock_code|quarter|year|category_code|data|
+|:---|:---|:---|:---|:---|
 
 </instruction>
 
@@ -45,6 +49,7 @@ Think step-by-step and return SQL query that suitable with the database schema b
 -- ### detailed_table_name
 
 ```
+- The `category_code_x` table contain value of both `financial_statment` and `explaination` tables
 - The user can only see the sql results, so your name should be as informative as possible
 - If the time is not mentioned, assume getting the current time (Q3 2024)
 - Do not make any assumption about the column name. You can refer to the mapping table above to find the suitable column name.

@@ -12,7 +12,7 @@ The database includes two reporting periods for financial statements: quarterly 
 
 </overall_description>
 
-You are given 6 tables in the database. Here are the detailed descriptions of them in PostgreSQL format:
+You are given 10 tables in the database. Here are the detailed descriptions of them in PostgreSQL format:
 
 ### PostgreSQL tables, with their properties
 ```sql 
@@ -52,6 +52,18 @@ CREATE TABLE financial_statement(
     date_added timestamp -- The datetime when the data was published
 );
 
+-- Table: industry_financial_statement: General report for each industry sector
+
+CREATE TABLE industry_financial_statement(
+    industry VARCHAR(255), -- Same with industry in table `company_info`
+    year int, 
+    quarter int,
+    category_code VARCHAR(255) references map_category_code_universal(category_code),
+    data float, 
+    date_added timestamp 
+);
+
+
 -- Table map_category_code_ratio: Mapping ratio name for Financial Ratio
 CREATE TABLE map_category_code_ratio(
     ratio_code VARCHAR(255) primary key,
@@ -65,16 +77,43 @@ CREATE TABLE financial_ratio(
     stock_code VARCHAR(255) references company_info(stock_code),
     year int,
     quarter int,
-    data float,
+    data float, -- Either in Million VND if the ratio_code related to money, or ratio otherwise
     date_added timestamp -- The datetime when the data was published
 )
 
+-- Table: industry_financial_ratio: General ratio for each industry sector
+CREATE TABLE industry_financial_ratio(
+    industry VARCHAR(255),
+    stock_code VARCHAR(255) references company_info(stock_code),
+    year int,
+    quarter int,
+    data float, 
+    date_added timestamp -- The datetime when the data was published
+)
+
+-- Table map_category_code_explaination
+CREATE TABLE map_category_code_explaination(
+    category_code VARCHAR(255) primary key, --The unique code for accounts recorded in the financial statements explaination part.
+    en_caption VARCHAR(255), --The Accounts (Caption) for the `category_code`.
+);
+
+-- Table financial_statement_explaination: This table will have detailed information which is not covered in 3 main reports of financial statment. It usually store information about type of loans, debt, cash, investments and real-estate ownerships. 
+-- Same structure as `financial_statement`
+CREATE TABLE financial_statement_explaination(
+    category_code VARCHAR(255) references map_category_code_explaination(category_code),
+    stock_code VARCHAR(255) references company_info(stock_code),
+    year int,
+    quarter int,
+    data float, 
+    date_added timestamp 
+)
 ```
 
 Note: 
 - Each value in `category_code` includes a prefix indicating the report it pertains to: *BS* is Balance sheet, *IS* is for Income statement and *CF* is Cash flow.
+- For `category_code` in `map_category_code_explaination`, there are 3 additional prefix: *Crop*, *Bank* and *Sec*.
 - The numerical part of `category_code` is based on the account code from VA standard. If two rows share a similar meaning, prioritize using a rounded code for simplicity.
-- Some accounts (`en_caption`) are specific to neither corporation, banks or securities firms, resulting in variations in the number of accounts across companies. Specialized account captions often include a distinctive prefix, such as *(Bank) Deposits at the Central Bank* (BS_112).
+- Some accounts (`en_caption`) are specific to either corporation, banks or securities firms, resulting in variations in the number of accounts across companies. Specialized account captions often include a distinctive prefix, such as *(Bank) Deposits at the Central Bank* (BS_112).
 
 ### Peek view of the schema
  - `company_info`
