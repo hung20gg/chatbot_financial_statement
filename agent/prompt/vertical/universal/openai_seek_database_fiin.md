@@ -59,7 +59,8 @@ CREATE TABLE industry_financial_statement(
     year int, 
     quarter int,
     category_code VARCHAR(255) references map_category_code_universal(category_code),
-    data float, 
+    data_mean float, -- Mean value of every firm in that industry
+    data_sun float, -- Total value of every firm in that industry
     date_added timestamp 
 );
 
@@ -87,7 +88,7 @@ CREATE TABLE industry_financial_ratio(
     stock_code VARCHAR(255) references company_info(stock_code),
     year int,
     quarter int,
-    data float, 
+    data_mean float, 
     date_added timestamp -- The datetime when the data was published
 )
 

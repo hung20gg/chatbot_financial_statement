@@ -747,3 +747,55 @@ WHERE
     and fs.year = 2023
 ORDER BY 
     fs.year DESC;
+
+
+-- 36. ### Compare Return on Asset (ROA) of BIDV in 2019 with the average ROA of all banks in 2019
+
+-- Get ROA of BIDV in 2019
+WITH bidv_roa AS (
+    SELECT 
+        fr.stock_code,
+        fr.data AS roa_percentage
+    FROM 
+        financial_ratio fr
+    WHERE 
+        fr.stock_code = 'BID'
+        AND fr.year = 2019
+        AND fr.quarter = 0
+        AND fr.ratio_code = 'ROA'
+),
+
+-- Get average ROA of all banks in 2019
+average_roa AS (
+    SELECT 
+        data_mean AS average_roa_percentage
+    FROM 
+        industry_financial_ratio ifr
+    WHERE 
+        ifr.year = 2019
+        AND ifr.quarter = 0
+        AND ifr.ratio_code = 'ROA'
+        AND ifr.industry = 'Banking'
+)
+
+SELECT 
+    b.stock_code,
+    b.roa_percentage,
+    a.average_roa_percentage
+FROM 
+    bidv_roa b,
+    average_roa a
+LIMIT 1;
+
+-- 37. Bad debt ratio 
+
+-- 38. Compare Total Asset 
+
+-- 39. Compare Equity
+
+-- 40. Financial Leverage
+
+-- 41. Asset Turnover
+
+-- 42. Percentage of X in BIDV compare to total in ...
+

@@ -125,17 +125,20 @@ class HubVerticalBase(BaseDBHUB):
             placeholder_fs = ', '.join(['%s' for _ in collect_code_fs])
             placeholder_tm = ', '.join(['%s' for _ in collect_code_tm])
             
-            query = f"SELECT category_code, en_caption FROM map_category_code_{type_} WHERE category_code IN ({placeholder_fs})"
-        
-            df = self.query(query, params=collect_code_fs, return_type='dataframe')
+            dfs = []
             
-            try:
+            if len(collect_code_fs) != 0:
+                query = f"SELECT category_code, en_caption FROM map_category_code_{type_} WHERE category_code IN ({placeholder_fs})"
+            
+                df = self.query(query, params=collect_code_fs, return_type='dataframe')
+                dfs.append(df)
+                
+            if len(collect_code_tm) != 0:
                 query = f"SELECT category_code, en_caption FROM map_category_code_explaination_{type_} WHERE category_code IN ({placeholder_tm})"
                 df_tm = self.query(query, params=collect_code_tm, return_type='dataframe') 
                 
-                df = pd.concat([df, df_tm])
-            except:
-                logging.warning(f"Table map_category_code_explaination{type_} not found")
+                dfs.append(df_tm)
+            df = pd.concat(dfs)
             
             return df
                 
@@ -341,13 +344,19 @@ class HubVerticalUniversal(BaseDBHUB):
         Return the result as a DataFrame.
         """
         collect_code = self.accounts_search(texts, top_k, type_ = type_)
+        print(collect_code)
         
         collect_code_fs = [code for code in collect_code if 'TM' not in code]
         collect_code_tm = [code for code in collect_code if 'TM' in code]
         
+        print(collect_code_fs)
+        print(collect_code_tm)
+        
         placeholder = ', '.join(['%s' for _ in collect_code])
         placeholder_fs = ', '.join(['%s' for _ in collect_code_fs])
         placeholder_tm = ', '.join(['%s' for _ in collect_code_tm])
+        
+        
         
         if type_ == 'ratio':
             query = f"SELECT ratio_code, ratio_name FROM map_category_code_ratio WHERE ratio_code IN ({placeholder})"
@@ -355,17 +364,19 @@ class HubVerticalUniversal(BaseDBHUB):
             return self.query(query, params=collect_code) 
         
         else:
-            query = f"SELECT category_code, en_caption FROM map_category_code_universal WHERE category_code IN ({placeholder_fs})"
-            df = self.query(query, params=collect_code_fs) 
+            dfs = []
             
-            try:
+            if len(collect_code_fs) != 0:
+                query = f"SELECT category_code, en_caption FROM map_category_code_universal WHERE category_code IN ({placeholder_fs})"
+                df = self.query(query, params=collect_code_fs) 
+                dfs.append(df)
+            
+            if len(collect_code_tm) != 0:
                 query = f"SELECT category_code, en_caption FROM map_category_code_explaination WHERE category_code IN ({placeholder_tm})"
                 df_tm = self.query(query, params=collect_code_tm) 
                 
-                df = pd.concat([df, df_tm])
-            except:
-                logging.warning('Table map_category_code_explaination not found')
-            
+                dfs.append(df_tm)
+            df = pd.concat(dfs)
             return df
     
     # ================== Search for suitable Mapping table ================== #
