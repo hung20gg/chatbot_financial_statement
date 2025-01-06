@@ -787,9 +787,58 @@ FROM
     average_roa a
 LIMIT 1;
 
--- 37. Bad debt ratio 
+-- 37. Bad debt ratio for BIDV in Q3 2023
 
--- 38. Compare Total Asset 
+SELECT 
+    stock_code,
+    quarter,
+    year,
+    ratio_code,
+    data
+FROM financial_ratio
+WHERE ratio_code = 'BDR' -- Bad Debt Ratio
+  AND stock_code = 'BID' -- BIDV stock code
+  AND year = 2023
+  AND quarter = 3 -- Q3 2023
+LIMIT 100;
+
+-- 38. Total Asset of VIC in Q3 2024 and Average Total Asset of its Industry 
+WITH vic_total_asset AS (
+    SELECT 
+        stock_code,
+        year,
+        quarter,
+        data AS total_assets
+    FROM 
+        financial_statement
+    WHERE 
+        stock_code = 'VIC'
+        AND year = 2024
+        AND quarter = 3
+        AND category_code = 'BS_270' -- Total Assets
+),
+
+
+industry_average AS (
+    SELECT 
+        industry,
+        data_mean AS average_total_assets
+    FROM 
+        industry_financial_statement ifs
+    WHERE 
+        ifs.industry = (SELECT industry FROM company_info WHERE stock_code = 'VIC') -- Real Estate
+        AND ifs.year = 2024
+        AND ifs.quarter = 3
+        AND ifs.category_code = 'BS_270' -- Total Assets
+)
+
+SELECT 
+    vic.stock_code,
+    vic.total_assets,
+    avg_ind.average_total_assets
+FROM 
+    vic_total_asset vic,
+    industry_average avg_ind;
 
 -- 39. Compare Equity
 
