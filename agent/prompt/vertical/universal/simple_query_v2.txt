@@ -840,11 +840,143 @@ FROM
     vic_total_asset vic,
     industry_average avg_ind;
 
--- 39. Compare Equity
+-- 39. Average total Asset of Real Estate Company in Q3 2023
 
--- 40. Financial Leverage
+SELECT 
+    industry,
+    year,
+    quarter,
+    category_code ,
+    data_mean
+FROM industry_financial_statement 
+WHERE category_code = 'BS_270' -- Total Asset
+  AND year = 2023
+  AND quarter = 3
+  AND industry = 'Real Estate'
+LIMIT 100;
 
--- 41. Asset Turnover
+-- 40. Financial Leverage of TCB in Q3 2024
 
--- 42. Percentage of X in BIDV compare to total in ...
+SELECT 
+    stock_code,
+    year,
+    quarter,
+    ratio_code,
+    data
+FROM financial_ratio
+WHERE ratio_code = 'FL' -- (Financial Leverage)
+  AND year = 2024
+  AND quarter = 3
+  AND stock_code = 'TCB'
+LIMIT 100;
 
+-- 41. Average Bad Debt Ratio of Banks in Q3 2024
+
+SELECT 
+    industry,
+    year,
+    quarter,
+    ratio_code,
+    data_mean
+FROM industry_financial_ratio
+WHERE ratio_code = 'BDR' -- Bad Debt Ratio
+  AND year = 2024
+  AND quarter = 3
+  AND industry = 'Banking'
+LIMIT 100;
+
+-- 42. Percentage of BIDV's Equity in Total Equity of All Banks for 2023
+
+WITH total_equity_2023 AS (
+    SELECT 
+        data_sum,
+        quarter,
+        year,
+        category_code
+    FROM 
+        industry_financial_statement
+    WHERE 
+        industry = 'Banking' 
+        AND year = 2023
+        AND quarter = 0 -- Annual report
+        AND category_code = 'BS_400' -- Total Equity
+),
+
+bidv_equity_2023 AS (
+    SELECT 
+        data,
+        stock_code
+    FROM 
+        financial_statement
+    WHERE 
+        stock_code = 'BID' -- BIDV stock code
+        AND year = 2023
+        AND quarter = 0 -- Annual report
+        AND category_code = 'BS_400' -- Total Equity
+)
+
+SELECT 
+	bidv.stock_code as stock_code,
+    (bidv.data / total.data_sum) * 100 AS equity_percentage,
+    total.year as year,
+    total.quarter as quarter,
+    total.category_code as category_code
+FROM 
+    bidv_equity_2023 bidv,
+    total_equity_2023 total;
+
+
+-- 43. Total amount of customer deposit in all banks in 2023
+
+SELECT 
+    industry,
+    year,
+    quarter,
+    category_code ,
+    data_sum
+FROM industry_financial_statement 
+WHERE category_code = 'BS_305' -- Customer deposits
+  AND year = 2023
+  AND quarter = 0 -- Annually
+  AND industry = 'Banking'
+LIMIT 100;
+
+-- 44. Percentage of Customer Deposits in TCB Relative to Total Customer Deposits in All Banks for Q3 2024
+
+WITH total_customer_deposits AS (
+    SELECT 
+        data_sum,
+        quarter,
+        year,
+        category_code
+    FROM 
+        industry_financial_statement
+    WHERE 
+        industry = 'Banking' 
+        AND year = 2024
+        AND quarter = 3 -- Annual report
+        AND category_code = 'BS_305' -- Customer deposits
+),
+
+tcb_customer_deposits AS (
+    SELECT 
+    	stock_code,
+        data
+    FROM 
+        financial_statement
+    WHERE 
+        stock_code = 'TCB' -- TCB stock code
+        AND year = 2024
+        AND quarter = 3 -- Q3 2024
+        AND category_code = 'BS_305' -- Customer deposits
+)
+
+SELECT 
+	tcb.stock_code as stock_code,
+    (tcb.data / total.data_sum) * 100 AS customer_deposits_percentage,
+    total.year as year,
+    total.quarter as quarter,
+    total.category_code as category_code
+FROM 
+    tcb_customer_deposits tcb,
+    total_customer_deposits total;
