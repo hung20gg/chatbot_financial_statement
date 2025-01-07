@@ -245,8 +245,8 @@ SECURITIES_PROFITABILITY_RATIO_FUNCTIONS = {
 
 SECURITIES_CASHFLOW_RATIO_FUNCTIONS = {
     'EBITDA': [['IS_090','IS_052'], 'CF_003'],  # EBIT (IS_050), depreciation_and_amortization (CF_002)
-    # 'free_cash_flow': ['CF_060', 'CF_044', None],  # operating_net_cash_flow , capital_expenditures , dividends_paid 
-    # 'free_cash_flow_to_operating_cash_flow_ratio': ['free_cash_flow', 'CF_060'],  # free_cash_flow, operating_net_cash_flow 
+    'free_cash_flow': ['CF_060', 'CF_061', None],  # operating_net_cash_flow , capital_expenditures , dividends_paid 
+    'free_cash_flow_to_operating_cash_flow_ratio': ['free_cash_flow', 'CF_060'],  # free_cash_flow, operating_net_cash_flow 
     'cash_debt_coverage_ratio': ['CF_060', 'BS_300'],  # operating_net_cash_flow , avg_total_liabilities 
     'cash_interest_coverage': ['CF_060', 'IS_052'],  # operating_net_cash_flow , interest_expense
     'cash_return_on_assets': ['CF_060', 'BS_270'],  # operating_net_cash_flow , avg_total_assets 
