@@ -65,6 +65,82 @@ def get_previous_year_q0_value(pivot_df, stock_code, year, category_code):
     except KeyError:
         return None
 
+def get_pre_calculated_ratio(stock_code, year, ratio_code, ratios_df):
+    try:
+        return ratios_df.loc[(ratios_df['stock_code'] == stock_code) & 
+                              (ratios_df['year'] == year) & 
+                              (ratios_df['quarter'] == 0) & 
+                              (ratios_df['ratio_code'] == ratio_code), 
+                              'data'].values[0]
+    except (IndexError, KeyError):
+        return None
+
+def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None):
+    """
+    Calculate YoY ratios for the given dataset and function dictionary.
+    Uses pre-calculated financial structure (ratios_df_1) and cash flow (ratios_df_6) ratios.
+    """
+    pivot_df = data_df.pivot_table(
+        index=['stock_code', 'year', 'quarter'],
+        columns='category_code',
+        values='data',
+        aggfunc='sum'
+    )
+
+    # Get YoY ratio mappings from const.py
+    ratio_mapping = const.YoY_RATIO_FUNCTIONS[type_]
+
+    # Initialize results
+    results = []
+
+    # Iterate through the pivoted data
+    for (stock_code, year, quarter), row in pivot_df.iterrows():
+        if quarter != 0:  # Skip non-annual data
+            continue
+
+        for ratio_name, category_code in ratio_mapping.items():
+            # Process YoY growth calculation
+            try:
+                if isinstance(category_code, list):
+                    # Handle sums of multiple codes
+                    current_year_value = sum(row.get(code, 0) for code in category_code)
+                    previous_year_value = sum(
+                        pivot_df.loc[(stock_code, year - 1, 0), code]
+                        if (stock_code, year - 1, 0) in pivot_df.index and code in pivot_df.columns
+                        else 0 for code in category_code
+                    )
+                elif category_code in ['EBIT']:
+                    current_year_value = get_pre_calculated_ratio(stock_code, year, category_code, ratios_df_1)
+                    previous_year_value = get_pre_calculated_ratio(stock_code, year - 1, category_code, ratios_df_1)
+                elif category_code in ['EBITDA']:
+                    current_year_value = get_pre_calculated_ratio(stock_code, year, category_code, ratios_df_6)
+                    previous_year_value = get_pre_calculated_ratio(stock_code, year - 1, category_code, ratios_df_6)
+                else:
+                    current_year_value = row.get(category_code, None)
+                    previous_year_value = pivot_df.loc[
+                        (stock_code, year - 1, 0), category_code
+                    ] if (stock_code, year - 1, 0) in pivot_df.index else None
+
+                # Calculate YoY growth
+                yoy_value = None
+                if previous_year_value == 0 or previous_year_value is None:
+                    yoy_value = None  # Avoid division by zero
+                else:
+                    yoy_value = (current_year_value - previous_year_value) / previous_year_value
+                    results.append({
+                        'stock_code': stock_code,
+                        'year': year,
+                        'quarter': quarter,
+                        'ratio_code': ratio_name,
+                        'data': yoy_value
+                    })
+            except Exception as e:
+                # Handle missing or invalid data gracefully
+                print(f"Error calculating YoY ratio {ratio_name} for {stock_code}: {e}")
+
+    return pd.DataFrame(results)
+
+
 
 #=====================#
 # Financial Structure #
@@ -397,7 +473,8 @@ def get_constant_values(type_):
             'financial_risk': const.FINANCIAL_RATIO_FUNCTIONS,
             'income': const.INCOME_RATIO_FUNCTIONS,
             'profitability': const.PROFITABILITY_RATIO_FUNCTIONS,
-            'cashflow': const.CASHFLOW_RATIO_FUNCTIONS
+            'cashflow': const.CASHFLOW_RATIO_FUNCTIONS,
+            'yoy': const.YoY_RATIO_FUNCTIONS['non_bank']
         }
         
     elif type_ == 'bank':
@@ -407,7 +484,8 @@ def get_constant_values(type_):
             'financial_risk': const.BANK_FINANCIAL_RATIO_FUNCTIONS,
             'income': const.BANK_INCOME_RATIO_FUNCTIONS,
             'profitability': const.BANK_PROFITABILITY_RATIO_FUNCTIONS,
-            'cashflow': const.BANK_CASHFLOW_RATIO_FUNCTIONS
+            'cashflow': const.BANK_CASHFLOW_RATIO_FUNCTIONS,
+            'yoy': const.YoY_RATIO_FUNCTIONS['bank']
         }
     
     elif type_ == 'securities':
@@ -417,7 +495,8 @@ def get_constant_values(type_):
             'financial_risk': const.SECURITIES_FINANCIAL_RATIO_FUNCTIONS,
             'income': const.SECURITIES_INCOME_RATIO_FUNCTIONS,
             'profitability': const.SECURITIES_PROFITABILITY_RATIO_FUNCTIONS,
-            'cashflow': const.SECURITIES_CASHFLOW_RATIO_FUNCTIONS
+            'cashflow': const.SECURITIES_CASHFLOW_RATIO_FUNCTIONS,
+            'yoy': const.YoY_RATIO_FUNCTIONS['securities']
         }
         
     else:
@@ -433,8 +512,8 @@ def get_financial_ratios(data_df, type_ = 'non_bank'):
     df_income = get_income_ratios(data_df, constant['income'])
     df_profitability = get_profitability_ratios(data_df, constant['profitability'])
     df_cashflow = get_cashflow_ratios(data_df, constant['cashflow'], type_)
-    
-    df = pd.concat([df_financial_structure, df_liquidity, df_financial_risk, df_income, df_profitability, df_cashflow], ignore_index=True)
+    df_yoy = get_yoy_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow)
+    df = pd.concat([df_financial_structure, df_liquidity, df_financial_risk, df_income, df_profitability, df_cashflow, df_yoy], ignore_index=True)
     
     if type_ == 'bank' and INCLUDING_FIIN:
         df_tm = get_financial_ratio_tm(data_df)
@@ -446,6 +525,12 @@ def get_financial_ratios(data_df, type_ = 'non_bank'):
     map_df = pd.read_csv(os.path.join(current_path ,'../csv/map_ratio_code.csv'))
     map_df['function_name'] = map_df['function_name'].str.strip()
     df = pd.merge(df, map_df, on='function_name', how='left')
+    # Check for missing mappings
+    missing_ratios = df[df['ratio_code'].isna()]
+    if not missing_ratios.empty:
+        print("Missing ratio codes for the following function names:")
+        print(missing_ratios['function_name'].unique())
+        raise ValueError("Update map_ratio_code.csv with the missing function names.")
     df.drop(columns=['function_name'], inplace=True)
     # print(df[df['ratio_code'].isna()]['function_name'].unique())
     
