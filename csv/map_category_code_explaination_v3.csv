@@ -1,0 +1,103 @@
+category_code,vi_caption,en_caption
+Bank_TM_2,     Chứng khoán nợ,Debt securities
+Bank_TM_8,     Chứng khoán vốn,Equity securities
+Bank_TM_12,     Chứng khoán kinh doanh khác,Other trading securities
+Bank_TM_13,     Dự phòng rủi ro chứng khoán kinh doanh,Provision for trading securities risk
+Bank_TM_17,     Tình trạng niêm yết của các chứng khoán kinh doanh,Listing status of trading securities
+Bank_TM_28,"     Cho vay các tổ chức kinh tế, cá nhân trong nước",Loans to domestic economic organizations and individuals
+Bank_TM_29,     Chiết khấu thương phiếu và giấy tờ có giá,Discount of commercial papers and valuable papers
+Bank_TM_30,     Cho thuê tài chính,Financial leasing
+Bank_TM_31,     Các khoản trả thay khách hàng,Payments on behalf of customers
+Bank_TM_32,"     Cho vay bằng vốn tài trợ, uỷ thác đầu tư",Loans funded by investment trust
+Bank_TM_33,"     Cho vay đối với các tổ chức, cá nhân nước ngoài",Loans to foreign organizations and individuals
+Bank_TM_34,     Cho vay theo chỉ định của Chính phủ,Loans designated by the Government
+Bank_TM_35,     Nợ cho vay được khoanh và nợ chờ xử lý,Frozen loans and loans pending resolution
+Bank_TM_36,     Các khoản cho vay khác,Other loans
+Bank_TM_38,Cho vay ngành thương mại,Loans to the trade industry
+Bank_TM_39,Cho vay ngành nông nghiệp và lâm nghiệp,Loans to agriculture and forestry
+Bank_TM_40,Cho vay ngành sản xuất,Loans to the manufacturing industry
+Bank_TM_45,Cho vay ngành xây dựng,Loans to the construction industry
+Bank_TM_46,Cho vay ngành dịch vụ cộng đồng và cá nhân,Loans to community and personal services
+Bank_TM_55,"Cho vay ngành kho bãi, vận tải và viễn thông","Loans to warehousing, transportation, and telecommunications"
+Bank_TM_58,Cho vay ngành dịch vụ và đào tạo,Loans to service and training
+Bank_TM_61,Cho vay bất động sản và tư vấn,Loans to real estate and consulting
+Bank_TM_62,Cho vay ngành khách sạn và nhà hàng,Loans to hotels and restaurants
+Bank_TM_63,Cho vay ngành dịch vụ tài chính,Loans to financial services
+Bank_TM_64,Cho vay ngành khác,Loans to other industries
+Bank_TM_66,Nợ đủ tiêu chuẩn (Nợ nhóm 1),Standard debts (Group 1 debts)
+Bank_TM_67,Nợ cần chú ý (Nợ nhóm 2),Debts needing attention (Group 2 debts)
+Bank_TM_68,Nợ dưới tiêu chuẩn (Nợ nhóm 3),Substandard debts (Group 3 debts)
+Bank_TM_69,Nợ nghi ngờ (Nợ nhóm 4),Doubtful debts (Group 4 debts)
+Bank_TM_70,Nợ xấu có khả năng mất vốn (Nợ nhóm 5),Bad debts with potential loss of capital (Group 5 debts)
+Bank_TM_72,     Cho vay ngắn hạn,Short-term loans
+Bank_TM_73,     Cho vay trung hạn,Medium-term loans
+Bank_TM_74,     Cho vay dài hạn,Long-term loans
+Bank_TM_85,cho vay     Doanh nghiệp nhà nước,Loans to State-owned enterprises
+Bank_TM_86,cho vay     Công ty TNHH và cổ phần,Loans to Limited liability and joint-stock companies
+Bank_TM_87,cho vay     Doanh nghiệp nước ngoài,Loans to Foreign enterprises
+Bank_TM_88,cho vay     Hợp tác xã và công ty tư nhân,Loans to Cooperatives and private companies
+Bank_TM_89,cho vay     Cá nhân,Loans to Individuals
+Bank_TM_90,cho vay     Khác,Loans - Other
+Bank_TM_121,     Tiền gửi không kỳ hạn,Demand deposits
+Bank_TM_122,     Tiền gửi có kỳ hạn,Term deposits
+Bank_TM_123,     Tiền gửi tiết kiệm,Savings deposits
+Bank_TM_124,     Tiền gửi ký quỹ,Margin deposits
+Bank_TM_125,     Tiền gửi cho những mục đích riêng biệt,Deposits for specific purposes
+Bank_TM_130,Tiền gửi     Doanh nghiệp nhà nước,Deposits from State-owned enterprises
+Bank_TM_131,Tiền gửi     Doanh nghiệp tư nhân,Deposits from Private enterprises
+Bank_TM_132,Tiền gửi     Doanh nghiệp nước ngoài,Deposits from Foreign enterprises
+Bank_TM_133,Tiền gửi     Cá nhân,Deposits from Individuals
+Bank_TM_134,Tiền gửi     Thu nhập lãi và các khoản Thu nhập tương tự,Interest income and similar income
+Sec_TM_2,     Chứng khoán giao dịch,Trading securities
+Sec_TM_7,     Chứng khoán tạm ngừng giao dịch,Suspended trading securities
+Sec_TM_12,     Chứng khoán cầm cố,Pledged securities
+Sec_TM_17,     Chứng khoán tạm giữ,Held securities
+Sec_TM_22,     Chứng khoán chờ thanh toán,Securities pending settlement
+Sec_TM_27,     Chứng khoán phong tỏa chờ rút,Blocked securities pending withdrawal
+Sec_TM_32,     Chứng khoán chờ giao dịch,Securities pending trading
+Sec_TM_37,     Chứng khoán ký quỹ đảm bảo khoản vay,Securities as margin for loan guarantee
+Sec_TM_43,CHỨNG KHOÁN LƯU KÝ CHƯA NIÊM YẾT,UNLISTED SECURITIES IN CUSTODY
+Sec_TM_44,     Chứng khoán giao dịch,Trading securities
+Sec_TM_49,     Chứng khoán tạm ngừng giao dịch,Suspended trading securities
+Sec_TM_54,     Chứng khoán cầm cố,Pledged securities
+Sec_TM_59,     Chứng khoán tạm giữ,Held securities
+Sec_TM_64,     Chứng khoán chờ thanh toán,Securities pending settlement
+Sec_TM_69,     Chứng khoán phong tỏa chờ rút,Blocked securities pending withdrawal
+Sec_TM_74,     Chứng khoán chờ giao dịch,Securities pending trading
+Sec_TM_79,     Chứng khoán ký quỹ đảm bảo khoản vay,Securities as margin for loan guarantee
+Sec_TM_89,     Tiền mặt,Cash
+Sec_TM_90,     Tiền gửi ngân hàng,Bank deposits
+Sec_TM_100,GIÁ TRỊ GIAO DỊCH THỰC HIỆN TRONG KỲ CỦA CTCK,VALUE OF TRANSACTIONS PERFORMED DURING THE PERIOD BY SECURITIES COMPANIES
+Sec_TM_101,     Giá trị Cổ phiếu,Value of Stocks
+Sec_TM_102,     Giá trị Trái phiếu,Value of Bonds
+Sec_TM_108,GIÁ TRỊ GIAO DỊCH THỰC HIỆN TRONG KỲ CỦA NĐT,VALUE OF TRANSACTIONS PERFORMED DURING THE PERIOD BY INVESTORS
+Sec_TM_109,     Giá trị Cổ phiếu,Value of Stocks
+Sec_TM_110,     Giá trị Trái phiếu,Value of Bonds
+Sec_TM_246,TRÍCH LẬP DỰ PHÒNG GIẢM GIÁ CÁC TÀI SẢN TÀI CHÍNH,PROVISION FOR IMPAIRMENT OF FINANCIAL ASSETS
+Sec_TM_371,"     Phải trả hộ cổ tức, gốc và lãi trái phiếu cho Nhà đầu tư","Payables on behalf of investors for dividends, principal, and interest of bonds"
+Sec_TM_409,     Vay ngân hàng,Bank loans
+Sec_TM_410,     Vay đối tượng khác,Loans from other entities
+Sec_TM_411,     Trái phiếu phát hành,Bonds issued
+Sec_TM_412,     Thuê tài chính,Financial leases
+Sec_TM_413,     Nợ dài hạn khác,Other long-term liabilities
+Corp_TM_2,     Tiền mặt,Cash
+Corp_TM_3,     Tiền gửi Ngân hàng,Bank deposits
+Corp_TM_7,     Chứng khoán đầu tư ngắn hạn,Short-term investments
+Corp_TM_20,"     Nguyên liệu, vật liệu","Raw materials, supplies"
+Corp_TM_23,     Thành phẩm,Finished goods
+Corp_TM_24,     Hàng hóa,Merchandise
+Corp_TM_25,     Hàng gửi đi bán,Goods on consignment
+Corp_TM_26,     Hàng hoá kho bảo thuế,Goods in bonded warehouses
+Corp_TM_27,     Hàng hoá bất động sản,Real estate goods
+Corp_TM_105,     Vay ngân hàng,Bank loans
+Corp_TM_106,     Vay đối tượng khác,Loans from other entities
+Corp_TM_107,     Trái phiếu phát hành,Bonds issued
+Corp_TM_108,     Thuê tài chính,Financial leases
+Corp_TM_114,     Doanh thu bán hàng,Sales revenue
+Corp_TM_115,     Doanh thu cung cấp dịch vụ,Revenue from service provision
+Corp_TM_116,     Doanh thu hợp đồng xây dựng,Revenue from construction contracts
+Corp_TM_134,"     Lãi tiền gửi, tiền cho vay",Interest income from deposits and loans
+Corp_TM_135,"     Lãi đầu tư trái phiếu, kỳ phiếu, tín phiếu","Interest income from bonds, promissory notes, treasury bills"
+Corp_TM_136,"     Cổ tức, lợi nhuận được chia","Dividends, profit share received"
+Corp_TM_137,"     Lãi từ bán, thanh lý các khoản đầu tư","Gain from sale, liquidation of investments"
+Corp_TM_144,     Lãi tiền vay,Loan interest

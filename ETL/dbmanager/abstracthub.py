@@ -30,7 +30,7 @@ class BaseDBHUB(BaseModel):
         if not self.multi_threading:
             raise Exception("This method is not supported in multi threading mode.")
 
-    def _similairty_search(self, vector_db: Chroma, text: list[str], top_k: int) -> list[str]:
+    def _similarity_search(self, vector_db: Chroma, text: list[str], top_k: int) -> list[str]:
         """
         Perform a similarity search based on the provided text.
         """
@@ -102,7 +102,7 @@ class BaseDBHUB(BaseModel):
         stock_codes = set()
         for name in company_name:
             # result = self.vector_db_company.similarity_search(name, top_k)
-            result = self._similairty_search(self.vector_db_company, name, top_k)
+            result = self._similarity_search(self.vector_db_company, name, top_k)
             for item in result:
                 stock_codes.add(item.metadata['stock_code'])
         
@@ -122,7 +122,7 @@ class BaseDBHUB(BaseModel):
         
         def search_name(name):
             # result = self.vector_db_company.similarity_search(name, top_k)
-            result = self._similairty_search(self.vector_db_company, name, top_k)
+            result = self._similarity_search(self.vector_db_company, name, top_k)
             return [item.metadata['stock_code'] for item in result]
         
         with ThreadPoolExecutor(max_workers=4) as executor:
@@ -178,7 +178,7 @@ class BaseDBHUB(BaseModel):
     # ===== Find SQL query for few shot learning ===== #
     
     def find_sql_query(self, text, top_k=1):
-        results = self._similairty_search(self.vector_db_sql, text, top_k)
+        results = self._similarity_search(self.vector_db_sql, text, top_k)
         # results = self.vector_db_sql.similarity_search(text, top_k)
         
         few_shot = ""
@@ -190,7 +190,7 @@ class BaseDBHUB(BaseModel):
         return few_shot
     
     def find_sql_query_v2(self, text, top_k=1):
-        results = self._similairty_search(self.vector_db_sql, text, top_k)
+        results = self._similarity_search(self.vector_db_sql, text, top_k)
         # results = self.vector_db_sql.similarity_search(text, top_k)
         
         sql_dict = {}

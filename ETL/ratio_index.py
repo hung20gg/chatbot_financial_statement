@@ -10,6 +10,8 @@ import pandas as pd
 import numpy as np 
 
 
+INCLUDING_FIIN = True
+
 # Code modified from @pphanhh
 
 #====================#
@@ -368,6 +370,21 @@ def get_cashflow_ratios(data_df, func_dict, type_):
     return pd.DataFrame(cash_flow_results_6)
 
 
+
+#===================#
+#  Ratio from fiin  #
+#===================#
+
+def current_account_saving_account_ratio(total_deposit, demand_deposit, margin_deposit):
+    return (demand_deposit + margin_deposit) / total_deposit if total_deposit else None
+
+def bad_debt_ratio(total_loan, bad_debt):
+    return bad_debt / total_loan if total_loan else None
+
+def get_financial_ratio_tm(data_df):
+    return __get_financial_ratio(data_df, const.BANK_FIIN_RATIO_FUNCTIONS)
+    
+
 #===================#
 #   Main Function   #
 #===================#
@@ -419,6 +436,10 @@ def get_financial_ratios(data_df, type_ = 'non_bank'):
     
     df = pd.concat([df_financial_structure, df_liquidity, df_financial_risk, df_income, df_profitability, df_cashflow], ignore_index=True)
     
+    if type_ == 'bank' and INCLUDING_FIIN:
+        df_tm = get_financial_ratio_tm(data_df)
+        df = pd.concat([df, df_tm], ignore_index=True)
+    
     # Map ratio_code to ratio_name
     df.rename(columns={'ratio_code': 'function_name'}, inplace=True)
 
@@ -430,19 +451,15 @@ def get_financial_ratios(data_df, type_ = 'non_bank'):
     
     df.drop_duplicates(inplace=True)
     
-    # # Find the intersection (inner join)
-    # set1 = set(df['ratio_mapping'])
-    # set2 = set(ratio_df['ratio_mapping'])
-    # intersection = set1.intersection(set2)
-
-    # # Perform the outer join excluding the intersection
-    # outer_join_excluding_inner = (set1.union(set2)) - intersection
-    # assert len(outer_join_excluding_inner) == 0, f"Missing mapping for ratio: {outer_join_excluding_inner}"
-    
     return df
+
+
     
     
 if __name__ == '__main__':
+    
+    
+    
     print("Test financial ratios")
     
     dfs = None
@@ -451,6 +468,11 @@ if __name__ == '__main__':
     for type_ in types:
         print(f"Processing {type_} data")
         data_df = pd.read_parquet(os.path.join(current_path, f'../csv/{type_}_financial_report_v3.parquet'))
+        
+        if INCLUDING_FIIN and type_ == 'bank':
+            tm_df = pd.read_parquet(os.path.join(current_path, '../csv/bank_explaination_v3.parquet'))
+            data_df = pd.concat([data_df, tm_df], ignore_index=True)
+        
         df = get_financial_ratios(data_df[['stock_code', 'year', 'quarter', 'category_code', 'data']], type_)
         
         data_df['time_code'] = data_df['stock_code'] + data_df['year'].astype(str) + data_df['quarter'].astype(str)

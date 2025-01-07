@@ -56,3 +56,13 @@ HORIZONTAL_PROMPT_UNIVERSAL = {
     "BRANCH_REASONING_TEXT2SQL_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/branch_reasoning_text2sql.txt'), start=['//']),
     "CONTINUE_REASONING_TEXT2SQL_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/continue_reasoning_text2sql.txt'), start=['//'])
 }
+
+FIIN_VERTICAL_PROMPT_UNIVERSAL = {
+    "BREAKDOWN_NOTE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/universal/breakdown_note_fiin.txt')),
+    "OPENAI_SEEK_DATABASE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/universal/openai_seek_database_fiin.md'), start=['//']),
+    "GET_STOCK_CODE_AND_SUITABLE_ROW_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/get_stock_code_and_suitable_row.txt'), start=['//']),
+    "BRANCH_REASONING_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/branch_reasoning.txt'), start=['//']),
+    "REASONING_TEXT2SQL_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/reasoning_text2sql.txt'), start=['//']),
+    "BRANCH_REASONING_TEXT2SQL_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/branch_reasoning_text2sql.txt'), start=['//']),
+    "CONTINUE_REASONING_TEXT2SQL_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/continue_reasoning_text2sql.txt'), start=['//'])
+}

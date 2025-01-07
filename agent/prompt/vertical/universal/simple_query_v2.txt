@@ -28,7 +28,10 @@ WHERE industry = 'Food and Beverage';
 
 SELECT 
     stock_code,
-    ROUND(data::numeric  * 100, 2) AS ROE_percentage
+    year,
+    quarter,
+    ratio_code,
+    ROUND(data::numeric  * 100, 2) AS data
 FROM 
     financial_ratio
 WHERE 
@@ -57,7 +60,7 @@ WHERE
  		value.year as year,
  		value.quarter as quarter,
  		value.data as data,
- 		mccr.ratio_name as ratio_name
+ 		mccr.ratio_code as ratio_code
 from value
 join map_category_code_ratio mccr 
 on value.ratio_code = mccr.ratio_code;
@@ -73,21 +76,25 @@ WITH viettel_subsidiaries AS (
 -- Step 2: Get the data from the `financial_statement` table
 select 
 	vs.subsidiary as stock_code,
-	fs.universal_code as universal_code,
+	fs.category_code as category_code,
 	fs.year as year,
+    fs.quarter as quarter,
 	fs.data as data
 
 FROM viettel_subsidiaries vs
 join financial_statement fs on fs.stock_code = vs.subsidiary
 where fs.quarter = 0
-and fs.universal_code = 'BS_270'
+and fs.category_code = 'BS_270'
 order by year desc
 
 -- 8. What is the Return on Equity (ROE) for all Banking companies in Q1 2024?
 
 SELECT
     stock_code,
-    data AS roe_percentage
+    year,
+    quarter,
+    ratio_code,
+    data 
 FROM financial_ratio
 WHERE ratio_code = 'ROE'
   AND year = 2024
@@ -100,7 +107,8 @@ SELECT
     stock_code,
     year,
     quarter,
-    data AS debt_to_equity_ratio
+    ratio_code,
+    data
 FROM financial_ratio
 WHERE ratio_code = 'DTER' -- Assuming 'DTER' is the code for Debt-to-Equity Ratio
   AND stock_code IN ('VCB', 'TCB')
@@ -175,7 +183,7 @@ WITH total_assets AS (
     from financial_statement fs2 
     
     where
-    	fs2.universal_code = 'BS_270'
+    	fs2.category_code = 'BS_270'
         and fs2.data > 100000000
         and fs2.year = 2024 
         and fs2.quarter = 2 
@@ -214,14 +222,14 @@ SELECT
     year,
     quarter,
     data,
-    universal_code
+    category_code
 FROM
     financial_statement
 WHERE
     stock_code IN ('VNM', 'MSN')
     AND year IN (2020, 2024)
     AND quarter = 2
-    AND universal_code IN ('BS_270', 'BS_300', 'IS_100')
+    AND category_code IN ('BS_270', 'BS_300', 'IS_100')
 
 -- 14. Rank the top 5 companies with the highest Return on Equity (ROE) in 2023, based on their financial statements. 
 SELECT
@@ -252,7 +260,7 @@ WHERE
     stock_code = 'VCB'
     AND year = 2023
     AND quarter = 2
-    AND universal_code = 'IS_080';
+    AND category_code = 'IS_080';
 
 -- Total Revenue for Vietcombank's subsidiaries and invested partner
 SELECT 
@@ -266,7 +274,7 @@ WHERE
     s.stock_code = 'VCB'
     AND bfr.year = 2022
     AND bfr.quarter = 2
-    AND bfr.universal_code = 'IS_080'
+    AND bfr.category_code = 'IS_080'
 GROUP BY 
     s.invest_on;
 
@@ -289,7 +297,7 @@ JOIN (
     WHERE 
         year = 2023
         AND quarter = 0 -- Annual data
-        AND universal_code = 'IS_100'
+        AND category_code = 'IS_100'
 ) AS fr ON ci.stock_code = fr.stock_code
 GROUP BY 
     ci.stock_code, ci.industry
@@ -356,7 +364,7 @@ net_income as (
 		stock_code in (SELECT subsidiary_stock_code FROM subsidiaries)
 		and year BETWEEN 2020 AND 2024
 		and quarter != 0
-		and universal_code = 'IS_100'
+		and category_code = 'IS_100'
 ),
 
 liquidity as (
@@ -364,8 +372,8 @@ liquidity as (
 		stock_code,
 		quarter,
 		year,
-		SUM(CASE WHEN universal_code = 'BS_100' THEN data END) AS current_assets,
-        SUM(CASE WHEN universal_code = 'BS_310' THEN data END) AS current_liabilities        
+		SUM(CASE WHEN category_code = 'BS_100' THEN data END) AS current_assets,
+        SUM(CASE WHEN category_code = 'BS_310' THEN data END) AS current_liabilities        
     from
     	financial_statement
     WHERE 
@@ -472,7 +480,7 @@ WITH income_2020 AS (
     FROM 
         financial_statement
     WHERE 
-    	universal_code = 'IS_100'
+    	category_code = 'IS_100'
         and year = 2020
         AND quarter = 0 -- Annual data for 2020
 ),
@@ -483,7 +491,7 @@ income_2024_q2 AS (
     FROM 
         financial_statement
     WHERE 
-    	universal_code = 'IS_100'
+    	category_code = 'IS_100'
         and year = 2024
         AND quarter = 2 -- data q2 for 2024
 )
@@ -516,10 +524,10 @@ SELECT
     stock_code,
     year,
     quarter,
-    universal_code,
+    category_code,
     data AS amount
 FROM financial_statement
-WHERE universal_code = 'BS_111' -- Bank register gems, gold along with cash
+WHERE category_code = 'BS_111' -- Bank register gems, gold along with cash
   AND stock_code = 'BID'
   AND year = 2023
   AND quarter IN (1, 2, 3, 4)
@@ -538,7 +546,7 @@ WHERE
     fs.stock_code = 'VCB'
     AND fs.year = 2020
     AND fs.quarter = 0
-    AND fs.universal_code = 'BS_270'
+    AND fs.category_code = 'BS_270'
 LIMIT 1;
 
 
@@ -573,7 +581,7 @@ WHERE
     fs.stock_code = 'FPT'
     AND fs.year = 2023
     AND fs.quarter = 0  -- Annual report
-    AND fs.universal_code = 'BS_300'  -- Total liabilities
+    AND fs.category_code = 'BS_300'  -- Total liabilities
 LIMIT 1;
 
 
@@ -691,14 +699,14 @@ SELECT
     year,
     quarter,
     data,
-    universal_code
+    category_code
 FROM
     financial_statement
 WHERE
     stock_code IN ('MSN', 'VIC', 'GAS')
     AND year = 2023
     AND quarter = 0
-    AND universal_code IN ('CF_006', 'CF_070')
+    AND category_code IN ('CF_006', 'CF_070')
 LIMIT 100;
 
 -- 34. Get company VIC and its subsidiaries:
@@ -726,7 +734,7 @@ WITH vingroup_subsidiaries as (
 
 SELECT 
     vs.stock_code AS stock_code,
-    fs.universal_code AS universal_code,
+    fs.category_code AS category_code,
     fs.year AS year,
     fs.data AS total_assets
 FROM 
@@ -735,7 +743,240 @@ JOIN
     financial_statement fs ON fs.stock_code = vs.stock_code
 WHERE 
     fs.quarter = 1
-    AND fs.universal_code = 'BS_270'
+    AND fs.category_code = 'BS_270'
     and fs.year = 2023
 ORDER BY 
     fs.year DESC;
+
+
+-- 36. ### Compare Return on Asset (ROA) of BIDV in 2019 with the average ROA of all banks in 2019
+
+-- Get ROA of BIDV in 2019
+WITH bidv_roa AS (
+    SELECT 
+        fr.stock_code,
+        fr.data AS roa_percentage
+    FROM 
+        financial_ratio fr
+    WHERE 
+        fr.stock_code = 'BID'
+        AND fr.year = 2019
+        AND fr.quarter = 0
+        AND fr.ratio_code = 'ROA'
+),
+
+-- Get average ROA of all banks in 2019
+average_roa AS (
+    SELECT 
+        data_mean AS average_roa_percentage
+    FROM 
+        industry_financial_ratio ifr
+    WHERE 
+        ifr.year = 2019
+        AND ifr.quarter = 0
+        AND ifr.ratio_code = 'ROA'
+        AND ifr.industry = 'Banking'
+)
+
+SELECT 
+    b.stock_code,
+    b.roa_percentage,
+    a.average_roa_percentage
+FROM 
+    bidv_roa b,
+    average_roa a
+LIMIT 1;
+
+-- 37. Bad debt ratio for BIDV in Q3 2023
+
+SELECT 
+    stock_code,
+    quarter,
+    year,
+    ratio_code,
+    data
+FROM financial_ratio
+WHERE ratio_code = 'BDR' -- Bad Debt Ratio
+  AND stock_code = 'BID' -- BIDV stock code
+  AND year = 2023
+  AND quarter = 3 -- Q3 2023
+LIMIT 100;
+
+-- 38. Total Asset of VIC in Q3 2024 and Average Total Asset of its Industry 
+WITH vic_total_asset AS (
+    SELECT 
+        stock_code,
+        year,
+        quarter,
+        data AS total_assets
+    FROM 
+        financial_statement
+    WHERE 
+        stock_code = 'VIC'
+        AND year = 2024
+        AND quarter = 3
+        AND category_code = 'BS_270' -- Total Assets
+),
+
+
+industry_average AS (
+    SELECT 
+        industry,
+        data_mean AS average_total_assets
+    FROM 
+        industry_financial_statement ifs
+    WHERE 
+        ifs.industry = (SELECT industry FROM company_info WHERE stock_code = 'VIC') -- Real Estate
+        AND ifs.year = 2024
+        AND ifs.quarter = 3
+        AND ifs.category_code = 'BS_270' -- Total Assets
+)
+
+SELECT 
+    vic.stock_code,
+    vic.total_assets,
+    avg_ind.average_total_assets
+FROM 
+    vic_total_asset vic,
+    industry_average avg_ind;
+
+-- 39. Average total Asset of Real Estate Company in Q3 2023
+
+SELECT 
+    industry,
+    year,
+    quarter,
+    category_code ,
+    data_mean
+FROM industry_financial_statement 
+WHERE category_code = 'BS_270' -- Total Asset
+  AND year = 2023
+  AND quarter = 3
+  AND industry = 'Real Estate'
+LIMIT 100;
+
+-- 40. Financial Leverage of TCB in Q3 2024
+
+SELECT 
+    stock_code,
+    year,
+    quarter,
+    ratio_code,
+    data
+FROM financial_ratio
+WHERE ratio_code = 'FL' -- (Financial Leverage)
+  AND year = 2024
+  AND quarter = 3
+  AND stock_code = 'TCB'
+LIMIT 100;
+
+-- 41. Average Bad Debt Ratio of Banks in Q3 2024
+
+SELECT 
+    industry,
+    year,
+    quarter,
+    ratio_code,
+    data_mean
+FROM industry_financial_ratio
+WHERE ratio_code = 'BDR' -- Bad Debt Ratio
+  AND year = 2024
+  AND quarter = 3
+  AND industry = 'Banking'
+LIMIT 100;
+
+-- 42. Percentage of BIDV's Equity in Total Equity of All Banks for 2023
+
+WITH total_equity_2023 AS (
+    SELECT 
+        data_sum,
+        quarter,
+        year,
+        category_code
+    FROM 
+        industry_financial_statement
+    WHERE 
+        industry = 'Banking' 
+        AND year = 2023
+        AND quarter = 0 -- Annual report
+        AND category_code = 'BS_400' -- Total Equity
+),
+
+bidv_equity_2023 AS (
+    SELECT 
+        data,
+        stock_code
+    FROM 
+        financial_statement
+    WHERE 
+        stock_code = 'BID' -- BIDV stock code
+        AND year = 2023
+        AND quarter = 0 -- Annual report
+        AND category_code = 'BS_400' -- Total Equity
+)
+
+SELECT 
+	bidv.stock_code as stock_code,
+    (bidv.data / total.data_sum) * 100 AS equity_percentage,
+    total.year as year,
+    total.quarter as quarter,
+    total.category_code as category_code
+FROM 
+    bidv_equity_2023 bidv,
+    total_equity_2023 total;
+
+
+-- 43. Total amount of customer deposit in all banks in 2023
+
+SELECT 
+    industry,
+    year,
+    quarter,
+    category_code ,
+    data_sum
+FROM industry_financial_statement 
+WHERE category_code = 'BS_305' -- Customer deposits
+  AND year = 2023
+  AND quarter = 0 -- Annually
+  AND industry = 'Banking'
+LIMIT 100;
+
+-- 44. Percentage of Customer Deposits in TCB Relative to Total Customer Deposits in All Banks for Q3 2024
+
+WITH total_customer_deposits AS (
+    SELECT 
+        data_sum,
+        quarter,
+        year,
+        category_code
+    FROM 
+        industry_financial_statement
+    WHERE 
+        industry = 'Banking' 
+        AND year = 2024
+        AND quarter = 3 -- Annual report
+        AND category_code = 'BS_305' -- Customer deposits
+),
+
+tcb_customer_deposits AS (
+    SELECT 
+    	stock_code,
+        data
+    FROM 
+        financial_statement
+    WHERE 
+        stock_code = 'TCB' -- TCB stock code
+        AND year = 2024
+        AND quarter = 3 -- Q3 2024
+        AND category_code = 'BS_305' -- Customer deposits
+)
+
+SELECT 
+	tcb.stock_code as stock_code,
+    (tcb.data / total.data_sum) * 100 AS customer_deposits_percentage,
+    total.year as year,
+    total.quarter as quarter,
+    total.category_code as category_code
+FROM 
+    tcb_customer_deposits tcb,
+    total_customer_deposits total;

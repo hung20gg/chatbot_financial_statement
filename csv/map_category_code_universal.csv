@@ -1,4 +1,4 @@
-Corp,corp_code,Securities,sec_code,Bank,bank_code,Universal_caption,universal_code
+corp,corp_code,securities,sec_code,bank,bank_code,en_caption,category_code
 A. CURRENT ASSETS,BS_100,A. CURRENT ASSETS,BS_100,,,(Balance sheet) A. CURRENT ASSETS,BS_100
 ,,I. Financial Assets,BS_110,,,(Balance sheet) (Securities) Financial Assets,BS_101
 I. Cash and cash equivalents,BS_110,1. Cash and cash equivalents,BS_111,,,(Balance sheet) Cash and cash equivalents,BS_110
