@@ -518,25 +518,25 @@ RDB_SETUP_CONFIG = {
 }
 
 FIIN_RDB_SETUP_CONFIG = {
-    # 'company_info' : ['../csv/df_company_info.csv', ['stock_code'], {}, True],
-    # 'sub_and_shareholder': ['../csv/df_sub_and_shareholders.csv', None, {'stock_code': 'company_info(stock_code)'}],
-    # 'map_category_code_bank': ['../csv/map_category_bank_v3.csv', ['category_code']],
-    # 'map_category_code_non_bank': ['../csv/map_category_corp_v3.csv', ['category_code']],
-    # 'map_category_code_securities': ['../csv/map_category_sec_v3.csv', ['category_code']],
-    # 'map_category_code_ratio': ['../csv/map_ratio_code.csv', ['ratio_code']],
-    # 'map_category_code_universal': ['../csv/map_category_code_universal_v3.csv', ['category_code']],
+    'company_info' : ['../csv/df_company_info.csv', ['stock_code'], {}, True],
+    'sub_and_shareholder': ['../csv/df_sub_and_shareholders.csv', None, {'stock_code': 'company_info(stock_code)'}],
+    'map_category_code_bank': ['../csv/map_category_bank_v3.csv', ['category_code']],
+    'map_category_code_non_bank': ['../csv/map_category_corp_v3.csv', ['category_code']],
+    'map_category_code_securities': ['../csv/map_category_sec_v3.csv', ['category_code']],
+    'map_category_code_ratio': ['../csv/map_ratio_code.csv', ['ratio_code']],
+    'map_category_code_universal': ['../csv/map_category_code_universal_v3.csv', ['category_code']],
     
-    # 'map_category_code_explaination': ['../csv/map_category_code_explaination_v3.csv', ['category_code']],
+    'map_category_code_explaination': ['../csv/map_category_code_explaination_v3.csv', ['category_code']],
     
     
-    # 'bank_financial_report' : ['../csv/bank_financial_report_v3.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    # 'non_bank_financial_report' : ['../csv/non_bank_financial_report_v3.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    # 'securities_financial_report' : ['../csv/securities_financial_report_v3.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'bank_financial_report' : ['../csv/bank_financial_report_v3.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'non_bank_financial_report' : ['../csv/non_bank_financial_report_v3.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'securities_financial_report' : ['../csv/securities_financial_report_v3.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'financial_ratio' : ['../csv/financial_ratio_v3.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    # 'financial_statement': ['../csv/financial_statement_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'financial_statement': ['../csv/financial_statement_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     
     'financial_statement_explaination': ['../csv/financial_statement_explaination_v3.parquet', None, {'category_code': 'map_category_code_explaination(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    # 'industry_financial_statement': ['../csv/industry_report_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)'}, False, ['date_added']],
+    'industry_financial_statement': ['../csv/industry_report_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)'}, False, ['date_added']],
     'industry_financial_ratio': ['../csv/industry_ratio_v3.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)'}, False, ['date_added']],    
 
 }
@@ -653,8 +653,8 @@ def setup_everything(config: dict):
     embedding_server = os.getenv('EMBEDDING_SERVER_URL')
     local_model = os.getenv('EMBEDDING_MODEL')
     
-    if not (check_embedding_server(embedding_server) or config.get('openai', False) or not os.getenv('LOCAL_EMBEDDING')):
-        raise ValueError("No available embedding server")
+    # if not (check_embedding_server(embedding_server) or config.get('openai', False) or not os.getenv('LOCAL_EMBEDDING')):
+    #     raise ValueError("No available embedding server")
     
     print(os.path.join(current_dir, '../data/vector_db_vertical_local'))
     
