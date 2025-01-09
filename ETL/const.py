@@ -47,7 +47,7 @@ INCOME_RATIO_FUNCTIONS = {
 PROFITABILITY_RATIO_FUNCTIONS = {
     'return_on_assets': ['IS_060', 'BS_270'],  # net_income (IS_060), total_assets (BS_270)
     'return_on_fixed_assets': ['IS_060', 'BS_220'],  # net_income (IS_060), average_fixed_assets (BS_220)
-    'return_on_long_term_operating_assets': ['IS_060', 'BS_240'],  # net_income (IS_060), average_long_term_operating_assets (BS_240)
+    'return_on_long_term_operating_assets':['IS_060', ['BS_240','BS_210','BS_220','BS_230','BS_260']],  # net_income (IS_060), average_long_term_operating_assets (BS_240)
     'Basic_Earning_Power_Ratio': [['IS_050', 'IS_023'], 'BS_270'],  # EBIT (IS_050 + IS_023), total_assets (BS_270)
     'Return_on_equity': ['IS_060', 'BS_400'],  # net_income (IS_060), equity (BS_400)
     # 'return_on_common_equity': ['IS_060', 'CF_036', 'BS_400'],  # net_income (IS_060), preferred_dividends (CF_036), average_common_equity (BS_400)
@@ -57,6 +57,7 @@ PROFITABILITY_RATIO_FUNCTIONS = {
     'Return_on_sales': ['IS_060', 'IS_010'],  # net_income (IS_060), net_sales (IS_010)
     'operating_profit_margin': ['IS_030', 'IS_010'],  # NOPAT, net_sales (IS_010)
     'gross_profit_margin': ['IS_020', 'IS_010'],  # gross_profit (IS_020), net_sales (IS_010)
+    'Total_Asset_Turnover': ['IS_010', 'BS_270']  # net_sales (IS_010), avg_total_assets (BS_270)
 }
 
 
@@ -233,13 +234,14 @@ SECURITIES_INCOME_RATIO_FUNCTIONS = {
 SECURITIES_PROFITABILITY_RATIO_FUNCTIONS = {
     'return_on_assets': ['IS_200', 'BS_270'],  # net_income , total_assets 
     'return_on_fixed_assets': ['IS_200', 'BS_220'],  # net_income , average_fixed_assets 
-    'return_on_long_term_operating_assets': ['IS_200', 'BS_200'],  # net_income , average_long_term_operating_assets 
+    'return_on_long_term_operating_assets': ['IS_200', ['BS_211','BS_220','BS_230','BS_240','BS_250']],  # net_income , average_long_term_operating_assets 
     'Basic_Earning_Power_Ratio': [['IS_090','IS_052'], 'BS_270'],  # EBIT , total_assets 
     'Return_on_equity': ['IS_200', 'BS_400'],  # net_income , equity 
     'profitability_of_operating_expenses': ['IS_200','IS_040', 'IS_040'],  # net_income_from_operating , total_operating_expenses 
     'Return_on_sales': ['IS_200', 'IS_020'],  # net_income , net_sales 
     'operating_profit_margin': ['IS_200','IS_040', 'IS_020'],  # NOPAT, net_sales 
     # 'gross_profit_margin': ['IS_020', ['IS_010','IS_003','IS_004','IS_007','IS_008','IS_009']],  # gross_profit , net_sales 
+    'Total_Asset_Turnover': ['IS_020', 'BS_270']  # net_sales , avg_total_assets
 }
 
 
