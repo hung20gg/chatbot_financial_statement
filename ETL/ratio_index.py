@@ -8,6 +8,7 @@ import const
 
 import pandas as pd 
 import numpy as np 
+from tqdm import tqdm
 
 
 INCLUDING_FIIN = True
@@ -602,8 +603,28 @@ def get_financial_ratios(data_df, type_ = 'non_bank'):
     return df
 
 
+def industry_ratios(data_df, metric = 'BS_400', top_n = 15):
+    df_company = pd.read_csv(os.path.join(current_path, '../csv/df_company_info.csv'))
     
+    # Read the financial statement data to get top 10 industries
+    df_fs = pd.read_parquet(os.path.join(current_path, '../csv/financial_statement_v3.parquet'))
+
+    # Add industry to the data
+    df_fs = pd.merge(df_fs, df_company[['stock_code', 'industry']], on='stock_code', how='left')
     
+    top_20_stocks = df_fs[df_fs['category_code'] == metric].groupby(['industry', 'year', 'quarter']).apply(
+        lambda x: x.nlargest(top_n, 'data')
+    ).reset_index(drop=True)[['industry','year', 'quarter', 'stock_code']]
+
+    # Inner Join of top 20 stocks with the financial statement data
+    filtered_data = pd.merge(data_df, top_20_stocks, on=['year', 'quarter', 'stock_code'], how='inner')
+
+    # Get the mean financial ratios for the top 20 stocks in each industry
+    industry_ratios = filtered_data.groupby(['industry', 'year', 'quarter', 'ratio_code'])['data'].mean().reset_index()
+    industry_ratios.rename(columns={'data': 'data_mean'}, inplace=True)
+    
+    return industry_ratios
+
 if __name__ == '__main__':
     
     
@@ -638,12 +659,18 @@ if __name__ == '__main__':
     
     assert dfs['ratio_code'].isna().sum()==0 , "Null value in ratio_code"
     
+
+
     dfs.drop_duplicates(inplace=True)
     dfs.fillna(0, inplace=True)
     
+    dfs = dfs[['stock_code', 'year', 'quarter', 'ratio_code', 'data', 'date_added']]
     
     dfs.to_parquet(os.path.join(current_path, '../csv/financial_ratio_v3.parquet'), index=False)
     
+    df_industry_ratios = industry_ratios(dfs, metric='BS_400', top_n=15)
+    df_industry_ratios.to_parquet(os.path.join(current_path, '../csv/industry_ratios_v3.parquet'), index=False)
+
     ratio = dfs['ratio_code'].unique()
     
     for r in ratio[:5]:

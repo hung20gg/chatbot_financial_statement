@@ -980,3 +980,305 @@ SELECT
 FROM 
     tcb_customer_deposits tcb,
     total_customer_deposits total;
+
+-- 45. Get all companies listed in VN30 bucket list
+
+SELECT
+    stock_code,
+FROM
+    company_info
+where
+	stock_indices = 'VN30'
+
+-- 46. Get all companies listed in HOSE exchange.
+
+SELECT
+    stock_code,
+    exchange
+FROM
+    company_info
+where
+	exchange = 'HOSE'
+
+-- 47. Within companies listed in VN30, which company has the highest net income in Q3 2024
+
+with vn30 as (
+	SELECT
+	    stock_code
+	FROM
+	    company_info
+	where
+		stock_indices = 'VN30'
+)
+
+select 
+	stock_code, 
+	quarter,
+	year,
+	category_code,
+	data
+from
+	financial_statement
+where 
+	quarter = 3
+	and year = 2024
+	and category_code = 'IS_100'
+	and stock_code in (SELECT stock_code FROM vn30)
+ORDER BY
+    data DESC
+LIMIT 1;
+
+-- 48. Within Technology firms, which firms has the highest ROS in Q2 2024
+with technology as (
+	SELECT
+	    stock_code
+	FROM
+	    company_info
+	where
+		industry = 'Information Technology'
+)
+
+select 
+	stock_code, 
+	quarter,
+	year,
+	ratio_code ,
+	data
+from
+	financial_ratio
+where 
+	quarter = 2
+	and year = 2024
+	and ratio_code = 'ROS'
+	and stock_code in (SELECT stock_code FROM technology)
+ORDER BY
+    data DESC
+LIMIT 1;
+
+
+-- 49. Within Securities firms, in 2021, get the accounting profit before tax
+
+with securities as (
+	SELECT
+	    stock_code
+	FROM
+	    company_info
+	where
+		industry = 'Financial Services'
+)
+
+select 
+	stock_code, 
+	quarter,
+	year,
+	category_code,
+	data
+from
+	financial_statement
+where 
+	quarter = 0
+	and year = 2023
+	and category_code = 'IS_080'
+	and stock_code in (SELECT stock_code FROM securities)
+ORDER BY
+    data desc
+
+-- 50. How many Real Estate companies in VN30
+
+SELECT
+    count(stock_code)
+FROM
+    company_info
+where
+	industry = 'Real Estate'
+
+-- 51. Top 5 bank highest CASA ratio in 2023
+
+with bank as (
+	SELECT
+	    stock_code
+	FROM
+	    company_info
+	where
+		industry = 'Banking'
+)
+
+select 
+	stock_code, 
+	quarter,
+	year,
+	ratio_code ,
+	data
+from
+	financial_ratio
+where 
+	quarter = 0
+	and year = 2023
+	and ratio_code = 'CASA'
+	and stock_code in (SELECT stock_code FROM bank)
+ORDER BY
+    data DESC
+LIMIT 5;
+
+-- 52. Top 5 Bank have lowest Bad debt ratio in Q3 2024
+
+with bank as (
+	SELECT
+	    stock_code
+	FROM
+	    company_info
+	where
+		industry = 'Banking'
+)
+
+select 
+	stock_code, 
+	quarter,
+	year,
+	ratio_code ,
+	data
+from
+	financial_ratio
+where 
+	quarter = 3
+	and year = 2024
+	and ratio_code = 'BDR'
+	and stock_code in (SELECT stock_code FROM bank)
+ORDER BY
+    data 
+LIMIT 5;
+
+-- 53. Top 5 real estate companies with highest Bank Loans in Q4 2023
+
+with real_estate as (
+	SELECT
+	    stock_code
+	FROM
+	    company_info
+	where
+		industry = 'Real Estate'
+)
+
+select 
+	stock_code, 
+	quarter,
+	year,
+	category_code,
+	data
+from
+	financial_statement_explaination
+where 
+	quarter = 4
+	and year = 2023
+	and category_code = 'Share_TM_3'
+	and stock_code in (SELECT stock_code FROM real_estate)
+ORDER BY
+    data DESC
+LIMIT 5;
+
+-- 54. Benefit of bonds, note and treasury bill of HPG in 2023
+
+select 
+	stock_code,
+	quarter,
+	year,
+	category_code,
+	data 
+from
+	financial_statement_explaination
+where 
+	quarter = 0
+	and year = 2023
+	and category_code = 'Corp_TM_135' -- Interest income from bonds, promissory notes, treasury bills
+	and stock_code = 'HPG'
+
+-- 55. From 2019 to 2023, get the amount of real estate goods of VHM
+
+select 
+	stock_code,
+	quarter,
+	year,
+	category_code,
+	data 
+from
+	financial_statement_explaination
+where 
+	quarter = 0
+	and year between 2019 and 2023
+	and category_code = 'Corp_TM_27' -- Real estate goods
+	and stock_code = 'VHM'
+	
+
+-- 56. Which bank issue the largest amount of loans to community and personal services in 2023
+
+select 
+	stock_code,
+	quarter,
+	year,
+	category_code,
+	data 
+from
+	financial_statement_explaination
+where 
+	quarter = 0
+	and year = 2023
+	and category_code = 'Bank_TM_46' -- Loans to community and personal services
+order by 
+	data desc 
+limit 1;
+
+-- 57. Short-term, medium-term and long-term loans issued by TCB at Q3 2024
+
+select 
+	stock_code,
+	quarter,
+	year,
+	category_code,
+	data 
+from
+	financial_statement_explaination
+where 
+	quarter = 3
+	and year = 2024
+	and category_code IN ('Bank_TM_72', 'Bank_TM_73', 'Bank_TM_74') -- Type of Loans
+	and stock_code = 'TCB'
+
+-- 58. Top 5 bank has the highest short-term loans percentage in total loans issued in Q3 2024
+
+with loans as (
+	select 
+		data,
+		stock_code,
+		year,
+		quarter
+	from
+		financial_statement
+	where 
+		category_code = 'BS_125' -- Loans to customer
+		and year = 2024
+		and quarter = 3 
+),
+
+short_term_loans as (
+	select 
+		data,
+		stock_code
+	from
+		financial_statement_explaination
+	where 
+		category_code = 'Bank_TM_72' -- Short term loans
+		and year = 2024
+		and quarter = 3 
+)
+
+select 
+	distinct l.stock_code,
+	l.year,
+	l.quarter,
+	stl.data/l.data as short_term_ratio
+	
+from loans l
+join short_term_loans stl
+on l.stock_code = stl.stock_code
+order by short_term_ratio desc 
+limit 5;

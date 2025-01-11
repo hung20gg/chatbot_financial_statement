@@ -119,9 +119,7 @@
         "job_titles": "Tax Consultant",
         "questions": [
             "What were the Return on Equity (ROE) and Net Profit Margin for each company in the Banking industry in 2021, compared to the industry average for those ratios?",
-            "For the year 2022, what were the Gross Profit Margin, Operating Profit Margin, and EBITDA Margin for each company in the Real Estate industry, and how did these compare to the industry average for each ratio?",
-            "In 2023, what was the Price-to-Earnings Ratio (P/E) and Return on Assets (ROA) for each company in the Information Technology industry, benchmarked against the industry average P/E and ROA?"
-        ]
+            "For the year 2022, what were the Gross Profit Margin, Operating Profit Margin, and EBITDA Margin for each company in the Real Estate industry, and how did these compare to the industry average for each ratio?"        ]
     },
     {
         "main_task": "Financial Ratios",
