@@ -60,15 +60,16 @@ if "username" not in st.session_state:
 
 @st.cache_resource
 def initialize(user_name):
-    db_config = DBConfig(**TEI_VERTICAL_UNIVERSAL_CONFIG)
+    db_config = DBConfig(**BGE_VERTICAL_UNIVERSAL_CONFIG)
     chat_config = ChatConfig(**INBETWEEN_CHAT_CONFIG)
     text2sql_config = Text2SQLConfig(**TEXT2SQL_FAST_OPENAI_CONFIG)
     prompt_config = PromptConfig(**FIIN_VERTICAL_PROMPT_UNIVERSAL)
     
-    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-base-en-v1.5', model_kwargs = {'device': device})
-    # # embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})    db_config.embedding = embedding_model
-    # db_config.embedding = embedding_model
+    # if db_config = TEI & openai, then comment 3 lines below
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-base-en-v1.5', model_kwargs = {'device': device})
+    # embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})    db_config.embedding = embedding_model
+    db_config.embedding = embedding_model
     
     reranker = BaseRerannk(name=os.getenv('RERANKER_SERVER_URL'))
     
