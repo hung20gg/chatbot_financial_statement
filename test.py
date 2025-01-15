@@ -22,7 +22,8 @@ from agent.prompt.prompt_controller import (
     VERTICAL_PROMPT_BASE, 
     VERTICAL_PROMPT_UNIVERSAL,
     HORIZONTAL_PROMPT_BASE,
-    HORIZONTAL_PROMPT_UNIVERSAL
+    HORIZONTAL_PROMPT_UNIVERSAL,
+    FIIN_VERTICAL_PROMPT_UNIVERSAL,
 )
 
 from ETL.dbmanager.setup import (
@@ -102,7 +103,7 @@ def test():
         print(db.vector_db_ratio.similarity_search('ROA', 2))
         
         logging.info('Test text2sql')
-        prompt = "Amount of customer deposits in BIDV and Vietcombank in Q2 2023"
+        prompt = "Total assets in BIDV and Vietcombank in Q2 2023"
         his, err, tab = text2sql.solve(prompt)
         print(tab[-1].table)
         

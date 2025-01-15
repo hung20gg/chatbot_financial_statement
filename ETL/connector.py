@@ -16,6 +16,7 @@ import re
 
 from langchain_chroma import Chroma
 from langchain_milvus import Milvus
+from langchain_elasticsearch import ElasticsearchStore
 
 
 from langchain_openai import OpenAIEmbeddings
@@ -327,7 +328,14 @@ def create_milvus_db(collection_name, persist_directory, embedding_function):
     return Milvus(
         collection_name=collection_name,
         embedding_function=embedding_function,
-        connection_args={"uri": persist_directory}
+        connection_args={"uri": persist_directory} # Either directory or an uri
+    )
+    
+def create_elastic_search_db(collection_name, es_url, embedding_function):
+    return ElasticsearchStore(
+        index_name = collection_name,
+        es_url = es_url,
+        embedding=embedding_function
     )
     
 def create_vector_db(collection_name, persist_directory, model_name, vectordb):
@@ -338,8 +346,11 @@ def create_vector_db(collection_name, persist_directory, model_name, vectordb):
         return create_milvus_db(collection_name, persist_directory, embedding_function)
     elif vectordb == 'chromadb':
         return create_chroma_db(collection_name, persist_directory, embedding_function)
+    elif vectordb == 'elastic-search':
+        return create_elastic_search_db(collection_name, persist_directory, embedding_function)
+    
     else:
-        raise ValueError("vectordb should be either 'milvus' or 'chromadb'")
+        raise ValueError(f"Vectordb format {vectordb} is not supported")
 
 #==================#
 #  Setup VectorDB  #
@@ -363,10 +374,12 @@ def setup_vector_db_fs(collection_name, persist_directory, table, model_name, ve
         
         categories_0 = [category[0] for category in batch_category]
         categories_1 = [category[1] for category in batch_category]
-        metadatas = [{'lang': 'vi', 'code': category[2]} for category in batch_category]
         
-        vector_db.add_texts(categories_0, metadatas=metadatas)
-        vector_db.add_texts(categories_1, metadatas=metadatas)
+        metadatas_0 = [{'lang': 'vi', 'code': category[2]} for category in batch_category]
+        metadatas_1 = [{'lang': 'en', 'code': category[2]} for category in batch_category]
+        
+        vector_db.add_texts(categories_0, metadatas=metadatas_0)
+        vector_db.add_texts(categories_1, metadatas=metadatas_1)
         
     batch_categories = [categories[i:i+BATCH_SIZE] for i in range(0, len(categories), BATCH_SIZE)]
         
@@ -379,18 +392,20 @@ def setup_vector_db_universal(collection_name, persist_directory, table, model_n
     logging.info("Connected to database")
     try:
         with conn.cursor() as cur:
-            cur.execute(f"SELECT universal_caption, universal_code FROM {table}")
+            cur.execute(f"SELECT en_caption, category_code FROM {table}")
             categories = cur.fetchall()
             categories = [(category[0], category[1]) for category in categories]
     finally:
         conn.close()
+        
+    logging.info(f'Categories: {len(categories)}')
     
     vector_db = create_vector_db(collection_name, persist_directory, model_name, vectordb)
     
     def process_category(vector_db, batch_category):
         
         categories_0 = [category[0] for category in batch_category]
-        metadatas = [{'lang': 'vi', 'code': category[1]} for category in batch_category]
+        metadatas = [{'lang': 'en', 'code': category[1]} for category in batch_category]
         
         vector_db.add_texts(categories_0, metadatas=metadatas)
         # chroma_db.add_texts([category[1]], metadatas=[{'lang': 'en', 'code': category[2]}])
@@ -420,7 +435,7 @@ def setup_vector_db_ratio(collection_name, persist_directory, table, model_name,
         categories_0 = [category[0] for category in batch_category]
         categories_1 = [category[1] for category in batch_category]
         
-        metadatas = [{'lang': 'vi', 'code': category[1]} for category in batch_category]
+        metadatas = [{'lang': 'en', 'code': category[1]} for category in batch_category]
         
         vector_db.add_texts(categories_0, metadatas=metadatas)
         vector_db.add_texts(categories_1, metadatas=metadatas)
@@ -491,14 +506,14 @@ RDB_SETUP_CONFIG = {
     'map_category_code_non_bank': ['../csv/map_category_code_non_bank.csv', ['category_code']],
     'map_category_code_securities': ['../csv/map_category_code_sec.csv', ['category_code']],
     'map_category_code_ratio': ['../csv/map_ratio_code.csv', ['ratio_code']],
-    'map_category_code_universal': ['../csv/map_category_code_universal.csv', ['universal_code']],
+    'map_category_code_universal': ['../csv/map_category_code_universal.csv', ['category_code']],
     
     
     'bank_financial_report' : ['../csv/bank_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'non_bank_financial_report' : ['../csv/non_bank_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'securities_financial_report' : ['../csv/securities_financial_report_v2_2.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'financial_ratio' : ['../csv/financial_ratio.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'financial_statement': ['../csv/financial_statement.parquet', None, {'universal_code': 'map_category_code_universal(universal_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'financial_statement': ['../csv/financial_statement.parquet', None, {'category_code': 'map_category_code_universal(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
 
 }
 
@@ -509,14 +524,20 @@ FIIN_RDB_SETUP_CONFIG = {
     'map_category_code_non_bank': ['../csv/map_category_corp_v3.csv', ['category_code']],
     'map_category_code_securities': ['../csv/map_category_sec_v3.csv', ['category_code']],
     'map_category_code_ratio': ['../csv/map_ratio_code.csv', ['ratio_code']],
-    'map_category_code_universal': ['../csv/map_category_code_universal_v3.csv', ['universal_code']],
+    'map_category_code_universal': ['../csv/map_category_code_universal_v3.csv', ['category_code']],
+    
+    'map_category_code_explaination': ['../csv/map_category_code_explaination_v3.csv', ['category_code']],
     
     
     'bank_financial_report' : ['../csv/bank_financial_report_v3.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'non_bank_financial_report' : ['../csv/non_bank_financial_report_v3.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'securities_financial_report' : ['../csv/securities_financial_report_v3.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'financial_ratio' : ['../csv/financial_ratio_v3.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'financial_statement': ['../csv/financial_statement_v3.parquet', None, {'universal_code': 'map_category_code_universal(universal_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'financial_statement': ['../csv/financial_statement_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    
+    'financial_statement_explaination': ['../csv/financial_statement_explaination_v3.parquet', None, {'category_code': 'map_category_code_explaination(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'industry_financial_statement': ['../csv/industry_report_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)'}, False, ['date_added']],
+    'industry_financial_ratio': ['../csv/industry_ratio_v3.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)'}, False, ['date_added']],    
 
 }
 
@@ -534,6 +555,7 @@ VERTICAL_VECTORDB_SETUP_CONFIG = {
     'sql_query': ['../agent/prompt/vertical/base/simple_query_v2.txt'],
     'sql_query_universal': ['../agent/prompt/vertical/universal/simple_query_v2.txt'],
     'category_universal_chroma': ['map_category_code_universal'],
+    'category_universal_chroma$': ['map_category_code_explaination'],
 }
 
 
@@ -554,6 +576,11 @@ def setup_rdb(force, config, **db_conn):
         args = [table] + params
         load_csv_to_postgres(force, *args, **db_conn)
         
+
+def remove_dollar_sign(text):
+    return text.replace('$', '')
+
+        
 def setup_vector_db(config, persist_directory, model_name = 'text-embedding-3-small', vectordb = 'chromadb', **db_conn):
     
     config = copy.deepcopy(config)
@@ -562,8 +589,12 @@ def setup_vector_db(config, persist_directory, model_name = 'text-embedding-3-sm
         vectordb = 'chromadb'
     
     for table, params in config.items():
+        
+        table = table.replace('$', '')
+        
         params.append(model_name)
         params.append(vectordb)
+        print(params)
 
         if 'sql_query' in table:
             setup_vector_db_sql_query(table, persist_directory, *params)
@@ -571,7 +602,7 @@ def setup_vector_db(config, persist_directory, model_name = 'text-embedding-3-sm
             setup_vector_db_company_name(table, persist_directory, *params, **db_conn)
         elif table == 'category_ratio_chroma':
             setup_vector_db_ratio(table, persist_directory, *params, **db_conn)
-        elif table == 'category_universal_chroma':
+        elif params[0] == 'map_category_code_universal':
             setup_vector_db_universal(table, persist_directory, *params, **db_conn)
         else:
             setup_vector_db_fs(table, persist_directory, *params, **db_conn)
@@ -635,8 +666,8 @@ def setup_everything(config: dict):
     embedding_server = os.getenv('EMBEDDING_SERVER_URL')
     local_model = os.getenv('EMBEDDING_MODEL')
     
-    if not (check_embedding_server(embedding_server) or config.get('openai', False) or not os.getenv('LOCAL_EMBEDDING')):
-        raise ValueError("No available embedding server")
+    # if not (check_embedding_server(embedding_server) or config.get('openai', False) or not os.getenv('LOCAL_EMBEDDING')):
+    #     raise ValueError("No available embedding server")
     
     print(os.path.join(current_dir, '../data/vector_db_vertical_local'))
     

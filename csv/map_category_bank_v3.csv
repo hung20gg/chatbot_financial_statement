@@ -146,4 +146,4 @@ IV.Lưu chuyển tiền thuần trong kỳ,CF_042,Lưu chuyển tiền thuần t
 V. Tiền và các khoản tương đương tiền tại thời điểm đầu kỳ,CF_043,Tiền và các khoản tương đương tiền tài thời điểm đầu kỳ,Cash and cash equivalents at the beginning of the period
 VI. Điều chỉnh ảnh hưởng của thay đổi tỷ giá,CF_044,Điều chỉnh ảnh hưởng của thay đổi tỷ giá,Adjustment for the effects of exchange rate changes
 VII. Tiền và các khoản tương đương tiền tại thời điểm cuối kỳ,CF_045,Tiền và các khoản tương đương tiền tại thời điểm cuối kỳ,Cash and cash equivalents at the end of the period
-Nợ ngắn hạn,BS_361,Nợ phải trả ngắn hạn,Current liabilities
+I. Nợ ngắn hạn,BS_361,I. Current liabilities,balance_sheet

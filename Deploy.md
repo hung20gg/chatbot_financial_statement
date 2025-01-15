@@ -39,3 +39,8 @@ chmod +x run.sh
 ```bash
 ./run.sh local-embedding --local True
 ```
+
+- For GPU + Rerank (Self-hosted Embedding Server)
+```bash
+./run.sh local-model --local True
+```

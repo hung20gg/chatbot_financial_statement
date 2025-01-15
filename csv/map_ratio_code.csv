@@ -20,30 +20,30 @@ Asset To Debt Ratio,ATDR,asset_to_debt_ratio
 Current Ratio,CurrentR,current_ratio
 Quick Ratio,QR, quick_ratio
 Cash Ratio,CashR, cash_ratio
-Long Term Debt Coverage Ratio,LTDCR, long_term_debt_coverage_ratio
-Long Term Debt To Equity Capital Ratio,LTDTECR, long_term_debt_to_equity_capital_ratio
-Time Interest Earned,TIE, time_interest_earned
-Debt To Tangible Net Worth Ratio,DTTNWR, debt_to_tangible_net_worth_ratio
-Financial Leverage,FL, financial_leverage
-Allowance For Doubtful Accounts To Total Assets Ratio,AFDATTAR, allowance_for_doubtful_accounts_to_total_assets_ratio
-Permanent Financing Ratio,PFR, permanent_financing_ratio
-Financial Income To Net Revenue Ratio,FITNRR, financial_income_to_net_revenue_ratio
-Return On Assets,ROA, return_on_assets
-Return On Fixed Assets,ROFA, return_on_fixed_assets
-Return On Long Term Operating Assets,ROLTOA, return_on_long_term_operating_assets
+Long Term Debt Coverage Ratio,LTDCR,long_term_debt_coverage_ratio
+Long Term Debt To Equity Capital Ratio,LTDTECR,long_term_debt_to_equity_capital_ratio
+Time Interest Earned,TIE,time_interest_earned
+Debt To Tangible Net Worth Ratio,DTTNWR,debt_to_tangible_net_worth_ratio
+Financial Leverage,FL,financial_leverage
+Allowance For Doubtful Accounts To Total Assets Ratio,AFDATTAR,allowance_for_doubtful_accounts_to_total_assets_ratio
+Permanent Financing Ratio,PFR,permanent_financing_ratio
+Financial Income To Net Revenue Ratio,FITNRR,financial_income_to_net_revenue_ratio
+Return On Assets,ROA,return_on_assets
+Return On Fixed Assets,ROFA,return_on_fixed_assets
+Return On Long Term Operating Assets,ROLTOA,return_on_long_term_operating_assets
 Basic Earning Power Ratio,BEPR,Basic_Earning_Power_Ratio
-Return On Equity,ROE, Return_on_equity
-Profitability Of Cost Of Goods Sold,POCOGS, profitability_of_cost_of_goods_sold
-Price Spread Ratio,PSR, price_spread_ratio
-Profitability Of Operating Expenses,POOE, profitability_of_operating_expenses
-Return On Sales,ROS, Return_on_sales
+Return On Equity,ROE,Return_on_equity
+Profitability Of Cost Of Goods Sold,POCOGS,profitability_of_cost_of_goods_sold
+Price Spread Ratio,PSR,price_spread_ratio
+Profitability Of Operating Expenses,POOE,profitability_of_operating_expenses
+Return On Sales,ROS,Return_on_sales
 Operating Profit Margin,OPM,operating_profit_margin
 Gross Profit Margin,GPM,gross_profit_margin
 Return on Invested Capital,ROIC,ROIC
 EBIT,EBIT,EBIT
 EBITDA,EBITDA,EBITDA
 Free Cash Flow,FCF,free_cash_flow
-Free Cash Flow To Operating Cash Flow Ratio,FCFTOCFR, free_cash_flow_to_operating_cash_flow_ratio
+Free Cash Flow To Operating Cash Flow Ratio,FCFTOCFR,free_cash_flow_to_operating_cash_flow_ratio
 Cash Interest Coverage,CIC,cash_interest_coverage
 Cash Flow From Sales To Sales,CFFSTS,cash_flow_from_sales_to_sales
 Cash Flow Margin,CFM,cash_flow_margin
@@ -55,3 +55,26 @@ CFO To Total Equity,CFOTTE,CFO_to_total_equity
 Net Interest Margin,NIM,net_interest_margin
 Allowance for loan customers ratio,ALCR,allowance_for_loan_customers_ratio
 Net profit margin,NPM,net_profit_margin
+Current Account Saving Account Ratio,CASA,current_account_saving_account_ratio
+Bad Debt Ratio,BDR,bad_debt_ratio
+Net Revenue Growth YoY,NRGYoY,Net_Revenue_Growth_YoY
+Gross Profit Growth YoY,GPGYoY,Gross_Profit_Growth_YoY
+EBITDA Growth YoY,EBITDAGYoY,EBITDA_Growth_YoY
+EBIT Growth YoY,EBITGYoY,EBIT_Growth_YoY
+Pre Tax Profit Growth YoY,PTPGYoY,Pre_Tax_Profit_Growth_YoY
+Accounts Receivable Growth YoY,ARGYoY,Accounts_Receivable_Growth_YoY
+Inventory Growth YoY,IGYoY,Inventory_Growth_YoY
+Short Term Debt Growth YoY,STDGYoY,Short_Term_Debt_Growth_YoY
+Long Term Debt Growth YoY,LTDGYoY,Long_Term_Debt_Growth_YoY
+SG&A Expense Growth YoY,SG&AEGYoY,SG&A_Expense_Growth_YoY
+Total Asset Growth YoY,TAGYoY,Total_Asset_Growth_YoY
+Equity Growth YoY,EGYoY,Equity_Growth_YoY
+CFO Growth YoY,CFOGYoY,CFO_Growth_YoY
+Customer Deposits Growth YoY,CDGYoY,Customer_Deposits_Growth_YoY
+Operating Expense Growth YoY,OEGYoY,Operating_Expense_Growth_YoY
+Income Before Provision Growth YoY,IBPGYoY,Income_Before_Provision_Growth_YoY
+Interest Income Growth YoY,IIGYoY,Interest_Income_Growth_YoY
+Non Interest Income Growth YoY,NIIGYoY,Non_Interest_Income_Growth_YoY
+Total Operating Income Growth,TOIGYoY,Total_Operating_Income_Growth
+Customer Loans Growth YoY,CLGYoY,Customer_Loans_Growth_YoY
+Total Asset Turnover,TAT,Total_Asset_Turnover
