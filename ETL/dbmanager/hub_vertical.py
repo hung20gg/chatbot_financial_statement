@@ -187,7 +187,12 @@ class HubVerticalBase(BaseDBHUB):
             'category_code_bank': None,
             'category_code_securities': None,
             'category_code_ratio': None
-        }        
+        }    
+
+        if len(industry) != 0:
+            exact_industries = self.get_exact_industry_bm25(industry)
+            df_industry = pd.DataFrame(exact_industries, columns=['industry'])
+            return_table['industry'] = df_industry
                 
         if len(financial_statement_row) != 0:  
             if check_status_table['category_code_non_bank']:
@@ -246,6 +251,11 @@ class HubVerticalBase(BaseDBHUB):
             'category_code_securities': None,
             'category_code_ratio': None
         }   
+
+        if len(industry) != 0:
+            exact_industries = self.get_exact_industry_bm25(industry)
+            df_industry = pd.DataFrame(exact_industries, columns=['industry'])
+            return_table['industry'] = df_industry
         
         tasks = []     
                 
@@ -388,7 +398,12 @@ class HubVerticalUniversal(BaseDBHUB):
         return_table = {
             'category_code_universal': None,
             'category_code_ratio': None
-        }        
+        }     
+
+        if len(industry) != 0:
+            exact_industries = self.get_exact_industry_bm25(industry)
+            df_industry = pd.DataFrame(exact_industries, columns=['industry'])
+            return_table['industry'] = df_industry   
                 
         if len(financial_statement_row) != 0:  
             return_table['category_code_universal'] = self.search_return_df(financial_statement_row, top_k, type_='fs')
@@ -410,6 +425,11 @@ class HubVerticalUniversal(BaseDBHUB):
             'category_code_ratio': None
         }   
         
+        if len(industry) != 0:
+            exact_industries = self.get_exact_industry_bm25(industry)
+            df_industry = pd.DataFrame(exact_industries, columns=['industry'])
+            return_table['industry'] = df_industry
+
         tasks = []     
                 
         if len(financial_statement_row) != 0:  

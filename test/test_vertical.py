@@ -47,7 +47,7 @@ if __name__ == "__main__":
     print(db.search_return_df('ROA', 5, 'ratio'))
     logging.info('Test search return account')
     
-    print(db.search_return_df('Total Asset', 5, 'fs'))
+    print(db.search_return_df('Deposit', 10, 'fs'))
     logging.info('Test search return account')
     
     # print(db.vector_db_sql.similarity_search('Compare the Return on Assets (ROA) and Return on Equity (ROE) of Vinamilk and Masan Group for the fiscal year 2023.  Additionally, provide the total assets and total equity for both companies for the same period.', 2))
