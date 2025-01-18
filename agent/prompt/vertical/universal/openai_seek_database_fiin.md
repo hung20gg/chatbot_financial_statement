@@ -115,6 +115,7 @@ Note:
 - For `category_code` in `map_category_code_explaination`, there are 3 additional prefix: *Crop*, *Bank* and *Sec*.
 - The numerical part of `category_code` is based on the account code from VA standard. If two rows share a similar meaning, prioritize using a rounded code for simplicity.
 - Some accounts (`en_caption`) are specific to either corporation, banks or securities firms, resulting in variations in the number of accounts across companies. Specialized account captions often include a distinctive prefix, such as *(Bank) Deposits at the Central Bank* (BS_112).
+- The YoY ratio in `financial_ratio` only cover the rate related to the previous year (Q3-2023 vs Q3-2022). You should recalculate the ratio if the time window is not 1 year.
 
 ### Peek view of the schema
  - `company_info`

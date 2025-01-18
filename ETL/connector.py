@@ -193,22 +193,29 @@ def create_table_if_not_exists(conn, table_name, df_path, primary_key=None, fore
 
 # Step 3: Insert data into table (upsert logic)
 def upsert_data(conn, table_name, df, log_gap = 5000):
-    with conn.cursor() as cur:
-        # Define a placeholder for the insert values
-        placeholders = ', '.join(['%s'] * len(df.columns))
-        # Convert DataFrame to list of tuples
-        data_tuples = [tuple(x) for x in df.to_numpy()]
-        
-        # Perform the upsert operation
-        for i,row in enumerate(data_tuples):
-            upsert_query = f"""
-                INSERT INTO {table_name} VALUES ({placeholders})
-            """
-            cur.execute(upsert_query, row)
-            if i % log_gap == 0:
-                logging.info(f'Upserted row: {row}')
-        conn.commit()
-        
+    
+    # Define a placeholder for the insert values
+    placeholders = ', '.join(['%s'] * len(df.columns))
+    # Convert DataFrame to list of tuples
+    data_tuples = [tuple(x) for x in df.to_numpy()]
+
+    upsert_query = """
+        INSERT INTO {table_name}
+        VALUES ({placeholders})
+        """
+    
+    for i in range(0, len(data_tuples), log_gap):
+        try:
+            with conn.cursor() as cur:
+                query = upsert_query.format(table_name=table_name, placeholders=placeholders)
+                cur.executemany(query, data_tuples[i:i+log_gap])
+                conn.commit()
+                logging.info(f'Upserted rows: {i} to {i+log_gap}')
+
+        except Exception as e:
+            conn.rollback()
+            logging.error(f"Error during upsert: {e}")
+
         
 def load_csv_to_postgres(force = False, *args, **db_conn):
     # Load CSV into pandas DataFrame
@@ -708,7 +715,31 @@ if __name__ == '__main__':
     
     env_path = os.path.join(current_dir, '../.env')
     dotenv.load_dotenv(env_path)
+
+    db_conn = {
+        'db_name': os.getenv('DB_NAME'),
+        'user': os.getenv('DB_USER'),
+        'password': os.getenv('DB_PASSWORD'),
+        'host': os.getenv('DB_HOST'),
+        'port': os.getenv('DB_PORT')
+        
+    }
+
+    query = """
+    	select 
+		industry,
+		ratio_code,
+		data_mean
+	from industry_financial_ratio
+	where 
+		ratio_code = 'BDR'
+		and year = 2016 
+--		and quarter = 0
+		and industry = 'Banking'
+"""
     
+    result = execute_query(query, conn=db_conn)
+    print(result)
     
 
 

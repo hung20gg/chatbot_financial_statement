@@ -60,22 +60,24 @@ def __get_financial_ratio(data_df, ratio_function):
     return pd.DataFrame(results)
 
 
-def get_previous_year_q0_value(pivot_df, stock_code, year, category_code):
+def get_previous_year_q0_value(pivot_df, stock_code, year, category_code, quarter=0):
     try:
-        return pivot_df.loc[(stock_code, year - 1, 0), category_code]
+        return pivot_df.loc[(stock_code, year - 1, quarter), category_code]
     except KeyError:
         return None
 
-def get_pre_calculated_ratio(stock_code, year, ratio_code, ratios_df):
+def get_pre_calculated_ratio(stock_code, year, ratio_code, ratios_df, quarter=0):
     try:
         return ratios_df.loc[(ratios_df['stock_code'] == stock_code) & 
                               (ratios_df['year'] == year) & 
-                              (ratios_df['quarter'] == 0) & 
+                              (ratios_df['quarter'] == quarter) & 
                               (ratios_df['ratio_code'] == ratio_code), 
                               'data'].values[0]
     except (IndexError, KeyError):
         return None
 
+
+# This code run so long, gonna optimize it later @pphanhh
 def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None):
     """
     Calculate YoY ratios for the given dataset and function dictionary.
@@ -96,8 +98,8 @@ def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None):
 
     # Iterate through the pivoted data
     for (stock_code, year, quarter), row in pivot_df.iterrows():
-        if quarter != 0:  # Skip non-annual data
-            continue
+        # if quarter != 0:  # Skip non-annual data
+        #     continue
 
         for ratio_name, category_code in ratio_mapping.items():
             # Process YoY growth calculation
@@ -106,21 +108,21 @@ def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None):
                     # Handle sums of multiple codes
                     current_year_value = sum(row.get(code, 0) for code in category_code)
                     previous_year_value = sum(
-                        pivot_df.loc[(stock_code, year - 1, 0), code]
-                        if (stock_code, year - 1, 0) in pivot_df.index and code in pivot_df.columns
+                        pivot_df.loc[(stock_code, year - 1, quarter), code]
+                        if (stock_code, year - 1, quarter) in pivot_df.index and code in pivot_df.columns
                         else 0 for code in category_code
                     )
                 elif category_code in ['EBIT']:
-                    current_year_value = get_pre_calculated_ratio(stock_code, year, category_code, ratios_df_1)
-                    previous_year_value = get_pre_calculated_ratio(stock_code, year - 1, category_code, ratios_df_1)
+                    current_year_value = get_pre_calculated_ratio(stock_code, year, category_code, ratios_df_1, quarter)
+                    previous_year_value = get_pre_calculated_ratio(stock_code, year - 1, category_code, ratios_df_1, quarter)
                 elif category_code in ['EBITDA']:
-                    current_year_value = get_pre_calculated_ratio(stock_code, year, category_code, ratios_df_6)
-                    previous_year_value = get_pre_calculated_ratio(stock_code, year - 1, category_code, ratios_df_6)
+                    current_year_value = get_pre_calculated_ratio(stock_code, year, category_code, ratios_df_6, quarter)
+                    previous_year_value = get_pre_calculated_ratio(stock_code, year - 1, category_code, ratios_df_6, quarter)
                 else:
-                    current_year_value = row.get(category_code, None)
+                    current_year_value = row.get(category_code, 0)
                     previous_year_value = pivot_df.loc[
-                        (stock_code, year - 1, 0), category_code
-                    ] if (stock_code, year - 1, 0) in pivot_df.index else None
+                        (stock_code, year - 1, quarter), category_code
+                    ] if (stock_code, year - 1, quarter) in pivot_df.index else 0
 
                 # Calculate YoY growth
                 yoy_value = None
@@ -603,7 +605,7 @@ def get_financial_ratios(data_df, type_ = 'non_bank'):
     return df
 
 
-def industry_ratios(data_df, metric = 'BS_400', top_n = 15):
+def industry_ratios(data_df, metric = 'BS_400', top_n = 5):
     df_company = pd.read_csv(os.path.join(current_path, '../csv/df_company_info.csv'))
     
     # Read the financial statement data to get top 10 industries
@@ -617,13 +619,19 @@ def industry_ratios(data_df, metric = 'BS_400', top_n = 15):
     ).reset_index(drop=True)[['industry','year', 'quarter', 'stock_code']]
 
     # Inner Join of top 20 stocks with the financial statement data
-    filtered_data = pd.merge(data_df, top_20_stocks, on=['year', 'quarter', 'stock_code'], how='inner')
+    filtered_data = pd.merge(data_df, top_20_stocks, on=['year', 'quarter', 'stock_code'], how='left')
+    print(filtered_data[filtered_data['ratio_code'] == 'BDR'].head(10))
 
     # Get the mean financial ratios for the top 20 stocks in each industry
-    industry_ratios = filtered_data.groupby(['industry', 'year', 'quarter', 'ratio_code'])['data'].mean().reset_index()
-    industry_ratios.rename(columns={'data': 'data_mean'}, inplace=True)
+    df_industry_ratios = filtered_data.groupby(['industry', 'year', 'quarter', 'ratio_code'])['data'].mean().reset_index()
     
-    return industry_ratios
+    print(df_industry_ratios[(df_industry_ratios['ratio_code'] == 'BDR') & (df_industry_ratios['year'] == 2023)].head(10))
+
+    assert data_df['ratio_code'].nunique() == df_industry_ratios['ratio_code'].nunique(), "Missing ratio code in industry_ratios"
+
+    df_industry_ratios.rename(columns={'data': 'data_mean'}, inplace=True)
+    
+    return df_industry_ratios
 
 if __name__ == '__main__':
     
@@ -669,7 +677,8 @@ if __name__ == '__main__':
     dfs.to_parquet(os.path.join(current_path, '../csv/financial_ratio_v3.parquet'), index=False)
     
     df_industry_ratios = industry_ratios(dfs, metric='BS_400', top_n=15)
-    df_industry_ratios.to_parquet(os.path.join(current_path, '../csv/industry_ratios_v3.parquet'), index=False)
+    print(df_industry_ratios[(df_industry_ratios['ratio_code'] == 'BDR') & (df_industry_ratios['year'] == 2023)].head(10))
+    df_industry_ratios.to_parquet(os.path.join(current_path, '../csv/industry_ratio_v3.parquet'), index=False)
 
     ratio = dfs['ratio_code'].unique()
     

@@ -1282,3 +1282,265 @@ join short_term_loans stl
 on l.stock_code = stl.stock_code
 order by short_term_ratio desc 
 limit 5;
+
+
+
+-- 60. Technology firms with highest Net Revenue Grow YoY in 2023
+
+with technology as (
+	SELECT
+	    stock_code
+	FROM
+	    company_info
+	where
+		industry = 'Information Technology'
+)
+
+select 
+	stock_code,
+	quarter,
+	year,
+	ratio_code,
+	data
+
+from financial_ratio
+
+where
+	ratio_code = 'NRGYoY'  -- Net Revenue Growth YoY
+	and year = 2023
+	and quarter = 0
+	and stock_code IN (SELECT stock_code FROM technology)
+	
+ORDER by
+    data desc
+LIMIT 1;
+
+-- 61. Get the total asset growth YoY of VIC, VHM and VRE in 2021
+
+select 
+	stock_code,
+	quarter,
+	year,
+	ratio_code,
+	data
+
+from financial_ratio
+
+where
+	ratio_code = 'TAGYoY'  -- Total Asset Growth YoY
+	and year = 2021
+	and quarter = 0
+	and stock_code IN ('VIC', 'VRE', 'VHM');
+
+-- 62. Collect the Net Revenue Growth YoY of HPG from 2016 to 2023
+
+select 
+	stock_code,
+	quarter,
+	year,
+	ratio_code,
+	data
+
+from financial_ratio
+
+where
+	ratio_code = 'NRGYoY'  -- Net Revenue Growth YoY
+	and year between 2016 and 2023
+	and quarter = 0
+	and stock_code = 'HPG';
+
+-- 63. Ranking industries based on average ROS in 2022
+
+select 
+	industry,
+	quarter,
+	year,
+	ratio_code,
+	data_mean
+
+from industry_financial_ratio 
+
+where
+	ratio_code = 'ROS'  -- Return on Sales
+	and year = 2022
+	and quarter = 0
+	
+order by 
+	data_mean desc;
+
+-- 64. Bad Debt ratio of banking industry from 2016 to 2023
+
+	select 
+		industry,
+		ratio_code,
+		year,
+		quarter,
+		data_mean
+	from industry_financial_ratio
+	where 
+		ratio_code = 'BDR'  -- Bad Debt Ratio
+		and year between 2016 and 2023
+		and quarter = 0
+		and industry = 'Banking'
+
+-- 68. Compare CASA of BIDV to average banking system in 2022 
+
+with banking_casa as (
+	select 
+		industry,
+		ratio_code,
+		data_mean
+	from industry_financial_ratio
+	where 
+		ratio_code = 'CASA'  -- CASA Ratio
+		and year = 2022
+		and quarter = 0
+		and industry = 'Banking'
+),
+bidv_casa as (
+	select 
+		ratio_code,
+		year,
+		quarter,
+		stock_code,
+		data 
+	from financial_ratio
+	where 
+		ratio_code = 'CASA' -- CASA Ratio
+		and year = 2022
+		and quarter = 0
+		and stock_code = 'BID'
+)
+
+select 
+	bid.ratio_code,
+	bid.year,
+	bid.quarter,
+	bid.stock_code,
+	bid.data,
+	bank.industry,
+	bank.data_mean
+from bidv_casa bid
+join banking_casa bank
+on bid.ratio_code = bank.ratio_code
+
+-- 65. Get the total money 2th debt group of BIDV in 2021.
+
+select 
+	category_code,
+	stock_code,
+	year,
+	quarter,
+	data 
+
+from financial_statement_explaination
+where 
+	stock_code = 'BID'
+	and year = 2021
+	and quarter = 0
+	and category_code = 'Bank_TM_67'  -- Second Bad Debt Group
+
+-- 66. In 2023, get the moeny listed in 2th debt group in top 5 bank with highest Bad Debt Ratio.
+
+with bank as (
+	select 
+		stock_code
+	from
+		company_info
+	where
+		industry = 'Banking'
+),
+
+bank_bad_debt as ( 
+	select 
+		stock_code,
+		quarter,
+		year,
+		ratio_code,
+		data
+	from
+		financial_ratio
+	where 
+		quarter = 0
+		and year = 2023
+		and ratio_code = 'BDR'   -- Bad Debt Ratio
+		and stock_code in (select stock_code from bank)
+),
+
+bank_2_debt_group as (
+	select 
+		stock_code,
+		quarter,
+		year,
+		category_code,
+		data
+	from 
+		financial_statement_explaination
+	where 
+		quarter = 0
+		and year = 2023
+		and category_code = 'Bank_TM_67' -- Second Bad Debt Group
+		and stock_code in (select stock_code from bank)
+)
+
+select 
+	bd.stock_code,
+	bd.quarter,
+	bd.year,
+	se.category_code,
+	se.data
+from
+	bank_bad_debt bd
+join 
+	bank_2_debt_group se
+on 
+	bd.stock_code = se.stock_code
+order by 
+	bd.data desc 
+limit 5;
+
+-- 67. Percentage of loan for state-owned companies in total of loans issued by MB Bank from 2017 to 2022
+
+with mbb_loan as ( 
+	select 
+		stock_code,
+		quarter,
+		year,
+		category_code,
+		data
+	from
+		financial_statement 
+	where 
+		quarter = 0
+		and year between 2017 and 2022
+		and category_code = 'BS_125'   -- Loan to customers
+		and stock_code = 'MBB'
+),
+
+mbb_state_loan as (
+	select 
+		stock_code,
+		quarter,
+		year,
+		category_code,
+		data
+	from 
+		financial_statement_explaination
+	where 
+		quarter = 0
+		and year between 2017 and 2022
+		and category_code = 'Bank_TM_85' -- Loans to State-owned enterprises
+		and stock_code = 'MBB'
+)
+
+select 
+	loan.stock_code,
+	loan.quarter,
+	loan.year,
+	state.data/ loan.data * 100 as state_loan_percentage 
+from
+	mbb_loan loan
+join 
+	mbb_state_loan state
+on 
+	loan.year = state.year
