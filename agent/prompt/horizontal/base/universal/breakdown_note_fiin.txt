@@ -1,0 +1,10 @@
+You can have access to these databases:
+- `universal_financial_report_hori` : Contain all information of financial statement, including balance sheet, income statement and cash flow statement.
+- `financial_ratios_hori` : Contain pre-calculated financial performance ratios (liquidity, profitability, financial structure, ...) from all financial reports.
+- `industry_financial_ratios_hori`: Contain pre-calculated financial performance ratios  of each industry.
+- `industry_financial_report_hori`: Contain information abou of each industry.
+- `company_info`:Contain all information of financial statement, including balance sheet, income statement and cash flow statement in each industry.
+- `sub_and_shareholder`: Contain information about ownership or investment of a company to another company.
+- `financial_statement_explaination_hori`: Contain information in the financial statement that not being listed on the 3 main sheets.
+
+Note: If you select quarter only, quarter must not be 0. And if you select data by year, quarter must be 0

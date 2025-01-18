@@ -25,6 +25,7 @@ from agent.prompt.prompt_controller import (
     VERTICAL_PROMPT_BASE, 
     VERTICAL_PROMPT_UNIVERSAL,
     FIIN_VERTICAL_PROMPT_UNIVERSAL,
+    FIIN_HORIZONTAL_PROMPT_UNIVERSAL
 )
 
 from ETL.dbmanager.setup import (
@@ -61,10 +62,10 @@ if "username" not in st.session_state:
 
 @st.cache_resource
 def initialize(user_name):
-    db_config = DBConfig(**BGE_VERTICAL_UNIVERSAL_CONFIG)
+    db_config = DBConfig(**BGE_HORIZONTAL_UNIVERSAL_CONFIG)
     chat_config = ChatConfig(**INBETWEEN_CHAT_CONFIG)
     text2sql_config = Text2SQLConfig(**TEXT2SQL_FAST_OPENAI_CONFIG)
-    prompt_config = PromptConfig(**FIIN_VERTICAL_PROMPT_UNIVERSAL)
+    prompt_config = PromptConfig(**FIIN_HORIZONTAL_PROMPT_UNIVERSAL)
     
     # if db_config = TEI & openai, then comment 3 lines below
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

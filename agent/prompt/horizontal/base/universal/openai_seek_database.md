@@ -61,10 +61,44 @@ CREATE TABLE financial_ratios_hori(
     -- ...
 )
 
+
+-- Table industry_financial_ratios_hori: This table contains average financial ratios of 18 industries.
+CREATE TABLE industry_financial_ratios_hori(
+    industry VARCHAR(255) references company_info(industry),
+    year int, -- The reported financial year
+    quarter int, --  The quarter reported (contain value either 0, 1, 2, 3, 4). If the value is 0, that mean the report is for annual report.
+    "ROE" float -- industry financial ratio
+    -- ...
+
+);
+
+-- Table industry_financial_report_hori: This table contains information about financial statement of 18 industries.
+CREATE TABLE industry_financial_report_hori(
+    industry VARCHAR(255) references company_info(industry),
+    year int, -- The reported financial year
+    quarter int, --  The quarter reported (contain value either 0, 1, 2, 3, 4). If the value is 0, that mean the report is for annual report.
+    "data_mean_BS_100" float, -- The column name refers to the code from the universal balance sheet standards. These values are calculated as the average of the corresponding metrics across companies within each industry. The unit of data in this column is always in Million VND.
+    -- ... 
+    "data_mean_CF_001" float, -- The column name refers to the code from the universal cashflow statement standards. These values are calculated as the average of the corresponding metrics across companies within each industry. The unit of data in this column is always in Million VND.
+    --- ...
+    "data_mean_IS_001" float -- The column name refers to the code from the universal income statement standards. These values are calculated as the average of the corresponding metrics across companies within each industry. The unit of data in this column is always in Million VND.
+    -- ...
+    "data_sum_BS_100" float, -- The column name refers to the code from the universal balance sheet standards. These values are calculated as the sum of the corresponding metrics across companies within each industry. The unit of data in this column is always in Million VND.
+    -- ... 
+    "data_sum_CF_001" float, -- The column name refers to the code from the universal cashflow statement standards. These values are calculated as the sum of the corresponding metrics across companies within each industry. The unit of data in this column is always in Million VND.
+    --- ...
+    "data_sum_IS_001" float -- The column name refers to the code from the universal income statement standards. These values are calculated as the sum of the corresponding metrics across companies within each industry. The unit of data in this column is always in Million VND.
+    -- ...
+
+);
+
+
 ```
 
 Note: 
-- For each column name in universal_financial_report_hori , the prefix indicating the report it pertains to: *BS* is Balance sheet, *IS* is for Income statement and *CF* is Cash flow.
+- Each value in `category_code` includes a prefix indicating the report it pertains to: *BS* is Balance sheet, *IS* is for Income statement and *CF* is Cash flow.
+- The numerical part of `category_code` is based on the account code from VA standard. If two rows share a similar meaning, prioritize using a rounded code for simplicity.
+
 ### Peek view of the schema
  - `company_info`
 
@@ -87,6 +121,13 @@ This mean MSN is a shareholder of TCB.
 |:---|:----|:----|:----|:----|:----|:----|:----|
 |VCB|2023|  0 | 110000|...|7837|...| 1839613.198 |
 
+- `financial_ratios_hori`
+
+|stock_code|year|quarter|ROE|...|ROA|
+|:----|:----|:----|:----|:----|:----|
+|VCB|2023| 0 | 0.004|...| 0.0001 |
+
+
 ### Note
 - You can access the database by using
 ```sql
@@ -96,6 +137,7 @@ LIMIT 100;
 ```
 - Column name like "BS_110" needs to be in "" when query.
 - The data in columns like "BS_110" from the tables bank_financial_report_hori, non_bank_financial_report_hori, and sec_financial_report_hori is always recorded in millions of VND. Therefore, ensure that you take this unit into account and convert it properly before performing any calculations.
+- When writing the SQL query, use column names that match those in the existing data whenever possible to maintain consistency.
 - For any financial ratio, it must be selected from the database rather than being calculated manually.
 - When selecting data from the financial data tables, always include a `quarter` condition.
 - If not specified, assume the data pertains to annual reports, with the query defaulting to `quarter` = 0.

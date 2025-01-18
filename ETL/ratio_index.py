@@ -81,6 +81,18 @@ def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None):
     Calculate YoY ratios for the given dataset and function dictionary.
     Uses pre-calculated financial structure (ratios_df_1) and cash flow (ratios_df_6) ratios.
     """
+
+    ratio_mapping = const.YoY_RATIO_FUNCTIONS[type_]
+    results = []
+
+    # Get all ratios across all types to identify those that are missing in the current type
+    all_ratios = set()
+    for company_type, ratios in const.YoY_RATIO_FUNCTIONS.items():
+        all_ratios.update(ratios.keys())
+
+    # Identify ratios that are not applicable for the current type
+    missing_ratios = all_ratios - set(ratio_mapping.keys())
+
     pivot_df = data_df.pivot_table(
         index=['stock_code', 'year', 'quarter'],
         columns='category_code',
@@ -88,19 +100,12 @@ def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None):
         aggfunc='sum'
     )
 
-    # Get YoY ratio mappings from const.py
-    ratio_mapping = const.YoY_RATIO_FUNCTIONS[type_]
-
-    # Initialize results
-    results = []
-
-    # Iterate through the pivoted data
     for (stock_code, year, quarter), row in pivot_df.iterrows():
-        if quarter != 0:  # Skip non-annual data
+        if quarter != 0:  
             continue
 
+        # Calculate applicable ratios
         for ratio_name, category_code in ratio_mapping.items():
-            # Process YoY growth calculation
             try:
                 if isinstance(category_code, list):
                     # Handle sums of multiple codes
@@ -123,7 +128,6 @@ def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None):
                     ] if (stock_code, year - 1, 0) in pivot_df.index else None
 
                 # Calculate YoY growth
-                yoy_value = None
                 if previous_year_value == 0 or previous_year_value is None:
                     yoy_value = None  # Avoid division by zero
                 else:
@@ -136,8 +140,17 @@ def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None):
                         'data': yoy_value
                     })
             except Exception as e:
-                # Handle missing or invalid data gracefully
                 print(f"Error calculating YoY ratio {ratio_name} for {stock_code}: {e}")
+
+        # Assign 0 for missing ratios
+        for missing_ratio in missing_ratios:
+            results.append({
+                'stock_code': stock_code,
+                'year': year,
+                'quarter': quarter,
+                'ratio_code': missing_ratio,
+                'data': 0
+            })
 
     return pd.DataFrame(results)
 

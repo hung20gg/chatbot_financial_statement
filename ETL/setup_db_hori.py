@@ -14,7 +14,15 @@ engine = create_engine(db_url)
 
 # List of CSV file paths to load
 file_paths = [
-    '../csv_horizontal/universal_financial_report_hori.csv',
+    '../csv_horizontal/bank_financial_report_hori.csv',
+    '../csv_horizontal/financial_ratios_hori.csv',
+    '../csv_horizontal/financial_statement_explaination_hori.csv',
+    '../csv_horizontal/industry_financial_ratios_hori.csv',
+    '../csv_horizontal/industry_financial_report_hori.csv',
+    '../csv_horizontal/non_bank_financial_report_hori.csv',
+    '../csv_horizontal/sec_financial_report_hori.csv',
+    '../csv_horizontal/universal_financial_report_hori.csv'
+
     
 ]
 
