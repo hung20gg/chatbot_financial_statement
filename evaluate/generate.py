@@ -115,13 +115,13 @@ def _solve(text2sql_config, prompt_config, questions, using_cache=False, version
         batch_questions.append(batch_question)
 
     # For testing
-    batch_questions = batch_questions[:4]
+    # batch_questions = batch_questions[:4]
 
     if version:
         current_dir = os.path.dirname(__file__)
-        file_path = os.path.join(current_dir, f"../data/{text2sql_config.get('llm', 'unknown')}__{version}.jsonl")
+        file_path = os.path.join(current_dir, f"../data/{text2sql_config.get('sql_llm', 'unknown')}__{version}.jsonl")
     else:
-        file_path = f"../data/{text2sql_config.get('llm', 'unknown')}_all.jsonl"
+        file_path = f"../data/{text2sql_config.get('sql_llm', 'unknown')}_all.jsonl"
 
     results = []
 
@@ -152,7 +152,7 @@ def get_text2sql_config(llm_name):
         return TEXT2SQL_FAST_OPENAI_CONFIG
 
     if 'deepseek' in llm_name:
-        return TEXT2SQL_DEEPSEEK_V3_CONFIG
+        return TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG
 
     else:
         config = TEXT2SQL_MEDIUM_GEMINI_CONFIG
@@ -164,15 +164,30 @@ def solve(args):
     prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL
     version = args.version
 
-    with open('../data/generated_questions.json') as f:
-        questions = json.load(f)
-        print(len(questions))
+    if version:
+        current_dir = os.path.dirname(__file__)
+        file_path = os.path.join(current_dir, f"../data/{text2sql_config.get('sql_llm', 'unknown')}__{version}.jsonl")
+    else:
+        file_path = f"../data/{text2sql_config.get('sql_llm', 'unknown')}_all.jsonl"
 
-    results = _solve(text2sql_config, prompt_config, questions, using_cache=args.using_cache, version=version, batch_size=args.batch_size, max_workers=args.max_workers, multi_thread=args.multi_thread)
-    with open('../data/generated_questions_sql.jsonl', 'w') as f:
-        for result in results:
-            json.dump(result, f)
-            f.write('\n')
+    done_ids = set()
+    if os.path.exists(file_path):
+        with open(file_path) as f:
+            for line in f:
+                data = json.loads(line)
+                done_ids.add(data['ids'])
+
+    selected_questions = []
+    with open('../data/generated_questions_2.json') as f:
+        questions = json.load(f)
+        for question in questions:
+            if question['ids'] not in done_ids:
+                selected_questions.append(question)
+        
+        print(f"Total questions: {len(questions)}")
+
+
+    results = _solve(text2sql_config, prompt_config, selected_questions, using_cache=args.using_cache, version=version, batch_size=args.batch_size, max_workers=args.max_workers, multi_thread=args.multi_thread)
 
 
 import argparse

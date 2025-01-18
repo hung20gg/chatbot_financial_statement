@@ -314,7 +314,6 @@ def _prune_entity(table: pd.DataFrame, entities: list[str]):
     table['mask'] = 0
     
     for col in cols:
-        print(col)
         if col in ['is_bank','is_securities'] and col in table.columns:
             table.drop(col, axis=1, inplace=True)
             continue

@@ -38,7 +38,7 @@ class BaseDBHUB(BaseModel):
             result = vector_db.similarity_search(text, top_k)
             return result
         else:
-            result = vector_db.similarity_search(text, top_k * 4) # Increase top_k to get more results
+            result = vector_db.similarity_search(text, top_k * 3) # Increase top_k to get more results
             result = self.reranker.rerank_langchain(text, result, top_k)
             return result[:top_k] # Return top_k results (if reranker not triggered)
         

@@ -678,6 +678,19 @@ def get_financial_ratios(data_df, type_ = 'corp', including_explaination = True)
     return df
 
 
+def _get_date_added(data_df):
+    quarter_to_month = {
+        0: 12,  # Quarter 0 is December of the same year
+        1: 3,
+        2: 6,
+        3: 9,
+        4: 12
+        }
+
+    data_df['date_added'] = pd.to_datetime(data_df.apply(lambda row: f"{row['year']}-{quarter_to_month[row['quarter']]}-30", axis=1))
+    return data_df
+
+
 def industry_ratios(data_df, metric = 'BS_400', top_n = 5, output_path = '../data/'):
     df_company = pd.read_csv(os.path.join(current_path, '../csv/df_company_info.csv'))
     
@@ -689,7 +702,7 @@ def industry_ratios(data_df, metric = 'BS_400', top_n = 5, output_path = '../dat
     
     top_20_stocks = df_fs[df_fs['category_code'] == metric].groupby(['industry', 'year', 'quarter']).apply(
         lambda x: x.nlargest(top_n, 'data')
-    ).reset_index(drop=True)[['industry','year', 'quarter', 'stock_code']]
+    ).reset_index(drop=True)[['industry','year', 'quarter', 'stock_code', ]]
 
     # Inner Join of top 20 stocks with the financial statement data
     filtered_data = pd.merge(data_df, top_20_stocks, on=['year', 'quarter', 'stock_code'], how='left')
@@ -704,6 +717,8 @@ def industry_ratios(data_df, metric = 'BS_400', top_n = 5, output_path = '../dat
 
     df_industry_ratios.rename(columns={'data': 'data_mean'}, inplace=True)
     
+    df_industry_ratios = _get_date_added(df_industry_ratios)
+
     return df_industry_ratios
 
 

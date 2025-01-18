@@ -78,7 +78,7 @@ def parallel_validate_qa(llm, *args):
     llm = get_llm_wrapper(model_name=llm)
     return validate_qa(llm, *args)
 
-def evaluate_qa_quality(path, llm_name, multi_thread=False):
+def evaluate_qa_quality(path, llm_name, multi_thread=False, max_workers=4):
     
     data = []
     with open(path) as f:
@@ -92,7 +92,7 @@ def evaluate_qa_quality(path, llm_name, multi_thread=False):
     results = []
 
     if multi_thread:
-        with ThreadPoolExecutor(max_workers=4) as executor:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_to_task = {executor.submit(parallel_validate_qa, llm_name, output_path, qa): qa for qa in data}
             
             for future in as_completed(future_to_task):
@@ -106,15 +106,23 @@ def evaluate_qa_quality(path, llm_name, multi_thread=False):
     return results
 
 
-def evaluate_difficult(llm, qa):
+def _evaluate_difficulty(llm, output_path, template, qa):
     task = qa['question']
-    code = qa['code'][-1]['code']
+    code = ""
+
+    for code_block in qa['sql']:
+        code += f"```\n\n{code_block}\n\n```" + '\n\n'
     
-    prompt = f"""
+    system_prompt = f"""
+You will be given a question and an SQL query. Your task is to evaluate the difficulty of the question and the SQL query, follow the difficulty of Spider 1.0 dataset. The difficulty should be in the range of 1 to 4, where 1 is the easiest and 4 is the hardest.
+
 Here are the descriptions of tables in the database:
 
 ### PostgreSQL tables, with their properties
 
+```sql
+{template}
+```
 
 <example>
 Here is the example of the difficulty evaluation from Spider 1.0 dataset:
@@ -168,6 +176,8 @@ WHERE name NOT IN
 
 </example>
 
+"""
+    prompt = f"""
 <task>
 You are given the following question
 <question>
@@ -181,8 +191,10 @@ Here is the SQL query to solve the problem:
 ```
 </answer>
 
-Based on the evaluation of Spider 1.0 dataset, please evaluate the difficulty of the question and the SQL query. The difficulty should be in the range of 1 to 4, where 1 is the easiest and 4 is the hardest.
-Return the difficulty in JSON format.
+Based on the evaluation of Spider 1.0 dataset, evaluate the difficulty of the question and the SQL query. The difficulty should be in the range of 1 to 4, where 1 is the easiest and 4 is the hardest.
+
+Think step-by-step and Return the difficulty in JSON format.
+
 ```json
 {{
     "difficulty": 1
@@ -193,6 +205,10 @@ Return the difficulty in JSON format.
 
 """
     messages = [
+        {
+            "role": "system",
+            "content": system_prompt
+        },
         {
             "role": "user",
             "content": prompt
@@ -208,26 +224,51 @@ Return the difficulty in JSON format.
     except Exception as e:
         print(e)
         qa['difficulty'] = -1
-    time.sleep(5)
-    return qa
 
-def parallel_evaluate_difficult(*args):
-    llm = ChatGPT('gpt-4o')
+    result = dict()
+    result['ids'] = qa['ids']
+    result['difficulty'] = qa['difficulty']
 
-    return evaluate_difficult(llm, *args)
+    append_json_to_file(result, output_path)
+    
 
-def evaluate_difficult_qa():
+
+def parallel_evaluate_difficult(llm, *args):
+    llm = get_llm_wrapper(model_name=llm)
+    return _evaluate_difficulty(llm, *args)
+
+def evaluate_qa_difficult(path, llm_name, multi_thread=False, template='vertical', max_workers=4):
         
-    with open('gpt-4o-generated-v2-scored-pass.json') as f:
-        data = json.load(f)
+    data = []
+    with open(path) as f:
+        for line in f:
+            data.append(json.loads(line))
     
     results = []
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        future_to_task = {executor.submit(parallel_evaluate_difficult, qa): qa for qa in data}
-        for future in as_completed(future_to_task):
-            qa = future_to_task[future]
-            results.append(qa)
-            
+
+    if template == 'vertical':
+        with open('vertical.sql', 'r') as f:
+            template = f.read()
+
+    elif template == 'horizontal':
+        with open('horizontal.sql', 'r') as f:
+            template = f.read()
+    else:
+        raise ValueError('Template must be either vertical or horizontal')
+
+    output_file_name = llm_name.replace('/', '__') + '-difficulty-' + path.split('/')[-1]
+    output_path = os.path.join('../data', output_file_name)
+
+    if multi_thread:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_task = {executor.submit(parallel_evaluate_difficult, llm_name, output_path, template, qa): qa for qa in data}
+            for future in as_completed(future_to_task):
+                qa = future_to_task[future]
+                results.append(qa)
+    else:
+        for qa in data:
+            results.append(parallel_evaluate_difficult(llm_name, output_path, template, qa))
+
     return results
 
 
@@ -239,6 +280,8 @@ def parse_args():
     parser.add_argument('--path', type=str, default=os.path.join(current_dir, '../data/gpt-4o-mini__v0.jsonl'), help='Path to the generated QA')
     parser.add_argument('--llm', type=str, default='gpt-4o', help='LLM model name')
     parser.add_argument('--multi_thread', type=bool, default=False, help='Use multi-threading or not')
+    parser.add_argument('--template', type=str, default='vertical', help='Template for the difficulty evaluation')
+    parser.add_argument('--max_workers', type=int, default=4, help='Output file')
     return parser.parse_args()
 
 
@@ -247,4 +290,6 @@ if __name__ == '__main__':
     args = parse_args()
 
     if args.task == 'qa_quality':
-        evaluate_qa_quality(args.path, args.llm, args.multi_thread)
+        evaluate_qa_quality(args.path, args.llm, args.multi_thread, args.max_workers)
+    elif args.task == 'qa_difficulty':
+        evaluate_qa_difficult(args.path, args.llm, args.multi_thread, args.template, args.max_workers)

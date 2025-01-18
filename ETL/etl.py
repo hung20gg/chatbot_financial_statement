@@ -62,7 +62,7 @@ def calculate_industry_report(version: str, output_path: str = '../data'):
     df_fs = pd.read_parquet(os.path.join(current_path, output_path, f'financial_statement_{version}.parquet'))
     df_fs = pd.merge(df_fs, company_table[['stock_code', 'industry']], on='stock_code', how='left')
 
-    df_industry_fs = df_fs.groupby(['industry', 'year', 'quarter', 'category_code'])['data'].agg(['sum', 'mean']).reset_index()
+    df_industry_fs = df_fs.groupby(['industry', 'year', 'quarter', 'category_code', 'date_added'])['data'].agg(['sum', 'mean']).reset_index()
     df_industry_fs.rename(columns={'sum': 'data_sum', 'mean': 'data_mean'}, inplace=True)
 
     df_industry_fs.to_parquet(os.path.join(current_path, output_path, f'industry_report_{version}.parquet'))

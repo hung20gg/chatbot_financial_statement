@@ -27,7 +27,7 @@ def llm_judge(llm, task, answer, ground_truth):
         </task>
         
         <answer>
-        {answer[:8000]}
+        {answer}
         </answer>
         
         <ground_truth>
@@ -42,14 +42,13 @@ The response must align accurately with the ground truth and the objectives of t
 
 Score the answer based on the following criteria:
  - 1 if the response provide accurate and enough answer to the task.
- - 0.5 for accurate answer, with some abundant information to the task (provide some unnecessary information).
  - 0 otherwise.
   
 Return in JSON format.
             
             ```json
             {{
-                "correct": 1
+                "score": 1
             }}      
         
 """}]
@@ -57,7 +56,7 @@ Return in JSON format.
     response = llm(messages)
     
     try:
-        score = get_json_from_text_response(response, new_method=True)['correct']
+        score = get_json_from_text_response(response, new_method=True)['score']
     except Exception as e:
         print(e)
         return 0
@@ -71,53 +70,8 @@ Return in JSON format.
 #     "ground_truth": "The Total Assets of company1 is 1000",
 # }
 
-def get_answer(func, qa, **kwargs):
-    task = qa['question']
-    try:
-        history, error_messages, execution_tables = func(task = task, **kwargs)
-        get_tables = execution_tables[-3:]
-        table_text = ""
-    except Exception as e:
-        print(e)
-        qa['answer'] = "Error in getting the answer"
-        qa['code'] = "Error in getting the code"
-        return qa
-    
-    for i,table in enumerate(get_tables):
-        table_text += f"Table {i+1}\n"
-        table_text += utils.df_to_markdown(table)
-        table_text += "\n\n"
-        
-    qa['answer'] = table_text
-    qa['code'] = get_code_from_text_response(history[-1]['content'])
-    return qa
 
-def get_prediction_answer(func, qa, **kwargs):
-    task = qa['question']
-    start = time.time()
-    
-    try:
-        history, error_messages, execution_tables = func(task = task, **kwargs)
-        get_tables = execution_tables[-3:]
-        
-    except Exception as e:
-        print(e)
-        qa['response'] = "Error in getting the answer"
-        qa['code_response'] = "Error in getting the code"
-        return qa
-    
-    table_text = ""
-    end = time.time()
-    
-    for i,table in enumerate(get_tables):
-        table_text += f"Table {i+1}\n"
-        table_text += utils.df_to_markdown(table)
-        table_text += "\n\n"
-        
-    qa['response'] = table_text[:8000]
-    qa['code_response'] = get_code_from_text_response(history[-1]['content'])
-    qa['time'] = end - start
-    return qa
+
 
 def scoring_a_task(judge_llm, llm, qa, db, function, **kwargs):
     """
