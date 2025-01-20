@@ -65,6 +65,10 @@ TEI_VERTICAL_UNIVERSAL_CONFIG = {
     "database_choice": 'vertical_universal'
 }
 
+# TEI_HORIZONTAL_UNIVERSAL_CONFIG = {
+#     "embedding": 'http://localhost:8080',
+#     "database_choice": 'horizontal_universal'
+# }
 
 def setup_db(config: DBConfig, vectordb = 'chromadb', multi_thread = True, reranker = None):
     conn = {
@@ -138,7 +142,26 @@ def setup_db(config: DBConfig, vectordb = 'chromadb', multi_thread = True, reran
                                      vector_db_company = vector_db_company,
                                      vector_db_sql = vector_db_sql,
                                      multi_thread = multi_thread,
-                                        reranker=reranker)
-        
+                                     reranker=reranker)
+    
+    elif config.database_choice == 'horizontal_base':
+        return HubHorizontalBase(conn = conn, 
+                                 vector_db_bank = bank_vector_store, 
+                                 vector_db_non_bank = none_bank_vector_store, 
+                                 vector_db_securities = sec_vector_store,
+                                 vector_db_ratio = ratio_vector_store,
+                                 vector_db_company = vector_db_company,
+                                 vector_db_sql = vector_db_sql,
+                                 multi_threading = multi_thread,
+                                 reranker=reranker)
+    
+    elif config.database_choice == 'horizontal_universal':
+        return HubHorizontalUniversal(conn = conn, 
+                                     vector_db_ratio = ratio_vector_store,
+                                     vector_db_fs = universal_vector_store,
+                                     vector_db_company = vector_db_company,
+                                     vector_db_sql = vector_db_sql,
+                                     multi_threading = multi_thread,
+                                     reranker=reranker)
     else:
         raise ValueError("Database choice not supported")

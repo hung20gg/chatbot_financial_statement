@@ -21,6 +21,7 @@ logging.basicConfig(
 
 from ..connector import *
 from .abstracthub import BaseDBHUB
+from .rerank import BaseRerannk
 
 class HubHorizontalBase(HubVerticalBase):
     # def __init__(self, conn, 
@@ -50,13 +51,17 @@ class HubHorizontalUniversal(HubVerticalUniversal):
                  vector_db_fs: Chroma, 
                  vector_db_company: Chroma, 
                  vector_db_sql: Chroma,
-                 multi_threading = True):
+                 multi_threading = True,
+                 reranker=None):
         super().__init__(
             conn=conn,
             vector_db_ratio=vector_db_ratio,
             vector_db_fs=vector_db_fs,
             vector_db_company=vector_db_company,
             vector_db_sql=vector_db_sql,
-            multi_threading=multi_threading
-        )
+            multi_threading=multi_threading,
+            reranker=reranker)
+        
         logging.info('Finish setup for Horizontal Universal')
+
+    

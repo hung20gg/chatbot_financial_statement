@@ -24,6 +24,7 @@ from agent.prompt.prompt_controller import (
     HORIZONTAL_PROMPT_BASE,
     HORIZONTAL_PROMPT_UNIVERSAL,
     FIIN_VERTICAL_PROMPT_UNIVERSAL,
+    FIIN_HORIZONTAL_PROMPT_UNIVERSAL
 )
 
 from ETL.dbmanager.setup import (
@@ -31,12 +32,10 @@ from ETL.dbmanager.setup import (
     BGE_VERTICAL_BASE_CONFIG,
     BGE_VERTICAL_UNIVERSAL_CONFIG,
     BGE_HORIZONTAL_BASE_CONFIG,
-    BGE_HORIZONTAL_UNIVERSAL_CONFIG,
-    TEI_HORIZONTAL_UNIVERSAL_CONFIG,
     TEI_VERTICAL_UNIVERSAL_CONFIG,
     OPENAI_VERTICAL_UNIVERSAL_CONFIG,
+    BGE_HORIZONTAL_UNIVERSAL_CONFIG,
     OPENAI_HORIZONTAL_UNIVERSAL_CONFIG,
-    OPENAI_HORIZONTAL_BASE_CONFIG,
     setup_db
 )
 
@@ -55,16 +54,14 @@ from ETL.dbmanager import get_semantic_layer, BaseRerannk
 def test():
     
     chat_config = ChatConfig(**GPT4O_MINI_CONFIG)
-    text2sql_config = Text2SQLConfig(**TEXT2SQL_FAST_OPENAI_CONFIG)
-    prompt_config = PromptConfig(**HORIZONTAL_PROMPT_UNIVERSAL)
+    text2sql_config = Text2SQLConfig(**TEXT2SQL_FASTEST_CONFIG)
+    prompt_config = PromptConfig(**FIIN_HORIZONTAL_PROMPT_UNIVERSAL)
     
     embedding_server = os.getenv('EMBEDDING_SERVER_URL')
     
     if check_embedding_server(embedding_server):
         logging.info('Using remote embedding server')
         db_config = DBConfig(**TEI_HORIZONTAL_UNIVERSAL_CONFIG)
-    elif os.path.exists('data/vector_db_horizontal_openai'):
-        db_config = DBConfig(**TEI_VERTICAL_UNIVERSAL_CONFIG)
     elif os.path.exists('data/vector_db_vertical_openai'):
         logging.info('Using openai embedding')
         db_config = DBConfig(**OPENAI_HORIZONTAL_UNIVERSAL_CONFIG)
@@ -74,7 +71,7 @@ def test():
     
         db_config = DBConfig(**BGE_HORIZONTAL_UNIVERSAL_CONFIG)
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')    
-        embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})
+        embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-base-en-v1.5', model_kwargs = {'device': device})
         db_config.embedding = embedding_model
     
     else:
@@ -107,11 +104,13 @@ def test():
         his, err, tab = text2sql.solve(prompt)
         print(tab[-1].table)
         
+
     except Exception as e:
         logging.error("Failed to setup chatbot")
         logging.error(e)
 
-
+    query = "Select * from company_info limit 5;"
+    print(db.query)
 if __name__ == "__main__":
     
     

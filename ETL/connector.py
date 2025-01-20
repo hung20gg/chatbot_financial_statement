@@ -166,7 +166,7 @@ def create_table_if_not_exists(conn, table_name, df_path, primary_key=None, fore
         column_definitions = ""
         
         for col, type_ in zip(columns, col_type):
-            column_definitions += f'{col} {type_} '
+            column_definitions += f'"{col}" {type_} '
             if col in primary_key:
                 column_definitions += 'PRIMARY KEY '
             
@@ -538,6 +538,11 @@ FIIN_RDB_SETUP_CONFIG = {
     'financial_statement_explaination': ['../csv/financial_statement_explaination_v3.parquet', None, {'category_code': 'map_category_code_explaination(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'industry_financial_statement': ['../csv/industry_report_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)'}, False, ['date_added']],
     'industry_financial_ratio': ['../csv/industry_ratio_v3.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)'}, False, ['date_added']],    
+    'universal_financial_report_hori': ['../csv_horizontal/universal_financial_report_hori.csv', None, {'stock_code': 'company_info(stock_code)'}],
+    'financial_ratios_hori': ['../csv_horizontal/financial_ratios_hori.csv', None, {'stock_code': 'company_info(stock_code)'}],
+    'industry_financial_report_hori': ['../csv_horizontal/industry_financial_report_hori.csv', None ],
+    'industry_financial_ratios_hori': ['../csv_horizontal/industry_financial_ratios_hori.csv', None ],
+    'financial_statement_explaination_hori': ['../csv_horizontal/financial_statement_explaination_hori.csv', None, {'stock_code': 'company_info(stock_code)'}],
 
 }
 
@@ -568,6 +573,7 @@ HORIZONTAL_VECTORDB_SETUP_CONFIG = {
     'sql_query': ['../agent/prompt/horizontal/base/base/query_horizontal_base.txt'],
     'sql_query_universal': ['../agent/prompt/horizontal/base/universal/query_horizontal_universal.txt'],
     'category_universal_chroma': ['map_category_code_universal'],
+    'category_universal_chroma$': ['map_category_code_explaination'],
 }
 
 
@@ -672,7 +678,8 @@ def setup_everything(config: dict):
     print(os.path.join(current_dir, '../data/vector_db_vertical_local'))
     
     client = PersistentClient(path = os.path.join(current_dir, '../data/vector_db_vertical_local'), settings = Settings())
-    
+    client_horizontal = PersistentClient(path=os.path.join(current_dir, '../data/vector_db_horizontal_local'), settings=Settings())
+
     # delete everything
     if config.get('force', False):
         delete_everything(db_conn)
@@ -693,7 +700,7 @@ def setup_everything(config: dict):
         if check_embedding_server(embedding_server):
             logging.info("Embedding server is running")
             setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client, embedding_server, **db_conn)
-            
+            setup_vector_db(HORIZONTAL_VECTORDB_SETUP_CONFIG, client_horizontal, embedding_server, **db_conn)
         elif os.getenv('LOCAL_EMBEDDING'):
             
             try:
@@ -703,14 +710,16 @@ def setup_everything(config: dict):
                 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
                 model = HuggingFaceEmbeddings(model_name=local_model, model_kwargs = {'device': device})
                 setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client, model, **db_conn)
-                
+                setup_vector_db(HORIZONTAL_VECTORDB_SETUP_CONFIG, client_horizontal, model, **db_conn)
             except Exception as e:
                 logging.error("Configured local model is not available")
                 raise e
     
     if config.get('openai', False):
         client_openai = PersistentClient(path = os.path.join(current_dir, '../data/vector_db_vertical_openai'), settings = Settings())
+        client_openai_horizontal = PersistentClient(path=os.path.join(current_dir, '../data/vector_db_horizontal_openai'), settings=Settings())
         setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client_openai, **db_conn)
+        setup_vector_db(HORIZONTAL_VECTORDB_SETUP_CONFIG, client_openai_horizontal, **db_conn)
         logging.info("OpenAI Embedding setup completed")
     
     
@@ -735,6 +744,6 @@ if __name__ == '__main__':
     setup_vector_db(HORIZONTAL_VECTORDB_SETUP_CONFIG, client, model, **db_conn)
     
     client_openai = PersistentClient(path = os.path.join(current_dir, '../data/vector_db_horizontal_openai'), settings = Settings())
-    setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client_openai, **db_conn)
+    setup_vector_db(HORIZONTAL_VECTORDB_SETUP_CONFIG, client_openai, **db_conn)
 
     
