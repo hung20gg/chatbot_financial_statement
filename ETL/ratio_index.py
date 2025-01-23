@@ -10,6 +10,10 @@ import pandas as pd
 import numpy as np 
 from tqdm import tqdm
 
+from multiprocessing import Pool
+
+
+import time
 
 INCLUDING_FIIN = True
 
@@ -34,7 +38,6 @@ def __get_financial_ratio(data_df, ratio_function):
         
         for ratio, inputs in ratio_function.items():
             input_values = []
-
             for input_name in inputs:
                 if isinstance(input_name, list):  # For cases like permanent capital (sum of multiple values)
                 # Sum multiple values if input_name is a list
@@ -66,9 +69,9 @@ def get_previous_year_q0_value(pivot_df, stock_code, year, category_code, quarte
     except KeyError:
         return None
 
-def get_pre_calculated_ratio(stock_code, year, ratio_code, ratios_df, quarter=0):
+def get_pre_calculated_ratio(year, ratio_code, ratios_df, quarter=0):
     try:
-        return ratios_df.loc[(ratios_df['stock_code'] == stock_code) & 
+        return ratios_df.loc[
                               (ratios_df['year'] == year) & 
                               (ratios_df['quarter'] == quarter) & 
                               (ratios_df['ratio_code'] == ratio_code), 
@@ -76,25 +79,19 @@ def get_pre_calculated_ratio(stock_code, year, ratio_code, ratios_df, quarter=0)
     except (IndexError, KeyError):
         return None
 
+def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None):
+    
+        # Get YoY ratio mappings from const.py
+    ratio_mapping = const.YoY_RATIO_FUNCTIONS[type_]
 
-# This code run so long, gonna optimize it later @pphanhh
-def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None):
-    """
-    Calculate YoY ratios for the given dataset and function dictionary.
-    Uses pre-calculated financial structure (ratios_df_1) and cash flow (ratios_df_6) ratios.
-    """
+    results = []
+    
     pivot_df = data_df.pivot_table(
         index=['stock_code', 'year', 'quarter'],
         columns='category_code',
         values='data',
         aggfunc='sum'
     )
-
-    # Get YoY ratio mappings from const.py
-    ratio_mapping = const.YoY_RATIO_FUNCTIONS[type_]
-
-    # Initialize results
-    results = []
 
     # Iterate through the pivoted data
     for (stock_code, year, quarter), row in pivot_df.iterrows():
@@ -113,11 +110,11 @@ def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None):
                         else 0 for code in category_code
                     )
                 elif category_code in ['EBIT']:
-                    current_year_value = get_pre_calculated_ratio(stock_code, year, category_code, ratios_df_1, quarter)
-                    previous_year_value = get_pre_calculated_ratio(stock_code, year - 1, category_code, ratios_df_1, quarter)
+                    current_year_value = get_pre_calculated_ratio(year, category_code, ratios_df_1, quarter)
+                    previous_year_value = get_pre_calculated_ratio(year - 1, category_code, ratios_df_1, quarter)
                 elif category_code in ['EBITDA']:
-                    current_year_value = get_pre_calculated_ratio(stock_code, year, category_code, ratios_df_6, quarter)
-                    previous_year_value = get_pre_calculated_ratio(stock_code, year - 1, category_code, ratios_df_6, quarter)
+                    current_year_value = get_pre_calculated_ratio(year, category_code, ratios_df_6, quarter)
+                    previous_year_value = get_pre_calculated_ratio(year - 1, category_code, ratios_df_6, quarter)
                 else:
                     current_year_value = row.get(category_code, 0)
                     previous_year_value = pivot_df.loc[
@@ -140,8 +137,42 @@ def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None):
             except Exception as e:
                 # Handle missing or invalid data gracefully
                 print(f"Error calculating YoY ratio {ratio_name} for {stock_code}: {e}")
+    return results
+
+# This code run so long, gonna optimize it later @pphanhh
+def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, multi_process=True):
+    """
+    Calculate YoY ratios for the given dataset and function dictionary.
+    Uses pre-calculated financial structure (ratios_df_1) and cash flow (ratios_df_6) ratios.
+    """
+
+    # Initialize results
+    results = []
+
+    symbols = data_df['stock_code'].unique()
+
+    inputs = []
+    for symbol in symbols:
+        inputs.append([
+                    data_df[data_df['stock_code'] == symbol],
+                    type_,
+                    ratios_df_1[ratios_df_1['stock_code'] == symbol] if ratios_df_1 is not None else None,
+                    ratios_df_6[ratios_df_6['stock_code'] == symbol] if ratios_df_6 is not None else None
+                ])
+    
+    if multi_process:
+        with Pool(4) as p:
+            jobs_results = p.starmap(__get_yoy_ratios, inputs)
+            for job_result in jobs_results:
+                results.extend(job_result)
+
+    else:
+        for args in inputs:
+            results.extend(__get_yoy_ratios(*args))
 
     return pd.DataFrame(results)
+
+
 
 
 
@@ -292,6 +323,26 @@ def financial_income_to_net_revenue_ratio(financial_income, net_revenue):
 def get_income_ratios(data_df, func_dict):
     return __get_financial_ratio(data_df, func_dict)
 
+
+#===================#
+#     PE Ratio      #
+#===================#
+
+def earning_per_share(eps):
+    return eps
+
+def price_earning_ratio(price, eps):
+    return price / eps if eps else None
+
+def book_value_per_share(eps, net_income, equity):
+    return (eps * net_income) / equity if equity else None
+
+def price_to_book_ratio(price, eps, net_income, equity):
+    bvps = book_value_per_share(eps, net_income, equity)
+    return price / bvps if bvps else None
+
+def get_pe_ratios(data_df, func_dict):
+    return __get_financial_ratio(data_df, func_dict)
 
 #===================#
 #  Profitability    #
@@ -527,6 +578,11 @@ def get_financial_ratio_tm(data_df):
     return __get_financial_ratio(data_df, const.BANK_FIIN_RATIO_FUNCTIONS)
     
 
+
+
+
+
+
 #===================#
 #   Main Function   #
 #===================#
@@ -540,6 +596,7 @@ def get_constant_values(type_):
             'income': const.INCOME_RATIO_FUNCTIONS,
             'profitability': const.PROFITABILITY_RATIO_FUNCTIONS,
             'cashflow': const.CASHFLOW_RATIO_FUNCTIONS,
+            'pe': const.PE_RATIO_FUNCTIONS,
             'yoy': const.YoY_RATIO_FUNCTIONS['non_bank']
         }
         
@@ -551,6 +608,7 @@ def get_constant_values(type_):
             'income': const.BANK_INCOME_RATIO_FUNCTIONS,
             'profitability': const.BANK_PROFITABILITY_RATIO_FUNCTIONS,
             'cashflow': const.BANK_CASHFLOW_RATIO_FUNCTIONS,
+            'pe': const.BANK_PE_RATIO_FUNCTIONS,
             'yoy': const.YoY_RATIO_FUNCTIONS['bank']
         }
     
@@ -562,26 +620,37 @@ def get_constant_values(type_):
             'income': const.SECURITIES_INCOME_RATIO_FUNCTIONS,
             'profitability': const.SECURITIES_PROFITABILITY_RATIO_FUNCTIONS,
             'cashflow': const.SECURITIES_CASHFLOW_RATIO_FUNCTIONS,
+            'pe': const.SECURITIES_PE_RATIO_FUNCTIONS,
             'yoy': const.YoY_RATIO_FUNCTIONS['securities']
         }
         
     else:
         raise ValueError(f"Invalid type: {type_}")
 
-def get_financial_ratios(data_df, type_ = 'non_bank'):
+
+
+# Helper function to execute the function with its arguments
+def run_function(func, *args):
+    return func(*args)
+
+def get_financial_ratios(data_df, type_ = 'non_bank', including_explaination = True):
     
     constant = get_constant_values(type_)
-    
+
     df_financial_structure = get_financial_structure_ratios(data_df, constant['financial_structure'])
     df_liquidity = get_liquidity_ratios(data_df, constant['liquidity'])
     df_financial_risk = get_financial_risk_ratio(data_df, constant['financial_risk'])
     df_income = get_income_ratios(data_df, constant['income'])
     df_profitability = get_profitability_ratios(data_df, constant['profitability'],type_)
     df_cashflow = get_cashflow_ratios(data_df, constant['cashflow'], type_)
-    df_yoy = get_yoy_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow)
-    df = pd.concat([df_financial_structure, df_liquidity, df_financial_risk, df_income, df_profitability, df_cashflow, df_yoy], ignore_index=True)
     
-    if type_ == 'bank' and INCLUDING_FIIN:
+    
+    df_pe = get_pe_ratios(data_df, constant['pe'])
+    
+    df_yoy = get_yoy_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow)
+    df = pd.concat([df_financial_structure, df_liquidity, df_financial_risk, df_income, df_profitability, df_cashflow, df_pe, df_yoy], ignore_index=True)
+    
+    if type_ == 'bank' and including_explaination:
         df_tm = get_financial_ratio_tm(data_df)
         df = pd.concat([df, df_tm], ignore_index=True)
     
@@ -590,6 +659,8 @@ def get_financial_ratios(data_df, type_ = 'non_bank'):
 
     map_df = pd.read_csv(os.path.join(current_path ,'../csv/map_ratio_code.csv'))
     map_df['function_name'] = map_df['function_name'].str.strip()
+    
+    
     df = pd.merge(df, map_df, on='function_name', how='left')
     # Check for missing mappings
     missing_ratios = df[df['ratio_code'].isna()]
@@ -633,56 +704,87 @@ def industry_ratios(data_df, metric = 'BS_400', top_n = 5):
     
     return df_industry_ratios
 
-if __name__ == '__main__':
-    
-    
-    
-    print("Test financial ratios")
-    
-    dfs = None
-    types = ['non_bank', 'bank', 'securities']
-    
+def calculate_index(version = 'v3', output_path: str = '../data/'):
+
+    if version == 'v3':
+        including_explaination = True
+    else:
+        including_explaination = False
+
+    dfs = []
+    types = ['non_bank',  'bank', 'securities']
+
+    df_stock_price_quarter = pd.read_parquet(os.path.join(current_path, '../csv/stock_price_quarterly.parquet'))
+    df_stock_price_quarter['category_code'] = 'Price'
+    df_stock_price_quarter['data'] = df_stock_price_quarter['close']
+    df_stock_price_quarter = df_stock_price_quarter[['stock_code', 'year', 'quarter', 'category_code', 'data']]
+
+    # Iterate through the types
     for type_ in types:
         print(f"Processing {type_} data")
-        data_df = pd.read_parquet(os.path.join(current_path, f'../csv/{type_}_financial_report_v3.parquet'))
+
+        # Read the financial statement data
+        data_df = pd.read_parquet(os.path.join(current_path, f'../csv/{type_}_financial_report_{version}.parquet'))
         
-        if INCLUDING_FIIN and type_ == 'bank':
+        # Get the stock price data based on type
+        df_stock_price_type = df_stock_price_quarter[df_stock_price_quarter['stock_code'].isin(data_df['stock_code'].unique())]
+        # Merge the data with the stock price data
+        data_df = pd.concat([data_df, df_stock_price_type], ignore_index=True)
+
+        # Get the explaination if the type is bank and INCLUDING_FIIN is True
+        if including_explaination and type_ == 'bank':
             tm_df = pd.read_parquet(os.path.join(current_path, '../csv/bank_explaination_v3.parquet'))
             data_df = pd.concat([data_df, tm_df], ignore_index=True)
         
-        df = get_financial_ratios(data_df[['stock_code', 'year', 'quarter', 'category_code', 'data']], type_)
         
+        # Get the financial ratios
+        df = get_financial_ratios(data_df[['stock_code', 'year', 'quarter', 'category_code', 'data']], type_, including_explaination =including_explaination)
+        
+        # Format datetime
         data_df['time_code'] = data_df['stock_code'] + data_df['year'].astype(str) + data_df['quarter'].astype(str)
         df['time_code'] = df['stock_code'] + df['year'].astype(str) + df['quarter'].astype(str)
         
-        time_df = data_df[['time_code', 'date_added']].drop_duplicates()
+
+        time_df = data_df[['time_code', 'date_added']]
+        time_df.dropna(inplace=True)
+        time_df.drop_duplicates(inplace=True)
         
         df = pd.merge(df, time_df, on='time_code', how='left')
         df.drop(columns=['time_code'], inplace=True)
         
-        if dfs is None:
-            dfs = df
-        else:
-            dfs = pd.concat([dfs, df], ignore_index=True)
+        dfs.append(df)
+
+    # Concatenate the dataframes
+    dfs = pd.concat(dfs, ignore_index=True)
     
     assert dfs['ratio_code'].isna().sum()==0 , "Null value in ratio_code"
     
-
-
     dfs.drop_duplicates(inplace=True)
     dfs.fillna(0, inplace=True)
     
     dfs = dfs[['stock_code', 'year', 'quarter', 'ratio_code', 'data', 'date_added']]
     
-    dfs.to_parquet(os.path.join(current_path, '../csv/financial_ratio_v3.parquet'), index=False)
+    dfs.to_parquet(os.path.join(current_path, output_path ,'financial_ratio_v3.parquet'), index=False)
     
+
+    # Get the industry ratios
+
     df_industry_ratios = industry_ratios(dfs, metric='BS_400', top_n=15)
     print(df_industry_ratios[(df_industry_ratios['ratio_code'] == 'BDR') & (df_industry_ratios['year'] == 2023)].head(10))
-    df_industry_ratios.to_parquet(os.path.join(current_path, '../csv/industry_ratio_v3.parquet'), index=False)
+    df_industry_ratios.to_parquet(os.path.join(current_path, output_path, f'industry_ratio_{version}.parquet'), index=False)
 
-    ratio = dfs['ratio_code'].unique()
+    ratio = dfs['ratio_code'].unique().tolist()
     
-    for r in ratio[:5]:
+    for r in ['BDR', 'EPS', 'PE']:
         print(r)
         print(dfs[(dfs['ratio_code'] == r)&(dfs['quarter'] == 0)&(dfs['year'] == 2022)].head(5))
         print('========================================')
+
+if __name__ == '__main__':
+    
+    start = time.time()
+    print("Test financial ratios")
+    calculate_index(version='v3')
+
+    end = time.time()
+    print(f"Time: {end - start}")

@@ -191,7 +191,7 @@ def get_table_name_from_sql(sql_text):
     return ""
     
     
-def TIR_reasoning(response, db, verbose=False):
+def TIR_reasoning(response, db, verbose=False, prefix=""):
     codes = get_code_from_text_response(response)
         
     TIR_response = ""
@@ -219,12 +219,11 @@ def TIR_reasoning(response, db, verbose=False):
             
             # If it see an error in the SQL code
             if isinstance(table, str):
-                execution_error.append((i, table))
-                continue
-            
-            table_obj = Table(table=table, sql=code, description=f"SQL Result {i+1}: {name}")
-            
-            execution_table.append(table_obj)
+                execution_error.append(f"{prefix} SQL {i+1} Error: " + table)
+                
+            else:
+                table_obj = Table(table=table, sql=code, description=f"{prefix} SQL {i+1} Result: {name}")
+                execution_table.append(table_obj)
     
     
     return execution_error, execution_table

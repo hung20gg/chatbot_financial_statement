@@ -1544,3 +1544,10 @@ join
 	mbb_state_loan state
 on 
 	loan.year = state.year
+
+
+-- 68. Total Equity of Bank in 2023
+
+-- 69. Total Equity of Real Estate in 2023
+
+-- Price-Earning Ratio (P/E) of VIC 2022

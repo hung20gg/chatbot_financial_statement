@@ -260,6 +260,28 @@ SECURITIES_CASHFLOW_RATIO_FUNCTIONS = {
     'net_interest_margin': ['IS_001', 'BS_110'],  # net_interest_income , avg_earning_assets
 }
 
+
+PE_RATIO_FUNCTIONS = {
+    'earning_per_share': ['IS_070'],
+    'price_earning_ratio': ['Price', 'IS_070'],
+    'book_value_per_share': ['IS_070','IS_060', 'BS_400'],
+    'price_to_book_ratio': ['Price', 'IS_070','IS_060', 'BS_400'],
+}
+
+BANK_PE_RATIO_FUNCTIONS = {
+    'earning_per_share': ['IS_023'],
+    'price_earning_ratio': ['Price', 'IS_023'],
+    'book_value_per_share': ['IS_023','IS_021', 'BS_500'],
+    'price_to_book_ratio': ['Price', 'IS_023','IS_021', 'BS_500'],
+}
+
+SECURITIES_PE_RATIO_FUNCTIONS = {
+    'earning_per_share': ['IS_501'],
+    'price_earning_ratio': ['Price', 'IS_501'],
+    'book_value_per_share': ['IS_501','IS_200', 'BS_400'],
+    'price_to_book_ratio': ['Price', 'IS_501','IS_200', 'BS_400'],
+}
+
 YoY_RATIO_FUNCTIONS = {
     'securities':{
         'Net_Revenue_Growth_YoY': 'IS_020',

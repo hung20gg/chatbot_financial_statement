@@ -23,17 +23,17 @@ def insert_null_row(df, index_to_insert):
 
 # Category code mapping
 
-map_caption_bcdkt_bank = pd.read_csv(os.path.join(current_dir, r'mapping_data\map_caption_bcdkt_bank.csv'))
-map_caption_bkqkd_bank = pd.read_csv(os.path.join(current_dir, r'mapping_data\map_caption_bkqkd_bank.csv'))
-map_caption_blctt_bank = pd.read_csv(os.path.join(current_dir, r'mapping_data\map_caption_blctt_bank.csv'))
+map_caption_bcdkt_bank = pd.read_csv(os.path.join(current_dir, r'mapping_data/map_caption_bcdkt_bank.csv'))
+map_caption_bkqkd_bank = pd.read_csv(os.path.join(current_dir, r'mapping_data/map_caption_bkqkd_bank.csv'))
+map_caption_blctt_bank = pd.read_csv(os.path.join(current_dir, r'mapping_data/map_caption_blctt_bank.csv'))
 
-map_caption_bcdkt_non_bank = pd.read_csv(os.path.join(current_dir, r'mapping_data\map_caption_bcdkt_non_bank.csv'))
-map_caption_bkqkd_non_bank = pd.read_csv(os.path.join(current_dir, r'mapping_data\map_caption_bkqkd_non_bank.csv'))
-map_caption_blctt_non_bank = pd.read_csv(os.path.join(current_dir, r'mapping_data\map_caption_blctt_non_bank.csv'))
+map_caption_bcdkt_non_bank = pd.read_csv(os.path.join(current_dir, r'mapping_data/map_caption_bcdkt_non_bank.csv'))
+map_caption_bkqkd_non_bank = pd.read_csv(os.path.join(current_dir, r'mapping_data/map_caption_bkqkd_non_bank.csv'))
+map_caption_blctt_non_bank = pd.read_csv(os.path.join(current_dir, r'mapping_data/map_caption_blctt_non_bank.csv'))
 
-map_caption_bcdkt_sec = pd.read_csv(os.path.join(current_dir, r'mapping_data\map_caption_bcdkt_sec.csv'))
-map_caption_bkqkd_sec = pd.read_csv(os.path.join(current_dir, r'mapping_data\map_caption_bkqkd_sec.csv'))
-map_caption_blctt_sec = pd.read_csv(os.path.join(current_dir, r'mapping_data\map_caption_blctt_sec.csv'))
+map_caption_bcdkt_sec = pd.read_csv(os.path.join(current_dir, r'mapping_data/map_caption_bcdkt_sec.csv'))
+map_caption_bkqkd_sec = pd.read_csv(os.path.join(current_dir, r'mapping_data/map_caption_bkqkd_sec.csv'))
+map_caption_blctt_sec = pd.read_csv(os.path.join(current_dir, r'mapping_data/map_caption_blctt_sec.csv'))
 
 # Dictionary mapping
 dict_map_caption_bcdkt_bank = dict(zip(map_caption_bcdkt_bank['vi_caption'], map_caption_bcdkt_bank['category_code']))
