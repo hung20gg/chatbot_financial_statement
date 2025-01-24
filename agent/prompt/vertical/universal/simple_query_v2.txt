@@ -1283,8 +1283,6 @@ on l.stock_code = stl.stock_code
 order by short_term_ratio desc 
 limit 5;
 
-
-
 -- 60. Technology firms with highest Net Revenue Grow YoY in 2023
 
 with technology as (
@@ -1548,6 +1546,34 @@ on
 
 -- 68. Total Equity of Bank in 2023
 
--- 69. Total Equity of Real Estate in 2023
+select 
+	industry,
+	quarter,
+	year,
+	category_code,
+	data_sum
 
--- Price-Earning Ratio (P/E) of VIC 2022
+from industry_financial_statement
+
+where
+	category_code = 'BS_400' -- Total Equity
+	and year = 2023
+	and quarter = 0
+	and industry = 'Banking'
+
+-- 69. Price-Earning Ratio (P/E) of VIC 2022
+
+select 
+	stock_code,
+	quarter,
+	year,
+	ratio_code,
+	data
+
+from financial_ratio
+
+where
+	ratio_code = 'PE' -- Price-Earning Ratio
+	and year = 2022
+	and quarter = 0
+	and stock_code = 'VIC'

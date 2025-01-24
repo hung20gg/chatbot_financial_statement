@@ -79,10 +79,8 @@ def get_pre_calculated_ratio(year, ratio_code, ratios_df, quarter=0):
     except (IndexError, KeyError):
         return None
 
-def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None):
+def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_mapping=None):
     
-        # Get YoY ratio mappings from const.py
-    ratio_mapping = const.YoY_RATIO_FUNCTIONS[type_]
 
     results = []
     
@@ -140,7 +138,7 @@ def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None):
     return results
 
 # This code run so long, gonna optimize it later @pphanhh
-def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, multi_process=True):
+def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, multi_process=True, constant=None):
     """
     Calculate YoY ratios for the given dataset and function dictionary.
     Uses pre-calculated financial structure (ratios_df_1) and cash flow (ratios_df_6) ratios.
@@ -157,7 +155,8 @@ def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, multi_pro
                     data_df[data_df['stock_code'] == symbol],
                     type_,
                     ratios_df_1[ratios_df_1['stock_code'] == symbol] if ratios_df_1 is not None else None,
-                    ratios_df_6[ratios_df_6['stock_code'] == symbol] if ratios_df_6 is not None else None
+                    ratios_df_6[ratios_df_6['stock_code'] == symbol] if ratios_df_6 is not None else None,
+                    constant
                 ])
     
     if multi_process:
@@ -588,7 +587,7 @@ def get_financial_ratio_tm(data_df):
 #===================#
 
 def get_constant_values(type_):
-    if type_ == 'non_bank':
+    if type_ == 'corp':
         return {
             'financial_structure': const.FINANCIAL_STRUCTURE_RATIO_FUNCTIONS,
             'liquidity': const.LIQUIDITY_RATIO_FUNCTIONS,
@@ -633,7 +632,7 @@ def get_constant_values(type_):
 def run_function(func, *args):
     return func(*args)
 
-def get_financial_ratios(data_df, type_ = 'non_bank', including_explaination = True):
+def get_financial_ratios(data_df, type_ = 'corp', including_explaination = True):
     
     constant = get_constant_values(type_)
 
@@ -647,7 +646,7 @@ def get_financial_ratios(data_df, type_ = 'non_bank', including_explaination = T
     
     df_pe = get_pe_ratios(data_df, constant['pe'])
     
-    df_yoy = get_yoy_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow)
+    df_yoy = get_yoy_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow, constant=constant['yoy'])
     df = pd.concat([df_financial_structure, df_liquidity, df_financial_risk, df_income, df_profitability, df_cashflow, df_pe, df_yoy], ignore_index=True)
     
     if type_ == 'bank' and including_explaination:
@@ -676,11 +675,11 @@ def get_financial_ratios(data_df, type_ = 'non_bank', including_explaination = T
     return df
 
 
-def industry_ratios(data_df, metric = 'BS_400', top_n = 5):
+def industry_ratios(data_df, metric = 'BS_400', top_n = 5, output_path = '../data/'):
     df_company = pd.read_csv(os.path.join(current_path, '../csv/df_company_info.csv'))
     
     # Read the financial statement data to get top 10 industries
-    df_fs = pd.read_parquet(os.path.join(current_path, '../csv/financial_statement_v3.parquet'))
+    df_fs = pd.read_parquet(os.path.join(current_path, output_path, 'financial_statement_v3.parquet'))
 
     # Add industry to the data
     df_fs = pd.merge(df_fs, df_company[['stock_code', 'industry']], on='stock_code', how='left')
@@ -704,6 +703,7 @@ def industry_ratios(data_df, metric = 'BS_400', top_n = 5):
     
     return df_industry_ratios
 
+
 def calculate_index(version = 'v3', output_path: str = '../data/'):
 
     if version == 'v3':
@@ -712,7 +712,7 @@ def calculate_index(version = 'v3', output_path: str = '../data/'):
         including_explaination = False
 
     dfs = []
-    types = ['non_bank',  'bank', 'securities']
+    types = ['corp',  'bank', 'securities']
 
     df_stock_price_quarter = pd.read_parquet(os.path.join(current_path, '../csv/stock_price_quarterly.parquet'))
     df_stock_price_quarter['category_code'] = 'Price'
@@ -724,7 +724,7 @@ def calculate_index(version = 'v3', output_path: str = '../data/'):
         print(f"Processing {type_} data")
 
         # Read the financial statement data
-        data_df = pd.read_parquet(os.path.join(current_path, f'../csv/{type_}_financial_report_{version}.parquet'))
+        data_df = pd.read_parquet(os.path.join(current_path, f'../csv/{version}/{type_}_financial_report.parquet'))
         
         # Get the stock price data based on type
         df_stock_price_type = df_stock_price_quarter[df_stock_price_quarter['stock_code'].isin(data_df['stock_code'].unique())]
@@ -733,7 +733,7 @@ def calculate_index(version = 'v3', output_path: str = '../data/'):
 
         # Get the explaination if the type is bank and INCLUDING_FIIN is True
         if including_explaination and type_ == 'bank':
-            tm_df = pd.read_parquet(os.path.join(current_path, '../csv/bank_explaination_v3.parquet'))
+            tm_df = pd.read_parquet(os.path.join(current_path, '../csv/v3/bank_explaination.parquet'))
             data_df = pd.concat([data_df, tm_df], ignore_index=True)
         
         
@@ -769,7 +769,7 @@ def calculate_index(version = 'v3', output_path: str = '../data/'):
 
     # Get the industry ratios
 
-    df_industry_ratios = industry_ratios(dfs, metric='BS_400', top_n=15)
+    df_industry_ratios = industry_ratios(dfs, metric='BS_400', top_n=15, output_path=output_path)
     print(df_industry_ratios[(df_industry_ratios['ratio_code'] == 'BDR') & (df_industry_ratios['year'] == 2023)].head(10))
     df_industry_ratios.to_parquet(os.path.join(current_path, output_path, f'industry_ratio_{version}.parquet'), index=False)
 

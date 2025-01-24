@@ -70,7 +70,7 @@ job_titles = [
     # "Broker"
 ]
 
-file_path = 'generated_questions.json'
+file_path = 'generated_questions_v2.json'
 # Function to add new content to a JSON file
 def add_content_to_json(new_data):
     try:
@@ -103,10 +103,10 @@ Note:
 - you must return questions only.
 - You can ask questions in any format, but the questions must be relevant to the task.
 - You mustn't contain the word : "Include" the list of companies in the end of the question.
-- your question should not contain prediction or forecast parts.
-- your questions should not contain the phrase: "This will help", "consider".
-- Making the question from easy to hard and more complex for each request. (Q1 is easy and final question is the most difficult)
+- Your question should not contain prediction or forecast parts.
+- Generate hard questions that require deep understanding of the financial reports of the companies.
 """
+    # - Making the question from easy to hard and more complex for each request. (Q1 is easy and final question is the most difficult)
    # , and you have to ask many explicit,meaningful and insightful questions about the financial reports of companies.
     
     if isinstance(analyzing_types, str):
@@ -205,7 +205,7 @@ Return the questions in a JSON format
 
         
 def parallel_generate_questions(*args):
-    llm = Gemini(model_name="gemini-1.5-flash")
+    llm = Gemini(model_name="gemini-1.5-pro")
 
     return generate_questions(llm, *args)
 
@@ -222,7 +222,7 @@ def main():
                     for job_title in job_titles:
                         tasks.append((main_task, sub_task,analyzing_type, time,job_title))
 
-    BATCH_SIZE = 10
+    BATCH_SIZE = 2
     # batch_tasks = [tasks[i:i+BATCH_SIZE] for i in range(0, len(tasks), BATCH_SIZE)]
 
     batch_tasks = []
@@ -237,7 +237,7 @@ def main():
 
     # Test
 
-    batch_tasks = random.sample(batch_tasks, 80)
+    batch_tasks = random.sample(batch_tasks, 100)
     # batch_tasks = batch_tasks[:2]
 
     print(f"Number of tasks: {len(tasks)}")
@@ -262,8 +262,6 @@ if __name__ == "__main__":
         json.dump([], f, indent=4)
     generated_questions = main()
     
-    with open('temp_generated_questions.json', 'w') as f:
-        json.dump([generated_questions], f, indent=4)
 
     # print(os.getenv('GENAI_API_KEY'))
 

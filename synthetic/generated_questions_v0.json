@@ -1,0 +1,1034 @@
+[
+    [
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "compare 2 or more company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of profitability",
+            "job_titles": "Auditor",
+            "questions": [
+                "For the year 2023, what was the Return on Equity (ROE) for Vietcombank (VCB) and Techcombank (TCB)?",
+                "Compare the Net Profit Margin for BIDV (BID) and ACB (ACB) in Q3 2024.",
+                "What were the total revenues of Vinamilk (VNM) and Masan Group (MSN) in 2022?",
+                "Calculate the Current Ratio for both FPT Corporation (FPT) and Viettel (assuming you have access to Viettel's financial statements) as of the end of 2021.",
+                "What is the difference in the Debt-to-Equity ratio between Hoa Phat Group (HPG) and Vinhomes (VHM) during 2020?"
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "compare 2 or more company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of profitability",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "Compare the Gross Profit Margin of Vinamilk (VNM) and KIDO Group (KDC) for the year 2023.",
+                "What were the operating expenses of Vietcombank (VCB) and Techcombank (TCB) in Q2 2024?"
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "compare 2 or more company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of profitability",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "For the year 2022, calculate the Earnings Per Share (EPS) for both FPT Corporation (FPT) and Mobile World Investment (MWG).",
+                "Compare the Cost of Goods Sold (COGS) as a percentage of revenue for Vinamilk (VNM) and Masan Group (MSN) in Q3 2024."
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "compare 2 or more company",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of profitability",
+            "job_titles": "Auditor",
+            "questions": [
+                "Analyze the trend of the Return on Assets (ROA) for Vietcombank (VCB) and ACB (ACB) from 2020 to Q3 2024.",
+                "How has the Net Income of Vinamilk (VNM) and Masan Group (MSN) changed from 2020 to 2023?"
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "compare 2 or more company",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of profitability",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "Show the change in the Profit Margin ratio for FPT Corporation (FPT) and Viettel (assuming you have access to Viettel's financial statements) from 2020 to 2023.",
+                "Compare the trend of Operating Income for BIDV (BID) and Techcombank (TCB) from Q1 2022 to Q3 2024."
+            ]
+        }
+    ],
+    [
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "Ranking top 1-5-10 with or without special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of business performance",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "What are the top 5 companies with the highest Return on Equity (ROE) in 2023, ranked in descending order?",
+                "For the year 2022, what were the Current Ratios of the top 10 companies with total assets exceeding 100 billion VND, ranked from highest to lowest?",
+                "Rank the top 5 companies by Debt-to-Equity Ratio (DER) for Q3 2024.  List in ascending order.",
+                "What were the Gross Profit Margins for the top 10 companies in the Banking industry for the year 2020, ranked from highest to lowest?",
+                "Which 5 companies had the highest Price-to-Earnings Ratio (P/E) in 2021, ranked in descending order?"
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "Ranking top 1-5-10 with or without special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of business performance",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "What are the top 5 companies with the highest Net Profit Margin in 2023, ranked in descending order?",
+                "For Q2 2024, rank the top 10 companies by their Quick Ratio, from highest to lowest, considering only those with total assets exceeding 50 billion VND."
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "Ranking top 1-5-10 with or without special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of business performance",
+            "job_titles": "Auditor",
+            "questions": [
+                "How did the top 5 companies' Return on Assets (ROA) change from 2020 to Q3 2024?  Present the data in a ranked format for each period.",
+                "Analyze the trend of the Debt-to-Equity Ratio (DER) for the top 10 companies from 2021 to 2023.  Show the ranking for each year."
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "Ranking top 1-5-10 with or without special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of business performance",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "Show the change in the top 5 companies' Inventory Turnover ratio from 2020 to 2023, ranked for each year.",
+                "Track the trend of the top 10 companies' Profitability Ratio (Net Profit Margin) from Q1 2023 to Q3 2024; provide rankings for each quarter."
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "Ranking top 1-5-10 with or without special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of business performance",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "For the top 10 companies, how has the Price-to-Book Ratio (P/B) changed from 2020 to 2023? Provide yearly rankings.",
+                "Analyze the trend of the top 5 companies'  Earnings Per Share (EPS) from Q1 2022 to Q3 2024.  Show rankings for each quarter."
+            ]
+        }
+    ],
+    [
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of profitability",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "For the period 2020-Q3 2024, calculate the Return on Assets (ROA) for each company in the Banking industry.  Compare each company's ROA to the industry average ROA for each year. Explain any significant variations from the industry average and potential reasons for such differences.",
+                "Analyze the Gross Profit Margin for each company in the Food and Beverages industry from 2020 to Q3 2024.  Compare each company's Gross Profit Margin trend to the industry average. Explain any significant upward or downward trends and potential factors driving these changes.",
+                "Calculate the Current Ratio for each company in the Real Estate industry for the period 2020-Q3 2024. Compare each company's Current Ratio to the industry average for each year. Explain any significant differences and potential implications for liquidity.",
+                "For the period 2020-Q3 2024, compute the Net Profit Margin for each company in the Information Technology industry. Compare each company's Net Profit Margin to the industry average for each reporting period. Explain any significant variations and possible underlying causes.",
+                "Analyze the Debt-to-Equity Ratio for each company in the Basic Resources industry from 2020 to Q3 2024. Compare each company's Debt-to-Equity Ratio to the industry average. Explain any significant differences and potential implications for financial risk."
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Cash flow analysis",
+            "job_titles": "Auditor",
+            "questions": [
+                "For the year 2023, calculate the operating cash flow to current liabilities ratio for each company in the Banking industry. Compare each company's ratio to the industry average for 2023. Explain any significant differences and discuss potential implications for short-term debt repayment ability.",
+                "Analyze the free cash flow (FCF) for each company in the Real Estate industry in Q2 2024. Compare each company's FCF to the industry average for Q2 2024. Explain any significant variations and potential reasons for those differences, considering factors like capital expenditures and working capital management."
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Cash flow analysis",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "For the year 2022, calculate the cash flow from operations to capital expenditures ratio for each company in the Manufacturing industry.  Compare each company's ratio to the industry average for 2022. Explain any significant differences and discuss what these differences might indicate about each company's investment and growth strategies.",
+                "Analyze the change in cash and cash equivalents for each company in the Technology industry during Q3 2024.  Compare the change in cash for each company to the industry average change. Explain any significant differences and discuss potential contributing factors, such as financing activities or changes in operating cash flow."
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Cash flow analysis",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "For the year 2021, calculate the operating cash flow ratio (operating cash flow / net sales) for each company in the Retail industry. Compare each company's ratio to the industry average for 2021. Explain significant differences and discuss potential causes, such as variations in inventory management or credit policies.",
+                "Analyze the cash flow from investing activities for each company in the Energy sector during Q1 2024.  Compare each company's cash flow from investing activities to the industry average. Explain significant differences and discuss potential reasons, such as capital expenditures on new projects or acquisitions."
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "over time with specific period",
+            "analyzing_types": "Cash flow analysis",
+            "job_titles": "Auditor",
+            "questions": [
+                "Analyze the trend of the cash conversion cycle (CCC) for each company in the Consumer Goods industry from 2020 to Q3 2024. Compare each company's CCC trend to the industry average trend over the same period. Explain any significant differences in trends and discuss potential contributing factors, such as changes in inventory management or payment terms.",
+                "For the period 2020-Q3 2024, calculate the free cash flow yield (FCF / market capitalization) for each company in the Financial Services industry. Compare each company's free cash flow yield trend to the industry average trend. Explain significant differences in trends and discuss potential reasons, such as changes in capital expenditures or profitability."
+            ]
+        }
+    ],
+    [
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "analyze over industry average report (might be % of X in the industry)",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of capital structures",
+            "job_titles": "Auditor",
+            "questions": [
+                "For the banking companies (BID, EIB, OCB, CTG, VCB, ACB, MBB, HDB, TPB, VPB, STB, TCB, SHB, VIB, ABB, LPB, NVB) from 2020 to Q3 2024, what were their Return on Equity (ROE) and Return on Assets (ROA) ratios, and how did these compare to the industry average for each year?",
+                "Calculate the Debt-to-Equity ratio for the Real Estate companies (SZC, VHM, VRE, DXG, SCR, KBC, NVL, HDC, TCH, CEO, KDH, VPI, VC3) from 2020 to Q3 2024.  How do these ratios compare to the industry average for each year?",
+                "Analyze the current ratio and quick ratio for the Food and Beverages companies (PAN, KDC, SBT, VNM, MSN, DBC, SAF, SLS) from 2020 to Q3 2024. How did these ratios change over time and how did they compare to the industry average for each year?",
+                "What were the interest coverage ratios for the Utilities (Electricity, Water & Gas) companies (REE, GAS, POW, PVG) from 2020 to Q3 2024? Compare these ratios to the industry average for each respective year."
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "analyze over industry average report (might be % of X in the industry)",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of capital structures",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "For the technology companies (ELC, ITD, CMG, FPT) from 2020 to Q3 2024,  what were their debt-to-asset ratios and how did these compare to the industry average each year?",
+                "Calculate the  profit margin and gross profit margin for the Basic Resources companies (HSG, HPG, CAP, TMB, TVD, NKG) from 2020 to Q3 2024. How do these margins compare to the industry average for each year?"
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "analyze over industry average report (might be % of X in the industry)",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of capital structures",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "For the Oil and Gas companies (BSR, PLX, PVS, PVC) from 2020 to Q3 2024, what were their inventory turnover ratios and how did these compare to the industry average each year?",
+                "Analyze the  price-to-earnings (P/E) ratio for the Retail companies (MWG, FRT, PSD) from 2020 to Q3 2024. How do these ratios compare to the industry average for each year?"
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "analyze over industry average report (might be % of X in the industry)",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of loan types (mostly for banks, focus on loan to customer, loan type, duration, etc)",
+            "job_titles": "Auditor",
+            "questions": [
+                "For the banking companies (BID, EIB, OCB, CTG, VCB, ACB, MBB, HDB, TPB, VPB, STB, TCB, SHB, VIB, ABB, LPB, NVB),  what was the percentage of Non-Performing Loans (NPLs) to total loans in Q3 2024, and how did this compare to the industry average for that quarter?",
+                "In 2023, what was the ratio of short-term loans to long-term loans for the banking companies (BID, EIB, OCB, CTG, VCB, ACB, MBB, HDB, TPB, VPB, STB, TCB, SHB, VIB, ABB, LPB, NVB)? Compare this ratio to the industry average for 2023."
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "analyze over industry average report (might be % of X in the industry)",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of loan types (mostly for banks, focus on loan to customer, loan type, duration, etc)",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "For the Banking companies (BID, EIB, OCB, CTG, VCB, ACB, MBB, HDB, TPB, VPB, STB, TCB, SHB, VIB, ABB, LPB, NVB), what proportion of their loan portfolio consisted of consumer loans in 2023?  Compare this to the industry average for the same year.",
+                "In Q2 2024, what was the average duration (maturity) of loans for the Banking companies (BID, EIB, OCB, CTG, VCB, ACB, MBB, HDB, TPB, VPB, STB, TCB, SHB, VIB, ABB, LPB, NVB)? How does this compare to the industry average for Q2 2024?"
+            ]
+        }
+    ],
+    [
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of capital structures",
+            "job_titles": "Auditor",
+            "questions": [
+                "For the banking companies (BID, EIB, OCB, CTG, VCB, ACB, MBB, HDB, TPB, VPB, STB, TCB, SHB, VIB, ABB, LPB, NVB) from 2020 to Q3 2024, what were their respective Return on Equity (ROE) and Return on Assets (ROA) ratios each year, and how do these compare to the industry average for each year?",
+                "Calculate the Debt-to-Equity ratio for each of the Real Estate companies (SZC, VHM, VRE, KBC, NVL, DXG, SCR, KDH, HDC, TCH, CEO, VC3, TIG, HLD, DTD) annually from 2020 to Q3 2024.  Compare each company's ratio to the industry average for each year.",
+                "Analyze the current ratio and quick ratio for the Food and Beverages companies (PAN, KDC, SBT, VNM, MSN, SAB, DBC, SAF, SLS) from 2020 to Q3 2024. How do these ratios compare to the industry average for each year?",
+                "For the Information Technology companies (ELC, ITD, CMG, FPT) from 2020 to Q3 2024, what were their respective Debt-to-Asset ratios and Interest Coverage ratios each year? Compare to the industry average for each year."
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of capital structures",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "For the years 2020-Q3 2024, calculate the interest coverage ratio for each company in the 'Utilities (Electricity, Water & Gas)' industry (REE, GAS, POW, PVG). Compare each company's ratio to the industry average for each year.",
+                "From 2020 to Q3 2024, compute the debt-to-asset ratio for all companies in the 'Basic Resources' industry (HSG, HPG, CAP, TMB, TVD, NKG). Compare each company's ratio against the industry average each year."
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of capital structures",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "Calculate the times interest earned ratio for all companies in the 'Chemicals' industry (CSV, GVR, DGC, DCM, LAS, PLC) annually from 2020 to Q3 2024.  Compare each company's ratio to the industry average for each year.",
+                "For the 'Retail' industry (MWG, FRT, PSD) from 2020 to Q3 2024, determine the inventory turnover ratio for each company annually. How does each company's ratio compare to the industry average over time?"
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of loan types (mostly for banks, focus on loan to customer, loan type, duration, etc)",
+            "job_titles": "Auditor",
+            "questions": [
+                "For Q3 2024, what was the percentage of Non-Performing Loans (NPLs) to total loans for each of the banking companies (BID, EIB, OCB, CTG, VCB, ACB, MBB, HDB, TPB, VPB, STB, TCB, SHB, VIB, ABB, LPB, NVB)?  Compare each bank's NPL ratio to the industry average for Q3 2024.",
+                "In 2023, what was the ratio of customer loans to total assets for each of the banking companies (BID, EIB, OCB, CTG, VCB, ACB, MBB, HDB, TPB, VPB, STB, TCB, SHB, VIB, ABB, LPB, NVB)? Compare each bank's ratio to the industry average for 2023."
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of loan types (mostly for banks, focus on loan to customer, loan type, duration, etc)",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "For the banking sector (BID, EIB, OCB, CTG, VCB, ACB, MBB, HDB, TPB, VPB, STB, TCB, SHB, VIB, ABB, LPB, NVB), what was the ratio of short-term loans to long-term loans in their loan portfolios for Q2 2024?  How does this compare to the industry average for that quarter?",
+                "Calculate the ratio of loans to customers to total assets for each bank (BID, EIB, OCB, CTG, VCB, ACB, MBB, HDB, TPB, VPB, STB, TCB, SHB, VIB, ABB, LPB, NVB) in 2022. Compare each bank's ratio to the industry average for 2022."
+            ]
+        }
+    ],
+    [
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "Ranking top 1-5-10 with or without special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of financial risk",
+            "job_titles": "Auditor",
+            "questions": [
+                "What is the average Return on Equity (ROE) for the top 5 banks (by total assets) \u2013 BID, CTG, VCB, ACB, MBB \u2013 from 2020 to Q3 2024?",
+                "For the top 10 companies (by market capitalization) listed on HOSE from 2020 to Q3 2024, what are their respective current ratios and quick ratios?  Please rank them from highest to lowest for each ratio.",
+                "Calculate the Debt-to-Equity ratio for VHM, VIC, and KDH for each year from 2020 to 2023.  Which company shows the highest level of financial leverage during this period?",
+                "Among the top 5 companies in the 'Food and Beverages' industry (based on revenue) \u2013 VNM, MSN, KDC, SBT, DBC \u2013  what was the trend of their Net Profit Margin from 2020 to Q3 2024?",
+                "What were the average inventory turnover ratios for the companies in the 'Chemicals' industry (CSV, GVR, DGC, DCM, PLC, LAS) from 2020 to Q3 2024? Rank them from highest to lowest."
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "Ranking top 1-5-10 with or without special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of financial risk",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "Rank the top 5 companies (by total assets) from among the banking sector (BID, CTG, VCB, ACB, MBB, EIB, OCB, HDB, TPB, VPB, STB, TCB, SHB, VIB, ABB, LPB, NVB) based on their interest coverage ratio from 2020 to Q3 2024.  Explain the implications of these ratios regarding financial risk.",
+                "For the top 10 companies listed on HOSE with total assets exceeding 100 billion VND in 2023, calculate their return on assets (ROA) for each year from 2020 to 2023.  Present the results in a ranked format, highlighting any significant trends or differences across companies."
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "Ranking top 1-5-10 with or without special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of financial risk",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "Analyze the top 5 companies (by market capitalization) in the 'Real Estate' industry (VHM, VIC, VRE, DXG, KDH) and calculate their debt-to-asset ratios for 2020-2023. Rank them and explain the implications of these ratios in terms of their financial risk profiles.",
+                "From 2020 to Q3 2024, determine the average gross profit margin for the top 10 companies (by revenue) in the 'Food and Beverages' sector. Rank these companies and discuss what the differences in gross profit margins might indicate about their pricing strategies and cost structures."
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "Ranking top 1-5-10 with or without special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of financial equilibrium",
+            "job_titles": "Auditor",
+            "questions": [
+                "For the year 2023, rank the top 5 companies (by revenue) in the technology sector (FPT, CMG, ITD, ELC) based on their operating cash flow to current liabilities ratio. Explain what this ratio indicates about their short-term liquidity and financial stability.",
+                "In Q3 2024, identify the top 10 companies (by total assets) across all sectors and calculate their quick ratio. Rank these companies and explain how the quick ratio, compared to the current ratio, provides a more stringent measure of short-term liquidity."
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "Ranking top 1-5-10 with or without special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of financial equilibrium",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "In 2022, rank the top 5 companies (by market capitalization) in the 'Basic Resources' sector (HSG, HPG, NKG, CAP, TMB) according to their inventory turnover ratio. Explain what a high or low inventory turnover ratio might signify about their operational efficiency and demand for their products.",
+                "For Q2 2024, calculate the debt-to-equity ratio for the top 10 companies (with total assets > 50 billion VND) in the 'Construction and Materials' industry.  Rank these companies and discuss the implications of high versus low debt-to-equity ratios on their financial stability."
+            ]
+        }
+    ],
+    [
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze the Subsidiaries or invested company",
+            "time": "over time with specific period",
+            "analyzing_types": "Cash flow analysis",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "For BIDV, Vietcombank (VCB), and Techcombank (TCB), what were the changes in their total assets from 2020 to Q3 2024?  Analyze how the changes in assets relate to their respective investments in subsidiaries or other companies during this period. Consider using the balance sheet to answer this question.",
+                "Calculate the return on assets (ROA) for ACB, MBBank (MBB), and VPBank (VPB) for each year from 2020 to Q3 2024.  How does the ROA compare to the investments each bank made in subsidiaries or other companies over the same period? This requires using the income statement and balance sheet.",
+                "Analyze the cash flow from investing activities for Hoa Sen Group (HSG),  ELCOM (ELC), and  Vietnam Container Shipping (VSC) from 2020 to Q3 2024.  How significant were cash outflows related to investments in other companies or subsidiaries compared to other investing activities? Use the statement of cash flows to answer this.",
+                "For the companies  VinGroup (VIC),  Vinhomes (VHM), and Vincom Retail (VRE) ,  compare their capital expenditures (CapEx) from 2020 to Q3 2024.  What portion of this CapEx can be attributed to investments in subsidiaries or other companies? You'll need to analyze the statement of cash flows and potentially other financial statement disclosures to find the relevant information.",
+                "Examine the change in equity for FPT Corp (FPT), Masan Group (MSN), and PetroVietnam Gas (GAS) from 2020 to Q3 2024.  How did the change in equity reflect investments in subsidiaries and other companies during that period? This will involve using the balance sheet and potentially the statement of changes in equity."
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze the Subsidiaries or invested company",
+            "time": "over time with specific period",
+            "analyzing_types": "Cash flow analysis",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "For BIDV (BID) and Vietcombank (VCB),  compare their cash flow from investing activities related to acquisitions or investments in subsidiaries from 2020 to Q3 2024. How did these investment cash flows affect their overall cash position during this period? (Use the statement of cash flows)",
+                "Analyze the changes in the long-term investments account for FPT Corp (FPT), Masan Group (MSN), and VinGroup (VIC) from 2020 to Q3 2024. How do these changes reflect the companies' investment strategies in subsidiaries or other companies? (Use the balance sheet)."
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze the Subsidiaries or invested company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of capital structures",
+            "job_titles": "Auditor",
+            "questions": [
+                "For the year 2023, compare the debt-to-equity ratios of ACB, TCB, and VCB. How do these ratios reflect the impact of investments in subsidiaries on the capital structures of these banks? (Use the balance sheet)",
+                "In Q3 2024, analyze the equity structure of FPT, MSN, and VIC. What proportion of their equity represents investments in subsidiaries, and how does this compare to their overall capital structure? (Use the balance sheet and notes to the financial statements, if needed, to identify investment in subsidiaries)."
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze the Subsidiaries or invested company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of capital structures",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "For the year 2022, compare the total debt of HPG, VNM, and VHM.  How does the level of debt relate to each company's investments in subsidiaries (if any)? (Use the balance sheet)",
+                "In Q2 2024, analyze the proportion of equity financing versus debt financing for  CTG, MBB, and STB. How does the financing mix differ in relation to the level of investment each bank has in subsidiaries or other companies? (Use the balance sheet)"
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze the Subsidiaries or invested company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of capital structures",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "For the year 2021, calculate the debt-to-asset ratio for VRE, VIC, and VHM. How does the level of debt, relative to assets, vary among these companies, considering their respective investment activities in subsidiaries or associated companies? (Use the balance sheet)",
+                "In Q1 2024, compare the interest coverage ratio for ACB, TCB, and VPB. How does the ability to cover interest expenses relate to the level of investment these banks have in subsidiaries or other companies? (Use the income statement and balance sheet)."
+            ]
+        }
+    ],
+    [
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "compare 2 or more company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of the financial structure",
+            "job_titles": "Auditor",
+            "questions": [
+                "For the year 2023, what was the difference in the current ratio between Vietcombank (VCB) and Techcombank (TCB)?  Explain what this difference might indicate about their short-term liquidity and financial health.",
+                "Compare the debt-to-equity ratios of BIDV (BID) and ACB (ACB) for Q3 2024. Explain how these ratios reflect the financial leverage and risk profiles of these two banks.",
+                "Calculate the return on equity (ROE) for both Vinamilk (VNM) and Masan Group (MSN) in 2022.  Explain what these ROE figures suggest about the profitability and efficiency of these companies in generating returns for their shareholders.",
+                "Analyze the accounts receivable turnover ratio for FPT (FPT) and Mobile World Investment (MWG) during 2020-2023.  What do these ratios reveal about the efficiency of their credit and collection policies?"
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "compare 2 or more company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of the financial structure",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "What were the total assets and total liabilities of Vietcombank (VCB) and Techcombank (TCB) at the end of 2021?  Explain what the difference in their asset-to-liability ratios might signify regarding their financial risk and stability.",
+                "Compare the gross profit margin and net profit margin of Vinamilk (VNM) and Masan Group (MSN) for Q2 2024. Explain the potential reasons for any differences observed in these profitability ratios."
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "compare 2 or more company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of the financial structure",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "For the year 2022, compare the inventory turnover ratios of  two companies in the Food and Beverages industry (e.g., VNM and MSN). What do these ratios indicate about the efficiency of their inventory management and sales processes?",
+                "Analyze the interest coverage ratio of BIDV (BID) and ACB (ACB) in Q3 2024. Explain what this ratio reveals about their ability to meet their interest obligations."
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "compare 2 or more company",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of the financial structure",
+            "job_titles": "Auditor",
+            "questions": [
+                "How has the return on assets (ROA) of Vietcombank (VCB) and Techcombank (TCB) changed from 2020 to Q3 2024? What factors might explain any trends or differences observed in their ROA over this period?",
+                "Analyze the trend in the debt-to-asset ratio for Vinamilk (VNM) and Masan Group (MSN) from 2020 to 2023. What does this analysis suggest about their capital structure and financing strategies over time?"
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "compare 2 or more company",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of the financial structure",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "Compare the changes in the operating profit margin of FPT (FPT) and VNIT (MWG) from 2020 to 2023.  What factors might have contributed to any differences in their operating profitability over this period?",
+                "Analyze the trend in the quick ratio for BIDV (BID) and ACB (ACB) from 2020 to Q3 2024.  What does this indicate about their ability to meet their short-term obligations without relying on inventory sales?"
+            ]
+        }
+    ],
+    [
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "compare within the same exchange or stock indices",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of the financial structure",
+            "job_titles": "Auditor",
+            "questions": [
+                "For the year 2023, what was the average Current Ratio for companies listed on HOSE, categorized by their industry (Banking vs. Real Estate)?",
+                "Calculate the Debt-to-Equity ratio for all companies listed on HNX in Q3 2024.  Compare the average Debt-to-Equity ratio of the companies in the 'Basic Resources' industry to the average of all other industries on HNX.",
+                "What was the median Return on Equity (ROE) for companies in the VN30 index during 2022? How does this compare to the median ROE for companies in the HNX30 index for the same year?",
+                "In 2020, what was the average Quick Ratio for companies listed on UPCOM? How does this compare to the average Quick Ratio for companies listed on HOSE for the same year?",
+                "Compare the average Gross Profit Margin for companies in the 'Food and Beverages' industry listed on HOSE for Q3 2024 to the average Gross Profit Margin for companies in the 'Food and Beverages' industry listed on HNX for the same quarter."
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "compare within the same exchange or stock indices",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of the financial structure",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "For the year 2021, what was the average Debt-to-Asset ratio for companies listed on the HOSE exchange?  How does this compare to the average Debt-to-Asset ratio for companies listed on the HNX exchange for the same year?",
+                "Compare the average Inventory Turnover ratio for companies in the 'Retail' industry listed on HOSE in Q2 2024 to the average Inventory Turnover ratio for companies in the 'Retail' industry listed on UPCOM for the same quarter."
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "compare within the same exchange or stock indices",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of the financial structure",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "What is the average Price-to-Earnings (P/E) ratio for companies in the VN30 index in 2023? How does this compare to the average P/E ratio for companies in the OTHER index (HOSE) for the same year?",
+                "Calculate the average Net Profit Margin for companies in the 'Basic Resources' sector listed on HNX for Q1 2024. Compare this to the average Net Profit Margin for companies in the 'Construction and Materials' sector on the same exchange and quarter."
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "compare within the same exchange or stock indices",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of the financial structure",
+            "job_titles": "Auditor",
+            "questions": [
+                "How has the average Return on Assets (ROA) of companies listed on HOSE in the 'Banking' industry changed from 2020 to Q3 2024? ",
+                "Analyze the trend of the average Quick Ratio for companies within the VN30 index from 2020 to Q3 2024."
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "compare within the same exchange or stock indices",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of the financial structure",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "Compare the change in the average Debt-to-Equity ratio for companies listed on the HNX exchange from 2020 to Q3 2024.  Specifically, look at the difference between the average ratio in 2020 and the average ratio in Q3 2024.",
+                "Analyze the trend of the average Inventory Turnover ratio for companies in the 'Food and Beverages' sector on HOSE from 2021 to Q3 2024.  Show this trend as a percentage change from year to year or quarter to quarter."
+            ]
+        }
+    ],
+    [
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of capital structures",
+            "job_titles": "Auditor",
+            "questions": [
+                "For the period 2020-Q3 2024, what were the current ratios for each of the banking companies (BID, EIB, OCB, CTG, VCB, ACB, MBB, HDB, TPB, VPB, STB, TCB, SHB, VIB, ABB, LPB, NVB) and how do these compare to the industry average current ratio for each year?",
+                "Calculate the debt-to-equity ratio for each of the Real Estate companies (SZC, DIG, SCR, KBC, VHM, VRE, NVL, DXG, VPI, KDH, HDC, TCH, CEO, HLD, VC3, TIG) from 2020 to Q3 2024.  Analyze the trends in leverage for each company and compare them to the industry average debt-to-equity ratio over time.",
+                "What were the Return on Equity (ROE) and Return on Assets (ROA) for each of the Food and Beverages companies (PAN, KDC, SBT, MSN, VNM, SAB, DBC, SAF, SLS) annually from 2020 to 2024? How do these profitability ratios compare to the industry average for each year?",
+                "For the Information Technology companies (ELC, ITD, CMG, FPT) from 2020 to Q3 2024, determine the gross profit margin and net profit margin. Analyze the trends in profitability for each company and compare them to the industry average for each year."
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of capital structures",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "Analyze the trend of the debt-to-asset ratio for the companies in the 'Basic Resources' industry (HSG, HPG, CAP, TMB, TVD, NKG) from 2020 to Q3 2024.  Compare each company's ratio to the industry average for each year. What insights can be drawn regarding their capital structures and risk profiles?",
+                "For the period 2020-Q3 2024, calculate the interest coverage ratio for each company in the 'Utilities (Electricity, Water & Gas)' industry (REE, GAS, POW, PVG). Compare these ratios to the industry average for each year. What conclusions can be made about their ability to meet interest obligations?"
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of capital structures",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "Compare the profitability of companies in the 'Retail' industry (MWG, FRT, PSD) from 2020 to Q3 2024 by calculating their net profit margins.  How do these margins compare to the industry average for each year?  What factors might explain any differences?",
+                "Analyze the liquidity of 'Chemicals' companies (CSV, GVR, DGC, DCM, LAS, PLC) from 2020 to Q3 2024 using the quick ratio. How do their quick ratios compare to the industry average each year? What does this indicate about their short-term financial health?"
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of loan types (mostly for banks, focus on loan to customer, loan type, duration, etc)",
+            "job_titles": "Auditor",
+            "questions": [
+                "For the banking sector (BID, EIB, OCB, CTG, VCB, ACB, MBB, HDB, TPB, VPB, STB, TCB, SHB, VIB, ABB, LPB, NVB) in 2023, what percentage of total loans was comprised of customer loans?  Compare this percentage for each bank to the industry average for that year. What insights can this provide regarding the banks' lending strategies?",
+                "Focusing on the year 2022, what was the average duration (maturity) of loans for each bank (BID, EIB, OCB, CTG, VCB, ACB, MBB, HDB, TPB, VPB, STB, TCB, SHB, VIB, ABB, LPB, NVB)?  Compare this average duration for each bank to the industry average for that year. What does this reveal about the banks' risk profiles related to loan repayment timelines?"
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of loan types (mostly for banks, focus on loan to customer, loan type, duration, etc)",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "For Q2 2024, what proportion of each bank's (BID, EIB, OCB, CTG, VCB, ACB, MBB, HDB, TPB, VPB, STB, TCB, SHB, VIB, ABB, LPB, NVB) loan portfolio was classified as non-performing loans (NPLs)?  Compare this to the industry average NPL ratio for Q2 2024. What does this suggest about the credit risk management practices of the individual banks?",
+                "In 2021, what was the average interest rate charged on customer loans for each bank (BID, EIB, OCB, CTG, VCB, ACB, MBB, HDB, TPB, VPB, STB, TCB, SHB, VIB, ABB, LPB, NVB)? Compare this to the industry average interest rate on customer loans for 2021.  What insights can be gained about the banks' pricing strategies and profitability?"
+            ]
+        }
+    ],
+    [
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "Ranking top 1-5-10 with or without special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of the financial structure",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "What are the top 5 companies with the highest Return on Equity (ROE) for each year from 2020 to Q3 2024?",
+                "Rank the top 10 companies by their Current Ratio from 2020 to Q3 2024.  Filter results to only include companies with total assets greater than 100 billion VND.",
+                "For the period 2020-Q3 2024, what is the Debt-to-Equity ratio for each of the following companies: BID, VCB, FPT, VHM, and MSN?",
+                "What are the top 5 companies with the highest Net Profit Margin for each year from 2020 to Q3 2024, and what were their respective net profit values for those years?",
+                "Calculate the Quick Ratio for BIDV, Vietcombank, and Techcombank for each year from 2020 to Q3 2024.  Additionally, provide the corresponding values for their cash and cash equivalents for each year."
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "Ranking top 1-5-10 with or without special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of liquidity and payment status",
+            "job_titles": "Auditor",
+            "questions": [
+                "Rank the top 10 companies by their Quick Ratio as of Q3 2024.  Only include companies with total assets exceeding 100 billion VND.",
+                "For the year 2023, what were the cash and cash equivalents, accounts receivable, and current liabilities for the top 5 companies with the highest current ratio?"
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "Ranking top 1-5-10 with or without special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of liquidity and payment status",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "What were the top 5 companies with the highest current ratio in 2022, and what were their respective values for current assets and current liabilities?",
+                "Rank the top 10 companies by their cash conversion cycle as of Q2 2024.  Include only companies listed on the HOSE."
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "Ranking top 1-5-10 with or without special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of liquidity and payment status",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "As of Q1 2024, what were the accounts receivable turnover ratios for the top 5 companies with the highest sales revenue?",
+                "Rank the top 10 companies based on their days sales outstanding (DSO) for the year 2023.  Only consider companies in the Banking industry."
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "Ranking top 1-5-10 with or without special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of liquidity and payment status",
+            "job_titles": "Auditor",
+            "questions": [
+                "What is the trend of the average collection period (ACP) for the top 5 companies with the highest total assets from 2020 to Q3 2024?",
+                "Show the year-over-year change in the current ratio for VCB, BID, and ACB from 2020 to Q3 2024."
+            ]
+        }
+    ],
+    [
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "compare within the same exchange or stock indices",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of capital structures",
+            "job_titles": "Auditor",
+            "questions": [
+                "For companies listed on HOSE with stock indices VN30, what was the average Return on Equity (ROE) and Debt-to-Equity ratio for each company from 2020 to Q3 2024?",
+                "Compare the current ratio and quick ratio of companies listed on HOSE and HNX for the year 2023.  Specifically, calculate the average current ratio and quick ratio for each exchange.",
+                "Analyze the trend of Net Profit Margin and Total Asset Turnover for companies listed in the VN30 index from 2020 to Q3 2024.  Present the data for each company individually.",
+                "For the banking sector companies listed on HOSE, calculate the average Non-Performing Loan (NPL) ratio and Loan-to-Deposit ratio for each company from 2020 to Q3 2024.",
+                "What were the average earnings per share (EPS) and price-to-earnings ratio (P/E) for companies in the 'Real Estate' industry listed on the HOSE exchange from 2020 to Q3 2024?"
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "compare within the same exchange or stock indices",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of capital structures",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "For companies listed on HOSE with stock indices VN30, how has the average debt-to-equity ratio changed from 2020 to Q3 2024?  Present this data alongside the average interest coverage ratio for the same period.",
+                "Compare the total revenue and net income of companies listed on the HNX exchange in the 'Basic Resources' industry for 2022 and 2023. Calculate the average growth rate of revenue and net income for this group over this period."
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "compare within the same exchange or stock indices",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of capital structures",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "Compare the average inventory turnover ratio and days sales outstanding (DSO) for companies in the 'Food and Beverages' industry listed on HOSE from 2020 to Q3 2024.",
+                "For companies listed on HNX with stock indices HNX30, calculate the average return on assets (ROA) and the average total debt for each company from 2020 to Q3 2024."
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "compare within the same exchange or stock indices",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of loan types (mostly for banks, focus on loan to customer, loan type, duration, etc)",
+            "job_titles": "Auditor",
+            "questions": [
+                "For the banking sector companies listed on HOSE for the year 2023, what was the proportion of different loan types (e.g., consumer loans, commercial loans, etc.) to total customer loans for each bank?",
+                "For banks listed on HNX in Q2 2024, what was the average weighted average maturity of customer loans and the average interest rate earned on these loans?"
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "compare within the same exchange or stock indices",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of loan types (mostly for banks, focus on loan to customer, loan type, duration, etc)",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "Amongst HOSE-listed banks, what was the average percentage of non-performing loans (NPLs) in their consumer loan portfolios for Q3 2024?",
+                "Compare the average loan-to-deposit ratio and the average net interest margin for banks listed on HNX in 2023, differentiating between banks with a significant proportion of long-term loans versus those with predominantly short-term loans."
+            ]
+        }
+    ],
+    [
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "compare 2 or more company",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of financial risk",
+            "job_titles": "Auditor",
+            "questions": [
+                "For BIDV, Vietcombank (VCB), and Techcombank (TCB), what was the trend of their Net Interest Income as a percentage of total revenue from 2020 to Q3 2024?  This will help assess the relative importance of interest income for these banks over time.",
+                "Compare the Current Ratio and Quick Ratio of ACB and MBB from 2020 to Q3 2024.  Analyze the short-term liquidity position of these two banks, considering the differences between the two ratios and how they changed over time.",
+                "Analyze the Debt-to-Equity ratio of Vingroup (VIC) and Vinhomes (VHM) from 2020 to Q3 2024. How does their capital structure compare and how has it evolved over time? This helps understand their financial risk profile.",
+                "For the period 2020 to Q3 2024, calculate and compare the Return on Equity (ROE) for three companies in the Food and Beverages industry (e.g., VNM, MSN, KDC). What insights can be drawn regarding their profitability and efficiency in using shareholder's equity?",
+                "Compare the Inventory Turnover ratio for HPG and GVR from 2020 to Q3 2024.  This helps to assess the efficiency of their inventory management and potential risks associated with inventory obsolescence."
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "compare 2 or more company",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of financial risk",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "Compare the profitability of Vietcombank (VCB) and Techcombank (TCB) from 2020 to Q3 2024 by analyzing their Net Profit Margin and Return on Assets (ROA).  Explain what these ratios indicate about the efficiency and profitability of each bank.",
+                "Analyze the long-term solvency of Vinamilk (VNM) and Masan Group (MSN) from 2020 to Q3 2024 using their Debt-to-Asset ratio and Times Interest Earned ratio. Explain the implications of these ratios for the financial risk of each company."
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "compare 2 or more company",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of financial risk",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "For the period 2020-Q3 2024, compare the accounts receivable turnover ratio of MWG and FPT.  What does this indicate about the efficiency of their credit and collection policies and the potential risk of bad debts?",
+                "Analyze the operating efficiency of ACB and VCB from 2020 to Q3 2024 by comparing their operating expenses as a percentage of total revenue.  What are the potential implications of any differences observed?"
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "compare 2 or more company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of financial equilibrium",
+            "job_titles": "Auditor",
+            "questions": [
+                "Compare the profitability and efficiency of VHM and VIC in 2023 by calculating their Gross Profit Margin and Asset Turnover ratio. What do these ratios reveal about their ability to generate profits from their assets?",
+                "Analyze the financial leverage of BIDV and TCB in Q2 2024 by examining their Debt-to-Equity ratio and interest coverage ratio. How do these ratios reflect their ability to handle debt obligations?"
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "compare 2 or more company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of financial equilibrium",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "Compare the liquidity positions of HPG and VNM in 2022 by calculating their current ratio and quick ratio.  What insights can be drawn about their ability to meet short-term obligations?",
+                "Analyze the solvency of MSN and VJC in Q3 2023 by comparing their debt-to-equity ratios and times interest earned ratios. How do these metrics reflect their long-term financial health?"
+            ]
+        }
+    ],
+    [
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of profitability",
+            "job_titles": "Auditor",
+            "questions": [
+                "For the year 2023, what was the Return on Assets (ROA) for each company in the Banking industry, and how does each company's ROA compare to the industry average ROA for that year?",
+                "Calculate the Net Profit Margin for Vietcombank (VCB), Techcombank (TCB), and the average Net Profit Margin for all companies in the Banking industry for Q3 2024.  What are the potential reasons for any significant differences?",
+                "What were the Gross Profit and Operating Profit for each company in the Real Estate industry for the year 2020? How does each company's Gross Profit Margin and Operating Profit Margin compare to the industry average for that year?",
+                "For the year 2022, compare the Earnings Per Share (EPS) of  Masan Group (MSN) and Vinamilk (VNM). How do these figures relate to their respective Price-to-Earnings (P/E) ratios and their performance within the Food and Beverages industry?",
+                "Compare the Current Ratio and Quick Ratio for each company in the Information Technology industry for Q3 2024. What insights can be drawn about their liquidity positions and short-term debt management?"
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of profitability",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "For the year 2021, calculate the Return on Equity (ROE) for each company in the Banking industry.  Compare each bank's ROE to the industry average ROE for that year. What factors might explain any significant differences among the companies?",
+                "Determine the Gross Profit Margin for Vingroup (VIC) and Vinhomes (VHM) for Q2 2024.  Compare these margins to the average Gross Profit Margin for all companies in the Real Estate industry during the same period. What factors may account for any variations?"
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of profitability",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "Calculate the operating profit margin for FPT Corporation (FPT) and other companies in the Information Technology sector for 2023. Compare FPT's operating profit margin to the industry average. What factors might contribute to any difference?",
+                "For the first quarter of 2024, what was the net profit margin for each company in the Food and Beverage industry? Compare the net profit margin of each company to the industry average.  Discuss potential reasons for any significant deviations from the average."
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of profitability",
+            "job_titles": "Auditor",
+            "questions": [
+                "Analyze the trend of the Return on Assets (ROA) for Vietcombank (VCB) from 2020 to Q3 2024. How does VCB's ROA trend compare to the average ROA trend for the Banking industry over the same period?  What factors might explain any differences in the trends?",
+                "Compare the evolution of the Net Profit Margin for Masan Group (MSN) and Vinamilk (VNM) from 2020 to Q3 2024. How do their respective trends compare to the average Net Profit Margin trend for the Food and Beverage industry during this period? What potential factors contributed to the observed trends?"
+            ]
+        },
+        {
+            "main_task": "Accounts in Financial Statements (including Explaination parts)",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of profitability",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "Analyze the trend of the Gross Profit Margin for companies in the Real Estate sector (e.g., Vinhomes, Novaland) from 2020 to Q3 2024.  Compare the trends of individual companies to the overall industry average. What external factors might have influenced these trends?",
+                "Compare the change in the Operating Profit Margin for FPT Corporation (FPT) and other major players in the Information Technology sector from 2020 to Q3 2024. How do these trends compare to the overall industry average? What internal or external factors might explain any differences in the performance of these companies?"
+            ]
+        }
+    ],
+    [
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "analyze the Subsidiaries or invested company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of the financial structure",
+            "job_titles": "Auditor",
+            "questions": [
+                "For BIDV (BID), CTG (CTG), and VCB (VCB), what were the Return on Equity (ROE) and Debt-to-Equity ratios for each year from 2020 to Q3 2024?  Analyze how these ratios changed over time, considering the impact of their subsidiaries/investments in other companies.",
+                "Calculate the current ratio and quick ratio for ACB (ACB), MBB (MBB), and TPB (TPB) for each year from 2020 to Q3 2024. How do these liquidity ratios reflect the financial health of these banks, considering their subsidiaries/investments?",
+                "What were the total assets and total liabilities of VHM (VHM), VIC (VIC), and VRE (VRE) for 2021 and 2023? Compare the changes in their financial structures over this period, considering any subsidiaries or investments.",
+                "For the years 2020-2024, what were the net income and revenue of MSN (Masan Group) and VNM (Vinamilk)?  Analyze the profitability of these companies, taking into account the influence of their subsidiaries and investments.",
+                "Compare the interest coverage ratio of GAS (PetroVietnam Gas) and POW (PV Power) for the period 2020-Q3 2024. How does this ratio reflect the financial risk associated with their debt and the performance of their subsidiaries/investments?"
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "analyze the Subsidiaries or invested company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of the financial structure",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "For the year 2023, what were the total revenues and net profits of FPT (FPT Corp) and its subsidiaries?  How does the performance of the subsidiaries contribute to the overall financial results?",
+                "Calculate the debt-to-asset ratio for BIDV (BID) and its major subsidiaries for Q3 2024. How does the leverage of the parent company compare to that of its subsidiaries?"
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "analyze the Subsidiaries or invested company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of the financial structure",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "For Vingroup (VIC) and its subsidiaries (VHM, VRE) in 2022, compare their respective return on assets (ROA) and the composition of their total assets (e.g., percentage of property, plant, and equipment; percentage of current assets).",
+                "Analyze the profitability of Masan Group (MSN) and its subsidiaries for Q2 2024 by comparing their gross profit margins and net profit margins.  How do the margins of individual subsidiaries contribute to the overall profitability of the group?"
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "analyze the Subsidiaries or invested company",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of the financial structure",
+            "job_titles": "Auditor",
+            "questions": [
+                "For the period 2020-2023, how did the current ratio of Vietcombank (VCB) and its subsidiaries change over time?  What factors might explain these changes?",
+                "Analyze the trend in total equity and retained earnings for FPT Corporation (FPT) and its subsidiaries from 2021 to Q3 2024. How does the growth in equity reflect the financial performance and investment activities of the group?"
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "analyze the Subsidiaries or invested company",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of the financial structure",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "For Techcombank (TCB) and its subsidiaries (if any) from 2020 to Q3 2024,  compare the trends in their net interest income and non-interest income as a percentage of total revenue. How has the income mix changed over time?",
+                "Analyze the changes in the debt-to-equity ratio for Vinamilk (VNM) and its subsidiaries from 2020 to 2023.  How has the company's capital structure evolved, and what might be the implications for its financial risk?"
+            ]
+        }
+    ],
+    [
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "get data 1 or more company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of business performance",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "What was the Return on Equity (ROE) for Vietcombank (VCB) and Techcombank (TCB) in 2023?",
+                "Calculate the Current Ratio for BIDV (BID), ACB (ACB), and MBBank (MBB) for Q3 2024.",
+                "What were the Debt-to-Equity ratios of Hoa Phat Group (HPG) and Vinamilk (VNM) in 2022?",
+                "For the year 2020, what were the Gross Profit Margins of FPT Corporation (FPT) and Masan Group (MSN)?",
+                "Compute the Price-to-Earnings ratio (P/E) for VinGroup (VIC) and Vinhomes (VHM) in 2021."
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "get data 1 or more company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of business performance",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "What was the Net Profit Margin for Vietcombank (VCB) in 2023 and for Techcombank (TCB) in Q2 2024?",
+                "Calculate the Quick Ratio for both Masan Group (MSN) and Vinamilk (VNM) for the year 2022."
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "get data 1 or more company",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of business performance",
+            "job_titles": "Auditor",
+            "questions": [
+                "What is the trend of the Return on Assets (ROA) for Vietcombank (VCB) from 2020 to Q3 2024?",
+                "How has the Debt-to-Equity ratio of FPT Corporation (FPT) changed from 2020 to 2023?"
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "get data 1 or more company",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of business performance",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "Analyze the trend of the Inventory Turnover ratio for Masan Group (MSN) from 2020 to Q3 2024.",
+                "Compare the changes in the Gross Profit Margin for both Vinamilk (VNM) and Hoa Phat Group (HPG) from 2020 to 2023."
+            ]
+        },
+        {
+            "main_task": "Financial Ratios",
+            "sub_task": "get data 1 or more company",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of business performance",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "Show the trend of the operating cash flow to sales ratio for FPT Corporation (FPT) from 2020 to Q3 2024.",
+                "Compare the evolution of the earnings per share (EPS) for both Vinhomes (VHM) and Vietcombank (VCB) between 2020 and 2023."
+            ]
+        }
+    ],
+    [
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "get data 1 or more company",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of the financial structure",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "What were the current ratios for BIDV, Vietcombank, and Techcombank from 2020 to Q3 2024?",
+                "For the period 2020-Q3 2024, what were the changes in total assets, total liabilities, and shareholders' equity for ACB, MBBank, and STB?",
+                "Calculate the return on equity (ROE) for Vingroup, Masan Group, and PetroVietnam Gas from 2020 to Q3 2024.",
+                "What were the debt-to-equity ratios for FPT, Vinamilk, and Hoa Phat Group from 2020 to Q3 2024?",
+                "Analyze the net profit margin for the following companies from 2020 to Q3 2024:  Vietjet Air, Mobile World Investment, and Vincom Retail."
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "get data 1 or more company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of liquidity and payment status",
+            "job_titles": "Auditor",
+            "questions": [
+                "What were the quick ratios and cash ratios for ACB, Techcombank, and VPBank in 2023?",
+                "Compare the operating cash flow and accounts receivable turnover for Vingroup and Masan Group in Q2 2024."
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "get data 1 or more company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of liquidity and payment status",
+            "job_titles": "Financial Analyst",
+            "questions": [
+                "For the year 2022, what were the working capital and the number of days of sales outstanding for BIDV, Vietcombank, and TPBank?",
+                "In Q3 2024, what were the cash conversion cycles for both Vinamilk and Masan Group?"
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "get data 1 or more company",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of liquidity and payment status",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "Calculate the cash ratio and the acid-test ratio for FPT, Vingroup, and Petrolimex in 2023.",
+                "What were the accounts payable turnover and the days payable outstanding for ACB, Techcombank, and VPBank in Q1 2024?"
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "get data 1 or more company",
+            "time": "over time with specific period",
+            "analyzing_types": "Analysis of liquidity and payment status",
+            "job_titles": "Auditor",
+            "questions": [
+                "Analyze the trend of the current ratio for Vietcombank, ACB, and Techcombank from 2020 to Q3 2024.",
+                "How has the operating cash flow to current liabilities ratio changed for Vinamilk and Masan Group between 2020 and Q3 2024?"
+            ]
+        }
+    ]
+]turn on assets (ROA) and return on equity (ROE) for FPT Corporation (FPT) in 2022, and how do these compare to the average ROA and ROE for the Information Technology industry?",
+                "Calculate the interest coverage ratio for Vietjet Air (VJC) in Q2 2024 and compare it to the average interest coverage ratio for companies in the Travel and Leisure industry."
+            ]
+        },
+        {
+            "main_task": "Both Financial Ratios and Accounts in Financial Statements",
+            "sub_task": "analyze company with its industry average ratio",
+            "time": "at specific year, optionally include quater",
+            "analyzing_types": "Analysis of financial risk",
+            "job_titles": "Financial Consultant",
+            "questions": [
+                "Compare the profitability of Techcombank (TCB) and Vietcombank (VCB) in 2023 using the net profit margin and return on equity (ROE). How do these metrics compare to the average for the banking industry?",
+                "Analyze the financial leverage of Vinhomes (VHM) and Vingroup (VIC) in Q3 2024 using the debt-to-asset ratio and debt-to-equity ratio. How do these ratios compare to the average for the real estate industry?"
+            ]
+        }
+    ]
+]

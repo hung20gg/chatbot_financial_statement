@@ -76,7 +76,10 @@ def get_llm_wrapper(model_name, **kwargs):
     elif 'gemini' in model_name:
         return Gemini(model_name=model_name, **kwargs)
     
-    return OpenAIWrapper(model_name=model_name, **kwargs)
+    host = os.getenv('LLM_HOST')
+    api_key = os.getenv('LLM_API_KEY')
+
+    return OpenAIWrapper(host=host, api_key=api_key, model_name=model_name, **kwargs)
     
 
 
