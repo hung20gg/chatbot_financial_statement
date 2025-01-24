@@ -17,7 +17,7 @@ import re
 from langchain_chroma import Chroma
 from langchain_milvus import Milvus
 from langchain_elasticsearch import ElasticsearchStore
-
+import uuid
 
 from langchain_openai import OpenAIEmbeddings
 from concurrent.futures import ThreadPoolExecutor
@@ -26,6 +26,7 @@ from langchain_huggingface  import (
     HuggingFaceEmbeddings,
     HuggingFaceEndpointEmbeddings
 )
+
 
 import logging
 import requests
@@ -385,8 +386,8 @@ def setup_vector_db_fs(collection_name, persist_directory, table, model_name, ve
         metadatas_0 = [{'lang': 'vi', 'code': category[2]} for category in batch_category]
         metadatas_1 = [{'lang': 'en', 'code': category[2]} for category in batch_category]
         
-        vector_db.add_texts(categories_0, metadatas=metadatas_0)
-        vector_db.add_texts(categories_1, metadatas=metadatas_1)
+        vector_db.add_texts(categories_0, metadatas=metadatas_0, ids=[str(uuid.uuid4()) for _ in range(len(categories_0))])
+        vector_db.add_texts(categories_1, metadatas=metadatas_1, ids=[str(uuid.uuid4()) for _ in range(len(categories_1))])
         
     batch_categories = [categories[i:i+BATCH_SIZE] for i in range(0, len(categories), BATCH_SIZE)]
         
@@ -414,7 +415,7 @@ def setup_vector_db_universal(collection_name, persist_directory, table, model_n
         categories_0 = [category[0] for category in batch_category]
         metadatas = [{'lang': 'en', 'code': category[1]} for category in batch_category]
         
-        vector_db.add_texts(categories_0, metadatas=metadatas)
+        vector_db.add_texts(categories_0, metadatas=metadatas, ids=[str(uuid.uuid4()) for _ in range(len(categories_0))])
         # chroma_db.add_texts([category[1]], metadatas=[{'lang': 'en', 'code': category[2]}])
         
     batch_categories = [categories[i:i+BATCH_SIZE] for i in range(0, len(categories), BATCH_SIZE)]
@@ -444,8 +445,8 @@ def setup_vector_db_ratio(collection_name, persist_directory, table, model_name,
         
         metadatas = [{'lang': 'en', 'code': category[1]} for category in batch_category]
         
-        vector_db.add_texts(categories_0, metadatas=metadatas)
-        vector_db.add_texts(categories_1, metadatas=metadatas)
+        vector_db.add_texts(categories_0, metadatas=metadatas, ids=[str(uuid.uuid4()) for _ in range(len(categories_0))])
+        vector_db.add_texts(categories_1, metadatas=metadatas, ids=[str(uuid.uuid4()) for _ in range(len(categories_1))])
     
     batch_categories = [categories[i:i+BATCH_SIZE] for i in range(0, len(categories), BATCH_SIZE)]
     
@@ -472,7 +473,7 @@ def setup_vector_db_company_name(collection_name, persist_directory, table, mode
     vector_db = create_vector_db(collection_name, persist_directory, model_name, vectordb)
     
     def process_company(vector_db, company):
-        vector_db.add_texts(list(company), metadatas=[{'lang': 'vi', 'stock_code': company[0]}] * 4)
+        vector_db.add_texts(list(company), metadatas=[{'lang': 'vi', 'stock_code': company[0]}] * 4, ids=[str(uuid.uuid4()) for _ in range(4)])
         
     
     with ThreadPoolExecutor() as executor:
@@ -499,7 +500,7 @@ def setup_vector_db_sql_query(collection_name, persist_directory, txt_path, mode
         
                 
     for code in codes:
-        vector_db.add_texts([code[0]], metadatas=[{'lang': 'sql', 'sql_code': code[1]}])
+        vector_db.add_texts([code[0]], metadatas=[{'lang': 'sql', 'sql_code': code[1]}], ids=[str(uuid.uuid4())])
 
 #================#
 #  Setup config  #
@@ -670,8 +671,13 @@ def setup_everything(config: dict):
     
     print(os.path.join(current_dir, '../data/vector_db_vertical_local'))
     
-    client = PersistentClient(path = os.path.join(current_dir, '../data/vector_db_vertical_local'), settings = Settings())
-    
+    if config.get('vectordb', 'chromadb') == 'chromadb':
+        client = PersistentClient(path = os.path.join(current_dir, '../data/vector_db_vertical_local'), settings = Settings())
+    elif config.get('vectordb', 'chromadb') == 'milvus':
+        client = 'http://localhost:19530'
+    else:
+        raise ValueError("Vectordb format not supported")
+
     # delete everything
     if config.get('force', False):
         delete_everything(db_conn)

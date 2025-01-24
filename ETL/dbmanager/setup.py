@@ -89,8 +89,10 @@ def setup_db(config: DBConfig, vectordb = 'chromadb', multi_thread = True, reran
     
     if vectordb == 'chromadb':
         persist_client = PersistentClient(path = os.path.join(current_directory, f'../../data/vector_db_{db_type}_{"local" if local_model else "openai"}'), settings = Settings())
-    else:
+    elif vectordb == 'milvus':
         persist_client = 'http://localhost:19530'
+    else:
+        raise ValueError(f"Vectordb format {vectordb} is not supported")
     
     if 'base' in config.database_choice:
         collection_chromadb = 'category_bank_chroma'

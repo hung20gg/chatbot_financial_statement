@@ -23,6 +23,12 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--vectordb', type=str, default='chromadb')
+args = parser.parse_args()
+
 
 if __name__ == "__main__":
     db_config = DBConfig(**TEI_VERTICAL_UNIVERSAL_CONFIG)
@@ -34,7 +40,7 @@ if __name__ == "__main__":
     
     reranker = BaseRerannk(name='http://localhost:8081/rerank')
     
-    db = setup_db(db_config, reranker = reranker)
+    db = setup_db(db_config, reranker = reranker, vectordb=args.vectordb)
     logging.info('Finish setup db')
     
     print(db.find_stock_code_similarity('Ngân hàng TMCP Ngoại Thương Việt Nam', 2))
