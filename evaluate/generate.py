@@ -13,6 +13,7 @@ from agent.const import (
     GPT4O_MINI_CONFIG,
     GPT4O_CONFIG,
     TEXT2SQL_FASTEST_CONFIG,
+    TEXT2SQL_SWEET_SPOT_CONFIG,
     TEXT2SQL_FAST_OPENAI_CONFIG,
     TEXT2SQL_DEEPSEEK_V3_CONFIG,
     TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG
@@ -44,7 +45,7 @@ logging.basicConfig(
 
 def append_json_to_file(json_obj, file_path):
     with open(file_path, 'a') as f:
-        json.dump(json_obj, f, indent=4)
+        json.dump(json_obj, f)
         f.write('\n')
 
 def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=False, file_path=None):
@@ -68,7 +69,7 @@ def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=F
 
     for i, code in enumerate(codes):
         responses.append({
-            'id': ids[i],
+            'id': ids,
             'question': prompt,
             'table': table_str,
             'sql': code
@@ -76,7 +77,7 @@ def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=F
 
         if file_path:
             append_json_to_file({
-                'id': ids[i],
+                'id': ids,
                 'question': prompt,
                 'table': table_str,
                 'sql': code
@@ -106,6 +107,8 @@ def solve(text2sql_config, prompt_config, questions, using_cache=False, version 
     if batch_question:
         batch_questions.append(batch_question)
 
+    print("Number of batches:", len(batch_questions))
+
     if version:
         current_dir = os.path.dirname(__file__)
         file_path = os.path.join(current_dir, f"../data/{text2sql_config.get('sql_llm', 'unknown')}__{version}.jsonl")
@@ -127,7 +130,7 @@ def solve(text2sql_config, prompt_config, questions, using_cache=False, version 
     return results
 
 def main():
-    text2sql_config = TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG
+    text2sql_config = TEXT2SQL_FAST_OPENAI_CONFIG
     prompt_config = VERTICAL_PROMPT_UNIVERSAL
     version = 'v1'
 
@@ -136,10 +139,10 @@ def main():
         print(len(questions))
 
     # Test    
-    questions = questions[:10]
+    questions = questions[:5]
 
-    results = solve(text2sql_config, prompt_config, questions, using_cache=False, version=version, batch_size=5, max_workers=4)
-    with open('../data/generated_questions_sql.jsonl', 'w') as f:
+    results = solve(text2sql_config, prompt_config, questions, using_cache=False, version=version, batch_size=1, max_workers=4)
+    with open(f'../data/{text2sql_config.get("sql_llm", "unknown")}_generated_questions_sql.jsonl', 'w') as f:
         for result in results:
             json.dump(result, f)
             f.write('\n')
