@@ -354,6 +354,13 @@ class HubVerticalUniversal(BaseDBHUB):
         Return the result as a DataFrame.
         """
         collect_code = self.accounts_search(texts, top_k, type_ = type_)
+        print(collect_code)
+        
+        collect_code_fs = [code for code in collect_code if 'TM' not in code]
+        collect_code_tm = [code for code in collect_code if 'TM' in code]
+        
+        print(collect_code_fs)
+        print(collect_code_tm)
         
         collect_code_fs = [code for code in collect_code if 'TM' not in code]
         collect_code_tm = [code for code in collect_code if 'TM' in code]

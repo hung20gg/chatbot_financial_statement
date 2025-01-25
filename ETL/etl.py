@@ -2,8 +2,7 @@ import sys
 import os
 import pandas as pd
 import numpy as np
-import pandas as pd
-import numpy as np
+
 current_path = os.path.dirname(__file__)
 sys.path.append(current_path)
 
