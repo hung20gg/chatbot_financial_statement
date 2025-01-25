@@ -24,6 +24,7 @@ from agent.prompt.prompt_controller import (
     PromptConfig, 
     VERTICAL_PROMPT_BASE, 
     VERTICAL_PROMPT_UNIVERSAL,
+    FIIN_VERTICAL_PROMPT_UNIVERSAL,
 )
 
 from ETL.dbmanager.setup import (
@@ -62,14 +63,14 @@ def initialize(user_name):
     db_config = DBConfig(**TEI_VERTICAL_UNIVERSAL_CONFIG)
     chat_config = ChatConfig(**INBETWEEN_CHAT_CONFIG)
     text2sql_config = Text2SQLConfig(**TEXT2SQL_FAST_OPENAI_CONFIG)
-    prompt_config = PromptConfig(**VERTICAL_PROMPT_UNIVERSAL)
+    prompt_config = PromptConfig(**FIIN_VERTICAL_PROMPT_UNIVERSAL)
     
     # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-base-en-v1.5', model_kwargs = {'device': device})
     # # embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5', model_kwargs = {'device': device})    db_config.embedding = embedding_model
     # db_config.embedding = embedding_model
     
-    reranker = BaseRerannk(name=os.getenv('RERANK_SERVER_URL'))
+    reranker = BaseRerannk(name=os.getenv('RERANKER_SERVER_URL'))
     
     logging.info('Finish setup embedding')
     

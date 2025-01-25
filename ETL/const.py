@@ -47,7 +47,7 @@ INCOME_RATIO_FUNCTIONS = {
 PROFITABILITY_RATIO_FUNCTIONS = {
     'return_on_assets': ['IS_060', 'BS_270'],  # net_income (IS_060), total_assets (BS_270)
     'return_on_fixed_assets': ['IS_060', 'BS_220'],  # net_income (IS_060), average_fixed_assets (BS_220)
-    'return_on_long_term_operating_assets': ['IS_060', 'BS_240'],  # net_income (IS_060), average_long_term_operating_assets (BS_240)
+    'return_on_long_term_operating_assets':['IS_060', ['BS_240','BS_210','BS_220','BS_230','BS_260']],  # net_income (IS_060), average_long_term_operating_assets (BS_240)
     'Basic_Earning_Power_Ratio': [['IS_050', 'IS_023'], 'BS_270'],  # EBIT (IS_050 + IS_023), total_assets (BS_270)
     'Return_on_equity': ['IS_060', 'BS_400'],  # net_income (IS_060), equity (BS_400)
     # 'return_on_common_equity': ['IS_060', 'CF_036', 'BS_400'],  # net_income (IS_060), preferred_dividends (CF_036), average_common_equity (BS_400)
@@ -57,6 +57,7 @@ PROFITABILITY_RATIO_FUNCTIONS = {
     'Return_on_sales': ['IS_060', 'IS_010'],  # net_income (IS_060), net_sales (IS_010)
     'operating_profit_margin': ['IS_030', 'IS_010'],  # NOPAT, net_sales (IS_010)
     'gross_profit_margin': ['IS_020', 'IS_010'],  # gross_profit (IS_020), net_sales (IS_010)
+    'Total_Asset_Turnover': ['IS_010', 'BS_270']  # net_sales (IS_010), avg_total_assets (BS_270)
 }
 
 
@@ -74,21 +75,36 @@ CASHFLOW_RATIO_FUNCTIONS = {
     'earning_quality_ratio': ['CF_020', 'IS_060'],  # operating_net_cash_flow (CF_020), net_income (IS_060)
 }
 
+# YoY_RATIO_FUNCTIONS = {
+#     'Net_Revenue_Growth_YoY': 'IS_010',
+#     'Gross_Profit_Growth_YoY': 'IS_020',
+#     'EBITDA_Growth_YoY': 'EBITDA',
+#     'EBIT_Growth_YoY': 'EBIT',
+#     'Pre_Tax_Profit_Growth_YoY': 'IS_050',
+#     'Accounts_Receivable_Growth_YoY': ['BS_131', 'BS_211'],  # Summing up these codes
+#     'Inventory_Growth_YoY': 'BS_140',
+#     'Short_Term_Debt_Growth_YoY': 'BS_320',
+#     'Long_Term_Debt_Growth_YoY': 'BS_338',
+#     'SG&A_Expense_Growth_YoY': ['IS_025', 'IS_026'],  # Summing up these codes
+#     'Total_Asset_Growth_YoY': 'BS_270',
+#     'Equity_Growth_YoY': 'BS_400',
+#     'CFO_Growth_YoY': 'CF_020'
+# }
 
 # BANK #
 
 BANK_FINANCIAL_STRUCTURE_RATIO_FUNCTIONS = {
-    'EBIT': ['IS_017'],  # EBIT, interest_expense
+    'EBIT': ['IS_017', 'IS_002'],  # EBIT, interest_expense
     'equity_ratio': ['BS_500', 'BS_300'],  # equity, total_assets
     'long_term_asset_self_financing_ratio': ['BS_500', ['BS_220','BS_210','BS_240']],  # permanent_capital (equity ), long_term_assets ( fixed assets, Long-term capital investments, property investments)
     'fixed_asset_self_financing_ratio': ['BS_500', 'BS_220'],  # permanent_capital (equity ), fixed_assets
     'general_solvency_ratio': ['BS_300', 'BS_400'],  #  total_assets, total_liabilities
     'return_on_investment': ['IS_021', 'BS_300'],  # net_income, total_investment (using total assets as example)
-    'basic_earning_power': ['IS_017', 'BS_300'],  # EBIT, total_assets
+    'basic_earning_power': [['IS_017', 'IS_002'], 'BS_300'],  # EBIT, total_assets
     'debt_to_assets_ratio': ['BS_400', 'BS_300'],  # total_liabilities, total_assets
     'debt_to_equity_ratio': ['BS_400', 'BS_500'],  # total_liabilities, equity
-    'interest_coverage_ratio': ['IS_017', 'IS_002'],  # EBIT, interest_expense
-    'long_term_debt_to_equity_ratio': [['BS_350','BS_360','BS_372'], 'BS_500'],
+    'interest_coverage_ratio': [['IS_017', 'IS_002'], 'IS_002'],  # EBIT, interest_expense
+    'long_term_debt_to_equity_ratio': [['BS_350','BS_360','BS_372'], 'BS_500'],  # long_term_liabilities(BS_350 + BS_360 + BS_372), equity
 }
 
 
@@ -105,7 +121,7 @@ BANK_LIQUIDITY_RATIO_FUNCTIONS = {
     'long_term_debt_coverage_ratio': [['BS_210','BS_220','BS_240'], ['BS_350','BS_360']],  # non_current_assets, non_current_liabilities
     'debt_to_equity_ratio': ['BS_400', 'BS_500'],  # total_liabilities, total_equity
     'long_term_debt_to_equity_capital_ratio': [['BS_350','BS_360'], 'BS_500'],  # long_term_liabilities, equity
-    'time_interest_earned': ['IS_017', 'IS_002'],  # EBIT, interest_expense
+    'time_interest_earned': [['IS_017', 'IS_002'], 'IS_002'],  # EBIT, interest_expense
     'debt_to_tangible_net_worth_ratio': ['BS_400', 'BS_500', 'BS_227'],  # total_liabilities, equity, intangible_assets
 }
 
@@ -123,7 +139,7 @@ BANK_PROFITABILITY_RATIO_FUNCTIONS = {
     'return_on_assets': ['IS_021', 'BS_300'],  # net_income , total_assets 
     'return_on_fixed_assets': ['IS_021', 'BS_220'],  # net_income , average_fixed_assets 
     'return_on_long_term_operating_assets': ['IS_021', ['BS_210','BS_220','BS_240']],  # net_income , average_long_term_operating_assets 
-    'Basic_Earning_Power_Ratio': ['IS_017', 'BS_300'],  # EBIT , total_assets 
+    'Basic_Earning_Power_Ratio': [['IS_017', 'IS_002'], 'BS_300'],  # EBIT , total_assets 
     'Return_on_equity': ['IS_021', 'BS_500'],  # net_income , equity 
     # 'return_on_common_equity': ['IS_060', 'CF_036', 'BS_400'],  # net_income (IS_060), preferred_dividends (CF_036), average_common_equity (BS_400)
     'profitability_of_cost_of_goods_sold': ['IS_015', 'IS_005'],  # net_income_from_operating (IS_030), COGS (IS_011)
@@ -135,7 +151,7 @@ BANK_PROFITABILITY_RATIO_FUNCTIONS = {
 }
 
 BANK_CASHFLOW_RATIO_FUNCTIONS = {
-    'EBITDA': ['IS_017'],  # EBIT (IS_050), depreciation_and_amortization (CF_002)
+    'EBITDA': [['IS_017', 'IS_002'],[ 'BS_223','BS_226','BS_229','BS_242']],  # EBIT , depreciation_and_amortization 
     'free_cash_flow': ['CF_024', 'CF_025', 'CF_038'],  # operating_net_cash_flow , capital_expenditures , dividends_paid 
     'free_cash_flow_to_operating_cash_flow_ratio': ['free_cash_flow', 'CF_024'],  # free_cash_flow, operating_net_cash_flow 
     'cash_debt_coverage_ratio': ['CF_024', 'BS_400'],  # operating_net_cash_flow , avg_total_liabilities 
@@ -144,7 +160,7 @@ BANK_CASHFLOW_RATIO_FUNCTIONS = {
     'cash_return_on_fixed_assets': ['CF_024', 'BS_220'],  # operating_net_cash_flow , avg_fixed_assets 
     'CFO_to_total_equity': ['CF_024', 'BS_500'],  # operating_net_cash_flow , avg_total_equity 
     'cash_flow_from_sales_to_sales': ['CF_024', ['IS_010','IS_003','IS_004']],  # operating_net_cash_flow , net_sales 
-    'cash_flow_margin': ['CF_020', ['IS_010','IS_003','IS_004','IS_007','IS_008','IS_009']],  # operating_net_cash_flow , total_revenue 
+    'cash_flow_margin': ['CF_024', ['IS_010','IS_003','IS_004','IS_007','IS_008','IS_009']],  # operating_net_cash_flow , total_revenue 
     'earning_quality_ratio': ['CF_024', 'IS_021'],  # operating_net_cash_flow , net_income 
     'net_interest_margin': ['IS_003', ['BS_161','BS_130','BS_170']],  # net_interest_income , avg_earning_assets
 }
@@ -154,6 +170,16 @@ BANK_FIIN_RATIO_FUNCTIONS = {
     'current_account_saving_account_ratio':  ['BS_330','Bank_TM_121','Bank_TM_124'],  
     'bad_debt_ratio': ['BS_161', ['Bank_TM_68', 'Bank_TM_69', 'Bank_TM_70' ]],
 }
+
+# BANK_YoY_RATIO_FUNCTIONS = {
+#     'Customer_Deposits_Growth_YoY' : 'BS_330',
+#     'Operating_Expense_Growth_YoY' : 'IS_014',
+#     'Income_Before_Provision_Growth_YoY' : 'IS_015',
+#     'Interest_Income_Growth_YoY' : 'IS_003',
+#     'Non_Interest_Income_Growth_YoY' : ['IS_006','IS_007','IS_008','IS_009','IS_012','IS_013'],
+#     'Total_Operating_Income_Growth' : 'IS_030',
+#     'Customer_Loans_Growth_YoY' : 'BS_160',
+# }
 
 # SECURITIES #
 
@@ -208,19 +234,20 @@ SECURITIES_INCOME_RATIO_FUNCTIONS = {
 SECURITIES_PROFITABILITY_RATIO_FUNCTIONS = {
     'return_on_assets': ['IS_200', 'BS_270'],  # net_income , total_assets 
     'return_on_fixed_assets': ['IS_200', 'BS_220'],  # net_income , average_fixed_assets 
-    'return_on_long_term_operating_assets': ['IS_200', 'BS_200'],  # net_income , average_long_term_operating_assets 
+    'return_on_long_term_operating_assets': ['IS_200', ['BS_211','BS_220','BS_230','BS_240','BS_250']],  # net_income , average_long_term_operating_assets 
     'Basic_Earning_Power_Ratio': [['IS_090','IS_052'], 'BS_270'],  # EBIT , total_assets 
     'Return_on_equity': ['IS_200', 'BS_400'],  # net_income , equity 
     'profitability_of_operating_expenses': ['IS_200','IS_040', 'IS_040'],  # net_income_from_operating , total_operating_expenses 
     'Return_on_sales': ['IS_200', 'IS_020'],  # net_income , net_sales 
     'operating_profit_margin': ['IS_200','IS_040', 'IS_020'],  # NOPAT, net_sales 
     # 'gross_profit_margin': ['IS_020', ['IS_010','IS_003','IS_004','IS_007','IS_008','IS_009']],  # gross_profit , net_sales 
+    'Total_Asset_Turnover': ['IS_020', 'BS_270']  # net_sales , avg_total_assets
 }
 
 
 SECURITIES_CASHFLOW_RATIO_FUNCTIONS = {
     'EBITDA': [['IS_090','IS_052'], 'CF_003'],  # EBIT (IS_050), depreciation_and_amortization (CF_002)
-    'free_cash_flow': ['CF_060', 'CF_044', None],  # operating_net_cash_flow , capital_expenditures , dividends_paid 
+    'free_cash_flow': ['CF_060', 'CF_061', None],  # operating_net_cash_flow , capital_expenditures , dividends_paid 
     'free_cash_flow_to_operating_cash_flow_ratio': ['free_cash_flow', 'CF_060'],  # free_cash_flow, operating_net_cash_flow 
     'cash_debt_coverage_ratio': ['CF_060', 'BS_300'],  # operating_net_cash_flow , avg_total_liabilities 
     'cash_interest_coverage': ['CF_060', 'IS_052'],  # operating_net_cash_flow , interest_expense
@@ -233,6 +260,67 @@ SECURITIES_CASHFLOW_RATIO_FUNCTIONS = {
     'net_interest_margin': ['IS_001', 'BS_110'],  # net_interest_income , avg_earning_assets
 }
 
+
+PE_RATIO_FUNCTIONS = {
+    'earning_per_share': ['IS_070'],
+    'price_earning_ratio': ['Price', 'IS_070'],
+    'book_value_per_share': ['IS_070','IS_060', 'BS_400'],
+    'price_to_book_ratio': ['Price', 'IS_070','IS_060', 'BS_400'],
+}
+
+BANK_PE_RATIO_FUNCTIONS = {
+    'earning_per_share': ['IS_023'],
+    'price_earning_ratio': ['Price', 'IS_023'],
+    'book_value_per_share': ['IS_023','IS_021', 'BS_500'],
+    'price_to_book_ratio': ['Price', 'IS_023','IS_021', 'BS_500'],
+}
+
+SECURITIES_PE_RATIO_FUNCTIONS = {
+    'earning_per_share': ['IS_501'],
+    'price_earning_ratio': ['Price', 'IS_501'],
+    'book_value_per_share': ['IS_501','IS_200', 'BS_400'],
+    'price_to_book_ratio': ['Price', 'IS_501','IS_200', 'BS_400'],
+}
+
+YoY_RATIO_FUNCTIONS = {
+    'securities':{
+        'Net_Revenue_Growth_YoY': 'IS_020',
+        'Gross_Profit_Growth_YoY': 'IS_040.1',
+        'EBITDA_Growth_YoY': 'EBITDA',
+        'EBIT_Growth_YoY': 'EBIT',
+        'Pre_Tax_Profit_Growth_YoY': 'IS_090',
+        'Accounts_Receivable_Growth_YoY': 'BS_117',
+        'Short_Term_Debt_Growth_YoY': 'BS_312',
+        'SG&A_Expense_Growth_YoY': ['IS_061', 'IS_062'],  # Summing up these codes
+        'Total_Asset_Growth_YoY': 'BS_270',
+        'Equity_Growth_YoY': 'BS_400',
+        'CFO_Growth_YoY': 'CF_060'},
+    'non_bank':{
+        'Net_Revenue_Growth_YoY': 'IS_010',
+        'Gross_Profit_Growth_YoY': 'IS_020',
+        'EBITDA_Growth_YoY': 'EBITDA',
+        'EBIT_Growth_YoY': 'EBIT',
+        'Pre_Tax_Profit_Growth_YoY': 'IS_050',
+        'Accounts_Receivable_Growth_YoY': ['BS_131', 'BS_211'],  # Summing up these codes
+        'Inventory_Growth_YoY': 'BS_140',
+        'Short_Term_Debt_Growth_YoY': 'BS_320',
+        'Long_Term_Debt_Growth_YoY': 'BS_338',
+        'SG&A_Expense_Growth_YoY': ['IS_025', 'IS_026'],  # Summing up these codes
+        'Total_Asset_Growth_YoY': 'BS_270',
+        'Equity_Growth_YoY': 'BS_400',
+        'CFO_Growth_YoY': 'CF_020'
+    },
+    'bank':{
+        'Customer_Deposits_Growth_YoY' : 'BS_330',
+        'Operating_Expense_Growth_YoY' : 'IS_014',
+        'Income_Before_Provision_Growth_YoY' : 'IS_015',
+        'Interest_Income_Growth_YoY' : 'IS_003',
+        'Non_Interest_Income_Growth_YoY' : ['IS_006','IS_007','IS_008','IS_009','IS_012','IS_013'],
+        'Total_Operating_Income_Growth' : 'IS_030',
+        'Customer_Loans_Growth_YoY' : 'BS_160',
+        }
+
+}
 
 INDUSTRIES_TRANSLATION = {
     "Ngân hàng": "Banking",

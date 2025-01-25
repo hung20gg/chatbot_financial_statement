@@ -1,4 +1,7 @@
+# need to rename file
+
 from pymongo import MongoClient
+from .abstract_semantic_layer import BaseSemantic
 from datetime import datetime
 import uuid
 
@@ -14,24 +17,6 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-class BaseSemantic:
-    def __init__(self, **kwargs):
-        pass
-    
-    def switch_collection(self, collection_name):
-        pass
-    
-    def add_sql(self, conversation_id, task, sql):
-        pass
-    
-    def create_conversation(self, user_id):
-        pass
-    
-    def add_message(self, conversation_id, messages, sql_messages):
-        pass
-    
-    def get_messages(self, conversation_id):
-        pass
     
 
 class MessageSaver(BaseSemantic):

@@ -131,6 +131,44 @@ TEXT2SQL_FAST_OPENAI_CONFIG = {
     'self_debug': True
 }
 
+TEXT2SQL_DEEPSEEK_V3_CONFIG = {
+    "llm": 'deepseek-chat',
+    "sql_llm": 'deepseek-chat',
+    "reasoning": False,
+    "branch_reasoning": False,
+    "company_top_k": 2,
+    "sql_example_top_k": 2,
+    "account_top_k": 5,
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
+}
+
+TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG = {
+    "llm": 'gemini-1.5-flash',
+    "sql_llm": 'deepseek-chat',
+    "reasoning": False,
+    "branch_reasoning": False,
+    "company_top_k": 2,
+    "sql_example_top_k": 2,
+    "account_top_k": 5,
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': False
+}
+
+TEXT2SQL_DEEPSEEK_REASONING_CONFIG = {
+    "llm": 'deepseek-chat',
+    "sql_llm": 'deepseek-reasoner',
+    "reasoning": True,
+    "branch_reasoning": False,
+    "company_top_k": 2,
+    "sql_example_top_k": 4,
+    "account_top_k": 8,
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
+}
 
 TEXT2SQL_MEDIUM_OPENAI_CONFIG = {
     "llm": 'gpt-4o-mini',

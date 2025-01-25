@@ -39,7 +39,7 @@ Snapshot of the mapping table:
 </data>
 
 ### Note: 
-- Include the detailed suitable name (including datetime, industry,... ) for the table in the query in the following format:
+- Include the detailed suitable name (including datetime, industry, ...) for the table in the query in the following format:
     ```sql
 
     -- ### detailed_table_name

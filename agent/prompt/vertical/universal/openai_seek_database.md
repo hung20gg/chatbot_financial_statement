@@ -38,8 +38,8 @@ CREATE TABLE sub_and_shareholder(
 
 -- Table: map_category_code_universal: Mapping account table for Financial Statement
 CREATE TABLE map_category_code_universal(
-    universal_code VARCHAR(255) primary key, --The unique code for accounts recorded in the financial statements.
-    universal_caption VARCHAR(255), --The Accounts (Caption) for the `universal_code`.
+    category_code VARCHAR(255) primary key, --The unique code for accounts recorded in the financial statements.
+    en_caption VARCHAR(255), --The Accounts (Caption) for the `category_code`.
 );
 
 -- Table: financial_statement: Financial Statement data for each `stock_code`
@@ -47,7 +47,7 @@ CREATE TABLE financial_statement(
     stock_code VARCHAR(255) references company_info(stock_code),
     year int, -- The reported financial year
     quarter int, --  The quarter reported (contain value either 0, 1, 2, 3, 4). If the value is 0, that mean the report is for annual report.
-    universal_code VARCHAR(255) references map_category_code_universal(universal_code),
+    category_code VARCHAR(255) references map_category_code_universal(category_code),
     data float, -- The value of the recorded category (in Million VND)
     date_added timestamp -- The datetime when the data was published
 );
@@ -72,9 +72,9 @@ CREATE TABLE financial_ratio(
 ```
 
 Note: 
-- Each value in `universal_code` includes a prefix indicating the report it pertains to: *BS* is Balance sheet, *IS* is for Income statement and *CF* is Cash flow.
-- The numerical part of `universal_code` is based on the account code from VA standard. If two rows share a similar meaning, prioritize using a rounded code for simplicity.
-- Some accounts (`universal_caption`) are specific to neither corporation, banks or securities firms, resulting in variations in the number of accounts across companies. Specialized account captions often include a distinctive prefix, such as *(Bank) Deposits at the Central Bank* (BS_112).
+- Each value in `category_code` includes a prefix indicating the report it pertains to: *BS* is Balance sheet, *IS* is for Income statement and *CF* is Cash flow.
+- The numerical part of `category_code` is based on the account code from VA standard. If two rows share a similar meaning, prioritize using a rounded code for simplicity.
+- Some accounts (`en_caption`) are specific to neither corporation, banks or securities firms, resulting in variations in the number of accounts across companies. Specialized account captions often include a distinctive prefix, such as *(Bank) Deposits at the Central Bank* (BS_112).
 
 ### Peek view of the schema
  - `company_info`
@@ -94,7 +94,7 @@ This mean MSN is a shareholder of TCB.
 
 - `financial_statement`
 
-|stock_code|year|quarter|universal_code|data|date_added|
+|stock_code|year|quarter|category_code|data|date_added|
 |:----|:----|:----|:----|:----|:----|
 |VCB|2023|  0 | BS_300 | 1839613.198 | 2023-12-30 |
 |LPB|2024|  2 | CF_045 | 68522.835| 2024-06-30 |
@@ -102,7 +102,7 @@ This mean MSN is a shareholder of TCB.
 
 - `map_category_code_universal`
 
-|universal_code|universal_caption|
+|category_code|universal_caption|
 |:----|:----|
 |BS_100| (Balance sheet) A. CURRENT ASSETS |
 

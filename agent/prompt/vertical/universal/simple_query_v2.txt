@@ -28,7 +28,10 @@ WHERE industry = 'Food and Beverage';
 
 SELECT 
     stock_code,
-    ROUND(data::numeric  * 100, 2) AS ROE_percentage
+    year,
+    quarter,
+    ratio_code,
+    ROUND(data::numeric  * 100, 2) AS data
 FROM 
     financial_ratio
 WHERE 
@@ -44,7 +47,7 @@ with value as (SELECT
     year,
     quarter,
     ratio_code,
-    ROUND(data::numeric  * 100, 2) AS data 
+    data 
 FROM 
     financial_ratio
 WHERE 
@@ -57,7 +60,7 @@ WHERE
  		value.year as year,
  		value.quarter as quarter,
  		value.data as data,
- 		mccr.ratio_name as ratio_name
+ 		mccr.ratio_code as ratio_code
 from value
 join map_category_code_ratio mccr 
 on value.ratio_code = mccr.ratio_code;
@@ -73,21 +76,25 @@ WITH viettel_subsidiaries AS (
 -- Step 2: Get the data from the `financial_statement` table
 select 
 	vs.subsidiary as stock_code,
-	fs.universal_code as universal_code,
+	fs.category_code as category_code,
 	fs.year as year,
+    fs.quarter as quarter,
 	fs.data as data
 
 FROM viettel_subsidiaries vs
 join financial_statement fs on fs.stock_code = vs.subsidiary
 where fs.quarter = 0
-and fs.universal_code = 'BS_270'
+and fs.category_code = 'BS_270'
 order by year desc
 
 -- 8. What is the Return on Equity (ROE) for all Banking companies in Q1 2024?
 
 SELECT
     stock_code,
-    data AS roe_percentage
+    year,
+    quarter,
+    ratio_code,
+    data 
 FROM financial_ratio
 WHERE ratio_code = 'ROE'
   AND year = 2024
@@ -100,7 +107,8 @@ SELECT
     stock_code,
     year,
     quarter,
-    data AS debt_to_equity_ratio
+    ratio_code,
+    data
 FROM financial_ratio
 WHERE ratio_code = 'DTER' -- Assuming 'DTER' is the code for Debt-to-Equity Ratio
   AND stock_code IN ('VCB', 'TCB')
@@ -114,7 +122,8 @@ SELECT
     stock_code,
     year,
     quarter,
-    data AS current_ratio
+    ratio_code,
+    data
 FROM financial_ratio
 WHERE ratio_code = 'CURRENT_RATIO'
   AND stock_code IN ('VHM', 'VRE', 'NVL') -- Vinhomes, Vincom Retail, Novaland
@@ -142,14 +151,14 @@ WITH bank_assets AS (
 ),
 net_interest_margin AS (
     SELECT
-        fr.stock_code,
-        fr.data AS net_interest_margin
+        stock_code,
+        data AS net_interest_margin
     FROM
-        financial_ratio fr
+        financial_ratio
     WHERE
-        fr.ratio_code = 'NIM' -- Assuming 'NIM' is the code for Net Interest Margin
-        AND fr.year = 2023
-        AND fr.quarter = 0 -- Select annual data
+        ratio_code = 'NIM' -- Assuming 'NIM' is the code for Net Interest Margin
+        AND year = 2023
+        AND quarter = 0 -- Select annual data
 )
 SELECT
     ba.stock_code,
@@ -170,35 +179,39 @@ LIMIT 5;
 -- Get Total Asset Data 
 WITH total_assets AS (
     SELECT
-        fs2.stock_code as stock_code,
-        fs2.data as total_assets
-    from financial_statement fs2 
+        stock_code as stock_code,
+        data as total_assets
+    from financial_statement 
     
     where
-    	fs2.universal_code = 'BS_270'
-        and fs2.data > 100000000
-        and fs2.year = 2024 
-        and fs2.quarter = 2 
+    	category_code = 'BS_270'
+        and data > 100000000
+        and year = 2024 
+        and quarter = 2 
 ),
 
 -- Get ROE
 roe_data AS (
     SELECT
-        fr.stock_code,
-        fr.data AS roe
+        stock_code,
+        data AS roe,
+        year,
+        quarter
     FROM
-        financial_ratio fr
+        financial_ratio
     WHERE
-        fr.ratio_code = 'ROE'
-        AND fr.year = 2024
-        AND fr.quarter = 2
+        ratio_code = 'ROE'
+        AND year = 2024
+        AND quarter = 2
 )
 
 -- JOIN
 SELECT
     ta.stock_code,
     ta.total_assets,
-    rd.roe
+    rd.roe,
+    rd.year,
+    rd.quarter
 FROM
     total_assets ta
 JOIN
@@ -214,14 +227,14 @@ SELECT
     year,
     quarter,
     data,
-    universal_code
+    category_code
 FROM
     financial_statement
 WHERE
     stock_code IN ('VNM', 'MSN')
     AND year IN (2020, 2024)
     AND quarter = 2
-    AND universal_code IN ('BS_270', 'BS_300', 'IS_100')
+    AND category_code IN ('BS_270', 'BS_300', 'IS_100')
 
 -- 14. Rank the top 5 companies with the highest Return on Equity (ROE) in 2023, based on their financial statements. 
 SELECT
@@ -252,12 +265,14 @@ WHERE
     stock_code = 'VCB'
     AND year = 2023
     AND quarter = 2
-    AND universal_code = 'IS_080';
+    AND category_code = 'IS_080';
 
 -- Total Revenue for Vietcombank's subsidiaries and invested partner
 SELECT 
     s.invest_on AS subsidiary_stock_code,
     SUM(bfr.data) AS subsidiary_revenue
+    bfr.year,
+    bfr.quarter
 FROM 
     sub_and_shareholder s
 JOIN 
@@ -266,53 +281,45 @@ WHERE
     s.stock_code = 'VCB'
     AND bfr.year = 2022
     AND bfr.quarter = 2
-    AND bfr.universal_code = 'IS_080'
+    AND bfr.category_code = 'IS_080'
 GROUP BY 
     s.invest_on;
 
 
--- 16. -- Retrieve the top 10 companies by net income for 2023
+-- 16. Retrieve the top 10 companies by net income for 2023
 
 SELECT 
-    ci.stock_code,
-    ci.industry,
-    SUM(fr.data) AS net_income_2023
-FROM 
-    company_info ci
-JOIN (
-    -- Bank financial report for net income
-    SELECT 
-        stock_code,
-        data
-    FROM 
-        financial_statement
-    WHERE 
-        year = 2023
-        AND quarter = 0 -- Annual data
-        AND universal_code = 'IS_100'
-) AS fr ON ci.stock_code = fr.stock_code
-GROUP BY 
-    ci.stock_code, ci.industry
-ORDER BY 
-    net_income_2023 DESC
+    stock_code,
+    quarter,
+    year,
+    category_code,
+    data 
+FROM
+    financial_statement
+WHERE
+    category_code = 'IS_100'
+    AND quarter = 0
+    AND year = 2023
+ORDER BY
+    category_code DESC
 LIMIT 10;
-
 
 -- 17. Current Ratio of VinGroup from 2020 to Q2 2024
 SELECT 
-    fr.stock_code,
-    fr.year,
-    fr.quarter,
-    fr.data AS current_ratio
+    stock_code,
+    year,
+    quarter,
+    ratio_code,
+    data 
 FROM 
-    financial_ratio fr
+    financial_ratio
 WHERE 
-    fr.stock_code IN ('VIC')
-    AND fr.ratio_code = 'CurrentR'
-    AND (fr.year BETWEEN 2020 AND 2024)
-    and fr.quarter != 0
+    stock_code IN ('VIC')
+    AND ratio_code = 'CurrentR'
+    AND (year BETWEEN 2020 AND 2024)
+    and quarter != 0
 ORDER BY 
-    fr.stock_code, fr.year, fr.quarter;
+    stock_code, year, quarter;
 
 -- 18. How has the current ratio of Vingroup changed from 2020 to Q2 2024, and how do these changes correlate with their respective subsidiaries' performance during the same period, considering both profitability and liquidity of the subsidiaries?
 
@@ -356,7 +363,7 @@ net_income as (
 		stock_code in (SELECT subsidiary_stock_code FROM subsidiaries)
 		and year BETWEEN 2020 AND 2024
 		and quarter != 0
-		and universal_code = 'IS_100'
+		and category_code = 'IS_100'
 ),
 
 liquidity as (
@@ -364,8 +371,8 @@ liquidity as (
 		stock_code,
 		quarter,
 		year,
-		SUM(CASE WHEN universal_code = 'BS_100' THEN data END) AS current_assets,
-        SUM(CASE WHEN universal_code = 'BS_310' THEN data END) AS current_liabilities        
+		SUM(CASE WHEN category_code = 'BS_100' THEN data END) AS current_assets,
+        SUM(CASE WHEN category_code = 'BS_310' THEN data END) AS current_liabilities        
     from
     	financial_statement
     WHERE 
@@ -412,10 +419,13 @@ WITH parent_companies AS (
     SELECT DISTINCT stock_code
     FROM sub_and_shareholder
 )
-SELECT AVG(fr.data) AS avg_quick_ratio_with_subs
+SELECT AVG(fr.data) AS data_mean
+    fr.year,
+    fr.quarter,
+    fr.ratio_code
 FROM financial_ratio fr
 JOIN parent_companies pc ON fr.stock_code = pc.stock_code
-WHERE fr.ratio_code = 'QR' -- Assuming 'QR' represents Quick Ratio
+WHERE fr.ratio_code = 'QR' -- Quick Ratio
   AND fr.year = 2024
   AND fr.quarter = 2;
 
@@ -437,31 +447,38 @@ companies_without_subs AS (
     LEFT JOIN parent_companies pc ON ac.stock_code = pc.stock_code
     WHERE pc.stock_code IS NULL
 )
-SELECT AVG(fr.data) AS avg_quick_ratio_without_subs
+SELECT 
+    AVG(fr.data) AS data_mean,
+    fr.year,
+    fr.quarter,
+    fr.ratio_code
+
 FROM financial_ratio fr
 JOIN companies_without_subs cws ON fr.stock_code = cws.stock_code
-WHERE fr.ratio_code = 'QR' -- Assuming 'QR' represents Quick Ratio
+WHERE fr.ratio_code = 'QR' -- Quick Ratio
   AND fr.year = 2024
   AND fr.quarter = 2;
 
 
 -- 20. Rank the top 5 companies with the lowest Debt-to-Equity ratio as of Q4 2023
 
-SELECT 
-    fr.stock_code,
-    ci.industry,
-    fr.data AS debt_to_equity_ratio
+
+SELECT
+    stock_code,
+    year,
+    quarter,
+    ratio_code,
+    data
 FROM 
-    financial_ratio fr
-JOIN 
-    company_info ci ON fr.stock_code = ci.stock_code
-WHERE 
-    fr.ratio_code = 'DTER' -- Assuming 'DTER' represents the Debt-to-Equity ratio
-    AND fr.year = 2023
-    AND fr.quarter = 4
-ORDER BY 
-    fr.data ASC
+    financial_ratio 
+WHERE
+    ratio_code = 'DTER' -- Debt-to-Equity ratio
+    AND year = 2023
+    AND quarter = 4
+ORDER BY
+    data 
 LIMIT 5;
+
 
 
 -- 21. Identify the top 10 companies with the highest net income growth rate from 2020 to Q2 2024, based on their financial statements.  Provide the growth rate for each company.
@@ -472,7 +489,7 @@ WITH income_2020 AS (
     FROM 
         financial_statement
     WHERE 
-    	universal_code = 'IS_100'
+    	category_code = 'IS_100'
         and year = 2020
         AND quarter = 0 -- Annual data for 2020
 ),
@@ -483,7 +500,7 @@ income_2024_q2 AS (
     FROM 
         financial_statement
     WHERE 
-    	universal_code = 'IS_100'
+    	category_code = 'IS_100'
         and year = 2024
         AND quarter = 2 -- data q2 for 2024
 )
@@ -502,7 +519,10 @@ LIMIT 10;
 
 SELECT
     stock_code,
-    data AS roa_percentage
+    year,
+    quarter,
+    ratio_code,
+    data
 FROM financial_ratio
 WHERE ratio_code = 'ROA'
   AND year = 2023
@@ -516,10 +536,10 @@ SELECT
     stock_code,
     year,
     quarter,
-    universal_code,
-    data AS amount
+    category_code,
+    data
 FROM financial_statement
-WHERE universal_code = 'BS_111' -- Bank register gems, gold along with cash
+WHERE category_code = 'BS_111' -- Bank register gems, gold along with cash
   AND stock_code = 'BID'
   AND year = 2023
   AND quarter IN (1, 2, 3, 4)
@@ -529,85 +549,75 @@ ORDER BY quarter;
 -- 24. Total asset of VCB in 2020
 
 SELECT 
-    fs.stock_code,
-    fs.year,
-    fs.data AS total_assets
+    stock_code,
+    year,
+    quarter,
+    category_code
+    data
 FROM 
-    financial_statement fs
+    financial_statement
 WHERE 
-    fs.stock_code = 'VCB'
-    AND fs.year = 2020
-    AND fs.quarter = 0
-    AND fs.universal_code = 'BS_270'
+    stock_code = 'VCB'
+    AND year = 2020
+    AND quarter = 0
+    AND category_code = 'BS_270'
 LIMIT 1;
 
 
 -- 25. company with highest ROI in 2023
 
 SELECT
-    fr.stock_code,
-    ci.company_name,
-    fr.data AS roi
+    stock_code,
+    year,
+    quarter,
+    ratio_code,
+    data
 FROM
-    financial_ratio fr
-JOIN
-    company_info ci ON fr.stock_code = ci.stock_code
+    financial_ratio
+
 WHERE
-    fr.ratio_code = 'ROI'  -- Assuming 'ROI' is the ratio code for Return on Investment
-    AND fr.year = 2023      -- Assuming we want the most recent year available
-    AND fr.quarter = 0      -- Annual report
+    ratio_code = 'ROI'  -- Assuming 'ROI' is the ratio code for Return on Investment
+    AND year = 2023      
+    AND quarter = 0      -- Annual report
 ORDER BY
-    roi desc 
+    data desc 
 LIMIT 1;
 
 
 -- 26. Total liabilities of FPT in 2023
 
 SELECT 
-    fs.stock_code,
-    fs.year,
-    fs.data AS total_liabilities
+    stock_code,
+    year,
+    quarter,
+    category_code
+    data
 FROM 
-    financial_statement fs
+    financial_statement
 WHERE 
-    fs.stock_code = 'FPT'
-    AND fs.year = 2023
-    AND fs.quarter = 0  -- Annual report
-    AND fs.universal_code = 'BS_300'  -- Total liabilities
+    stock_code = 'FPT'
+    AND year = 2023
+    AND quarter = 0  -- Annual report
+    AND category_code = 'BS_300'  -- Total liabilities
 LIMIT 1;
 
 
 -- 27. Return on Equity (ROE) and Return on Asset (ROA) of HPG in 2023 
 
 SELECT 
-    fr.stock_code,
-    fr.ratio_code,
-    ROUND(fr.data::numeric * 100, 2) AS ratio_percentage
+    stock_code,
+    year,
+    quarter,
+    ratio_code,
+    data
 FROM 
-    financial_ratio fr
+    financial_ratio
 WHERE 
-    fr.stock_code = 'HPG'
-    AND fr.year = 2023
-    AND fr.quarter = 0
-    AND fr.ratio_code IN ('ROE', 'ROA');
+    stock_code = 'HPG'
+    AND year = 2023
+    AND quarter = 0
+    AND ratio_code IN ('ROE', 'ROA');
 
--- 28. Rank the top 5 companies with the highest Current Ratio from 2020 to 2023, based on their financial reports.
--- Step 1: Get the Current Ratio data for the period 2020 to 2023
-SELECT
-    fr.stock_code,
-    ci.industry,
-    fr.data AS current_ratio
-FROM
-    financial_ratio fr
-JOIN
-    company_info ci ON fr.stock_code = ci.stock_code
-WHERE
-    fr.ratio_code = 'CurrentR' -- Assuming 'CurrentR' represents the Current Ratio
-    AND fr.year between 2020 and 2023
-    AND fr.quarter = 0 -- Annual reports
-ORDER BY
-    fr.data DESC
-LIMIT 5;
 
 -- 29. Calculate the Debt-to-Equity ratio for Masan Group and its subsidiaries for the year 2021.
 
@@ -620,10 +630,13 @@ WITH subsidiaries AS (
     SELECT 'MSN' AS stock_code
 )
 
--- Step 2: Get the financial data for Total Liabilities and Total Equity for the year 2021
+-- Step 2: Get the financial data for Debt-to-Equity Ratio for the year 2021
 SELECT 
     fr.stock_code,
-    fr.data AS Debt_to_Equity_Ratio
+    fr.year,
+    fr.quarter,
+    fr.ratio_code,
+    fr.data
 FROM 
     financial_ratio fr 
 JOIN 
@@ -631,28 +644,29 @@ JOIN
 WHERE 
     fr.year = 2021
     AND fr.quarter = 0 -- Annual report
-    and fr.ratio_code = 'DTER'
+    and fr.ratio_code = 'DTER' -- Debt-to-Equity Ratio
 LIMIT 100;
 
 
 -- 30. Calculate the Debt-to-Equity Ratio for Vinamilk, Masan Group, and Hoa Phat Group annually from 2020 to 2023
 
 SELECT 
-    fr.stock_code,
-    ci.industry,
-    fr.year,
-    fr.data AS debt_to_equity_ratio
+    stock_code,
+    industry,
+    year,
+    quarter,
+    ratio_code,
+    data
 FROM 
-    financial_ratio fr
-JOIN 
-    company_info ci ON fr.stock_code = ci.stock_code
+    financial_ratio
+
 WHERE 
-    fr.ratio_code = 'DTER' -- Assuming 'DTER' represents the Debt-to-Equity ratio
-    AND fr.year IN (2020, 2021, 2022, 2023)
-    AND fr.stock_code IN ('VNM', 'MSN', 'HPG') -- Stock codes for Vinamilk, Masan Group, and Hoa Phat Group
-    AND fr.quarter = 0 -- Annual data
+    ratio_code = 'DTER' -- Assuming 'DTER' represents the Debt-to-Equity ratio
+    AND year IN (2020, 2021, 2022, 2023)
+    AND stock_code IN ('VNM', 'MSN', 'HPG') -- Stock codes for Vinamilk, Masan Group, and Hoa Phat Group
+    AND quarter = 0 -- Annual data
 ORDER BY 
-    fr.year, fr.stock_code;
+    year, stock_code;
 
 -- 31. Calculate the Long Term Debt-to-Equity ratio for ABB in Q2 2023.
 
@@ -660,7 +674,8 @@ SELECT
     stock_code,
     year,
     quarter,
-    data AS long_term_debt_to_equity_ratio
+    ratio_code,
+    data
 FROM 
     financial_ratio
 WHERE 
@@ -672,16 +687,18 @@ WHERE
 -- 32. Return On Fixed Assets of Techcombank in financial year 2019.
 
 SELECT 
-    fr.stock_code,
-    fr.year,
-    fr.data AS return_on_fixed_assets
+    stock_code,
+    year,
+    quarter,
+    ratio_code,
+    data
 FROM 
-    financial_ratio fr
+    financial_ratio
 WHERE 
-    fr.stock_code = 'TCB'
-    AND fr.year = 2019
-    AND fr.quarter = 0
-    AND fr.ratio_code = 'ROFA'
+    stock_code = 'TCB'
+    AND year = 2019
+    AND quarter = 0
+    AND ratio_code = 'ROFA' -- Return on fixed assets
 LIMIT 1;
 
 -- 33. Analyze the changes in Cash Flow from Investing activities specifically related to investments in and divestments from subsidiaries for Masan Group, VinGroup, and PetroVietnam Gas in 2023.
@@ -691,14 +708,14 @@ SELECT
     year,
     quarter,
     data,
-    universal_code
+    category_code
 FROM
     financial_statement
 WHERE
     stock_code IN ('MSN', 'VIC', 'GAS')
     AND year = 2023
     AND quarter = 0
-    AND universal_code IN ('CF_006', 'CF_070')
+    AND category_code IN ('CF_006', 'CF_070')
 LIMIT 100;
 
 -- 34. Get company VIC and its subsidiaries:
@@ -714,6 +731,7 @@ WHERE sas2.stock_code = 'VIC';
 
 -- 35. Total Asset of Vingroup and its subsidiaries Q1 2023
 
+-- Merge Subsidiaries and its parent company
 WITH vingroup_subsidiaries as (
 	SELECT sas.stock_code AS stock_code
 	FROM sub_and_shareholder sas
@@ -726,16 +744,848 @@ WITH vingroup_subsidiaries as (
 
 SELECT 
     vs.stock_code AS stock_code,
-    fs.universal_code AS universal_code,
-    fs.year AS year,
-    fs.data AS total_assets
+    fs.category_code AS category_code,
+    fs.year,
+    fs.quarter,
+    fs.category_code,
+    fs.data
 FROM 
     vingroup_subsidiaries vs
 JOIN 
     financial_statement fs ON fs.stock_code = vs.stock_code
 WHERE 
     fs.quarter = 1
-    AND fs.universal_code = 'BS_270'
+    AND fs.category_code = 'BS_270' -- Total Asset
     and fs.year = 2023
 ORDER BY 
     fs.year DESC;
+
+
+-- 36. Compare Return on Asset (ROA) of BIDV in 2019 with the average ROA of all banks in 2019
+
+-- Get ROA of BIDV in 2019
+WITH bidv_roa AS (
+    SELECT 
+        fr.stock_code,
+        fr.data AS roa_percentage
+    FROM 
+        financial_ratio fr
+    WHERE 
+        fr.stock_code = 'BID'
+        AND fr.year = 2019
+        AND fr.quarter = 0
+        AND fr.ratio_code = 'ROA'
+),
+
+-- Get average ROA of all banks in 2019
+average_roa AS (
+    SELECT 
+        data_mean AS average_roa_percentage
+    FROM 
+        industry_financial_ratio ifr
+    WHERE 
+        ifr.year = 2019
+        AND ifr.quarter = 0
+        AND ifr.ratio_code = 'ROA'
+        AND ifr.industry = 'Banking'
+)
+
+SELECT 
+    b.stock_code,
+    b.roa_percentage,
+    a.average_roa_percentage
+FROM 
+    bidv_roa b,
+    average_roa a
+LIMIT 1;
+
+-- 37. Bad debt ratio for BIDV in Q3 2023
+
+SELECT 
+    stock_code,
+    quarter,
+    year,
+    ratio_code,
+    data
+FROM financial_ratio
+WHERE ratio_code = 'BDR' -- Bad Debt Ratio
+  AND stock_code = 'BID' -- BIDV stock code
+  AND year = 2023
+  AND quarter = 3 -- Q3 2023
+LIMIT 100;
+
+-- 38. Total Asset of VIC in Q3 2024 and Average Total Asset of its Industry 
+WITH vic_total_asset AS (
+    SELECT 
+        stock_code,
+        year,
+        quarter,
+        data AS total_assets
+    FROM 
+        financial_statement
+    WHERE 
+        stock_code = 'VIC'
+        AND year = 2024
+        AND quarter = 3
+        AND category_code = 'BS_270' -- Total Assets
+),
+
+
+industry_average AS (
+    SELECT 
+        industry,
+        data_mean AS average_total_assets
+    FROM 
+        industry_financial_statement ifs
+    WHERE 
+        ifs.industry = (SELECT industry FROM company_info WHERE stock_code = 'VIC') -- Real Estate
+        AND ifs.year = 2024
+        AND ifs.quarter = 3
+        AND ifs.category_code = 'BS_270' -- Total Assets
+)
+
+SELECT 
+    vic.stock_code,
+    vic.total_assets,
+    avg_ind.average_total_assets
+FROM 
+    vic_total_asset vic,
+    industry_average avg_ind;
+
+-- 39. Average total Asset of Real Estate Company in Q3 2023
+
+SELECT 
+    industry,
+    year,
+    quarter,
+    category_code ,
+    data_mean
+FROM industry_financial_statement 
+WHERE category_code = 'BS_270' -- Total Asset
+  AND year = 2023
+  AND quarter = 3
+  AND industry = 'Real Estate'
+LIMIT 100;
+
+-- 40. Financial Leverage of TCB in Q3 2024
+
+SELECT 
+    stock_code,
+    year,
+    quarter,
+    ratio_code,
+    data
+FROM financial_ratio
+WHERE ratio_code = 'FL' -- (Financial Leverage)
+  AND year = 2024
+  AND quarter = 3
+  AND stock_code = 'TCB'
+LIMIT 100;
+
+-- 41. Average Bad Debt Ratio of Banks in Q3 2024
+
+SELECT 
+    industry,
+    year,
+    quarter,
+    ratio_code,
+    data_mean
+FROM industry_financial_ratio
+WHERE ratio_code = 'BDR' -- Bad Debt Ratio
+  AND year = 2024
+  AND quarter = 3
+  AND industry = 'Banking'
+LIMIT 100;
+
+-- 42. Percentage of BIDV's Equity in Total Equity of All Banks for 2023
+
+WITH total_equity_2023 AS (
+    SELECT 
+        data_sum,
+        quarter,
+        year,
+        category_code
+    FROM 
+        industry_financial_statement
+    WHERE 
+        industry = 'Banking' 
+        AND year = 2023
+        AND quarter = 0 -- Annual report
+        AND category_code = 'BS_400' -- Total Equity
+),
+
+bidv_equity_2023 AS (
+    SELECT 
+        data,
+        stock_code
+    FROM 
+        financial_statement
+    WHERE 
+        stock_code = 'BID' -- BIDV stock code
+        AND year = 2023
+        AND quarter = 0 -- Annual report
+        AND category_code = 'BS_400' -- Total Equity
+)
+
+SELECT 
+	bidv.stock_code as stock_code,
+    (bidv.data / total.data_sum) * 100 AS equity_percentage,
+    total.year as year,
+    total.quarter as quarter,
+    total.category_code as category_code
+FROM 
+    bidv_equity_2023 bidv,
+    total_equity_2023 total;
+
+
+-- 43. Total amount of customer deposit in all banks in 2023
+
+SELECT 
+    industry,
+    year,
+    quarter,
+    category_code ,
+    data_sum
+FROM industry_financial_statement 
+WHERE category_code = 'BS_305' -- Customer deposits
+  AND year = 2023
+  AND quarter = 0 -- Annually
+  AND industry = 'Banking'
+LIMIT 100;
+
+-- 44. Percentage of Customer Deposits in TCB Relative to Total Customer Deposits in All Banks for Q3 2024
+
+WITH total_customer_deposits AS (
+    SELECT 
+        data_sum,
+        quarter,
+        year,
+        category_code
+    FROM 
+        industry_financial_statement
+    WHERE 
+        industry = 'Banking' 
+        AND year = 2024
+        AND quarter = 3 -- Annual report
+        AND category_code = 'BS_305' -- Customer deposits
+),
+
+tcb_customer_deposits AS (
+    SELECT 
+    	stock_code,
+        data
+    FROM 
+        financial_statement
+    WHERE 
+        stock_code = 'TCB' -- TCB stock code
+        AND year = 2024
+        AND quarter = 3 -- Q3 2024
+        AND category_code = 'BS_305' -- Customer deposits
+)
+
+SELECT 
+	tcb.stock_code as stock_code,
+    (tcb.data / total.data_sum) * 100 AS customer_deposits_percentage,
+    total.year as year,
+    total.quarter as quarter,
+    total.category_code as category_code
+FROM 
+    tcb_customer_deposits tcb,
+    total_customer_deposits total;
+
+-- 45. Get all companies listed in VN30 bucket list
+
+SELECT
+    stock_code,
+FROM
+    company_info
+where
+	stock_indices = 'VN30'
+
+-- 46. Get all companies listed in HOSE exchange.
+
+SELECT
+    stock_code,
+    exchange
+FROM
+    company_info
+where
+	exchange = 'HOSE'
+
+-- 47. Within companies listed in VN30, which company has the highest net income in Q3 2024
+
+with vn30 as (
+	SELECT
+	    stock_code
+	FROM
+	    company_info
+	where
+		stock_indices = 'VN30'
+)
+
+select 
+	stock_code, 
+	quarter,
+	year,
+	category_code,
+	data
+from
+	financial_statement
+where 
+	quarter = 3
+	and year = 2024
+	and category_code = 'IS_100'
+	and stock_code in (SELECT stock_code FROM vn30)
+ORDER BY
+    data DESC
+LIMIT 1;
+
+-- 48. Within Technology firms, which firms has the highest ROS in Q2 2024
+with technology as (
+	SELECT
+	    stock_code
+	FROM
+	    company_info
+	where
+		industry = 'Information Technology'
+)
+
+select 
+	stock_code, 
+	quarter,
+	year,
+	ratio_code ,
+	data
+from
+	financial_ratio
+where 
+	quarter = 2
+	and year = 2024
+	and ratio_code = 'ROS'
+	and stock_code in (SELECT stock_code FROM technology)
+ORDER BY
+    data DESC
+LIMIT 1;
+
+
+-- 49. Within Securities firms, in 2021, get the accounting profit before tax
+
+with securities as (
+	SELECT
+	    stock_code
+	FROM
+	    company_info
+	where
+		industry = 'Financial Services'
+)
+
+select 
+	stock_code, 
+	quarter,
+	year,
+	category_code,
+	data
+from
+	financial_statement
+where 
+	quarter = 0
+	and year = 2023
+	and category_code = 'IS_080'
+	and stock_code in (SELECT stock_code FROM securities)
+ORDER BY
+    data desc
+
+-- 50. How many Real Estate companies in VN30
+
+SELECT
+    count(stock_code)
+FROM
+    company_info
+where
+	industry = 'Real Estate'
+
+-- 51. Top 5 bank highest CASA ratio in 2023
+
+with bank as (
+	SELECT
+	    stock_code
+	FROM
+	    company_info
+	where
+		industry = 'Banking'
+)
+
+select 
+	stock_code, 
+	quarter,
+	year,
+	ratio_code ,
+	data
+from
+	financial_ratio
+where 
+	quarter = 0
+	and year = 2023
+	and ratio_code = 'CASA'
+	and stock_code in (SELECT stock_code FROM bank)
+ORDER BY
+    data DESC
+LIMIT 5;
+
+-- 52. Top 5 Bank have lowest Bad debt ratio in Q3 2024
+
+with bank as (
+	SELECT
+	    stock_code
+	FROM
+	    company_info
+	where
+		industry = 'Banking'
+)
+
+select 
+	stock_code, 
+	quarter,
+	year,
+	ratio_code ,
+	data
+from
+	financial_ratio
+where 
+	quarter = 3
+	and year = 2024
+	and ratio_code = 'BDR'
+	and stock_code in (SELECT stock_code FROM bank)
+ORDER BY
+    data 
+LIMIT 5;
+
+-- 53. Top 5 real estate companies with highest Bank Loans in Q4 2023
+
+with real_estate as (
+	SELECT
+	    stock_code
+	FROM
+	    company_info
+	where
+		industry = 'Real Estate'
+)
+
+select 
+	stock_code, 
+	quarter,
+	year,
+	category_code,
+	data
+from
+	financial_statement_explaination
+where 
+	quarter = 4
+	and year = 2023
+	and category_code = 'Share_TM_3'
+	and stock_code in (SELECT stock_code FROM real_estate)
+ORDER BY
+    data DESC
+LIMIT 5;
+
+-- 54. Benefit of bonds, note and treasury bill of HPG in 2023
+
+select 
+	stock_code,
+	quarter,
+	year,
+	category_code,
+	data 
+from
+	financial_statement_explaination
+where 
+	quarter = 0
+	and year = 2023
+	and category_code = 'Corp_TM_135' -- Interest income from bonds, promissory notes, treasury bills
+	and stock_code = 'HPG'
+
+-- 55. From 2019 to 2023, get the amount of real estate goods of VHM
+
+select 
+	stock_code,
+	quarter,
+	year,
+	category_code,
+	data 
+from
+	financial_statement_explaination
+where 
+	quarter = 0
+	and year between 2019 and 2023
+	and category_code = 'Corp_TM_27' -- Real estate goods
+	and stock_code = 'VHM'
+	
+
+-- 56. Which bank issue the largest amount of loans to community and personal services in 2023
+
+select 
+	stock_code,
+	quarter,
+	year,
+	category_code,
+	data 
+from
+	financial_statement_explaination
+where 
+	quarter = 0
+	and year = 2023
+	and category_code = 'Bank_TM_46' -- Loans to community and personal services
+order by 
+	data desc 
+limit 1;
+
+-- 57. Short-term, medium-term and long-term loans issued by TCB at Q3 2024
+
+select 
+	stock_code,
+	quarter,
+	year,
+	category_code,
+	data 
+from
+	financial_statement_explaination
+where 
+	quarter = 3
+	and year = 2024
+	and category_code IN ('Bank_TM_72', 'Bank_TM_73', 'Bank_TM_74') -- Type of Loans
+	and stock_code = 'TCB'
+
+-- 58. Top 5 bank has the highest short-term loans percentage in total loans issued in Q3 2024
+
+with loans as (
+	select 
+		data,
+		stock_code,
+		year,
+		quarter
+	from
+		financial_statement
+	where 
+		category_code = 'BS_125' -- Loans to customer
+		and year = 2024
+		and quarter = 3 
+),
+
+short_term_loans as (
+	select 
+		data,
+		stock_code
+	from
+		financial_statement_explaination
+	where 
+		category_code = 'Bank_TM_72' -- Short term loans
+		and year = 2024
+		and quarter = 3 
+)
+
+select 
+	distinct l.stock_code,
+	l.year,
+	l.quarter,
+	stl.data/l.data as short_term_ratio
+	
+from loans l
+join short_term_loans stl
+on l.stock_code = stl.stock_code
+order by short_term_ratio desc 
+limit 5;
+
+-- 60. Technology firms with highest Net Revenue Grow YoY in 2023
+
+with technology as (
+	SELECT
+	    stock_code
+	FROM
+	    company_info
+	where
+		industry = 'Information Technology'
+)
+
+select 
+	stock_code,
+	quarter,
+	year,
+	ratio_code,
+	data
+
+from financial_ratio
+
+where
+	ratio_code = 'NRGYoY'  -- Net Revenue Growth YoY
+	and year = 2023
+	and quarter = 0
+	and stock_code IN (SELECT stock_code FROM technology)
+	
+ORDER by
+    data desc
+LIMIT 1;
+
+-- 61. Get the total asset growth YoY of VIC, VHM and VRE in 2021
+
+select 
+	stock_code,
+	quarter,
+	year,
+	ratio_code,
+	data
+
+from financial_ratio
+
+where
+	ratio_code = 'TAGYoY'  -- Total Asset Growth YoY
+	and year = 2021
+	and quarter = 0
+	and stock_code IN ('VIC', 'VRE', 'VHM');
+
+-- 62. Collect the Net Revenue Growth YoY of HPG from 2016 to 2023
+
+select 
+	stock_code,
+	quarter,
+	year,
+	ratio_code,
+	data
+
+from financial_ratio
+
+where
+	ratio_code = 'NRGYoY'  -- Net Revenue Growth YoY
+	and year between 2016 and 2023
+	and quarter = 0
+	and stock_code = 'HPG';
+
+-- 63. Ranking industries based on average ROS in 2022
+
+select 
+	industry,
+	quarter,
+	year,
+	ratio_code,
+	data_mean
+
+from industry_financial_ratio 
+
+where
+	ratio_code = 'ROS'  -- Return on Sales
+	and year = 2022
+	and quarter = 0
+	
+order by 
+	data_mean desc;
+
+-- 64. Bad Debt ratio of banking industry from 2016 to 2023
+
+	select 
+		industry,
+		ratio_code,
+		year,
+		quarter,
+		data_mean
+	from industry_financial_ratio
+	where 
+		ratio_code = 'BDR'  -- Bad Debt Ratio
+		and year between 2016 and 2023
+		and quarter = 0
+		and industry = 'Banking'
+
+-- 68. Compare CASA of BIDV to average banking system in 2022 
+
+with banking_casa as (
+	select 
+		industry,
+		ratio_code,
+		data_mean
+	from industry_financial_ratio
+	where 
+		ratio_code = 'CASA'  -- CASA Ratio
+		and year = 2022
+		and quarter = 0
+		and industry = 'Banking'
+),
+bidv_casa as (
+	select 
+		ratio_code,
+		year,
+		quarter,
+		stock_code,
+		data 
+	from financial_ratio
+	where 
+		ratio_code = 'CASA' -- CASA Ratio
+		and year = 2022
+		and quarter = 0
+		and stock_code = 'BID'
+)
+
+select 
+	bid.ratio_code,
+	bid.year,
+	bid.quarter,
+	bid.stock_code,
+	bid.data,
+	bank.industry,
+	bank.data_mean
+from bidv_casa bid
+join banking_casa bank
+on bid.ratio_code = bank.ratio_code
+
+-- 65. Get the total money 2th debt group of BIDV in 2021.
+
+select 
+	category_code,
+	stock_code,
+	year,
+	quarter,
+	data 
+
+from financial_statement_explaination
+where 
+	stock_code = 'BID'
+	and year = 2021
+	and quarter = 0
+	and category_code = 'Bank_TM_67'  -- Second Bad Debt Group
+
+-- 66. In 2023, get the moeny listed in 2th debt group in top 5 bank with highest Bad Debt Ratio.
+
+with bank as (
+	select 
+		stock_code
+	from
+		company_info
+	where
+		industry = 'Banking'
+),
+
+bank_bad_debt as ( 
+	select 
+		stock_code,
+		quarter,
+		year,
+		ratio_code,
+		data
+	from
+		financial_ratio
+	where 
+		quarter = 0
+		and year = 2023
+		and ratio_code = 'BDR'   -- Bad Debt Ratio
+		and stock_code in (select stock_code from bank)
+),
+
+bank_2_debt_group as (
+	select 
+		stock_code,
+		quarter,
+		year,
+		category_code,
+		data
+	from 
+		financial_statement_explaination
+	where 
+		quarter = 0
+		and year = 2023
+		and category_code = 'Bank_TM_67' -- Second Bad Debt Group
+		and stock_code in (select stock_code from bank)
+)
+
+select 
+	bd.stock_code,
+	bd.quarter,
+	bd.year,
+	se.category_code,
+	se.data
+from
+	bank_bad_debt bd
+join 
+	bank_2_debt_group se
+on 
+	bd.stock_code = se.stock_code
+order by 
+	bd.data desc 
+limit 5;
+
+-- 67. Percentage of loan for state-owned companies in total of loans issued by MB Bank from 2017 to 2022
+
+with mbb_loan as ( 
+	select 
+		stock_code,
+		quarter,
+		year,
+		category_code,
+		data
+	from
+		financial_statement 
+	where 
+		quarter = 0
+		and year between 2017 and 2022
+		and category_code = 'BS_125'   -- Loan to customers
+		and stock_code = 'MBB'
+),
+
+mbb_state_loan as (
+	select 
+		stock_code,
+		quarter,
+		year,
+		category_code,
+		data
+	from 
+		financial_statement_explaination
+	where 
+		quarter = 0
+		and year between 2017 and 2022
+		and category_code = 'Bank_TM_85' -- Loans to State-owned enterprises
+		and stock_code = 'MBB'
+)
+
+select 
+	loan.stock_code,
+	loan.quarter,
+	loan.year,
+	state.data/ loan.data * 100 as state_loan_percentage 
+from
+	mbb_loan loan
+join 
+	mbb_state_loan state
+on 
+	loan.year = state.year
+
+
+-- 68. Total Equity of Bank in 2023
+
+select 
+	industry,
+	quarter,
+	year,
+	category_code,
+	data_sum
+
+from industry_financial_statement
+
+where
+	category_code = 'BS_400' -- Total Equity
+	and year = 2023
+	and quarter = 0
+	and industry = 'Banking'
+
+-- 69. Price-Earning Ratio (P/E) of VIC 2022
+
+select 
+	stock_code,
+	quarter,
+	year,
+	ratio_code,
+	data
+
+from financial_ratio
+
+where
+	ratio_code = 'PE' -- Price-Earning Ratio
+	and year = 2022
+	and quarter = 0
+	and stock_code = 'VIC'
