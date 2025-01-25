@@ -66,20 +66,24 @@ def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=F
         # Get the SQL code from the last response
         codes = get_code_from_text_response(his[-1]['content'])
 
-    for i, code in enumerate(codes):
+        sql = []
+        for code in codes:
+            if code.get('language') == 'sql':
+                sql.append(code.get('code',''))
+
         responses.append({
-            'id': ids[i],
+            'id': ids,
             'question': prompt,
             'table': table_str,
-            'sql': code
+            'sql': sql
         })
 
         if file_path:
             append_json_to_file({
-                'id': ids[i],
+                'id': ids,
                 'question': prompt,
                 'table': table_str,
-                'sql': code
+                'sql': sql
             }, file_path)
 
 
