@@ -13,7 +13,6 @@ from agent.const import (
     GPT4O_MINI_CONFIG,
     GPT4O_CONFIG,
     TEXT2SQL_FASTEST_CONFIG,
-    TEXT2SQL_SWEET_SPOT_CONFIG,
     TEXT2SQL_FAST_OPENAI_CONFIG,
     TEXT2SQL_DEEPSEEK_V3_CONFIG,
     TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG
@@ -67,12 +66,17 @@ def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=F
         # Get the SQL code from the last response
         codes = get_code_from_text_response(his[-1]['content'])
 
-    for i, code in enumerate(codes):
+        sql = []
+        for code in codes:
+            if code.get('language') == 'sql':
+                sql.append(code.get('code',''))
+
         responses.append({
             'id': ids,
             'question': prompt,
             'table': table_str,
-            'sql': code
+            'reasoning': his[-1]['content'],
+            'sql': sql
         })
 
         if file_path:
@@ -80,13 +84,14 @@ def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=F
                 'id': ids,
                 'question': prompt,
                 'table': table_str,
-                'sql': code
+                'reasoning': his[-1]['content'],
+                'sql': sql
             }, file_path)
 
 
     return responses
 
-def solve(text2sql_config, prompt_config, questions, using_cache=False, version = None, batch_size=5, max_workers=4, multi_thread=False):
+def _solve(text2sql_config, prompt_config, questions, using_cache=False, version = None, batch_size=5, max_workers=4, multi_thread=False):
     """
     Run a single solver on a batch of questions in parallel
     """
@@ -94,7 +99,6 @@ def solve(text2sql_config, prompt_config, questions, using_cache=False, version 
     batch_question = []
 
     for question in questions:
-        print(question)
         if version:
             if question['version'] != version:
                 continue
@@ -107,7 +111,8 @@ def solve(text2sql_config, prompt_config, questions, using_cache=False, version 
     if batch_question:
         batch_questions.append(batch_question)
 
-    print("Number of batches:", len(batch_questions))
+    # For testing
+    batch_questions = batch_questions[:4]
 
     if version:
         current_dir = os.path.dirname(__file__)
@@ -129,26 +134,25 @@ def solve(text2sql_config, prompt_config, questions, using_cache=False, version 
 
     return results
 
-def main():
-    text2sql_config = TEXT2SQL_FAST_OPENAI_CONFIG
-    prompt_config = VERTICAL_PROMPT_UNIVERSAL
-    version = 'v1'
+
+
+def solve():
+    text2sql_config = TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG
+    prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL
+    version = 'v0'
 
     with open('../data/generated_questions.json') as f:
         questions = json.load(f)
         print(len(questions))
 
-    # Test    
-    questions = questions[:5]
-
-    results = solve(text2sql_config, prompt_config, questions, using_cache=False, version=version, batch_size=1, max_workers=4)
-    with open(f'../data/{text2sql_config.get("sql_llm", "unknown")}_generated_questions_sql.jsonl', 'w') as f:
+    results = _solve(text2sql_config, prompt_config, questions, using_cache=True, version=version, batch_size=2, max_workers=4)
+    with open('../data/generated_questions_sql.jsonl', 'w') as f:
         for result in results:
             json.dump(result, f)
             f.write('\n')
 
 if __name__ == '__main__':
-    main()
+    solve()
 
     
     

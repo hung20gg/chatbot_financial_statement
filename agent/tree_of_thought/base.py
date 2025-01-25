@@ -21,7 +21,7 @@ from llm.llm_utils import get_code_from_text_response, get_json_from_text_respon
 
 class SQLReasoningNode(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
-
+    task: str 
     content: str # The reasoning content
     critique: str = ''
     error: List[str] = []
@@ -118,7 +118,7 @@ class SQLReasoningNode(BaseModel):
 
     def get_solution(self, full_solution = False, denote = 'Solution') -> str:
         # Traverse the tree to get the full solution
-        answer = ""
+        answer = f"<task>\n\n{self.task}\n\n</task>\n\n"
 
         if full_solution:
 
@@ -140,7 +140,9 @@ class SQLReasoningNode(BaseModel):
                 answer += node.local_solution()
 
         else:
-            return self.local_solution()
+            answer += self.local_solution()
+        
+        return answer
                 
 
     def is_fully_expanded(self) -> bool:
@@ -161,7 +163,7 @@ class SQLReasoningNode(BaseModel):
 
 
 class TreeOfThought(BaseModel):
-    root: SQLReasoningNode = SQLReasoningNode(content="")
+    root: SQLReasoningNode = SQLReasoningNode(task = "", content="")
     
     reward_model: Any = Field(defalt=None)
     critique_model: Any = Field(default=None)
@@ -313,7 +315,7 @@ class SelfRefine_TOT(TreeOfThought):
         content, _, _ = solver.refine_error_correction(error_messages, tables)
         
         # Add refine to current node
-        new_node = SQLReasoningNode(content=content, solver=solver)
+        new_node = SQLReasoningNode(task = task, content=content, solver=solver)
         new_node.add_error(error_messages)
         new_node.add_table(tables)
 
@@ -343,7 +345,7 @@ class SelfRefine_TOT(TreeOfThought):
 
 
     def clear(self):
-        self.root = SQLReasoningNode(content="")
+        self.root = SQLReasoningNode(task ='', content="")
         self.solver.reset()
 
     def start(self, question: str, weak_answer: bool = False) -> SQLReasoningNode:
@@ -356,9 +358,9 @@ class SelfRefine_TOT(TreeOfThought):
         
         if weak_answer:
             # Currently, we don't have a weak answer
-            node = SQLReasoningNode(content="I dont't know", solver=copy.deepcopy(self.solver))
+            node = SQLReasoningNode(task = question, content="I dont't know", solver=copy.deepcopy(self.solver))
         else:
-            node = SQLReasoningNode(content="I don't know", solver=copy.deepcopy(self.solver))
+            node = SQLReasoningNode(task = question, content="I don't know", solver=copy.deepcopy(self.solver))
 
         node.update_Q(0)
 

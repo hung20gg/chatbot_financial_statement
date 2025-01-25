@@ -84,7 +84,7 @@ class Partial_SelfRefine_TOT(SelfRefine_TOT):
             
             try:
                 tasks = get_solution_from_text_response(response)
-                previous_node = SQLReasoningNode(content = "I don't know", solver = copy.deepcopy(self.solver), critique = "No solution available")
+                previous_node = SQLReasoningNode(task = question, content = "I don't know", solver = copy.deepcopy(self.solver), critique = "No solution available")
 
                 # Solve the tasks
                 for task in tasks:
@@ -98,13 +98,13 @@ class Partial_SelfRefine_TOT(SelfRefine_TOT):
                 return previous_node
             except Exception as e:
                 print('Error in start', e)
-                return SQLReasoningNode(content = "I don't know", solver = copy.deepcopy(self.solver), critique = "No solution available")
+                return SQLReasoningNode(task = question, content = "I don't know", solver = copy.deepcopy(self.solver), critique = "No solution available")
 
             
 
 
         else:
-            new_node = SQLReasoningNode(content = "I don't know", solver = copy.deepcopy(self.solver), critique = "No solution available")
+            new_node = SQLReasoningNode(task = question, content = "I don't know", solver = copy.deepcopy(self.solver), critique = "No solution available")
             new_node.add_critique("No solution available")
             
         return new_node
