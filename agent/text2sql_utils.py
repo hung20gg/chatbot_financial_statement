@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 import os
 
+import sys 
+sys.path.append('..')
+
 from llm.llm.chatgpt import ChatGPT, OpenAIWrapper
 from llm.llm.gemini import Gemini
 
@@ -25,7 +28,7 @@ class Table(BaseModel):
         return f"Table(desc = {self.description})"
     
 
-def table_to_markdown(table: Table|pd.DataFrame|str, max_string = 5000) -> str:
+def table_to_markdown(table: Table|pd.DataFrame|str|list, max_string = 5000) -> str:
     
     if table is None:
         return ""
@@ -78,6 +81,8 @@ def get_llm_wrapper(model_name, **kwargs):
     
     host = os.getenv('LLM_HOST')
     api_key = os.getenv('LLM_API_KEY')
+
+    print(f"Using OpenAI Wrapper with host {host}")
 
     return OpenAIWrapper(host=host, api_key=api_key, model_name=model_name, **kwargs)
     
@@ -348,8 +353,11 @@ def prune_unnecessary_data_from_sql(tables: list[Table], messages: list[dict]):
         mentioned_entities.update(matches)
     
     for table in tables:
-        table.table = _prune_entity(table.table.copy(), list(mentioned_entities))
-        
+
+        # Allow successful query only
+        if isinstance(table.table, pd.DataFrame):
+            table.table = _prune_entity(table.table.copy(), list(mentioned_entities))
+
     if not is_list:
         return tables[0]
     return tables
@@ -376,3 +384,25 @@ def prune_null_table(tables: list[Table|pd.DataFrame]):
         new_tables.append(table)
         
     return new_tables
+
+
+
+if __name__ == '__main__':
+    
+
+    from dotenv import load_dotenv
+    load_dotenv()
+
+    print(os.getenv('LLM_HOST'))
+
+    llm = get_llm_wrapper('deepseek-chat')
+    
+    message = [
+        {
+            'role': 'user',
+            'content': "What is the revenue of Apple in Q2 2023"
+        }
+    ]
+
+    response = llm(message)
+    print(response)

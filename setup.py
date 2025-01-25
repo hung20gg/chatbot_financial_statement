@@ -24,7 +24,7 @@ def get_args():
     paser.add_argument('--openai', default=False, type=str2bool)
     paser.add_argument('--local', default=False, type=str2bool)
     paser.add_argument('--vectordb', default='chromadb', type=str)
-    paser.add_argument('--ignore_rdb', default=False, type=str2bool)
+    paser.add_argument('--ignore_rdb', default=True, type=str2bool)
     
     return paser.parse_args()
 

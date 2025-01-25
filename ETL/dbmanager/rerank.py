@@ -99,7 +99,23 @@ class BaseRerannk(BaseModel):
     def rerank(self, query, documents, top_k, **kwargs):
         
         if self.reranker_type == 'api':
-            result = asyncio.run(self._rerank_api(query, documents, top_k, **kwargs))
+            try:
+            # First attempt to use asyncio.run()
+                result = asyncio.run(self._rerank_api(query, documents, top_k, **kwargs))
+            except RuntimeError as e:
+                if "cannot be called from a running event loop" in str(e):
+                    # Handle Jupyter/async environment
+                    try:
+                        import nest_asyncio
+                        nest_asyncio.apply()  # Allow nested event loops
+                        result = asyncio.run(self._rerank_api(query, documents, top_k, **kwargs))
+                    except ImportError:
+                        raise RuntimeError(
+                            "This function requires nest_asyncio to run in a Jupyter notebook. "
+                            "Install it with: pip install nest_asyncio"
+                        )
+                else:
+                    raise  # Re-raise the original exception
         elif self.reranker_type == 'local':
             result = self._rerank_local(query, documents, top_k, **kwargs)
         

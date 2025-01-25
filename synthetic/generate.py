@@ -6,8 +6,10 @@ import pandas as pd
 import numpy as np
 import random
 import json
+import re
+import uuid
 
-from llm.llm.gemini import Gemini
+from agent.text2sql_utils import get_llm_wrapper
 from llm.llm_utils import get_json_from_text_response
 
 import os 
@@ -70,7 +72,7 @@ job_titles = [
     # "Broker"
 ]
 
-file_path = 'generated_questions_v2.json'
+file_path = 'generated_questions_v0.json'
 # Function to add new content to a JSON file
 def add_content_to_json(new_data):
     try:
@@ -104,7 +106,7 @@ Note:
 - You can ask questions in any format, but the questions must be relevant to the task.
 - You mustn't contain the word : "Include" the list of companies in the end of the question.
 - Your question should not contain prediction or forecast parts.
-- Generate hard questions that require deep understanding of the financial reports of the companies.
+- Generate easy to understand questions. You are giving task to an intern.
 """
     # - Making the question from easy to hard and more complex for each request. (Q1 is easy and final question is the most difficult)
    # , and you have to ask many explicit,meaningful and insightful questions about the financial reports of companies.
@@ -205,12 +207,12 @@ Return the questions in a JSON format
 
         
 def parallel_generate_questions(*args):
-    llm = Gemini(model_name="gemini-1.5-pro")
+    llm = get_llm_wrapper(model_name="gemini-1.5-flash-002")
 
     return generate_questions(llm, *args)
 
 
-def main():
+def generate():
     
     
     
@@ -222,7 +224,7 @@ def main():
                     for job_title in job_titles:
                         tasks.append((main_task, sub_task,analyzing_type, time,job_title))
 
-    BATCH_SIZE = 2
+    BATCH_SIZE = 5
     # batch_tasks = [tasks[i:i+BATCH_SIZE] for i in range(0, len(tasks), BATCH_SIZE)]
 
     batch_tasks = []
@@ -257,11 +259,74 @@ def main():
 
     return results
 
-if __name__ == "__main__":
-    with open(file_path, 'w') as f:
-        json.dump([], f, indent=4)
-    generated_questions = main()
+
+def main():
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+
+    if data:
+        print("Data already exists")
+    else:
+        with open(file_path, 'w') as f:
+            json.dump([], f, indent=4)
+
+    generate()
+
+def extract_questions(questions, version):
+    results = []
+
+    for question in questions['questions']:
+
+        if isinstance(question, dict):
+            question = question['question']
+
+        result = {
+            'ids': str(uuid.uuid4()),
+            'main_task': questions['main_task'],
+            'sub_task': questions['sub_task'],
+            'time': questions['time'],
+            'analyzing_types': questions['analyzing_types'],
+            'version': version,
+            'question': question
+        }
+        results.append(result)
+    return results
+        
+
+def merge_questions():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    pattern = re.compile(r'generated_questions_(v\d+)\.json')
+
+    versions = []
+    data = []
+
+    for file in os.listdir(current_dir):
+        match = pattern.match(file)
+        if match:
+            versions.append(match.group(1))
+            with open(file, 'r') as f:
+                data.append(json.load(f))
+
+    results = []
     
 
-    # print(os.getenv('GENAI_API_KEY'))
+    for version, conversations in zip(versions, data):
+        print(f"Processing version {version}")
+        count = 0
+        for conversation in conversations:
+            for questions in conversation:
+                new_questions = extract_questions(questions, version)
+                results.extend(new_questions)
+                count += len(new_questions)
+        print(f"Version {version} has {count} questions")
 
+    with open(os.path.join(current_dir, '../data/generated_questions.json'), 'w') as f:
+        json.dump(results, f, indent=4)
+
+
+
+if __name__ == "__main__":
+
+    # main()
+    merge_questions()

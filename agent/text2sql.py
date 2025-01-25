@@ -589,8 +589,11 @@ class Text2SQL(BaseAgent):
             
         company_info, suggest_table = self.get_stock_code_and_suitable_row(str_task)
         
+        tables = [company_info]
+        tables.extend(suggest_table)
+
         if cache:
-            company_info, suggest_table = self.update_suggest_data(company_info, suggest_table)
+            company_info, suggest_table = self.update_suggest_data(deepcopy(company_info), deepcopy(suggest_table))
         
         if not self.config.branch_reasoning:
             
@@ -603,10 +606,8 @@ class Text2SQL(BaseAgent):
         else:
             self.history, error_messages, execution_tables = self.branch_reasoning_text2SQL(task, steps, company_info, suggest_table)
 
-        tables = [company_info]
-        tables.extend(suggest_table)
         
-        tables = utils.prune_unnecessary_data_from_sql(deepcopy(tables), self.history)
+        tables = utils.prune_unnecessary_data_from_sql(tables, self.history)
         
         tables = utils.prune_null_table(tables) # Remove null table
         

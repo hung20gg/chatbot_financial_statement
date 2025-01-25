@@ -40,7 +40,7 @@ class BaseDBHUB(BaseModel):
         else:
             result = vector_db.similarity_search(text, top_k * 4) # Increase top_k to get more results
             result = self.reranker.rerank_langchain(text, result, top_k)
-            return result
+            return result[:top_k] # Return top_k results (if reranker not triggered)
         
     # ================== Search for suitable content (account) ================== #
     
