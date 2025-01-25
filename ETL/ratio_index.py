@@ -395,6 +395,9 @@ def operating_profit_margin(net_profit_from_operating, net_sales, bank_params = 
 def gross_profit_margin(gross_profit, net_sales):
     return gross_profit / net_sales if net_sales else None
 
+def net_profit_margin(net_profit, net_sales):
+    return net_profit / net_sales if net_sales else None
+
 def Total_Asset_Turnover(net_sales, avg_total_assets):
     return net_sales / avg_total_assets if avg_total_assets else None
 
