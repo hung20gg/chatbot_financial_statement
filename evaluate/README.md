@@ -38,7 +38,7 @@ Score the probability that the question can be answered with given data. (weak l
 Run the following script (remember change the argument accordingly)
 
 ```bash
-llm=gpt-4o
+llm=deepseek-chat
 multi_thread=True 
 task=qa_quality
 
