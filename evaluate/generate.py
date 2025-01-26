@@ -120,9 +120,9 @@ def _solve(text2sql_config, prompt_config, questions, using_cache=False, version
 
     if version:
         current_dir = os.path.dirname(__file__)
-        file_path = os.path.join(current_dir, f"../data/{text2sql_config.get('sql_llm', 'unknown')}__{version}.jsonl")
+        file_path = os.path.join(current_dir, f"../data/{text2sql_config.get('llm', 'unknown')}__{version}.jsonl")
     else:
-        file_path = f"../data/{text2sql_config.get('sql_llm', 'unknown')}_all.jsonl"
+        file_path = f"../data/{text2sql_config.get('llm', 'unknown')}_all.jsonl"
 
     results = []
 
@@ -189,6 +189,23 @@ def solve(args):
 
 
     results = _solve(text2sql_config, prompt_config, selected_questions, using_cache=args.using_cache, version=version, batch_size=args.batch_size, max_workers=args.max_workers, multi_thread=args.multi_thread)
+
+
+import argparse
+
+def get_args():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--task', type=str, default='generate_sql', help='task to evaluate')
+    parser.add_argument('--version', default='v0', type=str)
+    parser.add_argument('--batch_size', default=2, type=int)
+    parser.add_argument('--max_workers', default=4, type=int)
+    parser.add_argument('--multi_thread', default=False, type=bool)
+    parser.add_argument('--using_cache', default=False, type=bool)
+    parser.add_argument('--llm', default='gpt-4o-mini', type=str)
+
+    return parser.parse_args()
+
 
 
 import argparse
