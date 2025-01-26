@@ -104,6 +104,19 @@ TEXT2SQL_4O_CONFIG = {
     'get_all_acount': True,
     'self_debug': True
 }
+TEXT2SQL_GEMINI_PRO_CONFIG = {
+    "llm": 'gemini-1.5-pro-002',
+    "sql_llm": 'gemini-1.5-pro-002',
+    "self_debug": True,
+    "reasoning": False,
+    "branch_reasoning": False,
+    "company_top_k": 2,
+    "sql_example_top_k": 2,
+    "account_top_k": 5,
+    "verbose": False,
+    'get_all_acount': True,
+    'self_debug': True
+}
 
 TEXT2SQL_SWEET_SPOT_CONFIG = {
     "llm": 'gemini-1.5-flash-8b',

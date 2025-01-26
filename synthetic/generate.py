@@ -1,6 +1,8 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import sys
 import random 
+
+
 sys.path.append('..')
 import pandas as pd
 import numpy as np
@@ -11,6 +13,7 @@ import uuid
 
 from agent.text2sql_utils import get_llm_wrapper
 from llm.llm_utils import get_json_from_text_response
+from.generate_mcq import generate_mcq
 
 import os 
 from dotenv import load_dotenv
@@ -95,7 +98,7 @@ def add_content_to_json(new_data):
         print("Error: Invalid JSON file or file not found.")
 
 
-def generate_questions(llm, main_task, sub_task, analyzing_types, time, job_titles):
+def _generate_questions(llm, main_task, sub_task, analyzing_types, time, job_titles):
     system_prompt = f"""You are a/an {job_titles}, you are having a task of analyzing the information from financial reports of companies from 2020 to Q3 2024 to give the good insights. You have deep knowledge about the domain of financial analyzing. Your questions should contain financial ratios, accounts in financial reports analysis.
 
      
@@ -206,14 +209,23 @@ Return the questions in a JSON format
 
 
         
-def parallel_generate_questions(*args):
-    llm = get_llm_wrapper(model_name="gemini-1.5-flash-002")
+def parallel_generate_questions(llm, *args):
+    llm = get_llm_wrapper(model_name=llm)
 
-    return generate_questions(llm, *args)
+    return _generate_questions(llm, *args)
 
 
-def generate():
+def generate_questions(llm):
     
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+
+    if data:
+        print("Data already exists")
+    else:
+        with open(file_path, 'w') as f:
+            json.dump([], f, indent=4)
+
     
     
     tasks = []
@@ -246,7 +258,7 @@ def generate():
      
     results = []
     with ThreadPoolExecutor(max_workers=5) as executor:
-        future_to_task = {executor.submit(parallel_generate_questions, *args): (args) for args in batch_tasks}
+        future_to_task = {executor.submit(parallel_generate_questions, llm, *args): (args) for args in batch_tasks}
         
         for future in as_completed(future_to_task):
             task = future_to_task[future]
@@ -260,17 +272,6 @@ def generate():
     return results
 
 
-def main():
-    with open(file_path, 'r') as f:
-        data = json.load(f)
-
-    if data:
-        print("Data already exists")
-    else:
-        with open(file_path, 'w') as f:
-            json.dump([], f, indent=4)
-
-    generate()
 
 def extract_questions(questions, version):
     results = []
@@ -324,9 +325,28 @@ def merge_questions():
     with open(os.path.join(current_dir, '../data/generated_questions.json'), 'w') as f:
         json.dump(results, f, indent=4)
 
+import argparse
+
+def get_args():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--task', type=str, default='generate_questions', help='task to evaluate')
+    parser.add_argument('--version', default='v0', type=str)
+    parser.add_argument('--batch_size', default=2, type=int)
+    parser.add_argument('--max_workers', default=4, type=int)
+    parser.add_argument('--multi_thread', default=False, type=bool)
+    parser.add_argument('--using_cache', default=False, type=bool)
+    parser.add_argument('--llm', default='gpt-4o-mini', type=str)
+
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
 
-    # main()
-    merge_questions()
+    args = get_args()
+
+    if args.task == 'generate_questions':
+        generate_questions(args.llm)
+
+    elif args.task == 'merge_questions':
+        merge_questions()

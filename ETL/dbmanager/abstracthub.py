@@ -213,9 +213,10 @@ class BaseDBHUB(BaseModel):
         exact_industries = set()
         for industry in industries:
             df = self.query(query.format(industry=industry))
-            result = df['industry'].values.tolist()
-            for item in result:
-                exact_industries.add(item)
+            if isinstance(df, pd.DataFrame):
+                result = df['industry'].values.tolist()
+                for item in result:
+                    exact_industries.add(item)
         return list(exact_industries)
     
     

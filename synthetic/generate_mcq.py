@@ -113,16 +113,23 @@ def _generate_mcq(llm, data, mcq_style, file_path='tmp.jsonl'):
 
     mcq = get_json_from_text_response(response, new_method=True)
 
+    # Store the question
     data['mcq'] = mcq
+    question = dict()
+    question['ids'] = data['ids']
+    question['question'] = mcq['question']
+    question['choices'] = mcq['choices']
+    question['answer'] = mcq['answer']
+    question['explanation'] = mcq['explanation']
 
-    append_json_to_file(data, file_path)
+    append_json_to_file(question, file_path)
 
 
 def generate_mcq(llm, data, file_path='tmp.jsonl', max_workers=10, multi_thread=False):
     print("Generating MCQ...")
     print("Number of questions:", len(data))
 
-    
+    global mcq_styles
 
     if multi_thread:
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
