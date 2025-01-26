@@ -34,6 +34,20 @@ chmod +x run.sh
 ./run.sh local-server --local True 
 ```
 
+Or you can build the TEI local and run the following scripts
+
+- For embedding:
+```bash
+model=BAAI/bge-base-en-v1.5
+text-embeddings-router --model-id $model --port 8080
+```
+
+- For Reranker
+```bash
+model=BAAI/bge-reranker-v2-m3
+text-embeddings-router --model-id $model --port 8081
+```
+
 ## DB In the pipeline
 - ChromaDB (Storing the embedding)
 - PostgreSQL (Storing the data)

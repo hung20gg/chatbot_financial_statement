@@ -188,8 +188,8 @@ TOTAL LIABILITIES AND EQUITY,BS_440,TOTAL LIABILITIES AND OWNER'S EQUITY,BS_440,
 ,,,,Commitments issued,BS_920,(Balance sheet) (Bank) Commitments issued,BS_920,BS_920
 ,,,,Funding commitments to customers,BS_921,(Balance sheet) (Bank) Funding commitments to customers,BS_921,BS_921
 ,,,,Other commitments,BS_922,(Balance sheet) (Bank) Other commitments,BS_922,BS_922
-1. Doanh thu bán hàng và cung cấp dịch vụ,IS_001,x,,1.Thu nhập lãi và các khoản thu nhập tương tự,IS_001,(Income statement) Revenue from sales and services rendered,IS_001,IS_001
-2. Các khoản giảm trừ doanh thu,IS_002,x,,2. Chi phí lãi và các chi phí tương tự,IS_002,(Income statement) Deductions from revenue,IS_002,IS_002
+1. Doanh thu bán hàng và cung cấp dịch vụ,IS_001,x,,,,(Income statement) Revenue from sales and services rendered,IS_001,IS_001
+2. Các khoản giảm trừ doanh thu,IS_002,x,,,,(Income statement) Deductions from revenue,IS_002,IS_002
 ,,1.1. Lãi từ các tài sản tài chính ghi nhận thông qua lãi/lỗ (FVTPL),IS_001,,,(Income statement) (Securities) Interest from financial assets measured at fair value through profit or loss (FVTPL),IS_003,IS_020
 ,,a. Lãi bán các tài sản tài chính,IS_001.1,,,(Income statement) (Securities) Gain on sale of financial assets (FVTPL),IS_004,IS_020
 ,,b. Chênh lệch tăng đánh giá lại các TSTC thông qua lãi/lỗ,IS_001.2,,,(Income statement) (Securities) Revaluation gain on financial assets measured at fair value through profit or loss (FVTPL),IS_005,IS_020
@@ -204,7 +204,7 @@ TOTAL LIABILITIES AND EQUITY,BS_440,TOTAL LIABILITIES AND OWNER'S EQUITY,BS_440,
 ,,1.10. Doanh thu lưu ký chứng khoán,IS_009,,,(Income statement) (Securities) Custody revenue,IS_014,IS_020
 ,,Doanh thu hoạt động tư vấn tài chính,IS_010,,,(Income statement) (Securities) Revenue from financial advisory services,IS_015,IS_020
 ,,1.11. Thu nhập hoạt động khác,IS_011,,,(Income statement) (Securities) Other operating income,IS_016,IS_020
-3. Doanh thu thuần về bán hàng và cung cấp dịch vụ (10 = 01 - 02),IS_010,Cộng doanh thu hoạt động,IS_020,I. Thu nhập lãi thuần,IS_003,(Income statement) Net Revenue,IS_020,IS_020
+3. Doanh thu thuần về bán hàng và cung cấp dịch vụ (10 = 01 - 02),IS_010,Cộng doanh thu hoạt động,IS_020,1.Thu nhập lãi và các khoản thu nhập tương tự,IS_001,(Income statement) Net Revenue,IS_020,IS_020
 ,,2.1. Lỗ các tài sản tài chính ghi nhận thông qua lãi/lỗ (FVTPL),IS_021,,,(Income statement) (Securities) Loss from financial assets measured at fair value through profit or loss (FVTPL),IS_021,IS_036
 ,,a. Lỗ bán các tài sản tài chính,IS_021.1,,,(Income statement) (Securities) Loss on sale of financial assets,IS_022,IS_036
 ,,b. Chênh lệch giảm đánh giá lại các TSTC thông qua lãi/lỗ,IS_021.2,,,(Income statement) (Securities) Revaluation loss on financial assets measured at fair value through profit or loss (FVTPL),IS_023,IS_036
@@ -220,9 +220,12 @@ TOTAL LIABILITIES AND EQUITY,BS_440,TOTAL LIABILITIES AND OWNER'S EQUITY,BS_440,
 ,,2.11. Chi phí lưu ký chứng khoán,IS_030,,,(Income statement) (Securities) Custody expenses,IS_033,IS_036
 ,,     Chi phí hoạt động tư vấn tài chính,IS_031,,,(Income statement) (Securities) Financial commission expenses,IS_030.2,IS_036
 ,,2.12. Chi phí khác,IS_032,,,(Income statement) (Securities) Other expenses,IS_034,IS_036
-,,,,3. Thu nhập từ hoạt động dịch vụ,IS_004,(Income statement) (Bank) Income from service activities,IS_035,IS_036
-4. Giá vốn hàng bán,IS_011,Cộng chi phí hoạt động,IS_040,4. Chi phí hoạt động dịch vụ,IS_005,(Income statement) Cost of goods sold,IS_036,IS_036
-5. Lợi nhuận gộp về bán hàng và cung cấp dịch vụ(20=10-11),IS_020,Gross profit from sales and services rendered,IS_040.1,II. Lãi/lỗ thuần từ hoạt động dịch vụ,IS_006,(Income statement) Gross profit from sales and services rendered,IS_040,IS_040
+4. Giá vốn hàng bán,IS_011,Cộng chi phí hoạt động,IS_040,2. Chi phí lãi và các chi phí tương tự,IS_002,(Income statement) Cost of goods sold,IS_036,IS_036
+5. Lợi nhuận gộp về bán hàng và cung cấp dịch vụ(20=10-11),IS_020,Gross profit from sales and services rendered,IS_040.1,Tổng thu nhập hoạt động,IS_030,(Income statement) Gross profit from sales and services rendered,IS_040,IS_040
+,,,,I. Thu nhập lãi thuần,IS_003,(Income statement) (Bank) Net Interest Income,IS_150,IS_151
+,,,,3. Thu nhập từ hoạt động dịch vụ,IS_004,(Income statement) (Bank) Income from Service Activities,IS_151,IS_153
+,,,,4. Chi phí hoạt động dịch vụ,IS_005,(Income statement) (Bank) Expenses from Service Activities,IS_152,IS_153
+,,,,II. Lãi/lỗ thuần từ hoạt động dịch vụ,IS_006,(Income statement) (Bank) Net Profit/Loss from Service Activities,IS_153,IS_153
 ,,3.1. Chênh lệch lãi tỷ giá hối đoái đã và chưa thực hiện,IS_041,,,(Income statement) (Securities) Exchange rate gain (realized and unrealized),IS_041,IS_045
 ,,"3.2. Doanh thu, dự thu cổ tức, lãi tiền gửi không cố định phát sinh trong kỳ",IS_042,,,"(Income statement) (Securities) Revenue, accrued dividend, and interest from non-fixed deposits generated during the period",IS_042,IS_045
 ,,"3.3. Lãi bán, thanh lý các khoản đầu tư vào công ty con, liên kết, liên doanh",IS_043,,,"(Income statement) (Securities) Gain on sale and liquidation of investments in subsidiaries, associates, and joint ventures",IS_043,IS_045
@@ -239,8 +242,8 @@ TOTAL LIABILITIES AND EQUITY,BS_440,TOTAL LIABILITIES AND OWNER'S EQUITY,BS_440,
 ,,,,IV. Lãi /lỗ thuần từ mua bán chứng khoán kinh doanh,IS_008,(Income statement) (Bank) Net profit/(loss) from trading of trading securities,IS_054,IS_054
 ,,,,V. Lãi/lỗ thuần từ mua bán chứng khoán đầu tư,IS_009,(Income statement) (Bank) Net profit/(loss) from trading of investment securities,IS_055,IS_055
 ,,,,"VII. Thu nhập từ góp vốn, mua cổ phần",IS_013,"(Income statement) (Bank) Income from capital contributions, share purchases",IS_056,IS_056
-,,,,Tổng thu nhập hoạt động,IS_030,(Income statement) (Bank) Total administrative income,IS_057,IS_057
-10. Chi phí quản lý doanh nghiệp,IS_026,x,IS_062,VIII. Chi phí hoạt động,IS_014,(Income statement) Administrative expenses,IS_058,IS_058
+,IS_027,,IS_095,VIII. Chi phí hoạt động,IS_014,(Income statement) Total Operating Costs,IS_057,IS_057
+10. Chi phí quản lý doanh nghiệp,IS_026,x,IS_062,,,(Income statement) Administrative expenses,IS_058,IS_058
 11. Lợi nhuận thuần từ hoạt động kinh doanh{30=20+(21-22) + 24 - (25+26)},IS_030,x,IS_070,IX. Lợi nhuận thuần từ hoạt động kinh doanh trước chi phí dự phòng rủi ro tín dụng,IS_015,(Income statement) Net profit from operating activities,IS_060,IS_060
 ,,,,X. Chi phí dự phòng rủi ro tín dụng,IS_016,(Income statement) (Bank) Provision for credit losses,IS_061,IS_061
 12. Thu nhập khác,IS_031,8.1. Thu nhập khác,IS_071,5. Thu nhập từ hoạt động khác,IS_010,(Income statement) Other income,IS_062,IS_062

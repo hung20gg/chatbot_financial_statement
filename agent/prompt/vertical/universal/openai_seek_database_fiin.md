@@ -85,7 +85,7 @@ CREATE TABLE financial_ratio(
 -- Table: industry_financial_ratio: General ratio for each industry sector
 CREATE TABLE industry_financial_ratio(
     industry VARCHAR(255),
-    stock_code VARCHAR(255) references company_info(stock_code),
+    ratio_code VARCHAR(255) references map_category_code_ratio(ratio_code),
     year int,
     quarter int,
     data_mean float, 

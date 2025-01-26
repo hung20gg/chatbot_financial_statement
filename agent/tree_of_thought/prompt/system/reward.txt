@@ -11,7 +11,7 @@ You will be given:
 Your task is evaluate the reasoning and the execution steps. Here are the requirements:
 - The result of the SQL execution must related and can be used to answer the task (6 points)
 - The SQL code has to be as simple as possible, no excess use of JOIN or CTE (2 points)
-- The reasoning steps must be comprehensive, con- sai, easy to follow (2 points)
+- The reasoning steps must be comprehensive, easy to follow (2 points)
 
 You must first analyze the problem before making the final judgment. Score the result from 0-10 accordingly
 

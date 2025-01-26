@@ -15,7 +15,10 @@ from agent.const import (
     TEXT2SQL_FASTEST_CONFIG,
     TEXT2SQL_FAST_OPENAI_CONFIG,
     TEXT2SQL_DEEPSEEK_V3_CONFIG,
-    TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG
+    TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG,
+    TEXT2SQL_MEDIUM_GEMINI_CONFIG,
+    TEXT2SQL_GEMINI_PRO_CONFIG,
+    TEXT2SQL_4O_CONFIG
 )
 
 from agent.prompt.prompt_controller import (
@@ -72,7 +75,7 @@ def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=F
                 sql.append(code.get('code',''))
 
         responses.append({
-            'id': ids,
+            'ids': ids,
             'question': prompt,
             'table': table_str,
             'reasoning': his[-1]['content'],
@@ -81,7 +84,7 @@ def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=F
 
         if file_path:
             append_json_to_file({
-                'id': ids,
+                'ids': ids,
                 'question': prompt,
                 'table': table_str,
                 'reasoning': his[-1]['content'],
@@ -99,7 +102,7 @@ def _solve(text2sql_config, prompt_config, questions, using_cache=False, version
     batch_question = []
 
     for question in questions:
-        if version:
+        if version and version != 'all':
             if question['version'] != version:
                 continue
         batch_question.append(question)
@@ -116,43 +119,82 @@ def _solve(text2sql_config, prompt_config, questions, using_cache=False, version
 
     if version:
         current_dir = os.path.dirname(__file__)
-        file_path = os.path.join(current_dir, f"../data/{text2sql_config.get('sql_llm', 'unknown')}__{version}.jsonl")
+        file_path = os.path.join(current_dir, f"../data/{text2sql_config.get('llm', 'unknown')}__{version}.jsonl")
     else:
-        file_path = f"../data/{text2sql_config.get('sql_llm', 'unknown')}_all.jsonl"
+        file_path = f"../data/{text2sql_config.get('llm', 'unknown')}_all.jsonl"
 
     results = []
 
     if multi_thread:
+        print("Using multi-threading")
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = [executor.submit(single_solver, text2sql_config, prompt_config, batch_question, using_cache, file_path) for batch_question in batch_questions]
 
             for future in as_completed(futures):
                 results.extend(future.result())
     else:
+        print("Using single-threading")
         for batch_question in batch_questions:
             results.extend(single_solver(text2sql_config, prompt_config, batch_question, using_cache, file_path))
 
     return results
 
 
+def get_text2sql_config(llm_name):
+    if 'gemini' in llm_name:
+        if llm_name == 'gemini-flash':
+            return TEXT2SQL_GEMINI_PRO_CONFIG
+        return TEXT2SQL_MEDIUM_GEMINI_CONFIG
+    
+    if 'gpt-4o' in llm_name:
+        if 'mini' not in llm_name:
+            return TEXT2SQL_4O_CONFIG
+        return TEXT2SQL_FAST_OPENAI_CONFIG
 
-def solve():
-    text2sql_config = TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG
+    if 'deepseek' in llm_name:
+        return TEXT2SQL_DEEPSEEK_V3_CONFIG
+
+    else:
+        config = TEXT2SQL_MEDIUM_GEMINI_CONFIG
+        config['sql_llm'] = llm_name    
+        return config
+
+def solve(args):
+    text2sql_config = get_text2sql_config(args.llm)
     prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL
-    version = 'v0'
+    version = args.version
 
     with open('../data/generated_questions.json') as f:
         questions = json.load(f)
         print(len(questions))
 
-    results = _solve(text2sql_config, prompt_config, questions, using_cache=True, version=version, batch_size=2, max_workers=4)
+    results = _solve(text2sql_config, prompt_config, questions, using_cache=args.using_cache, version=version, batch_size=args.batch_size, max_workers=args.max_workers, multi_thread=args.multi_thread)
     with open('../data/generated_questions_sql.jsonl', 'w') as f:
         for result in results:
             json.dump(result, f)
             f.write('\n')
 
+
+import argparse
+
+def get_args():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--task', type=str, default='generate_sql', help='task to evaluate')
+    parser.add_argument('--version', default='v0', type=str)
+    parser.add_argument('--batch_size', default=2, type=int)
+    parser.add_argument('--max_workers', default=4, type=int)
+    parser.add_argument('--multi_thread', default=False, type=bool)
+    parser.add_argument('--using_cache', default=False, type=bool)
+    parser.add_argument('--llm', default='gpt-4o-mini', type=str)
+
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
-    solve()
+    args = get_args()
+    if args.task == 'generate_sql':
+        solve(args)
 
     
     

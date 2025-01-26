@@ -178,3 +178,4 @@ Lưu chuyển tiền thuần trong kỳ (50 = 20+30+40),CF_050,Lưu chuyển ti�
 Tiền và tương đương tiền đầu kỳ,CF_060,Tiền và tương đương tiền đầu kỳ,Cash and cash equivalents at the beginning of the period
 Ảnh hưởng của thay đổi tỷ giá hối đoái quy đổi ngoại tệ,CF_061,Ảnh hưởng của thay đổi tỷ giá hối đoái quy đổi ngoại tệ,Effect of exchange rate changes on foreign currency translation
 Tiền và tương đương tiền cuối kỳ (70 = 50+60+61),CF_070,Tiền và tương đương tiền cuối kỳ,Cash and cash equivalents at the end of the period
+Tổng chi phí hoạt động,IS_027,Tổng chi phí hoạt động,Total Operating Cost

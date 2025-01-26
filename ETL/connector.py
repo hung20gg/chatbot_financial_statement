@@ -291,6 +291,7 @@ def execute_query(query, conn=None, params = None, return_type='dataframe'):
             if return_type == 'dataframe':
                 columns = [desc[0] for desc in cur.description]
                 result = pd.DataFrame(result, columns=columns)
+            
     except Exception as e:
         print(e)
         result = str(e) 
@@ -671,12 +672,7 @@ def setup_everything(config: dict):
     
     print(os.path.join(current_dir, '../data/vector_db_vertical_local'))
     
-    if config.get('vectordb', 'chromadb') == 'chromadb':
-        client = PersistentClient(path = os.path.join(current_dir, '../data/vector_db_vertical_local'), settings = Settings())
-    elif config.get('vectordb', 'chromadb') == 'milvus':
-        client = 'http://localhost:19530'
-    else:
-        raise ValueError("Vectordb format not supported")
+    
 
     # delete everything
     if config.get('force', False):
@@ -690,8 +686,21 @@ def setup_everything(config: dict):
         logging.info("RDB setup completed")
     else:
         setup_rdb(False, FIIN_RDB_SETUP_CONFIG, **db_conn)
-    
-    
+
+        # ADD the bm25 index
+        with open(os.path.join(current_dir, 'bm25.sql'), 'r') as f:
+            query = f.read()
+            execute_query(query, conn=db_conn)
+
+    # Setup Embedding Client
+    if config.get('vectordb', 'chromadb') == 'chromadb':
+        client = PersistentClient(path = os.path.join(current_dir, '../data/vector_db_vertical_local'), settings = Settings())
+    elif config.get('vectordb', 'chromadb') == 'milvus':
+        client = 'http://localhost:19530'
+    else:
+        raise ValueError("Vectordb format not supported")
+
+
     # Check if embedding server is running, if not use local model
     if config.get('local', False):
         
