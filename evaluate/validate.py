@@ -36,7 +36,7 @@ def validate_qa(llm, output_path, qa):
 You are receiving a task and a table of report from your colleague. Your task is to evaluate does the table related to the task or not.
 Sometime, the report may contain some errors, null or not related to the task.
 
-Ignore the forecasting part of the question, you have to evaluate the report and return 1 if you can confidently answer the task with the provided data in the table, 0 otherwise. 
+Ignore the forecasting part of the question, you have to evaluate the report and return 1 only if you can confidently answer the task based on the provided data in the table only, 0 otherwise. 
 
 <question>
 {task}

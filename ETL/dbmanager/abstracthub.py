@@ -156,14 +156,14 @@ class BaseDBHUB(BaseModel):
         
         # If no stock code found
         if len(stock_codes) == 0:
-            return pd.DataFrame(columns=['stock_code', 'company_name', 'en_company_name', 'industry', 'is_bank', 'is_securities'])
+            return pd.DataFrame(columns=['stock_code', 'en_company_name', 'industry', 'is_bank', 'is_securities'])
         
         placeholder = ', '.join(['%s' for _ in stock_codes])
-        query = f"SELECT stock_code, company_name, en_company_name, industry, is_bank, is_securities FROM company_info WHERE stock_code IN ({placeholder});"
+        query = f"SELECT stock_code,  en_company_name, industry, is_bank, is_securities FROM company_info WHERE stock_code IN ({placeholder});"
         result = self.query(query, params=stock_codes)
         
         if isinstance(result, str):
-            result = pd.DataFrame(columns=['stock_code', 'company_name', 'en_company_name', 'industry', 'is_bank', 'is_securities'])
+            result = pd.DataFrame(columns=['stock_code',  'en_company_name', 'industry', 'is_bank', 'is_securities'])
         return result
     
     
@@ -190,14 +190,17 @@ class BaseDBHUB(BaseModel):
         return few_shot
     
     def find_sql_query_v2(self, text, top_k=1):
-        results = self._similarity_search(self.vector_db_sql, text, top_k)
-        # results = self.vector_db_sql.similarity_search(text, top_k)
-        
+
         sql_dict = {}
-        for result in results:
-            if result.metadata.get('sql_code', None) is not None:
-                sql_dict[result.page_content] = result.metadata['sql_code']
-                
+
+        if top_k > 0:
+            results = self._similarity_search(self.vector_db_sql, text, top_k)
+            # results = self.vector_db_sql.similarity_search(text, top_k)
+            
+            for result in results:
+                if result.metadata.get('sql_code', None) is not None:
+                    sql_dict[result.page_content] = result.metadata['sql_code']
+                    
         
         return sql_dict
     

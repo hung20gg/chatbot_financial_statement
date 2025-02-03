@@ -13,7 +13,7 @@ import uuid
 
 from agent.text2sql_utils import get_llm_wrapper
 from llm.llm_utils import get_json_from_text_response
-from.generate_mcq import generate_mcq
+from generate_mcq import generate_mcq
 
 import os 
 from dotenv import load_dotenv
@@ -38,32 +38,35 @@ main_tasks = [
 sub_tasks = [
     "get data 1 or more company", 
     "compare 2 or more company", 
-    "analyze the Subsidiaries or invested company", 
-    "analyze over industry average report (might be % of X in the industry)", 
-    "analyze company with its industry average ratio", 
+  #  "analyze the Subsidiaries or invested company", 
+  #  "analyze over industry average report (might be % of X in the industry)", 
+  #  "analyze company with its industry average ratio", 
     "compare within the same exchange or stock indices",
-    "Ranking top 1-5-10 with or without special criterias (Top 5 - Top 10)(e.g: total asset >100B VND,  ROE > 20%)",
+    "Ranking top 1-5-10 with or without special criterias (e.g: total asset >100B VND,  ROE > 20%)",
 ]
 
 analyzing_types = [
     # "General assessment of the financial position",
     "Analysis of the financial structure",
+    "Analysis of the financial structure",
+    "Financial performance analysis",
+    "Analysis of Financial account in general",
     "Analysis of liquidity and payment status",
     "Analysis of financial risk",
-    "Analysis of financial equilibrium",
+  #  "Analysis of financial equilibrium",
     "Analysis of business performance",
     "Analysis of profitability",
     "Cash flow analysis",
     "Analysis of capital structures",
-    "Analysis of loan types (mostly for banks, focus on loan to customer, loan type, duration, etc)",
-    "Analysis of financial explaination details (bank loan, bond, etc)",
+   # "Analysis of loan types (mostly for banks, focus on loan to customer, loan type, duration, etc)",
+   # "Analysis of financial explaination details (bank loan, bond, etc)",
     # "Forecasting of financial indicators",
     # "Business valuation"
 ]
 
 times = [
     "at specific year, optionally include quater", 
-    "over time with specific period",
+    "over time (year only)",
 ]
 job_titles = [
     "Auditor",
@@ -75,9 +78,9 @@ job_titles = [
     # "Broker"
 ]
 
-file_path = 'generated_questions_v0.json'
+# file_path = 'generated_questions_v0.json'
 # Function to add new content to a JSON file
-def add_content_to_json(new_data):
+def add_content_to_json(new_data, file_path):
     try:
         # Read existing data from the file
         with open(file_path, 'r') as file:
@@ -98,18 +101,19 @@ def add_content_to_json(new_data):
         print("Error: Invalid JSON file or file not found.")
 
 
-def _generate_questions(llm, main_task, sub_task, analyzing_types, time, job_titles):
-    system_prompt = f"""You are a/an {job_titles}, you are having a task of analyzing the information from financial reports of companies from 2020 to Q3 2024 to give the good insights. You have deep knowledge about the domain of financial analyzing. Your questions should contain financial ratios, accounts in financial reports analysis.
+def _generate_questions(llm, main_task, sub_task, analyzing_types, time, job_titles, file_path):
+    system_prompt = f"""You are having a task of analyzing the financial system of companies from 2020 to Q3 2024 to give the good insights. 
+    You have deep knowledge about the domain of financial analyzing. 
+    Your questions should contain financial data in financial reports analysis.
 
-     
-Note:
+### Note:
 - You must ask questions to provide data only.
 - Your question must contain the name of the companies. You must not leak any other information of the company table beside company name.
-- you must return questions only.
 - You can ask questions in any format, but the questions must be relevant to the task.
 - You mustn't contain the word : "Include" the list of companies in the end of the question.
 - Your question should not contain prediction or forecast parts.
-- Generate easy to understand questions. You are giving task to an intern.
+- Generate easy questions only. These questions should be easy to answer and should not require any complex calculations. You are giving these question to beginner
+- When giving question within time range, only use annual data.
 """
     # - Making the question from easy to hard and more complex for each request. (Q1 is easy and final question is the most difficult)
    # , and you have to ask many explicit,meaningful and insightful questions about the financial reports of companies.
@@ -136,7 +140,7 @@ Note:
 {company_table}
 Notice that there are 4 company that was not listed on any exchange, since they are government company, and they only have data about ownership/shareholder of other companies. 
 
-Task: Generate 3-5 questions on {main_task[0]} with {sub_task[0]},{time[0]}, and the questions need to be diversifying within {analyzing_types[0]}, the question contents and remember that each time of question generation needs to be diverse in content. The questions should be concise. 
+Task: Pretend you are a {job_titles}, generate 3-5 questions on {main_task[0]} with {sub_task[0]},{time[0]}, and the questions need to be diversifying within {analyzing_types[0]}, the question contents and remember that questions generated needs to be diverse in content. The questions should be concise. 
 
 Return the questions in a JSON format
 
@@ -178,7 +182,7 @@ Return the questions in a JSON format
         messages.append(
             {
                 'role': 'user',
-                'content': f"""Task: Generate only 2 questions on {main_task[i+1]} with {sub_task[i+1]},{time[i+1]}, and the questions need to be diversifying within {analyzing_types[i+1]}, the question contents and remember that each time of question generation needs to be diverse in content. The questions should be concise."""
+                'content': f"""Task: Generate questions on {main_task[i+1]} with {sub_task[i+1]},{time[i+1]}, and the questions need to be diversifying within {analyzing_types[i+1]}, the question contents and remember that each time of question generation needs to be diverse in content. The questions should be concise."""
             }
         )
 
@@ -203,7 +207,7 @@ Return the questions in a JSON format
             'content': response
         })
     
-    add_content_to_json(questions)
+    add_content_to_json(questions, file_path)
     return questions
 
 
@@ -215,13 +219,17 @@ def parallel_generate_questions(llm, *args):
     return _generate_questions(llm, *args)
 
 
-def generate_questions(llm):
+def generate_questions(args):
     
-    with open(file_path, 'r') as f:
-        data = json.load(f)
+    llm = args.llm
+    file_path = f'generated_questions_{args.version}.json'
 
-    if data:
-        print("Data already exists")
+    if os.path.exists(file_path) and args.using_cache:
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+
+        if data:
+            print("Data already exists")
     else:
         with open(file_path, 'w') as f:
             json.dump([], f, indent=4)
@@ -234,15 +242,15 @@ def generate_questions(llm):
             for analyzing_type in analyzing_types:
                 for time in times:
                     for job_title in job_titles:
-                        tasks.append((main_task, sub_task,analyzing_type, time,job_title))
+                        tasks.append((main_task, sub_task,analyzing_type, time, job_title))
 
-    BATCH_SIZE = 5
+    BATCH_SIZE = args.batch_size
     # batch_tasks = [tasks[i:i+BATCH_SIZE] for i in range(0, len(tasks), BATCH_SIZE)]
 
     batch_tasks = []
 
     for i in range(0, len(tasks), BATCH_SIZE):
-        batch_task = [[], [], [], [], []]
+        batch_task = [[], [], [], [], [], file_path]
         for task in tasks[i:i+BATCH_SIZE]:
             for j in range(5):
                 
@@ -251,7 +259,7 @@ def generate_questions(llm):
 
     # Test
 
-    batch_tasks = random.sample(batch_tasks, 100)
+    batch_tasks = random.sample(batch_tasks, min(200, len(batch_tasks)))
     # batch_tasks = batch_tasks[:2]
 
     print(f"Number of tasks: {len(tasks)}")
@@ -294,7 +302,7 @@ def extract_questions(questions, version):
     return results
         
 
-def merge_questions():
+def merge_questions(args):
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
     pattern = re.compile(r'generated_questions_(v\d+)\.json')
@@ -305,12 +313,21 @@ def merge_questions():
     for file in os.listdir(current_dir):
         match = pattern.match(file)
         if match:
-            versions.append(match.group(1))
-            with open(file, 'r') as f:
-                data.append(json.load(f))
+            if args.version == 'all':
+                versions.append(match.group(1))
+                with open(file, 'r') as f:
+                    data.append(json.load(f))
+            elif args.version == match.group(1):
+                with open(file, 'r') as f:
+                    data.append(json.load(f))
+                    versions.append(args.version)
+                break
+
 
     results = []
-    
+    if os.path.exists(os.path.join(current_dir, '../data/generated_questions.json')):
+        with open(os.path.join(current_dir, '../data/generated_questions.json'), 'r') as f:
+            results = json.load(f)
 
     for version, conversations in zip(versions, data):
         print(f"Processing version {version}")
@@ -346,7 +363,7 @@ if __name__ == "__main__":
     args = get_args()
 
     if args.task == 'generate_questions':
-        generate_questions(args.llm)
+        generate_questions(args)
 
     elif args.task == 'merge_questions':
-        merge_questions()
+        merge_questions(args)

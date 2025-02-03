@@ -51,7 +51,7 @@ logging.basicConfig(
 def test():
 
     chat_config = ChatConfig(**GPT4O_MINI_CONFIG)
-    text2sql_config = TEXT2SQL_DEEPSEEK_V3_CONFIG
+    text2sql_config = TEXT2SQL_FAST_OPENAI_CONFIG
     prompt_config = VERTICAL_PROMPT_UNIVERSAL
 
     try:

@@ -19,7 +19,7 @@ Here is a natural language query that you need to convert into a SQL query:
 
 </data>
 
-### Here is an example of a query that you can refer to:
+### Here are some examples of a query that you can refer to:
 
 <example>
 
@@ -30,10 +30,18 @@ Here is a natural language query that you need to convert into a SQL query:
 <instruction>
 
 Think step-by-step and return SQL query that suitable with the database schema based on the natural language query above.
+
 If possible, the table result should be in the following format:
 
 |stock_code|quarter|year|category_code|data|
 |:---|:---|:---|:---|:---|
+
+or for `financial_ratio`
+
+|stock_code|quarter|year|ratio_code|data|
+|:---|:---|:---|:---|:---|
+
+However, feel free to modify the table if needed.
 
 </instruction>
 
@@ -59,6 +67,7 @@ AND quarter !=0
 -- - Q2: YYYY-06-30
 -- - Q3: YYYY-09-30
 -- - Q4: YYYY-12-30
+-- - Q0: YYYY-12-30 (Annual data is add at the end of the year)
 ```
 
 - If the question requires data within annual data, you can use `year` column directly

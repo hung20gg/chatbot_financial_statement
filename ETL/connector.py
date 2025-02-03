@@ -27,6 +27,7 @@ from langchain_huggingface  import (
     HuggingFaceEndpointEmbeddings
 )
 
+from langchain_community.embeddings import TextEmbedEmbeddings
 
 import logging
 import requests
@@ -189,8 +190,16 @@ def create_table_if_not_exists(conn, table_name, df_path, primary_key=None, fore
                 {column_definitions}
             );
         """)
+                
         logging.info(f'Table {table_name} created successfully.')
         conn.commit()
+
+        if table_name == 'company_info':
+            # ADD the bm25 index
+            with open(os.path.join(current_dir, 'bm25.sql'), 'r') as f:
+                query = f.read()
+                cur.execute(query)
+                conn.commit()
 
 # Step 3: Insert data into table (upsert logic)
 def upsert_data(conn, table_name, df, log_gap = 5000):
@@ -307,14 +316,30 @@ def execute_query(query, conn=None, params = None, return_type='dataframe'):
 
 def create_embedding_function(model_name):
     if isinstance(model_name, str):
-        if 'text-embedding' in model_name:
-            embedding_function = OpenAIEmbeddings(api_key=os.getenv('OPENAI_API_KEY'), model="text-embedding-3-small")
-        
-        elif model_name[:4] == 'http':
-            embedding_function = HuggingFaceEndpointEmbeddings(model=model_name)
-        
+        decode_texts = model_name.split('$$')
+        if len(decode_texts) == 1:
+            if 'text-embedding' in model_name:
+                embedding_function = OpenAIEmbeddings(api_key=os.getenv('OPENAI_API_KEY'), model=model_name)
+            
+            elif model_name[:4] == 'http':
+                embedding_function = HuggingFaceEndpointEmbeddings(model=model_name)
+            
+            else:
+                embedding_function = HuggingFaceEmbeddings(model_name=model_name)
+        elif len(decode_texts) == 2:
+            source, model_name = decode_texts
+            if source == 'openai':
+                embedding_function = OpenAIEmbeddings(api_key=os.getenv('OPENAI_API_KEY'), model=model_name)
+            elif source == 'huggingface':
+                embedding_function = HuggingFaceEmbeddings(model_name=model_name)
+            elif source == 'tei':
+                embedding_function = HuggingFaceEndpointEmbeddings(model=model_name)
+            elif source == 'textembed':
+                embedding_function = TextEmbedEmbeddings(model=model_name)
+            
+
         else:
-            embedding_function = HuggingFaceEmbeddings(model_name=model_name)
+            raise ValueError("Model name format not supported")
     else:
         embedding_function = model_name
         
@@ -683,14 +708,13 @@ def setup_everything(config: dict):
     
     if not config.get('force', False):
         setup_rdb(not config.get('ignore_rdb', False), FIIN_RDB_SETUP_CONFIG, **db_conn)
-        logging.info("RDB setup completed")
+        logging.info("RDB setup completed")    
+
     else:
         setup_rdb(False, FIIN_RDB_SETUP_CONFIG, **db_conn)
 
-        # ADD the bm25 index
-        with open(os.path.join(current_dir, 'bm25.sql'), 'r') as f:
-            query = f.read()
-            execute_query(query, conn=db_conn)
+    
+        
 
     # Setup Embedding Client
     if config.get('vectordb', 'chromadb') == 'chromadb':
@@ -749,7 +773,8 @@ if __name__ == '__main__':
     	select 
 		industry,
 		ratio_code,
-		data_mean
+		data_mean,
+        date_added
 	from industry_financial_ratio
 	where 
 		ratio_code = 'BDR'
@@ -758,7 +783,50 @@ if __name__ == '__main__':
 		and industry = 'Banking'
 """
     
-    result = execute_query(query, conn=db_conn)
+    query2 = """ 
+
+DROP TRIGGER IF EXISTS industry_tsvector_trigger ON company_info;
+DROP FUNCTION IF EXISTS update_industry_tsvector();
+DROP INDEX IF EXISTS industry_tsvector_idx;
+ALTER TABLE company_info DROP COLUMN IF EXISTS industry_tsvector;
+
+    
+-- Add column
+ALTER TABLE company_info
+ADD COLUMN industry_tsvector tsvector;
+
+-- Update existing data
+UPDATE company_info
+SET industry_tsvector = to_tsvector('english', industry);
+
+-- Create index
+CREATE INDEX industry_tsvector_idx
+ON company_info
+USING GIN (industry_tsvector);
+
+-- Create function
+CREATE FUNCTION update_industry_tsvector() RETURNS trigger AS $$
+BEGIN
+  NEW.industry_tsvector := to_tsvector('english', NEW.industry);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create trigger
+CREATE TRIGGER industry_tsvector_trigger
+BEFORE INSERT OR UPDATE ON company_info
+FOR EACH ROW EXECUTE FUNCTION update_industry_tsvector();
+
+"""
+
+    query3 = """ 
+SELECT industry
+FROM company_info
+WHERE industry_tsvector @@ to_tsquery('english', 'technology');
+"""
+
+    result = execute_query(query2, conn=db_conn)
+    result = execute_query(query3, conn=db_conn)
     print(result)
     
 

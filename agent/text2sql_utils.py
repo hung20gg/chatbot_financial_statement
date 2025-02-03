@@ -43,14 +43,19 @@ def table_to_markdown(table: Table|pd.DataFrame|str|list, max_string = 5000) -> 
     markdown = ""
     for t in table:
         if isinstance(table, pd.DataFrame):
+            if table.empty:
+                continue
             markdown += df_to_markdown(t)[:max_string] + "\n\n"
         
-        try:
-            markdown += f"**{t.description}**\n\n"
-            markdown += df_to_markdown(t.table)[:max_string] + "\n\n"
-        
-        except:
-            raise ValueError("Invalid table type")
+        else:
+            try:
+                if t.table is None:
+                    continue
+                markdown += f"**{t.description}**\n\n"
+                markdown += df_to_markdown(t.table)[:max_string] + "\n\n"
+            
+            except:
+                raise ValueError("Invalid table type")
     
     return markdown
     

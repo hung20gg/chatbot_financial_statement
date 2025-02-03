@@ -269,15 +269,8 @@ class Text2SQL(BaseAgent):
             text += f"**{key}** \n\n```sql\n\n{value}```\n\n"
         return text
     
-    @staticmethod
-    def sql_dict_to_markdown(sql_dict):
-        text = ""
-        for key, value in sql_dict.items():
-            text += f"**{key}** \n\n```sql\n\n{value}```\n\n"
-        return text
     
-    
-    def reasoning_text2SQL(self, task: str, company_info: Table = None, suggest_table: List[Table] = []):
+    def reasoning_text2SQL(self, task: str, company_info: Table = None, suggest_table: List[Table] = [], inject_reasoning: str = None):
         
         """
         Reasoning with Text2SQL without branch reasoning.
@@ -294,13 +287,15 @@ class Text2SQL(BaseAgent):
             
         This function will convert the natural language query into SQL query and execute the SQL query
         """
+
+        # ============== Prepare the prompt =================
         if company_info is None or company_info.table.empty:
             stock_code_table = ""
         else:
             stock_code_table = utils.table_to_markdown(company_info)
         
         system_prompt = """
-    You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query. If time not mentioned, assume collecting data in Q3 2024.
+    You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query. 
     You will have the following database description:
 
     ### Database Description
@@ -334,6 +329,24 @@ class Text2SQL(BaseAgent):
                                                                                     suggestions_table = utils.table_to_markdown(suggest_table), 
                                                                                     few_shot = few_shot)
         
+        # =============================================
+
+
+        # ================= Prune Tag =================
+        if few_shot == "":
+
+            init_prompt.replace("<example>\n", "")
+            init_prompt.replace("</example>\n", "")
+
+            new_prompt.replace("<example>\n", "")
+            new_prompt.replace("</example>\n", "")
+
+        init_prompt.replace('<data>\n\n\n</data>', "")
+        new_prompt.replace('<data>\n\n\n</data>', "")
+
+        # ============================================
+
+        
         if len(self.history) == 0:
             self.history = [
                 {
@@ -355,11 +368,19 @@ class Text2SQL(BaseAgent):
             
         self._latest_task_index = len(self.history) - 1
 
-        response = self.sql_llm(self.history)
+        # =========== Generate SQL query =============
+        if inject_reasoning is not None: # Inject reasoning
+            response = inject_reasoning
+        else:
+            response = self.sql_llm(self.history)
+
         if self.config.verbose:
             print(response)
+
+        # ============================================
         
-        # Execute SQL Query with TIR reasoning    
+
+        # ===== Execute SQL Query with TIR reasoning =====
         error_messages = []
         execution_tables = []
         
@@ -375,8 +396,11 @@ class Text2SQL(BaseAgent):
             }
         )
         temp_message.append(self.history[-1])
+
+        # ===============================================
         
-        # Self-debug the SQL code
+
+        # ========== Self-debug the SQL code ============
         if self.config.self_debug and len(error_message) > 0:
             debug_messages, debug_error_messages, debug_execution_tables = self.debug_sql_code(self.history, error_message)
             
@@ -386,6 +410,8 @@ class Text2SQL(BaseAgent):
             self.history.extend(debug_messages)
             temp_message.extend(debug_messages)
             
+        # ===============================================
+
         self.llm_responses.extend(utils.reformat_messages(temp_message))   
         
         return self.history, error_messages, execution_tables
@@ -563,7 +589,7 @@ class Text2SQL(BaseAgent):
 
 
     
-    def solve(self, task: str, cache: bool = True):
+    def solve(self, task: str, cache: bool = True, inject_reasoning: str = None):
         """
         Solve the task with Text2SQL
         The solve method is designed to solve a given task by converting it into SQL queries using the Text2SQL model. It handles both simple and complex tasks by breaking them down into steps if necessary.
@@ -571,6 +597,8 @@ class Text2SQL(BaseAgent):
         Parameters:
 
             task (str): The task to be solved, provided as a natural language string.
+            cache (bool): A boolean value indicating whether to use the cache for the company information and suggested tables.
+            inject_reasoning (str): If provided, the reasoning will be injected into the conversation history, instead of generating it from the model.
 
         Returns:
 
@@ -581,12 +609,16 @@ class Text2SQL(BaseAgent):
         """
         
         start = time.time()
+
+        # ===== Simplify the task with branch reasoning (Break down step) =====
         steps = []
         str_task = task
         if self.config.branch_reasoning or self.config.reasoning:
             steps = self.simplify_branch_reasoning(task)
             str_task = steps_to_strings(steps)
-            
+
+
+        # ===== Get stock code and suitable row =====    
         company_info, suggest_table = self.get_stock_code_and_suitable_row(str_task)
         
         tables = [company_info]
@@ -595,6 +627,8 @@ class Text2SQL(BaseAgent):
         if cache:
             company_info, suggest_table = self.update_suggest_data(deepcopy(company_info), deepcopy(suggest_table))
         
+
+        # ===== Reasoning with Text2SQL =====
         if not self.config.branch_reasoning:
             
             # If steps are broken down
@@ -602,17 +636,19 @@ class Text2SQL(BaseAgent):
                 task += "\n\nBreak down the task into steps:\n\n" + steps_to_strings(steps)         
         
         
-            self.history, error_messages, execution_tables = self.reasoning_text2SQL(task, company_info, suggest_table)
+            self.history, error_messages, execution_tables = self.reasoning_text2SQL(task, company_info, suggest_table, inject_reasoning = inject_reasoning)
         else:
             self.history, error_messages, execution_tables = self.branch_reasoning_text2SQL(task, steps, company_info, suggest_table)
 
-        
+
+
+        # ===== Post-processing =====
+
         tables = utils.prune_unnecessary_data_from_sql(tables, self.history)
         
         tables = utils.prune_null_table(tables) # Remove null table
         
         tables.extend(execution_tables)
-        
         
         
         end = time.time()
