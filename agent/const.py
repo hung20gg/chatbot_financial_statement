@@ -19,8 +19,8 @@ class Text2SQLConfig(Config):
     reasoning: bool = True
     branch_reasoning: bool = True
     company_top_k: int = 2
-    sql_example_top_k: int = 2
-    account_top_k: int = 5
+    sql_example_top_k: int = 3
+    account_top_k: int = 8
     verbose: bool = False
     get_all_acount: bool = False    
     self_debug: bool = False
@@ -84,8 +84,8 @@ TEXT2SQL_BEST_CONFIG = {
     "reasoning": False,
     "branch_reasoning": True,
     "company_top_k": 2,
-    "sql_example_top_k": 2,
-    "account_top_k": 5,
+    "sql_example_top_k": 3,
+    "account_top_k": 8,
     "verbose": False,
     'get_all_acount': True,
     'self_debug': True
@@ -98,8 +98,21 @@ TEXT2SQL_4O_CONFIG = {
     "reasoning": False,
     "branch_reasoning": False,
     "company_top_k": 2,
-    "sql_example_top_k": 2,
-    "account_top_k": 5,
+    "sql_example_top_k": 3,
+    "account_top_k": 8,
+    "verbose": False,
+    'get_all_acount': True,
+    'self_debug': True
+}
+TEXT2SQL_GEMINI_PRO_CONFIG = {
+    "llm": 'gemini-1.5-pro-002',
+    "sql_llm": 'gemini-1.5-pro-002',
+    "self_debug": True,
+    "reasoning": False,
+    "branch_reasoning": False,
+    "company_top_k": 2,
+    "sql_example_top_k": 3,
+    "account_top_k": 7,
     "verbose": False,
     'get_all_acount': True,
     'self_debug': True
@@ -110,9 +123,7 @@ TEXT2SQL_SWEET_SPOT_CONFIG = {
     "sql_llm": 'gpt-4o-mini',
     "reasoning": False,
     "branch_reasoning": False,
-    "company_top_k": 2,
-    "sql_example_top_k": 2,
-    "account_top_k": 5,
+
     "verbose": False,
     'get_all_acount': False,
     'self_debug': True
@@ -123,23 +134,53 @@ TEXT2SQL_FAST_OPENAI_CONFIG = {
     "sql_llm": 'gpt-4o-mini',
     "reasoning": False,
     "branch_reasoning": False,
-    "company_top_k": 2,
-    "sql_example_top_k": 2,
-    "account_top_k": 5,
+
     "verbose": False,
     'get_all_acount': False,
     'self_debug': True
 }
 
+TEXT2SQL_DEEPSEEK_V3_CONFIG = {
+    "llm": 'deepseek-chat',
+    "sql_llm": 'deepseek-chat',
+    "reasoning": False,
+    "branch_reasoning": False,
+
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
+}
+
+TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG = {
+    "llm": 'gemini-1.5-flash',
+    "sql_llm": 'deepseek-chat',
+    "reasoning": False,
+    "branch_reasoning": False,
+
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': False
+}
+
+TEXT2SQL_DEEPSEEK_REASONING_CONFIG = {
+    "llm": 'deepseek-chat',
+    "sql_llm": 'deepseek-reasoner',
+    "reasoning": True,
+    "branch_reasoning": False,
+    "company_top_k": 2,
+    "sql_example_top_k": 4,
+    "account_top_k": 8,
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
+}
 
 TEXT2SQL_MEDIUM_OPENAI_CONFIG = {
     "llm": 'gpt-4o-mini',
     "sql_llm": 'gpt-4o-mini',
     "reasoning": True,
     "branch_reasoning": False,
-    "company_top_k": 2,
-    "sql_example_top_k": 2,
-    "account_top_k": 5,
+
     "verbose": False,
     'get_all_acount': False,
     'self_debug': True
@@ -150,9 +191,7 @@ TEXT2SQL_MEDIUM_GEMINI_CONFIG = {
     "sql_llm": 'gemini-1.5-flash-002',
     "reasoning": True,
     "branch_reasoning": False,
-    "company_top_k": 2,
-    "sql_example_top_k": 2,
-    "account_top_k": 5,
+
     "verbose": False,
     'get_all_acount': False,
     'self_debug': True
@@ -163,9 +202,7 @@ TEXT2SQL_EXP_GEMINI_CONFIG = {
     "sql_llm": 'gemini-2.0-flash-exp',
     "reasoning": True,
     "branch_reasoning": False,
-    "company_top_k": 2,
-    "sql_example_top_k": 2,
-    "account_top_k": 5,
+
     "verbose": False,
     'get_all_acount': False,
     'self_debug': True
@@ -176,9 +213,7 @@ TEXT2SQL_FASTEST_CONFIG = {
     "sql_llm": 'gemini-1.5-flash-002',
     "reasoning": False,
     "branch_reasoning": False,
-    "company_top_k": 2,
-    "sql_example_top_k": 2,
-    "account_top_k": 5,
+
     "verbose": True,
     'get_all_acount': False,
     'self_debug': False

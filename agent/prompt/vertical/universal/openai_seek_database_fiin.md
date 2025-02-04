@@ -85,7 +85,7 @@ CREATE TABLE financial_ratio(
 -- Table: industry_financial_ratio: General ratio for each industry sector
 CREATE TABLE industry_financial_ratio(
     industry VARCHAR(255),
-    stock_code VARCHAR(255) references company_info(stock_code),
+    ratio_code VARCHAR(255) references map_category_code_ratio(ratio_code),
     year int,
     quarter int,
     data_mean float, 
@@ -110,35 +110,36 @@ CREATE TABLE financial_statement_explaination(
 )
 ```
 
-Note: 
-- Each value in `category_code` includes a prefix indicating the report it pertains to: *BS* is Balance sheet, *IS* is for Income statement and *CF* is Cash flow.
-- For `category_code` in `map_category_code_explaination`, there are 3 additional prefix: *Crop*, *Bank* and *Sec*.
-- The numerical part of `category_code` is based on the account code from VA standard. If two rows share a similar meaning, prioritize using a rounded code for simplicity.
+### Note on schema description: 
+- Each value in `category_code` includes a prefix indicating the report it pertains to: *BS* is Balance sheet, *IS* is for Income statement, *CF* is Cash flow and *TM* is for Explaination.
+- For `category_code` in `map_category_code_explaination`, there are 4 additional prefix: *Crop*, *Bank* and *Sec* for specific account related to each type of organization (e.g: Bank_TM_66 for Standard Debt), and *Share* if the account type is similar across organizations (e.g: Share_TM_5 for Share Issued).
+- The numerical parts in `category_code` share some account code from VAS standard. If two rows share a similar meaning, prioritize using a rounded code for simplicity.
 - Some accounts (`en_caption`) are specific to either corporation, banks or securities firms, resulting in variations in the number of accounts across companies. Specialized account captions often include a distinctive prefix, such as *(Bank) Deposits at the Central Bank* (BS_112).
+- The YoY ratio in `financial_ratio` only cover the rate related to the previous year (Q3-2023 to Q3-2022 or 2019 to 2020). You should recalculate the ratio if the time window is not 1 year.
 
 ### Peek view of the schema
  - `company_info`
 
-|stock_code|industry|issue_share|is_bank|is_securities|exchange|stock_indices
+| stock_code | industry | issue_share | is_bank | is_securities | exchange | stock_indices |
 |:----|:----|:----|:----|:----|:----|:----|
-|VIC|Real Estate|3823700000|false|false|HOSE|VN30|
+| VIC | Real Estate | 3823700000 | false | false | HOSE | VN30 |
 
 - `sub_and_shareholder`
 
-|stock_code|invest_on|
+| stock_code | invest_on |
 |:---|:---|
-|MSN|TCB|
+| MSN | TCB |
 
 Explain:
 This mean MSN is a shareholder of TCB. 
 
 - `financial_statement`
 
-|stock_code|year|quarter|category_code|data|date_added|
+| stock_code | year | quarter | category_code | data | date_added |
 |:----|:----|:----|:----|:----|:----|
-|VCB|2023|  0 | BS_300 | 1839613.198 | 2023-12-30 |
-|LPB|2024|  2 | CF_045 | 68522.835| 2024-06-30 |
-|BID|2024|  1 | IS_014 | 5392.606 | 2024-03-30 |
+| VCB | 2023 |  0 | BS_300 | 1839613.198 | 2023-12-30 |
+| LPB | 2024 |  2 | CF_045 | 68522.835| 2024-06-30 |
+| BID | 2024 |  1 | IS_014 | 5392.606 | 2024-03-30 |
 
 - `map_category_code_universal`
 
@@ -146,15 +147,15 @@ This mean MSN is a shareholder of TCB.
 |:----|:----|
 |BS_100| (Balance sheet) A. CURRENT ASSETS |
 
-### Note
+### Note on creating query:
 - You can access the database by using
 ```sql
 SELECT * FROM financial_statement
 
-LIMIT 100;
+LIMIT 10;
 ```
 - For any financial ratio, it must be selected from the database rather than being calculated manually.
-- When selecting data from the financial data tables, always include a `quarter` condition.
+- Always include a `quarter` condition in your query.
 - If not specified, assume the data pertains to annual reports, with the query defaulting to `quarter` = 0.
 - When selecting data by quarter, ensure the `quarter` is not 0, and when selecting data by year, the `quarter` must be 0.
 - Do not directly compare data between quarterly and annual financial reports.

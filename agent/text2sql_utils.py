@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 import os
 
+import sys 
+sys.path.append('..')
+
 from llm.llm.chatgpt import ChatGPT, OpenAIWrapper
 from llm.llm.gemini import Gemini
 
@@ -25,7 +28,7 @@ class Table(BaseModel):
         return f"Table(desc = {self.description})"
     
 
-def table_to_markdown(table: Table|pd.DataFrame|str, max_string = 5000) -> str:
+def table_to_markdown(table: Table|pd.DataFrame|str|list, max_string = 5000) -> str:
     
     if table is None:
         return ""
@@ -40,14 +43,19 @@ def table_to_markdown(table: Table|pd.DataFrame|str, max_string = 5000) -> str:
     markdown = ""
     for t in table:
         if isinstance(table, pd.DataFrame):
+            if table.empty:
+                continue
             markdown += df_to_markdown(t)[:max_string] + "\n\n"
         
-        try:
-            markdown += f"**{t.description}**\n\n"
-            markdown += df_to_markdown(t.table)[:max_string] + "\n\n"
-        
-        except:
-            raise ValueError("Invalid table type")
+        else:
+            try:
+                if t.table is None:
+                    continue
+                markdown += f"**{t.description}**\n\n"
+                markdown += df_to_markdown(t.table)[:max_string] + "\n\n"
+            
+            except:
+                raise ValueError("Invalid table type")
     
     return markdown
     
@@ -76,7 +84,12 @@ def get_llm_wrapper(model_name, **kwargs):
     elif 'gemini' in model_name:
         return Gemini(model_name=model_name, **kwargs)
     
-    return OpenAIWrapper(model_name=model_name, **kwargs)
+    host = os.getenv('LLM_HOST')
+    api_key = os.getenv('LLM_API_KEY')
+
+    print(f"Using OpenAI Wrapper with host {host}")
+
+    return OpenAIWrapper(host=host, api_key=api_key, model_name=model_name, **kwargs)
     
 
 
@@ -191,7 +204,7 @@ def get_table_name_from_sql(sql_text):
     return ""
     
     
-def TIR_reasoning(response, db, verbose=False):
+def TIR_reasoning(response, db, verbose=False, prefix=""):
     codes = get_code_from_text_response(response)
         
     TIR_response = ""
@@ -219,12 +232,11 @@ def TIR_reasoning(response, db, verbose=False):
             
             # If it see an error in the SQL code
             if isinstance(table, str):
-                execution_error.append((i, table))
-                continue
-            
-            table_obj = Table(table=table, sql=code, description=f"SQL Result {i+1}: {name}")
-            
-            execution_table.append(table_obj)
+                execution_error.append(f"{prefix} SQL {i+1} Error: " + table)
+                
+            else:
+                table_obj = Table(table=table, sql=code, description=f"{prefix} SQL {i+1} Result: {name}")
+                execution_table.append(table_obj)
     
     
     return execution_error, execution_table
@@ -307,7 +319,6 @@ def _prune_entity(table: pd.DataFrame, entities: list[str]):
     table['mask'] = 0
     
     for col in cols:
-        print(col)
         if col in ['is_bank','is_securities'] and col in table.columns:
             table.drop(col, axis=1, inplace=True)
             continue
@@ -346,8 +357,11 @@ def prune_unnecessary_data_from_sql(tables: list[Table], messages: list[dict]):
         mentioned_entities.update(matches)
     
     for table in tables:
-        table.table = _prune_entity(table.table.copy(), list(mentioned_entities))
-        
+
+        # Allow successful query only
+        if isinstance(table.table, pd.DataFrame):
+            table.table = _prune_entity(table.table.copy(), list(mentioned_entities))
+
     if not is_list:
         return tables[0]
     return tables
@@ -374,3 +388,25 @@ def prune_null_table(tables: list[Table|pd.DataFrame]):
         new_tables.append(table)
         
     return new_tables
+
+
+
+if __name__ == '__main__':
+    
+
+    from dotenv import load_dotenv
+    load_dotenv()
+
+    print(os.getenv('LLM_HOST'))
+
+    llm = get_llm_wrapper('deepseek-chat')
+    
+    message = [
+        {
+            'role': 'user',
+            'content': "What is the revenue of Apple in Q2 2023"
+        }
+    ]
+
+    response = llm(message)
+    print(response)

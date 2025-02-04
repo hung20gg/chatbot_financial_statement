@@ -362,6 +362,9 @@ class HubVerticalUniversal(BaseDBHUB):
         print(collect_code_fs)
         print(collect_code_tm)
         
+        collect_code_fs = [code for code in collect_code if 'TM' not in code]
+        collect_code_tm = [code for code in collect_code if 'TM' in code]
+        
         placeholder = ', '.join(['%s' for _ in collect_code])
         placeholder_fs = ', '.join(['%s' for _ in collect_code_fs])
         placeholder_tm = ', '.join(['%s' for _ in collect_code_tm])

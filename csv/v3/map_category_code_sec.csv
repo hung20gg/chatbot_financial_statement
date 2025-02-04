@@ -1,0 +1,229 @@
+old_caption,category_code,vi_caption,en_caption
+A. TÀI SẢN NGẮN HẠN,BS_100,TÀI SẢN NGẮN HẠN,CURRENT ASSETS
+I. Tài sản tài chính,BS_110,     Tài sản tài chính ngắn hạn,Short-term financial assets
+1. Tiền và các khoản tương đương tiền,BS_111,          Tiền và tương đương tiền,Cash and cash equivalents
+1.1. Tiền,BS_111.1,               Tiền,Cash
+1.2. Các khoản tương đương tiền,BS_111.2,               Các khoản tương đương tiền,Cash equivalents
+2. Các tài sản tài chính ghi nhận thông qua lãi lỗ (FVTPL),BS_112,          Các tài sản tài chính ghi nhận thông qua lãi lỗ (FVTPL),Financial assets at fair value through profit or loss (FVTPL)
+3. Các khoản đầu tư giữ đến ngày đáo hạn (HTM),BS_113,          Các khoản đầu tư nắm giữ đến ngày đáo hạn (HTM),Held-to-maturity (HTM) investments
+4. Các khoản cho vay,BS_114,          Các khoản cho vay,Loans
+5. Các tài sản tài chính sẵn sàng để bán (AFS),BS_115,          Các khoản tài chính sẵn sàng để bán (AFS),Available-for-sale (AFS) financial assets
+6. Dự phòng suy giảm giá trị các tài sản tài chính và tài sản thế chấp,BS_116,          Dự phòng suy giảm giá trị tài sản tài chính và tài sản thế chấp,Provision for impairment of financial assets and collateral
+7. Các khoản phải thu,BS_117,          Tổng các khoản phải thu,Total receivables
+7.1. Phải thu bán các tài sản tài chính,BS_117.1,               Phải thu bán các tài sản tài chính,Receivables from sales of financial assets
+"7.2. Phải thu và dự thu cổ tức, tiền lãi các tài sản tài chính",BS_117.2,"               Phải thu và dự thu cổ tức, tiền lãi các tài sản tài chính",Receivables and accrued dividends and interest on financial assets
+"7.2.1. Dự thu cổ tức, tiền lãi đến ngày nhận",BS_117.3,"                    Phải thu cổ tức, tiền lãi đến ngày nhận",Receivables for dividends and interest due
+"7.2.2. Dự thu cổ tức, tiền lãi chưa đến ngày nhận",BS_117.4,"                    Dự thu cổ tức , tiền lãi chưa đến ngày nhận",Accrued dividends and interest not yet due
+Trả trước cho người bán,BS_118,          Trả trước người bán,Advances to suppliers
+9. Phải thu các dịch vụ CTCK cung cấp,BS_119,          Phải thu các dịch vụ CTCK cung cấp,Receivables for securities brokerage services provided
+10. Phải thu nội bộ,BS_120,          Phải thu nội bộ,Intercompany receivables
+11. Phải thu về lỗi giao dịch chứng khoán,BS_121,          Phải thu về lỗi giao dịch CK,Receivables for securities trading errors
+12. Các khoản phải thu khác,BS_122,          Phải thu khác,Other receivables
+13. Dự phòng suy giảm giá trị các khoản phải thu (*),BS_129,          Dự phòng suy giảm giá trị các khoản phải thu,Provision for impairment of receivables
+II.Tài sản ngắn hạn khác,BS_130,     Tài sản ngắn hạn khác,Other short-term assets
+1. Tạm ứng,BS_131,          Tạm ứng,Advances
+"2. Vật tư văn phòng, công cụ, dụng cụ",BS_132,"          Vật tư văn phòng, công cụ, dụng cụ","Office supplies, tools, and instruments"
+3. Chi phí trả trước ngắn hạn,BS_133,          Chi phí trả trước ngắn hạn,Short-term prepaid expenses
+"4. Cầm cố, thế chấp, ký quỹ, ký cược ngắn hạn",BS_134,"          Cầm cố, thế chấp, ký quý , ký cược ngắn hạn","Short-term collateral, mortgages, deposits"
+5. Thuế giá trị gia tăng được khấu trừ,BS_135,          Thuế giá trị gia tăng được khấu trừ,Deductible value-added tax
+6. Thuế và các khoản khác phải thu Nhà nước,BS_136,          Thuế và các khoản khác phải thu Nhà nước,Taxes and other receivables from the State
+5. Tài sản ngắn hạn khác,BS_137,          Tài sản ngắn hạn khác,Other short-term assets
+ Giao dịch mua bán lại trái phiếu chính phủ,BS_138,          Giao dịch mua bán lại trái phiếu chính phủ,Government bond repurchase agreements
+Dự phòng suy giảm giá trị TSNH khác,BS_139,          Dự phòng suy giảm giá trị TSNH khác,Provision for impairment of other short-term assets
+B.TÀI SẢN DÀI HẠN,BS_200,TÀI SẢN DÀI HẠN,NON-CURRENT ASSETS
+I. Tài sản tài chính dài hạn,BS_210,     Tài sản tài chính dài hạn,Long-term financial assets
+1. Các khoản phải thu dài hạn,BS_211,          Phải thu dài hạn,Long-term receivables
+2. Các khoản đầu tư,BS_212,          Đầu tư dài hạn,Long-term investments
+2.2. Đầu tư vào công ty con,BS_212.2,               Đầu tư vào các công ty con,Investments in subsidiaries
+"2.3. Đầu tư vào công ty liên doanh, liên kết",BS_212.3,               Đầu tư vào các công ty liên kết,Investments in associates
+2.4. Đầu tư dài hạn khác,BS_212.4,               Đầu tư dài hạn khác,Other long-term investments
+II. Tài sản cố định,BS_220,     Tài sản cố định,Fixed assets
+1. Tài sản cố định hữu hình,BS_221,          GTCL TSCĐ hữu hình,Net book value of tangible fixed assets
+- Nguyên giá,BS_222,               Nguyên giá TSCĐ hữu hình,Cost of tangible fixed assets
+- giá trị hao mòn lũy kế,BS_223a,               Khấu hao lũy kế TSCĐ hữu hình,Accumulated depreciation of tangible fixed assets
+,BS_224,          GTCL Tài sản thuê tài chính,Net book value of finance lease assets
+,BS_225,               Nguyên giá tài sản thuê tài chính,Cost of finance lease assets
+,BS_226,               Khấu hao lũy kế tài sản thuê tài chính,Accumulated depreciation of finance lease assets
+3. Tài sản cố định vô hình,BS_227,          GTCL tài sản cố định vô hình,Net book value of intangible fixed assets
+- Nguyên giá,BS_228,               Nguyên giá TSCĐ vô hình,Cost of intangible fixed assets
+- giá trị hao mòn lũy kế,BS_229a,               Khấu khao lũy kế TSCĐ vô hình,Accumulated amortization of intangible fixed assets
+III. Bất động sản đầu tư,BS_230,     Bất động sản đầu tư,Investment property
+- Nguyên giá,BS_231,          Nguyên giá tài sản đầu tư,Cost of investment property
+- giá trị hao mòn lũy kế,BS_232,          Khấu hao lũy kế tài sản đầu tư,Accumulated depreciation of investment property
+IV. Chi phí xây dựng cơ bản dở dang,BS_240,     Tài sản dở dang dài hạn,Long-term assets in progress
+V. Tài sản dài hạn khác,BS_250,     Tài sản dài hạn khác,Other long-term assets
+"1. Cầm cố, thế chấp, ký quỹ, ký cược dài hạn",BS_251,"          Cầm cố, thế chấp, kỹ quỹ, Ký cược dài hạn","Long-term collateral, mortgages, deposits"
+2. Chi phí trả trước dài hạn,BS_252,          Chi phí trả trước dài hạn,Long-term prepaid expenses
+3. Tài sản thuế thu nhập hoãn lại,BS_253,          Tài sản thuế thu nhập hoãn lại,Deferred tax assets
+4. Tiền nộp Quỹ Hỗ trợ thanh toán,BS_254,          Tiền chi nộp Quỹ Hỗ trợ thanh toán,Payments to the Settlement Support Fund
+5. Tài sản dài hạn khác,BS_255,          Các tài sản dài hạn khác,Other long-term assets
+,BS_256,          Lợi thế thương mại,Goodwill
+,BS_257,     Dự phòng suy giảm giá trị tài sản dài hạn,Provision for impairment of long-term assets
+TỔNG CỘNG TÀI SẢN,BS_270,TỔNG CỘNG TÀI SẢN,TOTAL ASSETS
+C. NỢ PHẢI TRẢ,BS_300,NỢ PHẢI TRẢ,LIABILITIES
+I. Nợ phải trả ngắn hạn,BS_310,     Nợ phải trả ngắn hạn,Short-term liabilities
+1. Vay và nợ thuê tài sản tài chính ngắn hạn,BS_311,          Vay và nợ thuê tài sản tài chính ngắn hạn,Short-term borrowings and financial lease liabilities
+1.1. Vay ngắn hạn,BS_312,               Vay ngắn hạn,Short-term borrowings
+1.2. Nợ thuê tài sản tài chính ngắn hạn,BS_313,               Nợ thuê tài sản tài chính ngắn hạn,Short-term financial lease liabilities
+2. Vay tài sản tài chính ngắn hạn,BS_314,          Vay tài sản tài chính ngắn hạn,Short-term borrowings of financial assets
+3. Trái phiếu chuyển đổi ngắn hạn,BS_315,          Trái phiếu chuyển đổi ngắn hạn - Cấu phần nợ,Short-term convertible bonds - liability component
+4. Trái phiếu phát hành ngắn hạn,BS_316,          Trái phiếu phát hành ngắn hạn,Short-term bonds issued
+5. Vay Quỹ Hỗ trợ thanh toán,BS_317,          Vay Quỹ Hỗ trợ thanh toán,Borrowings from the Settlement Support Fund
+6. Phải trả hoạt động giao dịch chứng khoán,BS_318,          Phải trả hoạt động giao dịch chứng khoán,Payables for securities trading activities
+7. Phải trả về lỗi giao dịch các tài sản tài chính,BS_319,          Phải trả về lỗi giao dịch các tài sản tài chính,Payables for errors in trading financial assets
+8. Phải trả người bán ngắn hạn,BS_320,          Phải trả người bán ngắn hạn,Short-term trade accounts payable
+9. Người mua trả tiền trước,BS_321,          Người mua trả tiền trước ngắn han,Short-term customer advances
+10. Thuế và các khoản phải nộp nhà nước,BS_322,          Thuế và các khoản phải nộp nhà nước,Taxes and other payables to the State
+11. Phải trả người lao động,BS_323,          Phải trả người lao động,Employee benefits payable
+12. Các khoản trích nộp phúc lợi nhân viên,BS_324,          Các khoản trích nộp phúc lợi nhân viên,Employee benefit provisions
+13. Chi phí phải trả ngắn hạn,BS_325,          Chi phí phải trả ngắn hạn,Short-term accrued expenses
+14. Phải trả nội bộ ngắn hạn,BS_326,          Phải trả nội bộ ngắn hạn,Short-term intercompany payables
+15. Doanh thu chưa thực hiện ngắn hạn,BS_327,          Doanh thu chưa thực hiện ngắn hạn,Short-term unearned revenue
+"16. Nhận ký quỹ, ký cược ngắn hạn",BS_328,"          Nhận ký quỹ, ký cược ngắn hạn",Short-term deposits received
+"17.Các khoản phải trả, phải nộp khác ngắn hạn",BS_329,"          Các khoản phải trả, phải nộp khác ngắn hạn",Other short-term payables
+18. Dự phòng phải trả ngắn hạn,BS_330,          Dự phòng phải trả ngắn hạn,Provision for short-term liabilities
+12. Quỹ khen thưởng phúc lợi,BS_331,          Quỹ khen thưởng phúc lợi,Bonus and welfare fund
+II. Nợ phải trả dài hạn,BS_340,     Nợ phải trả dài hạn,Long-term liabilities
+,BS_341,          Vay và nợ thuê tài sản tài chính dài hạn,Long-term borrowings and financial lease liabilities
+4. Trái phiếu phát hành dài hạn,BS_346,          Trái phiếu phát hành dài hạn,Long-term bonds issued
+5. Phải trả người bán dài hạn,BS_347,          Phải trả người bán dài hạn,Long-term trade accounts payable
+6. Người mua trả tiền trước dài hạn,BS_348,          Người mua trả tiền trước dài hạn,Long-term customer advances
+7. Chi phí phải trả dài hạn,BS_349,          Chi phí phải trả dài hạn,Long-term accrued expenses
+8. Phải trả nội bộ dài hạn,BS_350,          Phải trả nội bộ dài hạn,Long-term intercompany payables
+9. Doanh thu chưa thực hiện dài hạn,BS_351,          Doanh thu chưa thực hiên dài hạn,Long-term unearned revenue
+"10. Nhận ký quỹ, ký cược dài hạn",BS_352,"          Nhận ký quỹ, ký cược dài hạn",Long-term deposits received
+"11. Các khoản phải trả, phải nộp khác dài hạn",BS_353,          Phải trả dài hạn khác,Other long-term payables
+12. Dự phòng phải trả dài hạn,BS_354,          Dự phòng phải trả dài hạn,Provision for long-term liabilities
+13. Dự phòng bồi thường thiệt hại cho nhà đầu tư,BS_355,          Quỹ bảo vệ Nhà đầu tư,Investor Protection Fund
+14. Thuế thu nhập hoãn lại phải trả,BS_356,          Thuế thu nhập hoãn lại phải trả,Deferred tax liabilities
+15. Quỹ phát triển khoa học và công nghệ,BS_357,          Quỹ phát triển khoa học công nghệ,Science and technology development fund
+D. VỐN CHỦ SỞ HỮU,BS_400,VỐN CHỦ SỞ HỮU,EQUITY
+I. Vốn chủ sở hữu,BS_410,     Vốn chủ sở hữu,Equity
+1. Vốn đầu tư của chủ sở hữu,BS_411,          Vốn đầu tư của chủ sở hữu,Owners' contributed capital
+1.1. Vốn góp của chủ sở hữu,BS_411.1,               Vốn góp của chủ sở hữu,Owners' contributed capital
+,BS_411.1a,                    Cổ phiếu phổ thông có quyền biểu quyết,Common stock with voting rights
+,BS_411.1b,                    Cổ phiếu ưu đãi,Preferred stock
+1.2. Thặng dư vốn cổ phần,BS_411.2,               Thặng dư vốn cổ phần,Share premium
+1.3. Quyền chọn chuyển đổi trái phiếu,BS_411.3,               Quyền chọn chuyển đổi trái phiếu - Cấu phần vốn,Bond conversion options - equity component
+1.4. Vốn khác của chủ sở hữu,BS_411.4,               Vốn khác của chủ sở hữu,Other capital of owners
+1.5. Cổ phiếu quỹ,BS_411.5,               Cổ phiếu quỹ,Treasury shares
+2. Chênh lệch đánh giá tài sản theo giá trị hợp lý,BS_412,          Chênh lệch đánh giá lại tài sản theo giá trị hợp lý,Revaluation reserve based on fair value
+3. Chênh lệch tỷ giá hối đoái,BS_413,          Chênh lệch tỷ giá hổi đoái,Foreign exchange differences
+4. Quỹ dự trữ điều lệ,BS_414,          Quỹ dự trữ bổ sung vốn điều lệ,Capital reserve fund
+5. Quỹ dự phòng tài chính và rủi ro nghề nghiệp,BS_415,          Quỹ dự phòng tài chính và rủi ro nghiệp vụ,Financial and operational risk reserve fund
+6. Các Quỹ khác thuộc vốn chủ sở hữu,BS_416,          Quỹ khác thuộc vốn chủ sỡ hữu,Other equity funds
+7. Lợi nhuận chưa phân phối,BS_417,          Lợi nhuận chưa phân phối,Retained earnings
+7.1. Lợi nhuận đã thực hiện,BS_417.1,               Lợi nhuận đã thực hiện,Realized earnings
+7.2. Lợi nhuận chưa thực hiện,BS_417.2,               Lợi nhuận chưa thực hiện,Unrealized earnings
+8. Lợi ích của cổ đông không nắm quyền kiểm soát,BS_418,          Lợi ích cổ đông không kiểm soát,Non-controlling interests
+TỔNG CỘNG NỢ PHẢI TRẢ VÀ VỐN CHỦ SỞ HỮU,BS_440,TỔNG CỘNG NGUỒN VỐN,TOTAL EQUITY AND LIABILITIES
+Lợi nhuận trước thuế TNDN,CF_001,     LỢI NHUẬN TRƯỚC THUẾ,PROFIT BEFORE TAX
+,CF_002,     Điều chỉnh cho các khoản,Adjustments for
+Khấu hao tài sản cố định,CF_003,          Khấu hao tài sản cố định,Depreciation of fixed assets
+Các khoản dự phòng,CF_004,          Các khoản dự phòng,Provisions
+,CF_005,"          Lãi, lỗ chênh lệch tỷ giá hối đoái chưa thực hiện",Unrealized foreign exchange gains/losses
+Chi phí lãi vay,CF_006,          Chi phí lãi vay,Interest expense
+Lãi/lỗ hoạt động đầu tư,CF_007,"          Lãi, lỗ hoạt động đầu tư",Gain/loss from investing activities
+Dự thu tiền lãi,CF_008,          Dự thu lãi và cổ tức,Accrued interest and dividends
+,CF_010,     Tăng các chi phí phi tiền tệ,Increase in non-cash expenses
+,CF_018,     Giảm các doanh thu phi tiền tệ,Decrease in non-cash revenue
+Lợi nhuận từ hoạt động kinh doanh trước thay đổi vốn lưu động,CF_030,     Lợi nhuận từ hoạt động kinh doanh trước thay đổi vốn lưu động,Profit from operating activities before changes in working capital
+,CF_031,          Tăng (giảm) tài sản tài chính ghi nhận thông qua lãi/ lỗ (FVTPL),Increase/(decrease) in financial assets at fair value through profit or loss (FVTPL)
+,CF_032,          Tăng (giảm) các khoản đầu tư giữ đến ngày đáo hạn (HTM),Increase/(decrease) in held-to-maturity (HTM) investments
+,CF_033,          Tăng(giảm) các khoản cho vay,Increase/(decrease) in loans
+,CF_034,          Tăng (giảm) tài sản tài chính sẵn sàng để bán AFS,Increase/(decrease) in available-for-sale (AFS) financial assets
+,CF_035,"          (-) Tăng, (+) giảm phải thu bán các tài sản tài chính","(-) Increase, (+) decrease in receivables from sales of financial assets"
+,CF_036,"          (-) Tăng, (+) giảm phải thu và dự thu cổ tức, tiền lãi các tài sản tài chính","(-) Increase, (+) decrease in receivables and accrued dividends and interest on financial assets"
+,CF_037,"          (-) Tăng, (+) giảm các khoản phải thu các dịch vụ CTCK cung cấp","(-) Increase, (+) decrease in receivables for securities brokerage services provided"
+Tăng/giảm các khoản phải thu khác,CF_039,"          (-) Tăng, (+) giảm các khoản phải thu khác","(-) Increase, (+) decrease in other receivables"
+,CF_040,          Tăng/giảm các tài sản khác,Increase/decrease in other assets
+,CF_041,"          (-) Tăng, (+) giảm chi phí phải trả (không bao gồm chi phí lãi vay)","(-) Increase, (+) decrease in accrued expenses (excluding interest expense)"
+Tăng/giảm chi phí trả trước,CF_042,          Tăng/giảm chi phí trả trước,Increase/decrease in prepaid expenses
+Thuế TNDN đã trả,CF_043,          Thuế TNDN CTCK đã nộp,Corporate income tax paid
+Lãi vay phải trả,CF_044,          Tiền lãi vay đã trả,Interest paid
+,CF_045,"          (+) Tăng, (-) giảm phải trả cho người bán","(+) Increase, (-) decrease in trade accounts payable"
+,CF_046,"          (+) Tăng, (-) giảm các khoản trích nộp phúc lợi nhân viên","(+) Increase, (-) decrease in employee benefit provisions"
+,CF_047,"          (+) Tăng, (-) giảm thuế và các khoản phải nộp Nhà nước","(+) Increase, (-) decrease in taxes and other payables to the State"
+,CF_048,"          (+) Tăng, (-) giảm phải trả người lao động","(+) Increase, (-) decrease in employee benefits payable"
+Tăng/giảm các khoản phải trả khác,CF_050,"          (+) Tăng, (-) giảm các khoản phải trả, phải nộp khác","(+) Increase, (-) decrease in other payables"
+,CF_051,          Tiền thu khác từ hoạt động kinh doanh,Other cash receipts from operating activities
+,CF_052,          Tiền chi khác cho hoạt động kinh doanh,Other cash payments for operating activities
+Lưu chuyển tiền thuần từ hoạt động kinh doanh,CF_060,     Lưu chuyển thuần từ hoạt động kinh doanh,Net cash flow from operating activities
+Tiền mua tài sản cố định và các tài sản dài hạn khác,CF_061,"     Tiền chi để mua sắm, xây dựng TSCĐ, BĐSĐT và các tài sản dài hạn khác","Payments for purchases of fixed assets, investment properties, and other long-term assets"
+Tiền thu được từ thanh lý tài sản cố định,CF_062,"     Tiền thu từ thanh lý, nhượng bán TSCĐ, BĐSĐT và các tài sản dài hạn khác","Proceeds from disposals of fixed assets, investment properties, and other long-term assets"
+,CF_063,"     Tiền chi đầu tư góp vốn vào công ty con, công ty liên doanh, liên kết và đầu tư khác","Payments for investments in subsidiaries, joint ventures, associates and other investments"
+,CF_064,"     Tiền thu hồi các khoản đầu tư góp vốn vào công ty con, công ty liên doanh, liên kết và đầu tư khác","Proceeds from divestments in subsidiaries, joint ventures, associates and other investments"
+,CF_065,     Tiền thu về cổ tức lợi nhuận được chia từ các khoản đầu tư tài chính dài hạn,Dividends and profit received from long-term financial investments
+Lưu chuyển tiền thuần từ hoạt động đầu tư,CF_070,Lưu chuyển tiền thuần từ hoạt động đầu tư,Net cash flow from investing activities
+,CF_071,"     Tiền thu từ phát hành cổ phiếu, nhận vốn góp của chủ sở hữu",Proceeds from issuance of shares and receipt of capital contributions from owners
+,CF_072,"     Tiền chi trả vốn góp cho các chủ sở hữu, mua lại cổ phiếu của doanh nghiệp đã phát hành",Payments to repurchase equity or to redeem shares
+Tiền vay gốc,CF_073,     Tiền vay gốc,Proceeds from borrowings
+Tiền chi trả nợ gốc vay,CF_074,     Tiền chi trả nợ gốc vay,Repayments of borrowings
+,CF_075,     Tiền chi trả nợ thuê tài chính,Payments of finance lease liabilities
+,CF_076,"     Cổ tức, lợi nhuận đã trả cho chủ sở hữu",Dividends and profit paid to owners
+Lưu chuyển tiền tệ từ hoạt động tài chính,CF_080,Lưu chuyển thuần từ hoạt động tài chính,Net cash flow from financing activities
+LƯU CHUYỂN TIỀN THUẦN TRONG KỲ,CF_090,LƯU CHUYỂN TIỀN THUẦN TRONG KỲ,NET CASH FLOW DURING THE PERIOD
+TIỀN VÀ TƯƠNG ĐƯƠNG TIỀN ĐẦU KỲ,CF_101,TIỀN VÀ CÁC KHOẢN TƯƠNG ĐƯƠNG TIỀN ĐẦU KỲ,CASH AND CASH EQUIVALENTS AT THE BEGINNING OF THE PERIOD
+TIỀN VÀ TƯƠNG ĐƯƠNG TIỀN CUỐI KỲ,CF_103,TIỀN VÀ CÁC KHOẢN TƯƠNG ĐƯƠNG TIỀN CUỐI KỲ,CASH AND CASH EQUIVALENTS AT THE END OF THE PERIOD
+1.1. Lãi từ các tài sản tài chính ghi nhận thông qua lãi/lỗ (FVTPL),IS_001,     Lãi từ các tài sản tài chính ghi nhận thông qua lãi/lỗ ( FVTPL),Income from financial assets at fair value through profit or loss (FVTPL)
+a. Lãi bán các tài sản tài chính,IS_001.1,          Lãi bán các tài sản tài chính FVTPL,Gain on sales of FVTPL financial assets
+b. Chênh lệch tăng đánh giá lại các TSTC thông qua lãi/lỗ,IS_001.2,          Chênh lệch tăng đánh giá lại các TSTC thông qua lãi/lỗ,Increase in fair value of financial assets at FVTPL
+"c. Cổ tức, tiền lãi phát sinh từ tài sản tài chính PVTPL",IS_001.3,"          Cổ tức, tiền lãi phát sinh từ tài sản tài chính FVTPL",Dividends and interest arising from FVTPL financial assets
+1.2. Lãi từ các khoản đầu tư nắm giữ đến ngày đáo hạn (HTM),IS_002,     Lãi từ các khoản đầu tư nắm giữ đến ngày đáo hạn,Interest income from held-to-maturity investments
+1.3. Lãi từ các khoản cho vay và phải thu,IS_003,     Lãi từ các khoản cho vay và phải thu,Interest income from loans and receivables
+1.4. Lãi từ các tài sản tài chính sẵn sàng để bán (AFS),IS_004,     Lãi từ các tài sản tài chính sẵn sàng để bán,Income from available-for-sale financial assets
+1.6. Doanh thu môi giới chứng khoán,IS_006,     Doanh thu nghiệp vụ môi giới chứng khoán,Revenue from securities brokerage services
+"1.7. Doanh thu bảo lãnh, đại lý phát hành chứng khoán",IS_007,     Doanh thu nghiệp vụ bảo lãnh phát hành chứng khoán,Revenue from securities underwriting services
+1.8. Doanh thu nghiệp vụ tư vấn đầu tư chứng khoán,IS_008,     Doanh thu nghiệp vụ tư vấn đầu tư chứng khoán,Revenue from securities investment advisory services
+1.10. Doanh thu lưu ký chứng khoán,IS_009,     Doanh thu lưu ký chứng khoán,Revenue from securities depository services
+Doanh thu hoạt động tư vấn tài chính,IS_010,     Doanh thu hoạt động tư vấn tài chính,Revenue from financial advisory services
+1.11. Thu nhập hoạt động khác,IS_011,     Doanh thu khác,Other revenue
+Cộng doanh thu hoạt động,IS_020,Doanh thu thuần về hoạt động kinh doanh,Net revenue from operating activities
+2.1. Lỗ các tài sản tài chính ghi nhận thông qua lãi/lỗ (FVTPL),IS_021,     Lỗ các tài sản tài chính ghi nhận thông qua lãi lỗ (FVTPL),Losses from financial assets at fair value through profit or loss (FVTPL)
+a. Lỗ bán các tài sản tài chính,IS_021.1,          Lỗ bán các tài sản tài chính,Losses on sales of financial assets
+b. Chênh lệch giảm đánh giá lại các TSTC thông qua lãi/lỗ,IS_021.2,          Chênh lệch giảm đánh giá lại các TSTC thông qua lãi/lỗ,Decrease in fair value of financial assets at FVTPL
+c. c.Chi phí giao dịch mua các tài sản tài chính FVTPL,IS_021.3,          Chi phí giao dịch mua các tài sản tài chính FVTPL,Transaction costs for purchases of FVTPL financial assets
+2.2. Lỗ các khoản đầu tư nắm giữ đến ngày đáo hạn (HTM),IS_022,     Lỗ các khoản đầu tư nắm giữ đến ngày đáo hạn (HTM),Losses from held-to-maturity (HTM) investments
+2.4. Lỗ bán các tài sản tài chính sẵn sàng để bán (AFS),IS_023,     Lỗ và ghi nhận chênh lệch đánh giá theo giá trị hợp lý tài sản tài chính sẵn sàng để bán (AFS) khi phân loại lại,Losses and recognition of changes in fair value of available-for-sale (AFS) financial assets upon reclassification
+"Chi phí dự phòng tài sản tài chính, xử lý tổn thất các khoản phải thu khó đòi, lỗ suy giảm tài sản tài chính và chi phí đi vay của các khoản cho vay",IS_024,"     CP dự phòng TSTC, xử lý tổn thất các khoản phải thu khó đòi là lỗ suy giảm TSTC và CP đi vay","Provision expenses for financial assets, provision for impairment of receivables, provision expenses for loan losses, impairment of financial asset and cost of borrowing"
+2.6. Chi phí hoạt động tự doanh,IS_026,     Chi phí hoạt động tự doanh,Proprietary trading expenses
+2.7. Chi phí môi giới chứng khoán,IS_027,     Chi phí nghiệp vụ môi giới chứng khoán,Expenses for securities brokerage services
+"2.8. Chi phí hoạt động bảo lãnh, đại lý phát hành chứng khoán",IS_028,"     Chi phí nghiệp vụ bảo lãnh, đại lý phát hành chứng khoán",Expenses for securities underwriting and issuance agency services
+2.9. Chi phí tư vấn đầu tư chứng khoán,IS_029,     Chi phí nghiệp vụ tư vấn đầu tư chứng khoán,Expenses for securities investment advisory services
+2.11. Chi phí lưu ký chứng khoán,IS_030,     Chi phí nghiệp vụ lưu ký chứng khoán,Expenses for securities depository services
+,IS_031,     Chi phí hoạt động tư vấn tài chính,Expenses for financial advisory services
+2.12. Chi phí khác,IS_032,     Chi phí các dịch vụ khác,Expenses for other services
+Cộng chi phí hoạt động,IS_040,Chi phí hoạt động kinh doanh,Operating expenses
+,IS_040.1,LỢI NHUẬN GỘP,GROSS PROFIT
+3.1. Chênh lệch lãi tỷ giá hối đoái đã và chưa thực hiện,IS_041,     Chênh lệch lãi tỷ giá hối đoái đã và chưa thực hiện,Realized and unrealized foreign exchange gains
+"3.2. Doanh thu, dự thu cổ tức, lãi tiền gửi không cố định phát sinh trong kỳ",IS_042,"     Doanh thu, dự thu cổ tức, lãi tiền gửi không cố định phát sinh trong kỳ","Revenue, accrued dividends, interest from non-fixed income deposits arising during the period"
+"3.3. Lãi bán, thanh lý các khoản đầu tư vào công ty con, liên kết, liên doanh",IS_043,"     Lãi bán, thanh lý các khoản đầu tư vào công ty con, liên kết, liên doanh","Gains on sales and disposals of investments in subsidiaries, associates, and joint ventures"
+3.4. Doanh thu khác về đầu tư,IS_044,     Doanh thu khác về đầu tư,Other investment income
+Cộng doanh thu hoạt động tài chính,IS_050,Doanh thu hoạt động tài chính,Financial income
+4.1. Chênh lệch lỗ tỷ giá hối đoái đã và chưa thực hiện,IS_051,     Chênh lệch lỗ tỷ giá hối đoái đã và chưa thực hiện,Realized and unrealized foreign exchange losses
+4.2. Chi phí lãi vay,IS_052,     Chi phí lãi vay,Interest expense
+Chi phí dự phòng suy giảm giá trị các khoản đầu tư tài chính dài hạn,IS_053,     Chi phí dự phòng suy giảm giá trị các khoản đầu tư tài chính dài hạn,Provision expenses for impairment of long-term financial investments
+4.4. chi phí tài chính khác,IS_054,     Chi phí đầu tư khác,Other investment expenses
+Cộng chi phí tài chính,IS_060,     Chi phí tài chính,Financial expenses
+,IS_061,CHI PHÍ BÁN HÀNG,SELLING EXPENSES
+,IS_062,CHI PHÍ QUẢN LÝ CÔNG TY CHỨNG KHOÁN,GENERAL AND ADMINISTRATIVE EXPENSES
+8.1. Thu nhập khác,IS_071,     Thu nhập khác,Other income
+8.2. Chi phí khác,IS_072,     Chi phí khác,Other expenses
+Cộng kết quả hoạt động khác,IS_080,Thu nhập khác ròng,Net other income
+IX. TỔNG LỢI NHUẬN KẾ TOÁN TRƯỚC THUẾ,IS_090,TỔNG LỢI NHUẬN KẾ TOÁN TRƯỚC THUẾ,TOTAL PROFIT BEFORE TAX
+9.1. Lợi nhuận đã thực hiện,IS_091,     Lợi nhuận đã thực hiện,Realized profit
+9.2. Lợi nhuận chưa thực hiện,IS_092,     Lợi nhuận chưa thực hiện,Unrealized profit
+X. CHI PHÍ THUẾ TNDN,IS_100,CHI PHÍ THUẾ THU NHẬP DOANH NGHIỆP,CORPORATE INCOME TAX EXPENSE
+10.1. Chi phí thuế TNDN hiện hành,IS_100.1,     Chi phí thuế thu nhập hiện hành,Current income tax expense
+10.2. Chi phí thuế TNDN hoãn lại,IS_100.2,     Chi phí thuế thu nhập hoãn lại,Deferred income tax expense
+XI. LỢI NHUẬN KẾ TOÁN SAU THUẾ TNDN,IS_200,LỢI NHUẬN KẾ TOÁN SAU THUẾ,PROFIT AFTER TAX
+11.1. Lợi nhuận sau thuế phân bổ cho chủ sở hữu,IS_201,     Lợi nhuận sau thuế phân bổ cho chủ sở hữu,Profit after tax attributable to owners
+"11.2. Lợi nhuận sau thuế trích các Quỹ dự trữ điều lệ, Quỹ Dự phòng tài chính và rủi ro nghề nghiệp theo quy định của Điều lệ Công ty là %)",IS_202,"     LNST trích các Quỹ dự trữ điều lệ, Quỹ Dự phòng tài chính và rủi ro nghề nghiệp","Profit after tax appropriated to statutory reserve fund, financial reserve fund and operational risk fund"
+11.3. Lợi nhuận thuần phân bổ cho lợi ích của cổ đông không kiểm soát,IS_203,     Lợi nhuận thuần phân bổ cho lợi ích của cổ đông không kiểm soát,Net profit attributable to non-controlling interests
+XII. THU NHẬP (LỖ) TOÀN DIỆN KHÁC SAU THUẾ TNDN,IS_300,THU NHẬP (LỖ) TOÀN DIỆN KHÁC SAU THUẾ,OTHER COMPREHENSIVE INCOME/(LOSS) AFTER TAX
+Tổng thu nhập toàn diện,IS_400,Tổng thu nhập toàn diện,Total comprehensive income
+XIII. THU NHẬP THUẦN TRÊN CỔ PHIẾU PHỔ THÔNG,IS_500,THU NHẬP THUẦN TRÊN CỔ PHIẾU PHỔ THÔNG,BASIC EARNINGS PER SHARE
+13.1. Lãi cơ bản trên cổ phiếu (Đồng/1 cổ phiếu),IS_501,Lãi cơ bản trên cổ phiếu (VND),Basic earnings per share (VND)
+13.2. Thu nhập pha loãng trên cổ phiếu (Đồng/1 cổ phiếu),IS_502,Lãi trên cổ phiếu pha loãng (VND),Diluted earnings per share (VND)
+Lợi nhận Thuần từ hoạt động kinh doanh,IS_070,Lợi nhận Thuần từ hoạt động kinh doanh,Net profit from operating activities
+Tổng chi phí hoạt động,IS_095,Tổng chi phí hoạt động,Total Operating Cost
