@@ -1,5 +1,3 @@
-Here is a natural language query that you need to convert into a SQL query:
-
 <task>
 {task}
 </task>

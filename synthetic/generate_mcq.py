@@ -26,7 +26,7 @@ mcq_styles = [
 ]
 
 
-def append_json_to_file(json_obj, file_path):
+def append_jsonl_to_file(json_obj, file_path):
     with open(file_path, 'a') as f:
         json.dump(json_obj, f)
         f.write('\n')
@@ -126,7 +126,7 @@ def _generate_mcq(llm, data, mcq_style, file_path='tmp.jsonl'):
         question['answer'] = mcq['answer']
         question['explanation'] = mcq['explanation']
 
-        append_json_to_file(question, file_path)
+        append_jsonl_to_file(question, file_path)
     except:
         print("Error in generating MCQ =====")
         return

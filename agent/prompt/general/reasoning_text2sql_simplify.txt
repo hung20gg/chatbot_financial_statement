@@ -1,0 +1,66 @@
+Here is a natural language query that you need to convert into a SQL query:
+
+<task>
+{task}
+</task>
+
+### Company details
+
+<data>
+
+{stock_code_table}
+
+</data>
+
+### Snapshot of the mapping table:
+<data>
+
+{suggestions_table}
+
+</data>
+
+### Example:
+
+<example>
+
+{few_shot}
+
+</example>
+ 
+<instruction>
+
+Analyze the task step-by-step and return suitable SQL query.
+
+If possible, the table result should have the following columns:
+
+- stock_code / industry
+- year
+- quarter
+- category_code / stock_code
+- data / data_mean / data_sum
+
+However, feel free to modify the table if needed.
+
+</instruction>
+
+### Note: 
+- Include the detailed suitable name in the query in the following format:
+
+```sql
+-- ### detailed_table_name
+```
+
+- If the time is not mentioned, assume getting the current time (Q3 2024)
+- Do not make any assumption about the account name. You must refer to the mapping table.
+- If the question requires data within the quarter time range (from 2020 to Q3 2024), you should use the `date_added` in the following format:
+
+```sql
+WHERE date_added BETWEEN '2020-01-01' AND '2024-09-30' 
+AND quarter !=0
+
+-- - Q1: YYYY-03-30
+-- - Q2: YYYY-06-30
+-- - Q3: YYYY-09-30
+-- - Q4: YYYY-12-30
+-- - Q0: YYYY-12-30 (Annual data)
+```

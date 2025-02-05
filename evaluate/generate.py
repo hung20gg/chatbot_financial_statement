@@ -6,6 +6,8 @@ import random
 
 import os
 import sys 
+
+from utils import append_jsonl_to_file, get_available_path
 sys.path.append('..')
 
 from agent.const import (
@@ -31,6 +33,7 @@ from agent.prompt.prompt_controller import (
     HORIZONTAL_PROMPT_BASE,
     HORIZONTAL_PROMPT_UNIVERSAL,
     FIIN_VERTICAL_PROMPT_UNIVERSAL,
+    FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY
 )
 import agent.text2sql_utils as utils
 
@@ -42,16 +45,13 @@ from llm.llm_utils import get_json_from_text_response, get_code_from_text_respon
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
+
 import logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-def append_json_to_file(json_obj, file_path):
-    with open(file_path, 'a') as f:
-        json.dump(json_obj, f)
-        f.write('\n')
 
 
 def get_text2sql_config(llm_name):
@@ -74,15 +74,20 @@ def get_text2sql_config(llm_name):
         return config
 
 
+
+## ============ SQL SOLVER ============ ##
+
 def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=False, file_path=None):
     """
     Run a single solver on a batch of questions
     """
-    text2sql_config['sql_example_top_k'] = random.randint(1, 5) // 3
 
+    # Initialize the solver
     solver = initialize_text2sql(text2sql_config, prompt_config)
 
     responses = []
+
+    # Loop through the questions
     for question in batch_questions:
         prompt = question['question']
         ids = question['ids']
@@ -107,8 +112,9 @@ def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=F
             'sql': sql
         })
 
+        # Save to file
         if file_path:
-            append_json_to_file({
+            append_jsonl_to_file({
                 'ids': ids,
                 'question': prompt,
                 'table': table_str,
@@ -128,9 +134,11 @@ def _solve(text2sql_config, prompt_config, questions, using_cache=False, version
     batch_question = []
 
     for question in questions:
-        if version and version != 'all':
-            if question['version'] != version:
+        if 'version' in question:
+            if version and question['version'] != version: # Specific version v1 v2 v3
                 continue
+
+            # Else is all or specific version
         batch_question.append(question)
         if len(batch_question) == batch_size:
             batch_questions.append(batch_question)
@@ -140,15 +148,18 @@ def _solve(text2sql_config, prompt_config, questions, using_cache=False, version
     if batch_question:
         batch_questions.append(batch_question)
 
-    # For testing
 
     # Get the file path
     if version:
         current_dir = os.path.dirname(__file__)
-        file_path = os.path.join(current_dir, f"../data/{text2sql_config.get('sql_llm', 'unknown')}__{version}.jsonl")
+        output_path = os.path.join(current_dir, f"../data/{text2sql_config.get('sql_llm', 'unknown')}__{version}.jsonl")
     else:
-        file_path = f"../data/{text2sql_config.get('sql_llm', 'unknown')}_all.jsonl"
+        output_path = f"../data/{text2sql_config.get('sql_llm', 'unknown')}_all.jsonl"
 
+    output_path = get_available_path(output_path)
+
+    print(f"==== Total questions: {len(questions)} =====")
+    print(f'==== Saving to: {output_path} =====')
 
     # Run the solver
     results = []
@@ -156,20 +167,26 @@ def _solve(text2sql_config, prompt_config, questions, using_cache=False, version
     if multi_thread:
         print("Using multi-threading")
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = [executor.submit(single_solver, text2sql_config, prompt_config, batch_question, using_cache, file_path) for batch_question in batch_questions]
+            futures = [executor.submit(single_solver, text2sql_config, prompt_config, batch_question, using_cache, output_path) for batch_question in batch_questions]
 
             for future in as_completed(futures):
                 results.extend(future.result())
     else:
         print("Using single-threading")
         for batch_question in batch_questions:
-            results.extend(single_solver(text2sql_config, prompt_config, batch_question, using_cache, file_path))
+            results.append(single_solver(text2sql_config, prompt_config, batch_question, using_cache, output_path))
 
     return results
 
 
 
-def get_fake_messages(text2sql_config, prompt_config, batch_questions, using_cache=False, file_path=None):
+## ============ FAKE MESSAGES ============ ##
+
+def single_fake_messages(text2sql_config, prompt_config, batch_questions, using_cache=False, file_path=None):
+    
+    text2sql_config['sql_example_top_k'] = random.randint(1, 6) // 3 # 0,0, 1, 1, 1, 2
+
+    
     solver = initialize_text2sql(text2sql_config, prompt_config)
     global_history = []
     for question in batch_questions:
@@ -183,14 +200,12 @@ def get_fake_messages(text2sql_config, prompt_config, batch_questions, using_cac
         global_history = his
     
     if file_path:
-        append_json_to_file(global_history, file_path)
+        append_jsonl_to_file(global_history, file_path)
     return global_history
 
 
 
 def _fake_solve(text2sql_config, prompt_config, questions, using_cache=False, file_path = None, max_workers=4, multi_thread=False):
-
-
 
     batch_questions = []
     index = 0
@@ -212,25 +227,28 @@ def _fake_solve(text2sql_config, prompt_config, questions, using_cache=False, fi
 
     if multi_thread:
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = [executor.submit(get_fake_messages, text2sql_config, prompt_config, batch_question, using_cache, file_path) for batch_question in batch_questions]
+            futures = [executor.submit(single_fake_messages, text2sql_config, prompt_config, batch_question, using_cache, file_path) for batch_question in batch_questions]
 
             for future in as_completed(futures):
                 results.extend(future.result())
     else:
         for batch_question in batch_questions:
-            results.extend(get_fake_messages(text2sql_config, prompt_config, batch_question, using_cache, file_path))
+            results.append(single_fake_messages(text2sql_config, prompt_config, batch_question, using_cache, file_path))
 
 
     return results
 
-
+# ============ GENERATE FAKE MESSAGE RUNNER ============
 
 def generate_fake_messages(args):
     text2sql_config = get_text2sql_config(args.llm)
-    prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL
+
+    if 'simplify' in args.template:
+        print("===== Using simplify =====")
+        prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY
+    else:
+        prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL
     version = args.version
-
-
 
     selected_questions = []
     with open(args.path) as f: # JSONL
@@ -248,42 +266,75 @@ def generate_fake_messages(args):
     else:
         file_path = os.path.join(current_dir, f"../data/message_{base_name}.jsonl")
 
+    file_path = get_available_path(file_path)
+
     results = _fake_solve(text2sql_config, prompt_config, selected_questions, using_cache=args.using_cache, file_path=file_path, max_workers=args.max_workers, multi_thread=args.multi_thread)
 
 
-# RUNNER
-
+# ============ GENERATE SQL RUNNER ============
 
 def generate_sql(args):
     text2sql_config = get_text2sql_config(args.llm)
 
-    prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL
+    # Change the template here
+    if 'simplify' in args.template:
+        print("===== Using simplify =====")
+        prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY
+    else:
+        prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL
 
+    
+    # Get the version
     version = args.version
     sql_llm = text2sql_config.get('sql_llm', 'unknown').replace('/', '__')
 
+    if args.path:
+        file_path = args.path
+    else:
+        file_path = '../data/generated_questions.json'
+    
+
+    # Check if the file exists and if the question is already solved
     if version:
         current_dir = os.path.dirname(__file__)
-        file_path = os.path.join(current_dir, f"../data/{sql_llm}__{version}.jsonl")
+        output_path = os.path.join(current_dir, f"../data/{sql_llm}__{version}.jsonl")
     else:
-        file_path = f"../data/{sql_llm}_all.jsonl"
+        output_path = f"../data/{sql_llm}_all.jsonl"
+
+    output_path = get_available_path(output_path)
 
     done_ids = set()
-    if os.path.exists(file_path):
-        with open(file_path) as f:
+    if os.path.exists(output_path):
+        with open(output_path) as f:
             for line in f:
                 data = json.loads(line)
                 done_ids.add(data['ids'])
 
-    selected_questions = []
-    with open('../data/generated_questions.json') as f:
-        questions = json.load(f)
-        for question in questions:
-            if question['ids'] not in done_ids:
-                selected_questions.append(question)
-        
-        print(f"Total questions: {len(questions)}")
 
+    selected_questions = []
+
+    # Load the questions
+    if file_path.endswith('.json'):
+
+        with open(file_path) as f:
+            questions = json.load(f)
+            for question in questions:
+                if question['ids'] not in done_ids:
+                    selected_questions.append(question)
+
+    elif file_path.endswith('.jsonl'):
+        with open(file_path) as f:
+            for line in f:
+                question = json.loads(line)
+                if question['ids'] not in done_ids:
+                    selected_questions.append(question)
+    
+    else:
+        raise ValueError("Invalid file path")
+        
+    print(f"Total questions: {len(selected_questions)}")
+
+    # Run the solver
     results = _solve(text2sql_config, prompt_config, selected_questions, using_cache=args.using_cache, version=version, batch_size=args.batch_size, max_workers=args.max_workers, multi_thread=args.multi_thread)
 
 
@@ -301,7 +352,7 @@ def get_args():
     parser.add_argument('--using_cache', default=True, type=bool)
     parser.add_argument('--path', default='../data/deepseek-chat__v0_good.jsonl', type=str)
     parser.add_argument('--llm', default='gpt-4o-mini', type=str)
-
+    parser.add_argument('--template', default='vertical', type=str)
     return parser.parse_args()
 
 

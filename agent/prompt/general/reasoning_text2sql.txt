@@ -53,7 +53,7 @@ However, feel free to modify the table if needed.
 - The `category_code` mapping table contain value of both `financial_statment` and `explaination` tables
 - The user can only see the query results, so your name should be as informative as possible
 - If the time is not mentioned, assume getting the current time (Q3 2024)
-- Do not make any assumption about the column name. You can refer to the mapping table above to find the suitable column name.
+- Do not make any assumption about the account name. You can refer to the mapping table above to find the suitable account.
 - If the question requires data within the quarter time range (from 2020 to Q3 2024), you should use the `date_added` instead of `year` and `quarter`, in the following format:
 
 ```sql

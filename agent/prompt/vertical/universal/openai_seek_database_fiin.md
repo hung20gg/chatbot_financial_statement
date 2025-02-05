@@ -19,7 +19,7 @@ You are given 10 tables in the database. Here are the detailed descriptions of t
 CREATE TABLE company_info(
     stock_code VARCHAR(255) primary key, --The trading symbol.
     industry VARCHAR(255), --Current industry of company. 
-    exchange VARCHAR(255), -- The market where the stock is listed (e.g., HOSE, HNX)
+    exchange VARCHAR(255), -- The exchange where the stock is listed (e.g., HOSE, HNX)
     stock_indices VARCHAR(255), -- The stock index it belongs to (e.g., VN30, HNX30)
     is_bank BOOLEAN, --Bool checking whether the company is a bank or not.
     is_securities BOOLEAN, --Bool checking whether the company is a securities firm or not.
@@ -77,8 +77,8 @@ CREATE TABLE financial_ratio(
     year int,
     quarter int,
     data float, -- Either in Million VND if the ratio_code related to money, or ratio otherwise
-    date_added timestamp -- The datetime when the data was published
-)
+    date_added timestamp
+);
 
 -- Table: industry_financial_ratio: General ratio for each industry sector
 CREATE TABLE industry_financial_ratio(
@@ -87,8 +87,8 @@ CREATE TABLE industry_financial_ratio(
     year int,
     quarter int,
     data_mean float, 
-    date_added timestamp -- The datetime when the data was published
-)
+    date_added timestamp
+);
 
 -- Table map_category_code_explaination
 CREATE TABLE map_category_code_explaination(
@@ -105,7 +105,7 @@ CREATE TABLE financial_statement_explaination(
     quarter int,
     data float, 
     date_added timestamp 
-)
+);
 ```
 
 ### Note on schema description: 

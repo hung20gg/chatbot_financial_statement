@@ -158,6 +158,10 @@ class Text2SQL(BaseAgent):
         if self.db is None:
             return json_response
         
+        # Error handling JSON response
+        if not isinstance(json_response, dict):
+            json_response = dict()
+
         # Get data from JSON response
         industry = json_response.get("industry", [])
         company_names = json_response.get("company_name", [])
@@ -303,8 +307,8 @@ class Text2SQL(BaseAgent):
     {database_description}
     
     """
-        database_description = self.prompt_config.OPENAI_SEEK_DATABASE_PROMPT
-        system_prompt = system_prompt.format(database_description = database_description)
+        database_description = self.prompt_config.OPENAI_SEEK_DATABASE_PROMPT.strip()
+        system_prompt = system_prompt.format(database_description = database_description).strip()
         
         RAG_sql = self.db.find_sql_query_v2(text=task, top_k=self.config.sql_example_top_k)
         few_shot_dict = dict()
@@ -321,13 +325,13 @@ class Text2SQL(BaseAgent):
                                                                      task = task, 
                                                                      stock_code_table = stock_code_table, 
                                                                      suggestions_table = utils.table_to_markdown(suggest_table), 
-                                                                     few_shot = few_shot)
+                                                                     few_shot = few_shot).strip()
         
         
         new_prompt = self.prompt_config.CONTINUE_REASONING_TEXT2SQL_PROMPT.format(task = task, 
                                                                                     stock_code_table = stock_code_table,
                                                                                     suggestions_table = utils.table_to_markdown(suggest_table), 
-                                                                                    few_shot = few_shot)
+                                                                                    few_shot = few_shot).strip()
         
         # =============================================
 
