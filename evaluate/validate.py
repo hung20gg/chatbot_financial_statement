@@ -38,6 +38,9 @@ Sometime, the report may contain some errors, null or not related to the task.
 
 Ignore the forecasting part of the question, you have to evaluate the report and return 1 only if you can confidently answer the task based on the provided data in the table only, 0 otherwise. 
 
+Note:
+- Only accept annual data if the quarter is set to 0.
+
 <question>
 {task}
 </question>

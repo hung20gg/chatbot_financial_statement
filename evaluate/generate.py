@@ -15,7 +15,7 @@ from agent.const import (
     GPT4O_MINI_CONFIG,
     GPT4O_CONFIG,
     TEXT2SQL_FASTEST_CONFIG,
-    TEXT2SQL_SWEET_SPOT_CONFIG,
+    TEXT2SQL_FAST_GEMINI_CONFIG,
     TEXT2SQL_FAST_OPENAI_CONFIG,
     TEXT2SQL_DEEPSEEK_V3_CONFIG,
     TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG,
@@ -58,7 +58,7 @@ def get_text2sql_config(llm_name):
     if 'gemini' in llm_name:
         if llm_name == 'gemini-flash':
             return TEXT2SQL_GEMINI_PRO_CONFIG
-        return TEXT2SQL_MEDIUM_GEMINI_CONFIG
+        return TEXT2SQL_FAST_GEMINI_CONFIG
     
     if 'gpt-4o' in llm_name:
         if 'mini' not in llm_name:
@@ -69,7 +69,7 @@ def get_text2sql_config(llm_name):
         return TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG
 
     else:
-        config = TEXT2SQL_MEDIUM_GEMINI_CONFIG
+        config = TEXT2SQL_FAST_GEMINI_CONFIG
         config['sql_llm'] = llm_name    
         return config
 
@@ -78,7 +78,7 @@ def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=F
     """
     Run a single solver on a batch of questions
     """
-    text2sql_config['sql_example_top_k'] = random.randint(0, 2)
+    text2sql_config['sql_example_top_k'] = random.randint(1, 5) // 3
 
     solver = initialize_text2sql(text2sql_config, prompt_config)
 
@@ -188,14 +188,9 @@ def get_fake_messages(text2sql_config, prompt_config, batch_questions, using_cac
 
 
 
-def _fake_solve(text2sql_config, prompt_config, questions, using_cache=False, version = None, max_workers=4, multi_thread=False):
+def _fake_solve(text2sql_config, prompt_config, questions, using_cache=False, file_path = None, max_workers=4, multi_thread=False):
 
 
-    if version:
-        current_dir = os.path.dirname(__file__)
-        file_path = os.path.join(current_dir, f"../data/message_{text2sql_config.get('sql_llm', 'unknown')}__{version}.jsonl")
-    else:
-        file_path = os.path.join(current_dir, f"../data/message_{text2sql_config.get('sql_llm', 'unknown')}_all.jsonl")
 
     batch_questions = []
     index = 0
@@ -204,7 +199,7 @@ def _fake_solve(text2sql_config, prompt_config, questions, using_cache=False, ve
     bs = 0
 
     while index < len(questions):
-        batch_size = max(random.randint(1, 6)//2, 1) # 1,1,1,2,2,3
+        batch_size = max(random.randint(1, 6)//3, 1) # 1,1,1,1,1,2
         batch_question = questions[index:index+batch_size]
         index += batch_size
         batch_questions.append(batch_question)
@@ -235,6 +230,8 @@ def generate_fake_messages(args):
     prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL
     version = args.version
 
+
+
     selected_questions = []
     with open(args.path) as f: # JSONL
         for line in f:
@@ -242,8 +239,16 @@ def generate_fake_messages(args):
             selected_questions.append(question)
         
         print(f"Total questions: {len(selected_questions)}")
+    
+    base_name = os.path.basename(args.path).replace('.jsonl', '')
 
-    results = _fake_solve(text2sql_config, prompt_config, selected_questions, using_cache=args.using_cache, version=version, max_workers=args.max_workers, multi_thread=args.multi_thread)
+    if version:
+        current_dir = os.path.dirname(__file__)
+        file_path = os.path.join(current_dir, f"../data/message_{base_name}.jsonl")
+    else:
+        file_path = os.path.join(current_dir, f"../data/message_{base_name}.jsonl")
+
+    results = _fake_solve(text2sql_config, prompt_config, selected_questions, using_cache=args.using_cache, file_path=file_path, max_workers=args.max_workers, multi_thread=args.multi_thread)
 
 
 # RUNNER
@@ -251,14 +256,17 @@ def generate_fake_messages(args):
 
 def generate_sql(args):
     text2sql_config = get_text2sql_config(args.llm)
+
     prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL
+
     version = args.version
+    sql_llm = text2sql_config.get('sql_llm', 'unknown').replace('/', '__')
 
     if version:
         current_dir = os.path.dirname(__file__)
-        file_path = os.path.join(current_dir, f"../data/{text2sql_config.get('sql_llm', 'unknown')}__{version}.jsonl")
+        file_path = os.path.join(current_dir, f"../data/{sql_llm}__{version}.jsonl")
     else:
-        file_path = f"../data/{text2sql_config.get('sql_llm', 'unknown')}_all.jsonl"
+        file_path = f"../data/{sql_llm}_all.jsonl"
 
     done_ids = set()
     if os.path.exists(file_path):

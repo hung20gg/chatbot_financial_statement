@@ -2,8 +2,7 @@ You're given database about the financial statments of top Vietnamese companies,
 
 <overall_description>
 
-All the data in the financial statments are followed by the regulation of Vietnamese Accounting Standard (VAS). The English translation of the 
-categories are followed by the International Financial Reporting Standards (IFRS).
+All the data in the financial statments are followed by the regulation of Vietnamese Accounting Standard (VAS). The English translations are followed by the International Financial Reporting Standards (IFRS).
 
 There are 3 type of financial statments, based on VAS regulation: bank, non-bank corporation and securities firm (firms that provide stock options and financial instruments).
 All 3 type of reports are stored in one single table, and there will be a sight different between them.
@@ -24,7 +23,6 @@ CREATE TABLE company_info(
     stock_indices VARCHAR(255), -- The stock index it belongs to (e.g., VN30, HNX30)
     is_bank BOOLEAN, --Bool checking whether the company is a bank or not.
     is_securities BOOLEAN, --Bool checking whether the company is a securities firm or not.
-    issue_share int --Number of share issued.
 );
 
 -- Table: sub_and_shareholder
@@ -38,7 +36,7 @@ CREATE TABLE sub_and_shareholder(
 
 -- Table: map_category_code_universal: Mapping account table for Financial Statement
 CREATE TABLE map_category_code_universal(
-    category_code VARCHAR(255) primary key, --The unique code for accounts recorded in the financial statements.
+    category_code VARCHAR(255) primary key, --The unique code for accounts recorded.
     en_caption VARCHAR(255), --The Accounts (Caption) for the `category_code`.
 );
 
@@ -114,15 +112,15 @@ CREATE TABLE financial_statement_explaination(
 - Each value in `category_code` includes a prefix indicating the report it pertains to: *BS* is Balance sheet, *IS* is for Income statement, *CF* is Cash flow and *TM* is for Explaination.
 - For `category_code` in `map_category_code_explaination`, there are 4 additional prefix: *Crop*, *Bank* and *Sec* for specific account related to each type of organization (e.g: Bank_TM_66 for Standard Debt), and *Share* if the account type is similar across organizations (e.g: Share_TM_5 for Share Issued).
 - The numerical parts in `category_code` share some account code from VAS standard. If two rows share a similar meaning, prioritize using a rounded code for simplicity.
-- Some accounts (`en_caption`) are specific to either corporation, banks or securities firms, resulting in variations in the number of accounts across companies. Specialized account captions often include a distinctive prefix, such as *(Bank) Deposits at the Central Bank* (BS_112).
+- Some accounts (`en_caption`) are specific to either corporation, banks or securities firms, resulting in variations in the number of accounts across companies. Specialized account captions often include a prefix, such as *(Bank) Deposits at the Central Bank* (BS_112).
 - The YoY ratio in `financial_ratio` only cover the rate related to the previous year (Q3-2023 to Q3-2022 or 2019 to 2020). You should recalculate the ratio if the time window is not 1 year.
 
 ### Peek view of the schema
  - `company_info`
 
-| stock_code | industry | issue_share | is_bank | is_securities | exchange | stock_indices |
-|:----|:----|:----|:----|:----|:----|:----|
-| VIC | Real Estate | 3823700000 | false | false | HOSE | VN30 |
+| stock_code | industry |  is_bank | is_securities | exchange | stock_indices |
+|:----|:----|:----|:----|:----|:----|
+| VIC | Real Estate | false | false | HOSE | VN30 |
 
 - `sub_and_shareholder`
 

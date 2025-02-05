@@ -84,8 +84,12 @@ def get_llm_wrapper(model_name, **kwargs):
     elif 'gemini' in model_name:
         return Gemini(model_name=model_name, **kwargs)
     
-    host = os.getenv('LLM_HOST')
-    api_key = os.getenv('LLM_API_KEY')
+    elif 'deepseek' in model_name:
+        host = os.getenv('DEEPSEEK_HOST')
+        api_key = os.getenv('DEEPSEEK_API_KEY')
+    else:
+        host = os.getenv('LLM_HOST')
+        api_key = os.getenv('LLM_API_KEY')
 
     print(f"Using OpenAI Wrapper with host {host}")
 

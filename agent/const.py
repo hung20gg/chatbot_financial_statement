@@ -20,7 +20,7 @@ class Text2SQLConfig(Config):
     branch_reasoning: bool = True
     company_top_k: int = 2
     sql_example_top_k: int = 3
-    account_top_k: int = 8
+    account_top_k: int = 6
     verbose: bool = False
     get_all_acount: bool = False    
     self_debug: bool = False
@@ -132,6 +132,17 @@ TEXT2SQL_SWEET_SPOT_CONFIG = {
 TEXT2SQL_FAST_OPENAI_CONFIG = {
     "llm": 'gpt-4o-mini',
     "sql_llm": 'gpt-4o-mini',
+    "reasoning": False,
+    "branch_reasoning": False,
+
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
+}
+
+TEXT2SQL_FAST_GEMINI_CONFIG = {
+    "llm": 'gemini-1.5-flash',
+    "sql_llm": 'gemini-1.5-flash',
     "reasoning": False,
     "branch_reasoning": False,
 

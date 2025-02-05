@@ -29,17 +29,15 @@ Here is a natural language query that you need to convert into a SQL query:
  
 <instruction>
 
-Think step-by-step and return SQL query that suitable with the database schema based on the natural language query above.
+Analyze the task step-by-step and return SQL query that match with the database schema.
 
-If possible, the table result should be in the following format:
+If possible, the table result should have the following columns:
 
-|stock_code|quarter|year|category_code|data|
-|:---|:---|:---|:---|:---|
-
-or for `financial_ratio`
-
-|stock_code|quarter|year|ratio_code|data|
-|:---|:---|:---|:---|:---|
+- stock_code / industry
+- year
+- quarter
+- category_code / stock_code
+- data / data_mean / data_sum
 
 However, feel free to modify the table if needed.
 
@@ -52,8 +50,8 @@ However, feel free to modify the table if needed.
 -- ### detailed_table_name
 ```
 
-- The `category_code_x` table contain value of both `financial_statment` and `explaination` tables
-- The user can only see the sql results, so your name should be as informative as possible
+- The `category_code` mapping table contain value of both `financial_statment` and `explaination` tables
+- The user can only see the query results, so your name should be as informative as possible
 - If the time is not mentioned, assume getting the current time (Q3 2024)
 - Do not make any assumption about the column name. You can refer to the mapping table above to find the suitable column name.
 - If the question requires data within the quarter time range (from 2020 to Q3 2024), you should use the `date_added` instead of `year` and `quarter`, in the following format:

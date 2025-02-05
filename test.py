@@ -13,8 +13,10 @@ from agent.const import (
     TEXT2SQL_MEDIUM_GEMINI_CONFIG,
     TEXT2SQL_FASTEST_CONFIG,
     TEXT2SQL_FAST_OPENAI_CONFIG,
+    TEXT2SQL_FAST_GEMINI_CONFIG,
     TEXT2SQL_DEEPSEEK_V3_CONFIG,
-    TEXT2SQL_EXP_GEMINI_CONFIG
+    TEXT2SQL_EXP_GEMINI_CONFIG,
+
 )
 
 from agent.prompt.prompt_controller import (
@@ -51,7 +53,8 @@ logging.basicConfig(
 def test():
 
     chat_config = ChatConfig(**GPT4O_MINI_CONFIG)
-    text2sql_config = TEXT2SQL_FAST_OPENAI_CONFIG
+    text2sql_config = TEXT2SQL_FAST_GEMINI_CONFIG
+    text2sql_config['sql_llm'] = 'Qwen/Qwen2.5-Coder-3B-Instruct'
     prompt_config = VERTICAL_PROMPT_UNIVERSAL
 
     try:

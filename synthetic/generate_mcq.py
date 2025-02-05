@@ -44,6 +44,7 @@ def _generate_mcq(llm, data, mcq_style, file_path='tmp.jsonl'):
 
     Your question should be precise and clear, and make sure the question can only be answered by the information in the table.
     You should also provide the correct answer and explanation for the correct answer.
+    If you think the provided table is not enough to generate a question, refuse the task and ask for more information.
     """
 
     messages = [
@@ -89,8 +90,7 @@ def _generate_mcq(llm, data, mcq_style, file_path='tmp.jsonl'):
             "content": """
     Based on the multiple choice question, store it into JSON format:
 
-    Assume the "choice 2" is the correct answer. 
-
+    Assume the "choice 2" is the correct answer. The JSON format should be:
     ```json
     {
         "question": "multiple choice question",
@@ -104,6 +104,8 @@ def _generate_mcq(llm, data, mcq_style, file_path='tmp.jsonl'):
         "explanation": "explanation"
     }
     ```
+
+    If no question is provided, return an empty JSON object.
     """
         }
     )
@@ -111,51 +113,77 @@ def _generate_mcq(llm, data, mcq_style, file_path='tmp.jsonl'):
     # Get the question in JSON format
     response = llm(messages)
 
+    
     mcq = get_json_from_text_response(response, new_method=True)
 
+    try:
     # Store the question
-    data['mcq'] = mcq
-    question = dict()
-    question['ids'] = data['ids']
-    question['question'] = mcq['question']
-    question['choices'] = mcq['choices']
-    question['answer'] = mcq['answer']
-    question['explanation'] = mcq['explanation']
+        data['mcq'] = mcq
+        question = dict()
+        question['ids'] = data['ids']
+        question['question'] = mcq['question']
+        question['choices'] = mcq['choices']
+        question['answer'] = mcq['answer']
+        question['explanation'] = mcq['explanation']
 
-    append_json_to_file(question, file_path)
+        append_json_to_file(question, file_path)
+    except:
+        print("Error in generating MCQ =====")
+        return
 
-
-def generate_mcq(llm, data, file_path='tmp.jsonl', max_workers=10, multi_thread=False):
+def generate_mcq(llm, input_path, max_workers=10, multi_thread=False):
+    llm = get_llm_wrapper(llm)
     print("Generating MCQ...")
+    
+    
+    basename = os.path.basename(input_path)
+    output_path = f"../data/mcq_{basename}"
+
+    done_ids = set()
+    if os.path.exists(output_path):
+        with open(output_path, 'r') as f:
+            for line in f:
+                data = json.loads(line)
+                done_ids.add(data['ids'])
+
+    data = []
+    with open(input_path, 'r') as f:
+        for line in f:
+            try:
+                line = json.loads(line)
+                if line['ids'] in done_ids:
+                    continue
+                data.append(line)
+            except:
+                continue
+
     print("Number of questions:", len(data))
+
 
     global mcq_styles
 
+    results = []
     if multi_thread:
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = []
-            for i in range(len(data)):
-                future = executor.submit(_generate_mcq, llm, data[i], mcq_styles[random.randint(0, len(mcq_styles)-1)], file_path)
-                futures.append(future)
+            futures = [executor.submit(_generate_mcq, llm, data[i], mcq_styles[random.randint(0, len(mcq_styles)-1)], output_path) for i in range(len(data))]
+            
             for future in as_completed(futures):
-                future.result()
+                results.extend(future.result())
+
+            
 
     else:
         for i in range(len(data)):
-            _generate_mcq(llm, data[i], mcq_styles[random.randint(0, len(mcq_styles)-1)], file_path)
+            _generate_mcq(llm, data[i], mcq_styles[random.randint(0, len(mcq_styles)-1)], output_path)
 
 
 def generate():
-    llm = get_llm_wrapper(model_name="deepseek-chat")
-    data = []
+    llm = 'gpt-4o-mini'
+    input_path = '../data/gemini-1.5-flash__v0.jsonl'
 
-    with open('../data/deepseek-chat__v0.jsonl', 'r') as f:
-        for line in f:
-            data.append(json.loads(line))
+    max_workers = 1
 
-    max_workers = min(4, len(data))
-
-    generate_mcq(llm, data, file_path='../data/tmp_mcq.jsonl', max_workers=max_workers, multi_thread=True)
+    generate_mcq(llm, input_path, max_workers=max_workers, multi_thread=True)
 
 if __name__ == "__main__":
     generate()

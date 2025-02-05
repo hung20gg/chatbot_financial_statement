@@ -520,9 +520,10 @@ def setup_vector_db_sql_query(collection_name, persist_directory, txt_path, mode
     for i, s in enumerate(sql[1:]):
         sql_code = heading[i]+ s
         task = sql_code.split('\n')[0]
+        code = '\n'.join(sql_code.split('\n')[1:])
         task = re.sub(r'--\s*\d+\.?', '', task).strip()
         
-        codes.append((task, sql_code))
+        codes.append((task, code))
         
                 
     for code in codes:

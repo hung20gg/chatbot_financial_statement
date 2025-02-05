@@ -342,6 +342,9 @@ def merge_questions(args):
     with open(os.path.join(current_dir, '../data/generated_questions.json'), 'w') as f:
         json.dump(results, f, indent=4)
 
+def generate_mcq_wrapper(args):
+    generate_mcq(args.llm, args.path, args.max_workers, args.multi_thread)
+
 import argparse
 
 def get_args():
@@ -354,6 +357,7 @@ def get_args():
     parser.add_argument('--multi_thread', default=False, type=bool)
     parser.add_argument('--using_cache', default=False, type=bool)
     parser.add_argument('--llm', default='gpt-4o-mini', type=str)
+    parser.add_argument('--path', default='../data/gemini-1.5-flash__v0.jsonl', type=str)
 
     return parser.parse_args()
 
@@ -367,3 +371,6 @@ if __name__ == "__main__":
 
     elif args.task == 'merge_questions':
         merge_questions(args)
+
+    elif args.task == 'generate_mcq':
+        generate_mcq_wrapper(args)
