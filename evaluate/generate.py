@@ -23,6 +23,7 @@ from agent.const import (
     TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG,
     TEXT2SQL_MEDIUM_GEMINI_CONFIG,
     TEXT2SQL_GEMINI_PRO_CONFIG,
+    TEXT2SQL_THINKING_GEMINI_CONFIG,
     TEXT2SQL_4O_CONFIG
 )
 
@@ -33,7 +34,8 @@ from agent.prompt.prompt_controller import (
     HORIZONTAL_PROMPT_BASE,
     HORIZONTAL_PROMPT_UNIVERSAL,
     FIIN_VERTICAL_PROMPT_UNIVERSAL,
-    FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY
+    FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY,
+    FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI,
 )
 import agent.text2sql_utils as utils
 
@@ -44,7 +46,7 @@ from llm.llm_utils import get_json_from_text_response, get_code_from_text_respon
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-
+MAX_QUESTION = 1000
 
 import logging
 logging.basicConfig(
@@ -56,7 +58,10 @@ logging.basicConfig(
 
 def get_text2sql_config(llm_name):
     if 'gemini' in llm_name:
-        if llm_name == 'gemini-flash':
+
+        if 'thinking' in llm_name:
+            return TEXT2SQL_THINKING_GEMINI_CONFIG
+        if 'gemini-pro' in llm_name:
             return TEXT2SQL_GEMINI_PRO_CONFIG
         return TEXT2SQL_FAST_GEMINI_CONFIG
     
@@ -65,7 +70,7 @@ def get_text2sql_config(llm_name):
             return TEXT2SQL_4O_CONFIG
         return TEXT2SQL_FAST_OPENAI_CONFIG
 
-    if 'deepseek' in llm_name:
+    if 'deepseek-chat' in llm_name:
         return TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG
 
     else:
@@ -133,6 +138,11 @@ def _solve(text2sql_config, prompt_config, questions, using_cache=False, version
     batch_questions = []
     batch_question = []
 
+    sql_llm = text2sql_config.get('sql_llm', 'unknown').replace('/', '__')
+
+    print(f'==== Version: {version} ====')
+
+    count = 0
     for question in questions:
         if 'version' in question:
             if version and question['version'] != version: # Specific version v1 v2 v3
@@ -143,6 +153,9 @@ def _solve(text2sql_config, prompt_config, questions, using_cache=False, version
         if len(batch_question) == batch_size:
             batch_questions.append(batch_question)
             batch_question = []
+        count += 1
+        if count >= MAX_QUESTION:
+            break
     
     # Last batch
     if batch_question:
@@ -152,11 +165,11 @@ def _solve(text2sql_config, prompt_config, questions, using_cache=False, version
     # Get the file path
     if version:
         current_dir = os.path.dirname(__file__)
-        output_path = os.path.join(current_dir, f"../data/{text2sql_config.get('sql_llm', 'unknown')}__{version}.jsonl")
+        output_path = os.path.join(current_dir, f"../data/{sql_llm}__{version}.jsonl")
     else:
-        output_path = f"../data/{text2sql_config.get('sql_llm', 'unknown')}_all.jsonl"
+        output_path = f"../data/{sql_llm}_all.jsonl"
 
-    output_path = get_available_path(output_path)
+    # output_path = get_available_path(output_path)
 
     print(f"==== Total questions: {len(questions)} =====")
     print(f'==== Saving to: {output_path} =====')
@@ -182,12 +195,14 @@ def _solve(text2sql_config, prompt_config, questions, using_cache=False, version
 
 ## ============ FAKE MESSAGES ============ ##
 
-def single_fake_messages(text2sql_config, prompt_config, batch_questions, using_cache=False, file_path=None):
+def single_fake_messages(text2sql_config,  batch_questions, using_cache=False, file_path=None):
     
     text2sql_config['sql_example_top_k'] = random.randint(1, 6) // 3 # 0,0, 1, 1, 1, 2
 
-    
-    solver = initialize_text2sql(text2sql_config, prompt_config)
+    random_config = random.choice([FIIN_VERTICAL_PROMPT_UNIVERSAL, FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY, FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY, FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI])
+    random_table = random.randint(0, 1)
+
+    solver = initialize_text2sql(text2sql_config, random_config)
     global_history = []
     for question in batch_questions:
         prompt = question['question']
@@ -195,7 +210,7 @@ def single_fake_messages(text2sql_config, prompt_config, batch_questions, using_
 
         if not using_cache:
             solver.reset()
-        his, err, tables = solver.solve(prompt, inject_reasoning=reasoning) # Fake reasoning
+        his, err, tables = solver.solve(prompt, inject_reasoning=reasoning, adjust_table=random_table) # Fake reasoning
 
         global_history = his
     
@@ -205,7 +220,7 @@ def single_fake_messages(text2sql_config, prompt_config, batch_questions, using_
 
 
 
-def _fake_solve(text2sql_config, prompt_config, questions, using_cache=False, file_path = None, max_workers=4, multi_thread=False):
+def _fake_solve(text2sql_config, questions, using_cache=False, file_path = None, max_workers=4, multi_thread=False):
 
     batch_questions = []
     index = 0
@@ -227,7 +242,7 @@ def _fake_solve(text2sql_config, prompt_config, questions, using_cache=False, fi
 
     if multi_thread:
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = [executor.submit(single_fake_messages, text2sql_config, prompt_config, batch_question, using_cache, file_path) for batch_question in batch_questions]
+            futures = [executor.submit(single_fake_messages, text2sql_config, batch_question, using_cache, file_path) for batch_question in batch_questions]
 
             for future in as_completed(futures):
                 results.extend(future.result())
@@ -243,11 +258,6 @@ def _fake_solve(text2sql_config, prompt_config, questions, using_cache=False, fi
 def generate_fake_messages(args):
     text2sql_config = get_text2sql_config(args.llm)
 
-    if 'simplify' in args.template:
-        print("===== Using simplify =====")
-        prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY
-    else:
-        prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL
     version = args.version
 
     selected_questions = []
@@ -268,7 +278,7 @@ def generate_fake_messages(args):
 
     file_path = get_available_path(file_path)
 
-    results = _fake_solve(text2sql_config, prompt_config, selected_questions, using_cache=args.using_cache, file_path=file_path, max_workers=args.max_workers, multi_thread=args.multi_thread)
+    results = _fake_solve(text2sql_config, selected_questions, using_cache=args.using_cache, file_path=file_path, max_workers=args.max_workers, multi_thread=args.multi_thread)
 
 
 # ============ GENERATE SQL RUNNER ============
@@ -277,7 +287,10 @@ def generate_sql(args):
     text2sql_config = get_text2sql_config(args.llm)
 
     # Change the template here
-    if 'simplify' in args.template:
+    if 'openai' in args.template:
+        print("===== Using openai =====")
+        prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI
+    elif 'simplify' in args.template:
         print("===== Using simplify =====")
         prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY
     else:
@@ -301,7 +314,7 @@ def generate_sql(args):
     else:
         output_path = f"../data/{sql_llm}_all.jsonl"
 
-    output_path = get_available_path(output_path)
+    # output_path = get_available_path(output_path)
 
     done_ids = set()
     if os.path.exists(output_path):
@@ -313,6 +326,7 @@ def generate_sql(args):
 
     selected_questions = []
 
+    
     # Load the questions
     if file_path.endswith('.json'):
 

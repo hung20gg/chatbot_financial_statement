@@ -16,6 +16,7 @@ from agent.const import (
     TEXT2SQL_FAST_GEMINI_CONFIG,
     TEXT2SQL_DEEPSEEK_V3_CONFIG,
     TEXT2SQL_EXP_GEMINI_CONFIG,
+    TEXT2SQL_THINKING_GEMINI_CONFIG
 
 )
 
@@ -26,6 +27,8 @@ from agent.prompt.prompt_controller import (
     HORIZONTAL_PROMPT_BASE,
     HORIZONTAL_PROMPT_UNIVERSAL,
     FIIN_VERTICAL_PROMPT_UNIVERSAL,
+    FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY,
+    FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI,
 )
 
 from ETL.dbmanager.setup import (
@@ -53,12 +56,16 @@ logging.basicConfig(
 def test():
 
     chat_config = ChatConfig(**GPT4O_MINI_CONFIG)
-    text2sql_config = TEXT2SQL_FAST_GEMINI_CONFIG
-    text2sql_config['sql_llm'] = 'Qwen/Qwen2.5-Coder-3B-Instruct'
-    prompt_config = VERTICAL_PROMPT_UNIVERSAL
+    # text2sql_config = TEXT2SQL_FAST_GEMINI_CONFIG
+    # text2sql_config['sql_llm'] = 'llama3.2-3b-test'
+    text2sql_config = TEXT2SQL_THINKING_GEMINI_CONFIG
+    # text2sql_config['sql_example_top_k'] = 1
+    # text2sql_config['company_top_k'] = 1
+    # text2sql_config['account_top_k'] = 4
+    prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI
 
-    try:
-
+    # try:
+    if True:
         text2sql = initialize_text2sql(text2sql_config, prompt_config)
         
         chatbot = Chatbot(config = chat_config, text2sql = text2sql)
@@ -72,11 +79,17 @@ def test():
         logging.info('Test text2sql')
         prompt = "For the year 2023, what was the Return on Equity (ROE) for Vietcombank (VCB) and Techcombank (TCB)?"
         his, err, tab = text2sql.solve(prompt)
+        last_reasoning = his[-1]['content']
+
+        print('===== Reasoning =====')
+        print(last_reasoning)
+        print('===== Table =====')
         print(tab[-1].table)
         
-    except Exception as e:
-        logging.error("Failed to setup chatbot")
-        logging.error(e)
+        
+    # except Exception as e:
+    #     logging.error("Failed to setup chatbot")
+    #     logging.error(e)
 
 
 if __name__ == "__main__":

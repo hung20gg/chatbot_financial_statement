@@ -15,11 +15,6 @@ from llm.llm_utils import get_json_from_text_response
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
-# def append_jsonl_to_file(json_obj, file_path):
-#     with open(file_path, 'a') as f:
-#         json.dump(json_obj, f)
-#         f.write('\n')
-
 
 def single_validate_qa(llm, output_path, qa):
     task = qa['question']
@@ -35,10 +30,10 @@ def single_validate_qa(llm, output_path, qa):
         {
             "role": "user",
             "content": f"""
-You are receiving a task and a table of report from your colleague. Your task is to evaluate does the table related to the task or not.
+You are receiving a task and a table of report from your colleague. Your task is to valuate does the table match with the task or not.
 Sometime, the report may contain some errors, null or not related to the task.
 
-Ignore the forecasting part of the question, you have to evaluate the report and return 1 only if you can confidently answer the task based on the provided data in the table only, 0 otherwise. 
+Ignore the forecasting part of the question, you have to evaluate the report and return 1 only if you can confidently answer the task based on the provided data in the table only with no additional calculation step, 0 otherwise. 
 
 Note:
 - Only accept annual data if the quarter is set to 0.

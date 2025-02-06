@@ -1,19 +1,15 @@
 Here is a natural language query that you need to convert into a SQL query:
 
 <task>
+
 {task}
+
 </task>
 
-### Company details
-
+### Company details and Snapshot of the mapping table:
 <data>
 
 {stock_code_table}
-
-</data>
-
-### Snapshot of the mapping table:
-<data>
 
 {suggestions_table}
 
@@ -29,14 +25,14 @@ Here is a natural language query that you need to convert into a SQL query:
  
 <instruction>
 
-Analyze the task step-by-step and return suitable SQL query.
+Analyze the task step-by-step then return suitable SQL query.
 
 If possible, the table result should have the following columns:
 
 - stock_code / industry
 - year
 - quarter
-- category_code / stock_code
+- category_code / ratio_code
 - data / data_mean / data_sum
 
 However, feel free to modify the table if needed.
@@ -44,12 +40,12 @@ However, feel free to modify the table if needed.
 </instruction>
 
 ### Note: 
-- Include the detailed suitable name in the query in the following format:
+- Include the detailed name of the table in the query in the following format:
 
 ```sql
 -- ### detailed_table_name
 ```
-
+- The query must not contain column `ratio_name` or `en_caption`.
 - If the time is not mentioned, assume getting the current time (Q3 2024)
 - Do not make any assumption about the account name. You must refer to the mapping table.
 - If the question requires data within the quarter time range (from 2020 to Q3 2024), you should use the `date_added` in the following format:

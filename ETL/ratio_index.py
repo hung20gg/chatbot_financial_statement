@@ -99,6 +99,7 @@ def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_m
         for ratio_name, category_code in ratio_mapping.items():
             # Process YoY growth calculation
             try:
+                
                 if isinstance(category_code, list):
                     # Handle sums of multiple codes
                     current_year_value = sum(row.get(code, 0) for code in category_code)
@@ -118,6 +119,7 @@ def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_m
                     previous_year_value = pivot_df.loc[
                         (stock_code, year - 1, quarter), category_code
                     ] if (stock_code, year - 1, quarter) in pivot_df.index else 0
+            
 
                 # Calculate YoY growth
                 yoy_value = None
@@ -135,7 +137,47 @@ def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_m
             except Exception as e:
                 # Handle missing or invalid data gracefully
                 print(f"Error calculating YoY ratio {ratio_name} for {stock_code}: {e}")
-    return results
+    return pd.DataFrame(results)
+
+
+def __single_inventory_turnover_ratio(data_df, cost_of_goods_sold, inventory):
+    # Filter and prepare inventory and COGS data
+    inventory_data = (
+        data_df[data_df['category_code'] == inventory]
+        .sort_values(by=['year', 'quarter'])
+        .assign(previous_inventory=lambda df: df['data'].shift(1))
+    )
+
+    # Calculate average inventory
+    inventory_data['average_inventory'] = (inventory_data['data'] + inventory_data['previous_inventory'].fillna(0)) / 2
+
+    # Prepare and sort COGS data
+    cogs_data = data_df[data_df['category_code'] == cost_of_goods_sold].sort_values(by=['year', 'quarter'])
+
+    # Merge inventory and COGS data
+    merged_data = pd.merge(
+        inventory_data[['stock_code', 'year', 'quarter', 'average_inventory']],
+        cogs_data[['stock_code', 'year', 'quarter', 'data']],
+        on=['stock_code', 'year', 'quarter'],
+        how='inner'
+    )
+
+    # Calculate inventory turnover ratio safely (avoid division by zero)
+    merged_data['data'] = merged_data['data'] / merged_data['average_inventory'].replace({0: np.nan})
+
+    # Set the ratio code and select relevant columns
+    merged_data = merged_data.assign(ratio_code='inventory_turnover_ratio').drop(columns=['average_inventory'])
+
+    return merged_data
+
+
+def router(function_name, *args, **kwargs):
+    if function_name == 'get_yoy_ratio':
+        return __get_yoy_ratios(*args, **kwargs)
+    elif function_name == 'get_inventory_turnover_ratio':
+        return __single_inventory_turnover_ratio(*args, **kwargs)
+    else:
+        return None
 
 # This code run so long, gonna optimize it later @pphanhh
 def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, multi_process=True, constant=None):
@@ -151,25 +193,39 @@ def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, multi_pro
 
     inputs = []
     for symbol in symbols:
+
+        df_symbol = data_df[data_df['stock_code'] == symbol]
+
         inputs.append([
-                    data_df[data_df['stock_code'] == symbol],
+                    'get_yoy_ratio',
+                    df_symbol,
                     type_,
                     ratios_df_1[ratios_df_1['stock_code'] == symbol] if ratios_df_1 is not None else None,
                     ratios_df_6[ratios_df_6['stock_code'] == symbol] if ratios_df_6 is not None else None,
                     constant
                 ])
+        if type_ == 'corp': # Add inventory turnover ratio for Corporation only
+            
+            inputs.append(
+                [
+                    'get_inventory_turnover_ratio',
+                    df_symbol,
+                    'BS_141',
+                    'IS_011'
+                ]
+            )
     
     if multi_process:
         with Pool(4) as p:
-            jobs_results = p.starmap(__get_yoy_ratios, inputs)
+            jobs_results = p.starmap(router, inputs)
             for job_result in jobs_results:
-                results.extend(job_result)
+                results.append(job_result)
 
     else:
         for args in inputs:
-            results.extend(__get_yoy_ratios(*args))
+            results.append(__get_yoy_ratios(*args))
 
-    return pd.DataFrame(results)
+    return pd.concat(results)
 
 
 
@@ -342,6 +398,31 @@ def price_to_book_ratio(price, eps, net_income, equity):
 
 def get_pe_ratios(data_df, func_dict):
     return __get_financial_ratio(data_df, func_dict)
+
+
+#===================#
+#    Date related   #
+#===================#
+
+
+def days_sales_outstanding(accounts_receivable, net_sales):
+    return (accounts_receivable / net_sales) if net_sales else 0
+
+def days_payable_outstanding(short, long, COGS):
+    return (short + long) / COGS if COGS else 0
+
+def days_inventory_outstanding(inventory, COGS):
+    return (inventory / COGS) if COGS else 0
+
+def cash_conversion_cycle(accounts_receivable, short, long, inventory, COGS, net_sales):
+    DSO = days_sales_outstanding(accounts_receivable, net_sales)
+    DPO = days_payable_outstanding(short, long, COGS)
+    DIO = days_inventory_outstanding(inventory, COGS)
+    return DSO + DIO - DPO
+
+def get_date_related_ratios(data_df, func_dict):
+    return __get_financial_ratio(data_df, func_dict)
+
 
 #===================#
 #  Profitability    #
@@ -599,7 +680,8 @@ def get_constant_values(type_):
             'profitability': const.PROFITABILITY_RATIO_FUNCTIONS,
             'cashflow': const.CASHFLOW_RATIO_FUNCTIONS,
             'pe': const.PE_RATIO_FUNCTIONS,
-            'yoy': const.YoY_RATIO_FUNCTIONS['non_bank']
+            'yoy': const.YoY_RATIO_FUNCTIONS['non_bank'],
+            'date': const.DATE_RELATED_FUNCTIONS
         }
         
     elif type_ == 'bank':
@@ -611,7 +693,8 @@ def get_constant_values(type_):
             'profitability': const.BANK_PROFITABILITY_RATIO_FUNCTIONS,
             'cashflow': const.BANK_CASHFLOW_RATIO_FUNCTIONS,
             'pe': const.BANK_PE_RATIO_FUNCTIONS,
-            'yoy': const.YoY_RATIO_FUNCTIONS['bank']
+            'yoy': const.YoY_RATIO_FUNCTIONS['bank'],
+            'date': const.BANK_DATE_RELATED_FUNCTIONS
         }
     
     elif type_ == 'securities':
@@ -623,7 +706,8 @@ def get_constant_values(type_):
             'profitability': const.SECURITIES_PROFITABILITY_RATIO_FUNCTIONS,
             'cashflow': const.SECURITIES_CASHFLOW_RATIO_FUNCTIONS,
             'pe': const.SECURITIES_PE_RATIO_FUNCTIONS,
-            'yoy': const.YoY_RATIO_FUNCTIONS['securities']
+            'yoy': const.YoY_RATIO_FUNCTIONS['securities'],
+            'date': const.SECURITIES_DATE_RELATED_FUNCTIONS
         }
         
     else:
@@ -645,12 +729,12 @@ def get_financial_ratios(data_df, type_ = 'corp', including_explaination = True)
     df_income = get_income_ratios(data_df, constant['income'])
     df_profitability = get_profitability_ratios(data_df, constant['profitability'],type_)
     df_cashflow = get_cashflow_ratios(data_df, constant['cashflow'], type_)
-    
+    df_date = get_date_related_ratios(data_df, constant['date'])
     
     df_pe = get_pe_ratios(data_df, constant['pe'])
     
     df_yoy = get_yoy_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow, constant=constant['yoy'])
-    df = pd.concat([df_financial_structure, df_liquidity, df_financial_risk, df_income, df_profitability, df_cashflow, df_pe, df_yoy], ignore_index=True)
+    df = pd.concat([df_financial_structure, df_liquidity, df_financial_risk, df_income, df_profitability, df_cashflow, df_pe, df_yoy, df_date], ignore_index=True)
     
     if type_ == 'bank' and including_explaination:
         df_tm = get_financial_ratio_tm(data_df)
@@ -674,6 +758,8 @@ def get_financial_ratios(data_df, type_ = 'corp', including_explaination = True)
     # print(df[df['ratio_code'].isna()]['function_name'].unique())
     
     df.drop_duplicates(inplace=True)
+
+
     
     return df
 
@@ -689,6 +775,23 @@ def _get_date_added(data_df):
 
     data_df['date_added'] = pd.to_datetime(data_df.apply(lambda row: f"{row['year']}-{quarter_to_month[row['quarter']]}-30", axis=1))
     return data_df
+
+
+def modify_days_ratio(data_df):
+
+    # These ratios are not multiplied by number of days in a quarter/year
+
+    selected_ratio = ['DSO', 'DPO', 'DIO', 'CCC']
+    index_selected =data_df['ratio_code'].isin(selected_ratio)
+
+    index_annual_data = data_df['quarter'] == 0
+
+    data_df.loc[index_selected & ~index_annual_data, 'data'] = data_df.loc[index_selected & index_annual_data, 'data'] * 90
+    data_df.loc[index_selected & index_annual_data, 'data'] = data_df.loc[index_selected & index_annual_data, 'data'] * 365
+
+    return data_df
+
+
 
 
 def industry_ratios(data_df, metric = 'BS_400', top_n = 5, output_path = '../data/'):
@@ -772,6 +875,7 @@ def calculate_index(version = 'v3', output_path: str = '../data/'):
         
         dfs.append(df)
 
+
     # Concatenate the dataframes
     dfs = pd.concat(dfs, ignore_index=True)
     
@@ -782,6 +886,8 @@ def calculate_index(version = 'v3', output_path: str = '../data/'):
     
     dfs = dfs[['stock_code', 'year', 'quarter', 'ratio_code', 'data', 'date_added']]
     
+    dfs = modify_days_ratio(dfs)
+
     dfs.to_parquet(os.path.join(current_path, output_path ,'financial_ratio_v3.parquet'), index=False)
     
 
@@ -793,7 +899,7 @@ def calculate_index(version = 'v3', output_path: str = '../data/'):
 
     ratio = dfs['ratio_code'].unique().tolist()
     
-    for r in ['BDR', 'EPS', 'PE']:
+    for r in ['BDR', 'EPS', 'PE', 'DSO']:
         print(r)
         print(dfs[(dfs['ratio_code'] == r)&(dfs['quarter'] == 0)&(dfs['year'] == 2022)].head(5))
         print('========================================')

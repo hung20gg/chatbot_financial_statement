@@ -17,7 +17,7 @@ class ChatConfig(Config):
 class Text2SQLConfig(Config):
     sql_llm: str
     reasoning: bool = True
-    branch_reasoning: bool = True
+    branch_reasoning: bool = False
     company_top_k: int = 2
     sql_example_top_k: int = 3
     account_top_k: int = 6
@@ -28,6 +28,13 @@ class Text2SQLConfig(Config):
 GEMINI_FAST_CONFIG = {
     "llm": 'gemini-1.5-flash-002',
     "routing_llm": 'gemini-1.5-flash-002',
+    "summary_every": -1,
+    "get_task": True
+}
+
+GEMINI_EXP_CONFIG = {
+    "llm": 'gemini-2.0-flash-exp',
+    "routing_llm": 'gemini-2.0-flash-exp',
     "summary_every": -1,
     "get_task": True
 }
@@ -124,8 +131,6 @@ TEXT2SQL_SWEET_SPOT_CONFIG = {
     "reasoning": False,
     "branch_reasoning": False,
 
-    "verbose": False,
-    'get_all_acount': False,
     'self_debug': True
 }
 
@@ -135,8 +140,6 @@ TEXT2SQL_FAST_OPENAI_CONFIG = {
     "reasoning": False,
     "branch_reasoning": False,
 
-    "verbose": False,
-    'get_all_acount': False,
     'self_debug': True
 }
 
@@ -146,8 +149,6 @@ TEXT2SQL_FAST_GEMINI_CONFIG = {
     "reasoning": False,
     "branch_reasoning": False,
 
-    "verbose": False,
-    'get_all_acount': False,
     'self_debug': True
 }
 
@@ -157,8 +158,6 @@ TEXT2SQL_DEEPSEEK_V3_CONFIG = {
     "reasoning": False,
     "branch_reasoning": False,
 
-    "verbose": False,
-    'get_all_acount': False,
     'self_debug': True
 }
 
@@ -168,8 +167,6 @@ TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG = {
     "reasoning": False,
     "branch_reasoning": False,
 
-    "verbose": False,
-    'get_all_acount': False,
     'self_debug': False
 }
 
@@ -181,8 +178,6 @@ TEXT2SQL_DEEPSEEK_REASONING_CONFIG = {
     "company_top_k": 2,
     "sql_example_top_k": 4,
     "account_top_k": 8,
-    "verbose": False,
-    'get_all_acount': False,
     'self_debug': True
 }
 
@@ -192,8 +187,6 @@ TEXT2SQL_MEDIUM_OPENAI_CONFIG = {
     "reasoning": True,
     "branch_reasoning": False,
 
-    "verbose": False,
-    'get_all_acount': False,
     'self_debug': True
 }
 
@@ -203,8 +196,6 @@ TEXT2SQL_MEDIUM_GEMINI_CONFIG = {
     "reasoning": True,
     "branch_reasoning": False,
 
-    "verbose": False,
-    'get_all_acount': False,
     'self_debug': True
 }
 
@@ -214,10 +205,18 @@ TEXT2SQL_EXP_GEMINI_CONFIG = {
     "reasoning": True,
     "branch_reasoning": False,
 
-    "verbose": False,
-    'get_all_acount': False,
     'self_debug': True
 }
+
+TEXT2SQL_THINKING_GEMINI_CONFIG = {
+    "llm": 'gemini-2.0-flash-exp',
+    'sql_llm': 'gemini-2.0-flash-thinking-exp-01-21',
+    "reasoning": False,
+    "branch_reasoning": False,
+
+    'self_debug': True
+}
+
 
 TEXT2SQL_FASTEST_CONFIG = {
     "llm": 'gemini-1.5-flash-8b',
@@ -229,6 +228,8 @@ TEXT2SQL_FASTEST_CONFIG = {
     'get_all_acount': False,
     'self_debug': False
 }
+
+
 
 
 BREAKDOWN_NOTE_PROMPT = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/breakdown_note.txt'))

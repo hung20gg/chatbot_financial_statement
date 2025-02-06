@@ -1,6 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import sys
 import random 
+import time
 
 
 sys.path.append('..')
@@ -37,6 +38,8 @@ main_tasks = [
 
 sub_tasks = [
     "get data 1 or more company", 
+    "get data 1 or more company", 
+    "compare 2 or more company", 
     "compare 2 or more company", 
   #  "analyze the Subsidiaries or invested company", 
   #  "analyze over industry average report (might be % of X in the industry)", 
@@ -140,7 +143,7 @@ def _generate_questions(llm, main_task, sub_task, analyzing_types, time, job_tit
 {company_table}
 Notice that there are 4 company that was not listed on any exchange, since they are government company, and they only have data about ownership/shareholder of other companies. 
 
-Task: Pretend you are a {job_titles}, generate 3-5 questions on {main_task[0]} with {sub_task[0]},{time[0]}, and the questions need to be diversifying within {analyzing_types[0]}, the question contents and remember that questions generated needs to be diverse in content. The questions should be concise. 
+Task: Pretend you are a {job_titles}, generate 10+ questions on {main_task[0]} with {sub_task[0]},{time[0]}, and the questions need to be diversifying within {analyzing_types[0]}, the question contents and remember that questions generated needs to be diverse in content. The questions should be concise. 
 
 Return the questions in a JSON format
 
@@ -224,7 +227,7 @@ def generate_questions(args):
     llm = args.llm
     file_path = f'generated_questions_{args.version}.json'
 
-    if os.path.exists(file_path) and args.using_cache:
+    if os.path.exists(file_path):
         with open(file_path, 'r') as f:
             data = json.load(f)
 
@@ -240,9 +243,9 @@ def generate_questions(args):
     for main_task in main_tasks:
         for sub_task in sub_tasks:
             for analyzing_type in analyzing_types:
-                for time in times:
+                for duration in times:
                     for job_title in job_titles:
-                        tasks.append((main_task, sub_task,analyzing_type, time, job_title))
+                        tasks.append((main_task, sub_task,analyzing_type, duration, job_title))
 
     BATCH_SIZE = args.batch_size
     # batch_tasks = [tasks[i:i+BATCH_SIZE] for i in range(0, len(tasks), BATCH_SIZE)]
@@ -259,23 +262,34 @@ def generate_questions(args):
 
     # Test
 
-    batch_tasks = random.sample(batch_tasks, min(200, len(batch_tasks)))
+    batch_tasks = random.sample(batch_tasks, min(400, len(batch_tasks)))
     # batch_tasks = batch_tasks[:2]
 
     print(f"Number of tasks: {len(tasks)}")
      
     results = []
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        future_to_task = {executor.submit(parallel_generate_questions, llm, *args): (args) for args in batch_tasks}
-        
-        for future in as_completed(future_to_task):
-            task = future_to_task[future]
-            try:
-                result = future.result()
-                results.extend(result)
-                print(f"Task completed")
-            except Exception as exc:
-                print(f"Task generated an exception: {exc}")
+
+    if args.multi_thread:
+
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            future_to_task = {executor.submit(parallel_generate_questions, llm, *args): (args) for args in batch_tasks}
+            
+            for future in as_completed(future_to_task):
+                task = future_to_task[future]
+                try:
+                    result = future.result()
+                    results.extend(result)
+                    print(f"Task completed")
+                except Exception as exc:
+                    print(f"Task generated an exception: {exc}")
+
+    else:
+        for task in batch_tasks:
+            result = parallel_generate_questions(llm, *task)
+            results.extend(result)
+            if 'exp' in llm:
+                time.sleep(10)
+        print(f"Task completed")
 
     return results
 

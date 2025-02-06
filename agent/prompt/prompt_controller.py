@@ -19,7 +19,7 @@ class PromptConfig(BaseModel):
     
 VERTICAL_PROMPT_BASE = {
     "BREAKDOWN_NOTE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/base/breakdown_note.txt')),
-    "OPENAI_SEEK_DATABASE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/base/openai_seek_database.md'), start=['//']),
+    "OPENAI_SEEK_DATABASE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/base/seek_database.md'), start=['//']),
     "GET_STOCK_CODE_AND_SUITABLE_ROW_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/get_stock_code_and_suitable_row.txt'), start=['//']),
     "BRANCH_REASONING_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/branch_reasoning.txt'), start=['//']),
     "REASONING_TEXT2SQL_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/reasoning_text2sql.txt'), start=['//']),
@@ -29,7 +29,7 @@ VERTICAL_PROMPT_BASE = {
 
 VERTICAL_PROMPT_UNIVERSAL = {
     "BREAKDOWN_NOTE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/universal/breakdown_note.txt')),
-    "OPENAI_SEEK_DATABASE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/universal/openai_seek_database.md'), start=['//']),
+    "OPENAI_SEEK_DATABASE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/universal/seek_database.md'), start=['//']),
     "GET_STOCK_CODE_AND_SUITABLE_ROW_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/get_stock_code_and_suitable_row.txt'), start=['//']),
     "BRANCH_REASONING_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/branch_reasoning.txt'), start=['//']),
     "REASONING_TEXT2SQL_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/reasoning_text2sql.txt'), start=['//']),
@@ -59,7 +59,7 @@ HORIZONTAL_PROMPT_UNIVERSAL = {
 
 FIIN_VERTICAL_PROMPT_UNIVERSAL = {
     "BREAKDOWN_NOTE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/universal/breakdown_note_fiin.txt')),
-    "OPENAI_SEEK_DATABASE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/universal/openai_seek_database_fiin.md'), start=['//']),
+    "OPENAI_SEEK_DATABASE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/universal/seek_database_fiin.md'), start=['//']),
     "GET_STOCK_CODE_AND_SUITABLE_ROW_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/get_stock_code_and_suitable_row.txt'), start=['//']),
     "BRANCH_REASONING_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/branch_reasoning.txt'), start=['//']),
     "REASONING_TEXT2SQL_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/reasoning_text2sql.txt'), start=['//']),
@@ -68,6 +68,17 @@ FIIN_VERTICAL_PROMPT_UNIVERSAL = {
 }
 
 FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY = {
+    "BREAKDOWN_NOTE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/universal/breakdown_note_fiin.txt')),
+    "OPENAI_SEEK_DATABASE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/universal/seek_database_simplify_fiin.md'), start=['//']),
+    "GET_STOCK_CODE_AND_SUITABLE_ROW_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/get_stock_code_and_suitable_row.txt'), start=['//']),
+    "BRANCH_REASONING_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/branch_reasoning.txt'), start=['//']),
+    "REASONING_TEXT2SQL_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/reasoning_text2sql_simplify.txt'), start=['//']),
+    "BRANCH_REASONING_TEXT2SQL_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/branch_reasoning_text2sql.txt'), start=['//']),
+    "CONTINUE_REASONING_TEXT2SQL_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/continue_reasoning_text2sql.txt'), start=['//'])
+}
+
+
+FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI = {
     "BREAKDOWN_NOTE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/universal/breakdown_note_fiin.txt')),
     "OPENAI_SEEK_DATABASE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/universal/openai_seek_database_simplify_fiin.md'), start=['//']),
     "GET_STOCK_CODE_AND_SUITABLE_ROW_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/get_stock_code_and_suitable_row.txt'), start=['//']),
@@ -81,7 +92,7 @@ FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY = {
 
 TOT_FIIN_VERTICAL_PROMPT_UNIVERSAL = {
     "BREAKDOWN_NOTE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/universal/breakdown_note_fiin.txt')),
-    "OPENAI_SEEK_DATABASE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/universal/openai_seek_database_fiin.md'), start=['//']),
+    "OPENAI_SEEK_DATABASE_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'vertical/universal/seek_database_fiin.md'), start=['//']),
     "GET_STOCK_CODE_AND_SUITABLE_ROW_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/get_stock_code_and_suitable_row.txt'), start=['//']),
     "BRANCH_REASONING_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/branch_reasoning.txt'), start=['//']),
     "REASONING_TEXT2SQL_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/reasoning_text2sql.txt'), start=['//']),

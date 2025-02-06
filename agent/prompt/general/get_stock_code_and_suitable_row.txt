@@ -1,7 +1,7 @@
 <task>
 
-Based on given question, analyze and suggest the suitable rows (categories) in the financial statement and/or financial performance ratios that can be used to answer the question.
-Extract the company name and/or the industry that positively mentioned based on the given question. Do not return unnecessary data
+Based on given question, analyze and suggest the suitable accounts in the financial statement and/or financial ratios that can be used to answer the question.
+Extract the company name and/or the industry that positively mentioned based on the given question.
 
 </task>
  
@@ -11,7 +11,7 @@ Extract the company name and/or the industry that positively mentioned based on 
 
 </question>
 
-Only return exact the company name mentioned. Do not answer the question.
+Only return the accounts and entities extracted. Do not answer the question.
 Return in JSON format, followed by this schema. 
 
 ```

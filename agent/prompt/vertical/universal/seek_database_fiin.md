@@ -69,7 +69,7 @@ CREATE TABLE map_category_code_ratio(
     ratio_name VARCHAR(255)
 );
 
--- Table financial_ratio: This table will have pre-calculated common Financial Ratio such as ROA, ROE, FCF, etc
+-- Table financial_ratio: This table will have pre-calculated common Ratio such as ROA, ROE, FCF, etc
 -- Same structure as `financial_statement`
 CREATE TABLE financial_ratio(
     ratio_code VARCHAR(255) references map_category_code_ratio(ratio_code),

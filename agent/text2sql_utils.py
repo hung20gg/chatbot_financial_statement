@@ -13,6 +13,12 @@ from pydantic import BaseModel, ConfigDict
 from typing import Union
 import re
 
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 class Table(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -28,7 +34,7 @@ class Table(BaseModel):
         return f"Table(desc = {self.description})"
     
 
-def table_to_markdown(table: Table|pd.DataFrame|str|list, max_string = 5000) -> str:
+def table_to_markdown(table: Table|pd.DataFrame|str|list, adjust:str = 'shrink', max_string = 5000) -> str:
     
     if table is None:
         return ""
@@ -78,20 +84,30 @@ def join_and_get_difference(df1, df2):
 
 
 def get_llm_wrapper(model_name, **kwargs):
-    if 'gpt' in model_name:
-        return ChatGPT(model_name=model_name, **kwargs)
-    
-    elif 'gemini' in model_name:
-        return Gemini(model_name=model_name, **kwargs)
-    
-    elif 'deepseek' in model_name:
-        host = os.getenv('DEEPSEEK_HOST')
-        api_key = os.getenv('DEEPSEEK_API_KEY')
-    else:
+
+
+    if '/' not in model_name: # Direct provider
+
+        if 'gpt' in model_name:
+            logging.info(f"Using ChatGPT with model {model_name}")
+            return ChatGPT(model_name=model_name, **kwargs)
+        
+        elif 'gemini' in model_name:
+            logging.info(f"Using Gemini with model {model_name}")
+            return Gemini(model_name=model_name, **kwargs)
+        
+        elif 'deepseek' in model_name:
+            logging.info(f"Found DeepSeek endpoint: {model_name}")
+            host = os.getenv('DEEPSEEK_HOST')
+            api_key = os.getenv('DEEPSEEK_API_KEY')
+        else:
+            raise ValueError("Model not supported")
+
+    else: # Huggingface LLM
         host = os.getenv('LLM_HOST')
         api_key = os.getenv('LLM_API_KEY')
 
-    print(f"Using OpenAI Wrapper with host {host}")
+    logging.info(f"Using OpenAI Wrapper model: {model_name}  with host {host}")
 
     return OpenAIWrapper(host=host, api_key=api_key, model_name=model_name, **kwargs)
     
@@ -119,10 +135,49 @@ def read_file(file_path):
         return f.read()
     
     
-def df_to_markdown(df):
+def df_to_markdown(df, adjust:str = 'keep') -> str:
     if not isinstance(df, pd.DataFrame):
         return str(df)
-    markdown = df.to_markdown(index=False)
+    
+    if adjust == 'keep':
+        columns = df.columns
+        if len(columns) > 2:
+            logging.warning("Too many columns, Using shrink")
+            return df_to_markdown(df, adjust='shrink')
+        
+        if len(columns) == 1:
+            text_df = f"List of items *{columns[0]}*\n"
+            for i, row in df.iterrows():
+                text_df += f"- {row[columns[0]]}\n"
+            return text_df
+        elif len(columns) == 2:
+            text_df = f"List of {columns[0]} with corresponding {columns[1]}\n"
+            for i, row in df.iterrows():
+                text_df += f"- {row[columns[0]]}: {row[columns[1]]}\n"
+            return text_df
+        
+    if adjust == 'shrink':
+        
+        columns = df.columns
+        text_df = "| "
+        for col in columns:
+            text_df += f"{col} | "
+        text_df = text_df[:-1] + "\n|"
+        for col in columns:
+            text_df += " --- |"
+        text_df += "\n"
+
+        for i, row in df.iterrows():
+            text_df += "| "
+            for col in columns:
+                text_df += f"{row[col]} | "
+            text_df = text_df[:-1] + "\n"
+        return text_df
+    
+    else:
+        logging.warning("Adjust not supported")
+        markdown = df.to_markdown(index=False)
+    
     return markdown
 
 

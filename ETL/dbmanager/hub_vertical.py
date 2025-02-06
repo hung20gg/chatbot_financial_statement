@@ -203,7 +203,7 @@ class HubVerticalBase(BaseDBHUB):
                 return_table['category_code_securities'] = self.search_return_df(financial_statement_row, top_k, type_='securities')
                 
         if len(financial_ratio_row) != 0:
-            return_table['category_code_ratio'] = self.search_return_df(financial_ratio_row, top_k, type_='ratio')
+            return_table['ratio_code'] = self.search_return_df(financial_ratio_row, top_k, type_='ratio')
            
         end = time.time()
         logging.info(f"Time taken to return mapping table: {end-start}") 
@@ -249,7 +249,7 @@ class HubVerticalBase(BaseDBHUB):
             'category_code_non_bank': None,
             'category_code_bank': None,
             'category_code_securities': None,
-            'category_code_ratio': None
+            'ratio_code': None
         }   
 
         if len(industry) != 0:
@@ -270,7 +270,7 @@ class HubVerticalBase(BaseDBHUB):
                 tasks.append(('category_code_securities', financial_statement_row, top_k, 'securities'))
                 
         if len(financial_ratio_row) != 0:
-            tasks.append(('category_code_ratio', financial_ratio_row, top_k, 'ratio'))
+            tasks.append(('ratio_code', financial_ratio_row, top_k, 'ratio'))
             
         def process_task(task):
             table_name, financial_statement_row, top_k, type_ = task
@@ -359,12 +359,6 @@ class HubVerticalUniversal(BaseDBHUB):
         collect_code_fs = [code for code in collect_code if 'TM' not in code]
         collect_code_tm = [code for code in collect_code if 'TM' in code]
         
-        print(collect_code_fs)
-        print(collect_code_tm)
-        
-        collect_code_fs = [code for code in collect_code if 'TM' not in code]
-        collect_code_tm = [code for code in collect_code if 'TM' in code]
-        
         placeholder = ', '.join(['%s' for _ in collect_code])
         placeholder_fs = ', '.join(['%s' for _ in collect_code_fs])
         placeholder_tm = ', '.join(['%s' for _ in collect_code_tm])
@@ -399,21 +393,32 @@ class HubVerticalUniversal(BaseDBHUB):
         start = time.time()
         
         return_table = {
-            'category_code_universal': None,
-            'category_code_ratio': None
+            'category_code_mapping': None,
+            'ratio_code_mapping': None
         }     
 
         if len(industry) != 0:
             exact_industries = self.get_exact_industry_bm25(industry)
             df_industry = pd.DataFrame(exact_industries, columns=['industry'])
             return_table['industry'] = df_industry   
-                
+
+        # Allow cross check between ratio
+        category_dfs = []
+        ratio_dfs = []
+
         if len(financial_statement_row) != 0:  
-            return_table['category_code_universal'] = self.search_return_df(financial_statement_row, top_k, type_='fs')
-                
+            category_dfs.append(self.search_return_df(financial_statement_row, top_k, type_='fs'))
+            ratio_dfs.append(self.search_return_df(financial_statement_row, top_k//3, type_='ratio'))
+
         if len(financial_ratio_row) != 0:
-            return_table['category_code_ratio'] = self.search_return_df(financial_ratio_row, top_k, type_='ratio')
-           
+            category_dfs.append(self.search_return_df(financial_ratio_row, top_k, type_='fs'))
+            ratio_dfs.append(self.search_return_df(financial_ratio_row, top_k//3, type_='ratio'))
+        
+        if len(category_dfs) != 0:
+            return_table['category_code_mapping'] = pd.concat(category_dfs).drop_duplicates()
+        if len(ratio_dfs) != 0:
+            return_table['ratio_code_mapping'] = pd.concat(ratio_dfs).drop_duplicates()
+
         end = time.time()
         logging.info(f"Time taken to return mapping table: {end-start}") 
         return return_table
@@ -424,8 +429,8 @@ class HubVerticalUniversal(BaseDBHUB):
         start = time.time()
         
         return_table = {
-            'category_code_universal': None,
-            'category_code_ratio': None
+            'category_code_mapping': [],
+            'ratio_code_mapping': []
         }   
         
         if len(industry) != 0:
@@ -436,11 +441,13 @@ class HubVerticalUniversal(BaseDBHUB):
         tasks = []     
                 
         if len(financial_statement_row) != 0:  
-            tasks.append(('category_code_universal', financial_statement_row, top_k, 'fs'))
-                
+            tasks.append(('category_code_mapping', financial_statement_row, top_k, 'fs'))
+            tasks.append(('ratio_code_mapping', financial_statement_row, top_k//3, 'ratio'))
+
         if len(financial_ratio_row) != 0:
-            tasks.append(('category_code_ratio', financial_ratio_row, top_k, 'ratio'))
-            
+            tasks.append(('ratio_code_mapping', financial_ratio_row, top_k, 'ratio'))
+            tasks.append(('category_code_mapping', financial_ratio_row, top_k//3, 'fs'))
+
         def process_task(task):
             table_name, financial_statement_row, top_k, type_ = task
             return table_name, self.search_return_df(financial_statement_row, top_k, type_=type_)
@@ -449,7 +456,14 @@ class HubVerticalUniversal(BaseDBHUB):
             results = executor.map(process_task, tasks)
             
         for table_name, result in results:
-            return_table[table_name] = result
+            return_table[table_name].append(result)
+
+        # Concatenate the results
+        for key in return_table.keys():
+            if len(return_table[key]) != 0:
+                return_table[key] = pd.concat(return_table[key]).drop_duplicates()
+            else:
+                return_table[key] = None
             
         end = time.time()
         logging.info(f"Time taken to return mapping table multithread: {end-start}")     

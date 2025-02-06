@@ -274,7 +274,7 @@ class Text2SQL(BaseAgent):
         return text
     
     
-    def reasoning_text2SQL(self, task: str, company_info: Table = None, suggest_table: List[Table] = [], inject_reasoning: str = None):
+    def reasoning_text2SQL(self, task: str, company_info: Table = None, suggest_table: List[Table] = [], inject_reasoning: str = None, adjust_table: str|int = 0):
         
         """
         Reasoning with Text2SQL without branch reasoning.
@@ -292,11 +292,17 @@ class Text2SQL(BaseAgent):
         This function will convert the natural language query into SQL query and execute the SQL query
         """
 
+        list_adj_table = ["shrink", "text", "keep"]
+        if isinstance(adjust_table, int):
+            choice = min(2, max(0, adjust_table))
+            adjust_table = list_adj_table[choice]
+        
+
         # ============== Prepare the prompt =================
         if company_info is None or company_info.table.empty:
             stock_code_table = ""
         else:
-            stock_code_table = utils.table_to_markdown(company_info)
+            stock_code_table = utils.table_to_markdown(company_info, adjust = adjust_table)
         
         system_prompt = """
     You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query. 
@@ -324,13 +330,13 @@ class Text2SQL(BaseAgent):
         init_prompt = self.prompt_config.REASONING_TEXT2SQL_PROMPT.format( 
                                                                      task = task, 
                                                                      stock_code_table = stock_code_table, 
-                                                                     suggestions_table = utils.table_to_markdown(suggest_table), 
+                                                                     suggestions_table = utils.table_to_markdown(suggest_table, adjust = adjust_table), 
                                                                      few_shot = few_shot).strip()
         
         
         new_prompt = self.prompt_config.CONTINUE_REASONING_TEXT2SQL_PROMPT.format(task = task, 
                                                                                     stock_code_table = stock_code_table,
-                                                                                    suggestions_table = utils.table_to_markdown(suggest_table), 
+                                                                                    suggestions_table = utils.table_to_markdown(suggest_table, adjust = adjust_table), 
                                                                                     few_shot = few_shot).strip()
         
         # =============================================
@@ -346,7 +352,9 @@ class Text2SQL(BaseAgent):
             new_prompt.replace("</example>\n", "")
 
         init_prompt.replace('<data>\n\n\n</data>', "")
+        init_prompt.replace('<data>\n\n\n\n\n</data>', "")
         new_prompt.replace('<data>\n\n\n</data>', "")
+        new_prompt.replace('<data>\n\n\n\n\n</data>', "")
 
         # ============================================
 
@@ -420,8 +428,42 @@ class Text2SQL(BaseAgent):
         
         return self.history, error_messages, execution_tables
     
+
+
+    def self_reflection(self, task: str, cache: bool = True, adjust_table: str|int = 0):
+
+
+        # ========= Router for self-reflection ========= #
+        reflection = False
+        new_task = task
+        # Some code here
+
+
+        if reflection:
+
+            # ========== Get stock code and suitable row ========== #
+            company_info, suggest_table = self.get_stock_code_and_suitable_row(task)
+            
+            tables = [company_info]
+            tables.extend(suggest_table)
+
+            if cache:
+                company_info, suggest_table = self.update_suggest_data(deepcopy(company_info), deepcopy(suggest_table))
+            # =================================================== #
+
+
+            # ========= Reasoning with Text2SQL ========= #
+            self.history, error_messages, execution_tables = self.reasoning_text2SQL(new_task, company_info, suggest_table, adjust_table = adjust_table)
+            # =========================================== #
+
+            return self.history, error_messages, tables, reflection
         
-    def branch_reasoning_text2SQL(self, task: str, steps: list[str], company_info, suggest_table):
+        # No reflection
+        return self.history, [], [], reflection
+
+    
+        
+    def branch_reasoning_text2SQL(self, task: str, steps: list[str], company_info, suggest_table, adjust_table: str|int = 0):
         
         """
         Branch reasoning with Text2SQL 
@@ -441,14 +483,19 @@ class Text2SQL(BaseAgent):
             - Simulate with Monte Carlo Tree Search
         """
         
-        stock_code_table = utils.table_to_markdown(company_info)
+        list_adj_table = ["shrink", "text", "keep"]
+        if isinstance(adjust_table, int):
+            choice = min(2, max(0, adjust_table))
+            adjust_table = list_adj_table[choice]
+
+        stock_code_table = utils.table_to_markdown(company_info, adjust=adjust_table)
         look_up_stock_code = f"\n\nHere are the detail of the companies: \n\n{stock_code_table}"
 
         database_description = self.prompt_config.OPENAI_SEEK_DATABASE_PROMPT
         init_prompt = self.prompt_config.BRANCH_REASONING_TEXT2SQL_PROMPT.format(database_description = database_description, 
                                                                              task = task, 
                                                                              steps_string = steps_to_strings(steps), 
-                                                                             suggestions_table = utils.table_to_markdown(suggest_table))
+                                                                             suggestions_table = utils.table_to_markdown(suggest_table, adjust=adjust_table))
     
         system_prompt = f"""
     You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query. If time not mentioned, assume collecting data in Q3 2024.
@@ -523,15 +570,15 @@ class Text2SQL(BaseAgent):
                 error_messages.extend(debug_error_messages)
                 execution_tables.extend(debug_execution_tables)
                 
-                previous_result = utils.table_to_markdown(debug_execution_tables)
+                previous_result = utils.table_to_markdown(debug_execution_tables, adjust=adjust_table)
             
             else:
-                previous_result = utils.table_to_markdown(execute_table)
+                previous_result = utils.table_to_markdown(execute_table, adjust=adjust_table)
             
             # Prepare for the next step
             company_info = utils.get_company_detail_from_df(execution_tables, self.db) # dataframe
             
-            stock_code_table = utils.table_to_markdown(company_info)
+            stock_code_table = utils.table_to_markdown(company_info, adjust=adjust_table)
             look_up_stock_code = f"\nHere are the detail of the companies: \n\n{stock_code_table}"
             self.history[task_index]["content"] = init_prompt + '\n\n' + look_up_stock_code
                    
@@ -585,7 +632,7 @@ class Text2SQL(BaseAgent):
             for i, prefix, error in enumerate(error_messages):
                 error_message += f"{prefix}: {error}\n\n"
 
-            table_message = utils.table_to_markdown(tables)
+            table_message = utils.table_to_markdown(tables, adjust="shrink")
 
             return reasoning, error_message, table_message
         else:
@@ -593,7 +640,7 @@ class Text2SQL(BaseAgent):
 
 
     
-    def solve(self, task: str, cache: bool = True, inject_reasoning: str = None):
+    def solve(self, task: str, cache: bool = True, inject_reasoning: str = None, adjust_table: str|int = 0):
         """
         Solve the task with Text2SQL
         The solve method is designed to solve a given task by converting it into SQL queries using the Text2SQL model. It handles both simple and complex tasks by breaking them down into steps if necessary.
@@ -640,9 +687,9 @@ class Text2SQL(BaseAgent):
                 task += "\n\nBreak down the task into steps:\n\n" + steps_to_strings(steps)         
         
         
-            self.history, error_messages, execution_tables = self.reasoning_text2SQL(task, company_info, suggest_table, inject_reasoning = inject_reasoning)
+            self.history, error_messages, execution_tables = self.reasoning_text2SQL(task, company_info, suggest_table, inject_reasoning = inject_reasoning, adjust_table = adjust_table)
         else:
-            self.history, error_messages, execution_tables = self.branch_reasoning_text2SQL(task, steps, company_info, suggest_table)
+            self.history, error_messages, execution_tables = self.branch_reasoning_text2SQL(task, steps, company_info, suggest_table, adjust_table = adjust_table)
 
 
 

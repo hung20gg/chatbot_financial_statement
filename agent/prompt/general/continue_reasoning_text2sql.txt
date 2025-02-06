@@ -1,16 +1,12 @@
 <task>
+
 {task}
+
 </task>
 
-### Company details
 <data>
 
 {stock_code_table}
-
-</data>
-
-### Snapshot of the mapping table:
-<data>
 
 {suggestions_table}
 
