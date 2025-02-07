@@ -19,6 +19,7 @@ from agent.prompt.prompt_controller import (
     HORIZONTAL_PROMPT_BASE,
     HORIZONTAL_PROMPT_UNIVERSAL,
     FIIN_VERTICAL_PROMPT_UNIVERSAL,
+    FIIN_HORIZONTAL_PROMPT_UNIVERSAL
 )
 
 from ETL.dbmanager.setup import (
@@ -45,7 +46,7 @@ from ETL.dbmanager import get_semantic_layer, BaseRerannk
 
 
 
-def initialize_text2sql(text2sql_config, prompt_config):
+def initialize_text2sql(text2sql_config, prompt_config, horizontal=False):
     text2sql_config = Text2SQLConfig(**text2sql_config)
     prompt_config = PromptConfig(**prompt_config)
 

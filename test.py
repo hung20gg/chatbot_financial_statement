@@ -80,7 +80,7 @@ def test():
         logging.error(e)
 
     query = "Select * from company_info limit 5;"
-    print(db.query)
+
 if __name__ == "__main__":
     
     

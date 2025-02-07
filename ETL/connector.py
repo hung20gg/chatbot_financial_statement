@@ -581,14 +581,14 @@ FIIN_RDB_SETUP_CONFIG = {
     'industry_financial_ratio': ['../data/industry_ratio_v3.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)'}, False, ['date_added']],    
     
    
-    # 'universal_financial_report_hori': ['../csv_horizontal/universal_financial_report_hori.csv', None, {'stock_code': 'company_info(stock_code)'}],
+    'universal_financial_report_hori': ['../csv_horizontal/universal_financial_report_hori.csv', None, {'stock_code': 'company_info(stock_code)'}],
     'corp_financial_report_hori': ['../csv_horizontal/non_bank_financial_report_hori.csv', None, {'stock_code': 'company_info(stock_code)'}],
     'bank_financial_report_hori': ['../csv_horizontal/bank_financial_report_hori.csv', None, {'stock_code': 'company_info(stock_code)'}],
     'sec_financial_report_hori': ['../csv_horizontal/sec_financial_report_hori.csv', None, {'stock_code': 'company_info(stock_code)'}],
-    # 'financial_ratios_hori': ['../csv_horizontal/financial_ratios_hori.csv', None, {'stock_code': 'company_info(stock_code)'}],
-    # 'industry_financial_report_hori': ['../csv_horizontal/industry_financial_report_hori.csv', None ],
-    # 'industry_financial_ratios_hori': ['../csv_horizontal/industry_financial_ratios_hori.csv', None ],
-    # 'financial_statement_explaination_hori': ['../csv_horizontal/financial_statement_explaination_hori.csv', None, {'stock_code': 'company_info(stock_code)'}],
+    'financial_ratios_hori': ['../csv_horizontal/financial_ratios_hori.csv', None, {'stock_code': 'company_info(stock_code)'}],
+    'industry_financial_report_hori': ['../csv_horizontal/industry_financial_report_hori.csv', None ],
+    'industry_financial_ratios_hori': ['../csv_horizontal/industry_financial_ratios_hori.csv', None ],
+    'financial_statement_explaination_hori': ['../csv_horizontal/financial_statement_explaination_hori.csv', None, {'stock_code': 'company_info(stock_code)'}],
 
     # 'stock_price' : ['../csv/stock_price_daily.parquet']
 }
