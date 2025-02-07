@@ -35,6 +35,17 @@ path=../data/generated_questions.json
 python generate.py --llm $llm --version $version --multi_thread $multi_thread --path $path
 ```
 
+Using *correction* for refine SQL
+
+```bash
+llm=gemini-2.0-flash-thinking-exp-01-21
+version=v1
+path=../data/generated_questions.json
+template=openai
+
+python generate.py --llm $llm --version $version --path $path --enhance correction
+```
+
 Generate SQL code for evaluation dataset `sql_v0.jsonl`
 ```bash
 llm=gpt-4o-mini

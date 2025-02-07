@@ -28,10 +28,10 @@ class Table(BaseModel):
     description: str = ""
     
     def __str__(self):
-        return f"Table(desc = {self.description})"
+        return f"Table(desc = {self.description}, num_rows = {len(self.table)}, num_columns = {len(self.table.columns)}"
     
     def __repr__(self):
-        return f"Table(desc = {self.description})"
+        return f"Table(desc = {self.description}, num_rows = {len(self.table)}, num_columns = {len(self.table.columns)}"
     
 
 def table_to_markdown(table: Table|pd.DataFrame|str|list, adjust:str = 'shrink', max_string = 5000) -> str:
@@ -47,7 +47,7 @@ def table_to_markdown(table: Table|pd.DataFrame|str|list, adjust:str = 'shrink',
         table = [table]
         
     markdown = ""
-    for t in table:
+    for i,t in enumerate(table):
         if isinstance(table, pd.DataFrame):
             if table.empty:
                 continue
@@ -57,8 +57,10 @@ def table_to_markdown(table: Table|pd.DataFrame|str|list, adjust:str = 'shrink',
             try:
                 if t.table is None:
                     continue
-                markdown += f"**{t.description}**\n\n"
-                markdown += df_to_markdown(t.table)[:max_string] + "\n\n"
+                markdown += f"**{t.description.strip()}**\n\n"
+                markdown += df_to_markdown(t.table)[:max_string]
+                if i < len(table) - 1:
+                    markdown += "\n\n"
             
             except:
                 raise ValueError("Invalid table type")
@@ -148,12 +150,21 @@ def df_to_markdown(df, adjust:str = 'keep') -> str:
         if len(columns) == 1:
             text_df = f"List of items *{columns[0]}*\n"
             for i, row in df.iterrows():
-                text_df += f"- {row[columns[0]]}\n"
+                text_df += f"- {row[columns[0]]}"
+
+                # Add new line if not the last row
+                if i < len(df) - 1:
+                    text_df += "\n"
             return text_df
+        
         elif len(columns) == 2:
             text_df = f"List of {columns[0]} with corresponding {columns[1]}\n"
             for i, row in df.iterrows():
-                text_df += f"- {row[columns[0]]}: {row[columns[1]]}\n"
+                text_df += f"- {row[columns[0]]}: {row[columns[1]]}"
+
+                # Add new line if not the last row
+                if i < len(df) - 1:
+                    text_df += "\n"
             return text_df
         
     if adjust == 'shrink':
@@ -171,7 +182,11 @@ def df_to_markdown(df, adjust:str = 'keep') -> str:
             text_df += "| "
             for col in columns:
                 text_df += f"{row[col]} | "
-            text_df = text_df[:-1] + "\n"
+            text_df = text_df[:-1]
+
+            # Add new line if not the last row
+            if i < len(df) - 1:
+                text_df += "\n"
         return text_df
     
     else:
@@ -262,6 +277,25 @@ def get_table_name_from_sql(sql_text):
         return matches[0]
     return ""
     
+
+
+
+def get_content_with_heading_tag(content: str, tag: str = "###") -> dict:
+    
+    pattern = tag
+    pattern = tag + r"\s*(.*?)\s*:(.*?)\n(?=" + tag + r"|$)"
+    matches = re.findall(pattern, content, re.DOTALL)
+
+    result = dict()
+    if not matches:
+        return result
+
+    # Parse matches into a dictionary
+    for key, value in matches:
+        result[key.strip().lower().replace(" ", "_")] = value.strip() if value.strip() else None
+
+    return result
+
     
 def TIR_reasoning(response, db, verbose=False, prefix=""):
     codes = get_code_from_text_response(response)

@@ -199,7 +199,7 @@ class BaseDBHUB(BaseModel):
             
             for result in results:
                 if result.metadata.get('sql_code', None) is not None:
-                    sql_dict[result.page_content] = result.metadata['sql_code']
+                    sql_dict[result.page_content] = result.metadata['sql_code'].strip()
                     
         
         return sql_dict

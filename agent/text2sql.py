@@ -272,12 +272,19 @@ class Text2SQL(BaseAgent):
     @staticmethod
     def sql_dict_to_markdown(sql_dict):
         text = ""
+        count_sql = 0
         for key, value in sql_dict.items():
-            text += f"**{key}** \n\n```sql\n\n{value}```\n\n"
+            text += f"**{key}** \n\n```sql\n{value}```"
+            
+            # Add new line
+            count_sql += 1
+            if count_sql < len(sql_dict):
+                text += "\n\n"
+
         return text
     
     
-    def reasoning_text2SQL(self, task: str, company_info: Table = None, suggest_table: List[Table] = [], inject_reasoning: str = None, adjust_table: str|int = 0):
+    def reasoning_text2SQL(self, task: str, company_info: Table = None, suggest_table: List[Table] = [], enhance: bool = False, inject_reasoning: str = None, adjust_table: str = 'shrink'):
         
         """
         Reasoning with Text2SQL without branch reasoning.
@@ -295,12 +302,6 @@ class Text2SQL(BaseAgent):
         This function will convert the natural language query into SQL query and execute the SQL query
         """
 
-        list_adj_table = ["shrink", "text", "keep"]
-        if isinstance(adjust_table, int):
-            choice = min(2, max(0, adjust_table))
-            adjust_table = list_adj_table[choice]
-        
-
         # ============== Prepare the prompt =================
         if company_info is None or company_info.table.empty:
             stock_code_table = ""
@@ -308,14 +309,27 @@ class Text2SQL(BaseAgent):
             stock_code_table = utils.table_to_markdown(company_info, adjust = adjust_table)
         
         system_prompt = """
-    You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query. 
-    You will have the following database description:
+You are an expert in financial statement and database management. You will be asked to convert a natural language query into a SQL query. 
+You will have the following database description:
 
-    ### Database Description
+### Database Description
+{database_description}
+"""
+        
+        # Add reagulation to the prompt
+        if enhance:
+            enhance_prompt = """
+### Regulation:   
+- Your should reasoning and provide the SQL query with explaination for the task in <task> and <instruction> tag.
+- For <correction> tag, you only need to provide the SQL query if the previous SQL query is incorrect.
+- For <reflection> tag, you dont need to provide the SQL query.
+- Always return SQL query in the following format:
+    ```sql
+    {{SQL query}}
+    ```
+"""
+            system_prompt += enhance_prompt
 
-    {database_description}
-    
-    """
         database_description = self.prompt_config.OPENAI_SEEK_DATABASE_PROMPT.strip()
         system_prompt = system_prompt.format(database_description = database_description).strip()
         
@@ -340,8 +354,21 @@ class Text2SQL(BaseAgent):
         new_prompt = self.prompt_config.CONTINUE_REASONING_TEXT2SQL_PROMPT.format(task = task, 
                                                                                     stock_code_table = stock_code_table,
                                                                                     suggestions_table = utils.table_to_markdown(suggest_table, adjust = adjust_table), 
-                                                                                    few_shot = few_shot).strip()
-        
+            
+                                                                                few_shot = few_shot).strip()
+        if enhance:
+            enhance_prompt = (
+                "\n\n"
+                "Answer in the following format:\n"
+                "### Reasoning:\n"
+                "{Your reasoning}\n"
+                "### SQL Query:\n"
+                "{SQL query}"
+            )
+
+            init_prompt += enhance_prompt
+            
+
         # =============================================
 
 
@@ -430,14 +457,21 @@ class Text2SQL(BaseAgent):
         self.llm_responses.extend(utils.reformat_messages(temp_message))   
         
         return self.history, error_messages, execution_tables
-    
-
-    def __get_content_behind_heading(self, text: str, heading = "###"):
-
-        pass
 
 
-    def self_correction(self, task: str, error_messages, execution_tables, cache: bool = True, adjust_table: str|int = 0):
+    def __flatten_sql_result(self, error_messages, execution_tables, adjust_table: str = 'keep'):
+        sql_result = ""
+        if len(execution_tables) > 0:
+            sql_result += "### SQL Result from previous query:\n\n"
+            sql_result += utils.table_to_markdown(execution_tables, adjust=adjust_table)
+        if len(error_messages) > 0:
+            sql_result += "### Error Messages from previous query:\n\n"
+            for i, error in enumerate(error_messages):
+                sql_result += f"{error}\n\n"
+        return sql_result
+
+
+    def self_correction(self, error_messages: list[str] = [], execution_tables: list[Table] = [], adjust_table: str = 'shrink'):
         
         """
         Self-correction with Text2SQL
@@ -460,15 +494,16 @@ class Text2SQL(BaseAgent):
         """
         
         correction_prompt ="""
-
 {sql_result}
 
 <correction>
 
 Based on the result, do you think the SQL query is correct and can fully answer the question? 
-If not, return No under *Decision* heading, think step-by-step under *Reasoning* heading again and generate the correct SQL query under *SQL Query*. Otherwise, only return Yes under *decision*.
 
-Return in the following format:
+If the previous SQL not correct, return No under *Decision* heading, think step-by-step under *Reasoning* heading again and generate the correct SQL query under *SQL Query*.
+Otherwise, you only need to return Yes under *Decision* heading. You must not provide the SQL query again.
+
+Return in the following format (### SQL Query is optional):
 
 ### Decision: 
 {{Your decision}}
@@ -477,19 +512,12 @@ Return in the following format:
 {{Your reasoning}}
 
 ### SQL Query:
-{{Your SQL query}}
+{{Corrected SQL query}}
 
 </correction>
 """
 
-        sql_result = ""
-        if len(execution_tables) > 0:
-            sql_result += "### SQL Result:\n\n"
-            sql_result += utils.table_to_markdown(execution_tables, adjust=adjust_table)
-        if len(error_messages) > 0:
-            sql_result += "### Error Messages:\n\n"
-            for i, error in enumerate(error_messages):
-                sql_result += f"{error}\n\n"
+        sql_result = self.__flatten_sql_result(error_messages, execution_tables, adjust_table)
 
         correction_prompt = correction_prompt.format(sql_result = sql_result)
 
@@ -500,12 +528,32 @@ Return in the following format:
             "content": correction_prompt
         })
 
-        respones = self.sql_llm(self.history)
+        response = self.sql_llm(self.history)
 
-        dict_response = self.__get_content_behind_heading(respones, "###")
+        if self.config.verbose:
+            print(response)
+
+        self.history.append({
+            "role": "assistant",
+            "content": response
+        })
+
+        dict_response = utils.get_content_with_heading_tag(response, "###")
+        
+        router = True
+
+        decision = dict_response.get("decision", "")
+
+        if decision.lower().replace("{",'').replace("}",'').strip() in ["no", "n", "false", "f"]:
+            router = False
+
+            error_messages, execution_tables = utils.TIR_reasoning(response, self.db, verbose=self.config.verbose)
+
+        return self.history, error_messages, execution_tables, router
 
 
-    def self_reflection(self, task: str, error_messages, execution_tables, cache: bool = True, adjust_table: str|int = 0):
+
+    def self_reflection(self, error_messages, execution_tables, cache: bool = True, adjust_table: str = 'shrink'):
 
 
         # ========= GET self-reflection ========= #
@@ -517,9 +565,9 @@ Return in the following format:
 
 Based on the result, do you think the SQL query is correct and can fully answer the question? 
 If not, return NO under *Decision* heading, and provide the reason and giving detailed tips to the correct SQL query under *Reflection* heading.
-Else, return YES.
+Else, you only need to return YES under *Decision* heading.
 
-Only return new, detailed task. Return in the following format:
+Only return new, detailed task. Do not return the SQL. Return in the following format:
 
 ### Decision: 
 {{Your decision}}
@@ -532,15 +580,47 @@ Only return new, detailed task. Return in the following format:
         
 
         # ========= Router for self-reflection ========= #
-        reflection = False
-        new_task = task
-        # Some code here
 
+        sql_result = self.__flatten_sql_result(error_messages, execution_tables)
+
+        reflection_prompt = reflection_prompt.format(sql_result = sql_result)
+
+        self.history.append({
+            "role": "user",
+            "content": reflection_prompt
+        })
+
+        reflection_response = self.sql_llm(self.history)
+
+        if self.config.verbose:
+            print(reflection_response)
+
+        self.history.append({
+            "role": "assistant",
+            "content": reflection_response
+        })
+
+        
+
+        reflection = False
+        new_task = ""
+
+        dict_response = utils.get_content_with_heading_tag(reflection_response, "###")
+
+        decision = dict_response.get("decision", "")
+        new_task = dict_response.get("reflection", "")
+
+        if decision.lower().replace("{",'').replace("}",'').strip() in ["no", "n", "false", "f"]:
+            print("Reflection is True")
+            reflection = True
+        else:
+            reflection = False
+            print("Reflection is False")
 
         if reflection:
 
             # ========== Get stock code and suitable row ========== #
-            company_info, suggest_table = self.get_stock_code_and_suitable_row(task)
+            company_info, suggest_table = self.get_stock_code_and_suitable_row(new_task)
             
             tables = [company_info]
             tables.extend(suggest_table)
@@ -556,12 +636,13 @@ Only return new, detailed task. Return in the following format:
 
             return self.history, error_messages, execution_tables, reflection
         
+        print("End of reflection")
         # No reflection
-        return self.history, [], [], reflection
+        return self.history, [], [], not reflection
 
     
         
-    def branch_reasoning_text2SQL(self, task: str, steps: list[str], company_info, suggest_table, adjust_table: str|int = 0):
+    def branch_reasoning_text2SQL(self, task: str, steps: list[str], company_info, suggest_table, enhance: bool = False, adjust_table: str|int = 0):
         
         """
         Branch reasoning with Text2SQL 
@@ -604,6 +685,14 @@ Only return new, detailed task. Return in the following format:
     {database_description}
 
     """
+        
+        if enhance:
+            enhance_prompt = """
+    ### Regulation        
+    Your should reasoning and provide the SQL query with explaination for the task in <task>, <instruction> and/or <correction> tag.
+    For <reflection> tag, you dont need to provide the SQL query.
+    """
+            system_prompt += enhance_prompt
 
         if len(self.history) == 0:
             task_index = 1
@@ -738,7 +827,7 @@ Only return new, detailed task. Return in the following format:
 
 
     
-    def solve(self, task: str, cache: bool = True, inject_reasoning: str = None, self_reflection: bool = True, adjust_table: str|int = 0):
+    def solve(self, task: str, cache: bool = True, inject_reasoning: str = None, enhance: str = None, adjust_table: str|int = 0):
         """
         Solve the task with Text2SQL
         The solve method is designed to solve a given task by converting it into SQL queries using the Text2SQL model. It handles both simple and complex tasks by breaking them down into steps if necessary.
@@ -756,8 +845,15 @@ Only return new, detailed task. Return in the following format:
             execution_tables (list): A list of execution tables generated during the process.
             
         """
-        if self_reflection:
+        list_adj_table = ["shrink", "text", "keep"]
+        if isinstance(adjust_table, int):
+            choice = min(2, max(0, adjust_table))
+            adjust_table = list_adj_table[choice]
+
+        bool_enhance = False
+        if enhance is not None:
             self.max_debug_round = 1
+            bool_enhance = True
         else:
             self.max_debug_round = 3
         
@@ -789,16 +885,21 @@ Only return new, detailed task. Return in the following format:
                 task += "\n\nBreak down the task into steps:\n\n" + steps_to_strings(steps)         
         
         
-            self.history, error_messages, execution_tables = self.reasoning_text2SQL(task, company_info, suggest_table, inject_reasoning = inject_reasoning, adjust_table = adjust_table)
+            self.history, error_messages, execution_tables = self.reasoning_text2SQL(task, company_info, suggest_table, inject_reasoning = inject_reasoning, adjust_table = adjust_table, enhance = bool_enhance)
         else:
-            self.history, error_messages, execution_tables = self.branch_reasoning_text2SQL(task, steps, company_info, suggest_table, adjust_table = adjust_table)
+            self.history, error_messages, execution_tables = self.branch_reasoning_text2SQL(task, steps, company_info, suggest_table, adjust_table = adjust_table, enhance = bool_enhance)
 
-        if self_reflection:
+        if bool_enhance:
             accept_result = False
             count_reflection = 0
             while not accept_result and count_reflection < 2: # Maximum 2 times to reflect
                 count_reflection += 1
-                self.history, error_messages, tables, accept_result = self.self_reflection(task, cache=cache, adjust_table=adjust_table)
+                logging.info(f"Reflection round {count_reflection}, using {enhance} method")
+
+                if enhance == "correction":
+                    self.history, error_messages, tables, accept_result = self.self_correction(error_messages, execution_tables, adjust_table=adjust_table)
+                elif enhance == "reflection":
+                    self.history, error_messages, tables, accept_result = self.self_reflection(error_messages, execution_tables, cache=cache, adjust_table=adjust_table)
                 
 
         # ===== Post-processing =====
