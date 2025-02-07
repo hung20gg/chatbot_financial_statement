@@ -44,6 +44,8 @@ class Text2SQL(BaseAgent):
     suggest_table: List = [] # The suggested table for the task
     company_info: Table = None # The company information
     _latest_task_index: int = 0 # The latest task index
+
+    max_debug_round: int = 3 # The maximum number of debugging rounds
     
     def __init__(self, config: Config, prompt_config: PromptConfig, db, max_steps: int = 2, **kwargs):
         super().__init__(config=config, db = db, max_steps = max_steps, prompt_config = prompt_config)
@@ -68,6 +70,7 @@ class Text2SQL(BaseAgent):
         self.company_info = None
         self.sql_dict = {}
         self._latest_task_index = 0
+        self.max_debug_round = 3
 
     
     def get_latest_task(self):
@@ -243,12 +246,12 @@ class Text2SQL(BaseAgent):
         execution_tables = []
         debug_messages = []
         
-        count_debug = 1
+        count_debug = 0
         
-        while count_debug < 3: # Maximum 3 times to debug
+        while count_debug < self.max_debug_round: # Maximum 3 times to debug
             
             logging.info(f"Debug SQL code round {count_debug}")
-            response, error_messages, execute_table = self.__debug_sql(history, error_messages[-1], prefix=f"Debug Round {count_debug}")
+            response, error_messages, execute_table = self.__debug_sql(history, error_messages[-1], prefix=f"Debug Round {count_debug + 1}")
             all_error_messages.extend(error_messages)
             execution_tables.extend(execute_table)
             
@@ -429,9 +432,104 @@ class Text2SQL(BaseAgent):
         return self.history, error_messages, execution_tables
     
 
+    def __get_content_behind_heading(self, text: str, heading = "###"):
 
-    def self_reflection(self, task: str, cache: bool = True, adjust_table: str|int = 0):
+        pass
 
+
+    def self_correction(self, task: str, error_messages, execution_tables, cache: bool = True, adjust_table: str|int = 0):
+        
+        """
+        Self-correction with Text2SQL
+        The self-correction method is designed to correct errors in SQL queries. It uses the SQL language model to identify and fix errors in the SQL queries.
+        
+        Parameters:
+
+            task (str): The task to be solved, provided as a natural language string.
+            error_messages (list): A list of error messages from SQL query.
+            execution_tables (list): A list of execution tables generated during the process.
+            cache (bool): A boolean value indicating whether to use the cache for the company information and suggested tables.
+        
+        Returns:
+
+            history (list): A list of the conversation history.
+            error_messages (list): A list of error messages from SQL query.
+            execution_tables (list): A list of execution tables generated during the process.
+            correct (bool): A boolean value indicating whether the previous SQL query has been corrected.
+        
+        """
+        
+        correction_prompt ="""
+
+{sql_result}
+
+<correction>
+
+Based on the result, do you think the SQL query is correct and can fully answer the question? 
+If not, return No under *Decision* heading, think step-by-step under *Reasoning* heading again and generate the correct SQL query under *SQL Query*. Otherwise, only return Yes under *decision*.
+
+Return in the following format:
+
+### Decision: 
+{{Your decision}}
+
+### Reasoning:
+{{Your reasoning}}
+
+### SQL Query:
+{{Your SQL query}}
+
+</correction>
+"""
+
+        sql_result = ""
+        if len(execution_tables) > 0:
+            sql_result += "### SQL Result:\n\n"
+            sql_result += utils.table_to_markdown(execution_tables, adjust=adjust_table)
+        if len(error_messages) > 0:
+            sql_result += "### Error Messages:\n\n"
+            for i, error in enumerate(error_messages):
+                sql_result += f"{error}\n\n"
+
+        correction_prompt = correction_prompt.format(sql_result = sql_result)
+
+
+        # ========= LLM Reasoning ========= #
+        self.history.append({
+            "role": "user",
+            "content": correction_prompt
+        })
+
+        respones = self.sql_llm(self.history)
+
+        dict_response = self.__get_content_behind_heading(respones, "###")
+
+
+    def self_reflection(self, task: str, error_messages, execution_tables, cache: bool = True, adjust_table: str|int = 0):
+
+
+        # ========= GET self-reflection ========= #
+        reflection_prompt = """
+
+{sql_result}
+
+<reflection>
+
+Based on the result, do you think the SQL query is correct and can fully answer the question? 
+If not, return NO under *Decision* heading, and provide the reason and giving detailed tips to the correct SQL query under *Reflection* heading.
+Else, return YES.
+
+Only return new, detailed task. Return in the following format:
+
+### Decision: 
+{{Your decision}}
+
+### Reflection:
+{{Your reflection}}
+
+</reflection>
+"""
+        
 
         # ========= Router for self-reflection ========= #
         reflection = False
@@ -456,7 +554,7 @@ class Text2SQL(BaseAgent):
             self.history, error_messages, execution_tables = self.reasoning_text2SQL(new_task, company_info, suggest_table, adjust_table = adjust_table)
             # =========================================== #
 
-            return self.history, error_messages, tables, reflection
+            return self.history, error_messages, execution_tables, reflection
         
         # No reflection
         return self.history, [], [], reflection
@@ -640,7 +738,7 @@ class Text2SQL(BaseAgent):
 
 
     
-    def solve(self, task: str, cache: bool = True, inject_reasoning: str = None, adjust_table: str|int = 0):
+    def solve(self, task: str, cache: bool = True, inject_reasoning: str = None, self_reflection: bool = True, adjust_table: str|int = 0):
         """
         Solve the task with Text2SQL
         The solve method is designed to solve a given task by converting it into SQL queries using the Text2SQL model. It handles both simple and complex tasks by breaking them down into steps if necessary.
@@ -658,6 +756,10 @@ class Text2SQL(BaseAgent):
             execution_tables (list): A list of execution tables generated during the process.
             
         """
+        if self_reflection:
+            self.max_debug_round = 1
+        else:
+            self.max_debug_round = 3
         
         start = time.time()
 
@@ -691,7 +793,13 @@ class Text2SQL(BaseAgent):
         else:
             self.history, error_messages, execution_tables = self.branch_reasoning_text2SQL(task, steps, company_info, suggest_table, adjust_table = adjust_table)
 
-
+        if self_reflection:
+            accept_result = False
+            count_reflection = 0
+            while not accept_result and count_reflection < 2: # Maximum 2 times to reflect
+                count_reflection += 1
+                self.history, error_messages, tables, accept_result = self.self_reflection(task, cache=cache, adjust_table=adjust_table)
+                
 
         # ===== Post-processing =====
 

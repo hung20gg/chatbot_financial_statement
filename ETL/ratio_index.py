@@ -209,7 +209,16 @@ def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, multi_pro
             inputs.append(
                 [
                     'get_inventory_turnover_ratio',
-                    df_symbol,
+                    df_symbol[df_symbol['quarter'] != 0],
+                    'BS_141',
+                    'IS_011'
+                ]
+            )
+
+            inputs.append(
+                [
+                    'get_inventory_turnover_ratio',
+                    df_symbol[df_symbol['quarter'] == 0],
                     'BS_141',
                     'IS_011'
                 ]
@@ -803,9 +812,12 @@ def industry_ratios(data_df, metric = 'BS_400', top_n = 5, output_path = '../dat
     # Add industry to the data
     df_fs = pd.merge(df_fs, df_company[['stock_code', 'industry']], on='stock_code', how='left')
     
-    top_20_stocks = df_fs[df_fs['category_code'] == metric].groupby(['industry', 'year', 'quarter']).apply(
-        lambda x: x.nlargest(top_n, 'data')
-    ).reset_index(drop=True)[['industry','year', 'quarter', 'stock_code', ]]
+    top_20_stocks = (
+        df_fs[df_fs['category_code'] == metric]
+        .groupby(['industry', 'year', 'quarter'], group_keys=False)
+        .apply(lambda x: x.nlargest(top_n, 'data'))
+        .reset_index(drop=True)
+    )[['industry', 'year', 'quarter', 'stock_code']]
 
     # Inner Join of top 20 stocks with the financial statement data
     filtered_data = pd.merge(data_df, top_20_stocks, on=['year', 'quarter', 'stock_code'], how='left')
@@ -867,10 +879,10 @@ def calculate_index(version = 'v3', output_path: str = '../data/'):
         
 
         time_df = data_df[['time_code', 'date_added']]
-        time_df.dropna(inplace=True)
-        time_df.drop_duplicates(inplace=True)
+        time_df = time_df.dropna().drop_duplicates().copy()
+        # time_df.drop_duplicates(inplace=True)
         
-        df = pd.merge(df, time_df, on='time_code', how='left')
+        df = pd.merge(df, time_df, on='time_code', how='inner')
         df.drop(columns=['time_code'], inplace=True)
         
         dfs.append(df)
@@ -880,6 +892,7 @@ def calculate_index(version = 'v3', output_path: str = '../data/'):
     dfs = pd.concat(dfs, ignore_index=True)
     
     assert dfs['ratio_code'].isna().sum()==0 , "Null value in ratio_code"
+    assert dfs['date_added'].isna().sum()==0 , "Null value in date_added"
     
     dfs.drop_duplicates(inplace=True)
     dfs.fillna(0, inplace=True)
