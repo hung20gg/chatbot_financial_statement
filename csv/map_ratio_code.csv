@@ -87,3 +87,6 @@ Days Inventory Outstanding,DIO,days_inventory_outstanding
 Days Payable Outstanding,DPO,days_payable_outstanding
 Cash Conversion Cycle,CCC,cash_conversion_cycle
 Inventory Turnover Ratio,ITR,inventory_turnover_ratio
+Return On Average Assets,ROAA,return_on_average_assets
+Return On Average Equity,ROAE,return_on_average_equity
+Return On Average Sales,ROAS,return_on_average_sales
