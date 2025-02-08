@@ -58,7 +58,7 @@ def test():
     chat_config = ChatConfig(**GPT4O_MINI_CONFIG)
     text2sql_config = TEXT2SQL_FAST_GEMINI_CONFIG
     # text2sql_config['sql_llm'] = 'Qwen/Qwen2.5-Coder-32B-Instruct-GPTQ-Int4'
-    text2sql_config = TEXT2SQL_THINKING_GEMINI_CONFIG
+    # text2sql_config = TEXT2SQL_THINKING_GEMINI_CONFIG
     text2sql_config['sql_example_top_k'] = 2
     # text2sql_config['company_top_k'] = 1
     text2sql_config['account_top_k'] = 5

@@ -43,7 +43,7 @@ Note:
 </question>
 
 <table>
-{table}
+{table[:5000]}
 </table>
 
 Return final answer in JSON format.
@@ -80,16 +80,28 @@ def parallel_validate_qa(llm, *args):
 
 def evaluate_qa_quality(path, llm_name, multi_thread=False, max_workers=4):
     
+
+        
+    basename = path.split('/')[-1]
+    output_file_name = llm_name.replace('/', '__') + '-scored-' + basename     
+    output_path = os.path.join('../data', output_file_name)  
+    
+    done_ids = set()
+    if os.path.exists(output_path):
+        with open(output_path, 'r') as f:
+            for line in f:
+                done_ids.add(json.loads(line)['ids'])
+
+
     data = []
     with open(path) as f:
         for line in f:
-            data.append(json.loads(line))
-            
-    path = path.split('/')[-1]
-    output_file_name = llm_name.replace('/', '__') + '-scored-' + path     
-    output_path = os.path.join('../data', output_file_name)  
-    
-    output_path = get_available_path(output_path)
+            qa = json.loads(line)
+            if qa['ids'] not in done_ids:
+                data.append(qa)
+
+
+    print(f"Number of questions: {len(data)}")
 
     results = []
 

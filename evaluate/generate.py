@@ -128,7 +128,7 @@ def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=F
             append_jsonl_to_file(answer, file_path)
         
         if is_exp_model:
-            time.sleep(10)
+            time.sleep(12)
 
 
     return responses

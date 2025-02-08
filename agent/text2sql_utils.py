@@ -328,7 +328,7 @@ def TIR_reasoning(response, db, verbose=False, prefix=""):
                 execution_error.append(f"{prefix} SQL {i+1} Error: " + table)
                 
             else:
-                table_obj = Table(table=table, sql=code, description=f"{prefix} SQL {i+1} Result: {name}")
+                table_obj = Table(table=table, sql=code, description=f"{prefix} SQL {i+1} Result: {name}".strip())
                 execution_table.append(table_obj)
     
     
