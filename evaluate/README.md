@@ -74,6 +74,19 @@ python generate.py --llm $llm --version $version --multi_thread $multi_thread --
 ```
 
 
+### For create template for batch generation
+
+```bash
+llm=gpt-4o-mini
+multi_thread=True 
+version=v5
+task=generate_sql_template
+path=../data/generated_questions.jsonl
+reference_path=../data/gpt_4o__v5.jsonl
+
+python generate.py --llm $llm --version $version --multi_thread $multi_thread --task $task --path $path
+```
+
 ### For evaluating the difficulty
 #### Pre request: You must have a solution file in `data` folder.
 Score the probability that the question can be answered with given data. (weak label)

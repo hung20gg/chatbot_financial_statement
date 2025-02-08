@@ -142,6 +142,15 @@ TEXT2SQL_FAST_OPENAI_CONFIG = {
     'self_debug': True
 }
 
+TEXT2SQL_FAST_SQL_OPENAI_CONFIG = {
+    "llm": 'gemini-2.0-flash-lite-preview-02-05',
+    "sql_llm": 'gpt-4o-mini',
+    "reasoning": False,
+    "branch_reasoning": False,
+
+    'self_debug': True
+}
+
 TEXT2SQL_FAST_GEMINI_CONFIG = {
     "llm": 'gemini-2.0-flash-lite-preview-02-05',
     "sql_llm": 'gemini-2.0-flash',

@@ -8,14 +8,21 @@ import random
 import os
 import sys 
 
-from utils import append_jsonl_to_file, get_available_path, get_text2sql_config, get_prompt_config
+from utils import (
+    append_jsonl_to_file, 
+    get_available_path, 
+    get_text2sql_config, 
+    get_prompt_config, 
+    get_avaliable_questions
+    )
+
 sys.path.append('..')
 
 
 import agent.text2sql_utils as utils
 
 
-
+from .generate import prepare_messages_template
 from initialize import initialize_text2sql
 from llm.llm_utils import get_json_from_text_response, get_code_from_text_response
 
@@ -165,7 +172,7 @@ def single_fake_messages(text2sql_config,  batch_questions, using_cache=False, f
     
     text2sql_config['sql_example_top_k'] = random.randint(1, 6) // 3 # 0,0, 1, 1, 1, 2
 
-    random_config = random.choice([FIIN_VERTICAL_PROMPT_UNIVERSAL, FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY, FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY, FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI])
+    random_config = random.choice(['vertical', 'openai', 'openai', 'simpify', 'simpify', 'openai'])
     random_table = random.randint(0, 1)
 
     solver = initialize_text2sql(text2sql_config, random_config)
@@ -226,13 +233,9 @@ def generate_fake_messages(args):
 
     version = args.version
 
-    selected_questions = []
-    with open(args.path) as f: # JSONL
-        for line in f:
-            question = json.loads(line)
-            selected_questions.append(question)
+    selected_questions = get_avaliable_questions(args.path)
         
-        print(f"Total questions: {len(selected_questions)}")
+    print(f"Total questions: {len(selected_questions)}")
     
     base_name = os.path.basename(args.path).replace('.jsonl', '')
 
@@ -275,41 +278,45 @@ def generate_sql(args):
 
     # output_path = get_available_path(output_path)
 
-    done_ids = set()
-    if os.path.exists(output_path):
-        with open(output_path) as f:
-            for line in f:
-                data = json.loads(line)
-                done_ids.add(data['ids'])
+    selected_questions = get_avaliable_questions(file_path, output_path)
 
-
-    selected_questions = []
-
-    
-    # Load the questions
-    if file_path.endswith('.json'):
-
-        with open(file_path) as f:
-            questions = json.load(f)
-            for question in questions:
-                if question['ids'] not in done_ids:
-                    selected_questions.append(question)
-
-    elif file_path.endswith('.jsonl'):
-        with open(file_path) as f:
-            for line in f:
-                question = json.loads(line)
-                if question['ids'] not in done_ids:
-                    selected_questions.append(question)
-    
-    else:
-        raise ValueError("Invalid file path")
         
     print(f"Total questions: {len(selected_questions)}")
 
     # Run the solver
     results = _solve(text2sql_config, prompt_config, selected_questions, using_cache=args.using_cache, version=version, enhance=args.enhance, batch_size=args.batch_size, max_workers=args.max_workers, multi_thread=args.multi_thread)
 
+
+
+# ============ GENERATE SQL TEMPLATE ============
+
+def generate_sql_template(args):
+    text2sql_config = get_text2sql_config(args.llm)
+
+    # Change the template here
+    prompt_config = get_prompt_config(args.template)
+
+    
+    # Get the version
+    version = args.version
+    llm = text2sql_config.get('llm', 'unknown').replace('/', '__')
+
+    if args.path:
+        file_path = args.path
+    else:
+        file_path = '../data/generated_questions.json'
+    
+
+    # Check if the file exists and if the question is already solved
+    if version:
+        current_dir = os.path.dirname(__file__)
+        output_path = os.path.join(current_dir, f"../data/template_{llm}__{version}.jsonl")
+    else:
+        output_path = f"../data/template_{llm}_all.jsonl"
+
+    # output_path = get_available_path(output_path)
+
+    return prepare_messages_template(text2sql_config, prompt_config, file_path, output_path, reference_path=args.reference_path, enhance=args.enhance, multi_thread=args.multi_thread, max_workers=args.max_workers)
 
 
 import argparse
@@ -327,6 +334,7 @@ def get_args():
     parser.add_argument('--llm', default='gpt-4o-mini', type=str)
     parser.add_argument('--template', default='vertical', type=str)
     parser.add_argument('--enhance', default=None, type=str)
+    parser.add_argument('--reference_path', default=None, type=str)
     return parser.parse_args()
 
 
@@ -337,6 +345,9 @@ if __name__ == '__main__':
 
     elif args.task == 'generate_messages':
         generate_fake_messages(args)
+    
+    elif args.task == 'generate_sql_template':
+        generate_sql_template(args)
 
     
     

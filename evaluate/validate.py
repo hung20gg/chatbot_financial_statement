@@ -2,7 +2,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import sys
 import random 
 
-from utils import get_available_path, append_jsonl_to_file
+from utils import get_available_path, append_jsonl_to_file, get_avaliable_questions
 sys.path.append('..')
 import pandas as pd
 import numpy as np
@@ -86,20 +86,7 @@ def evaluate_qa_quality(path, llm_name, multi_thread=False, max_workers=4):
     output_file_name = llm_name.replace('/', '__') + '-scored-' + basename     
     output_path = os.path.join('../data', output_file_name)  
     
-    done_ids = set()
-    if os.path.exists(output_path):
-        with open(output_path, 'r') as f:
-            for line in f:
-                done_ids.add(json.loads(line)['ids'])
-
-
-    data = []
-    with open(path) as f:
-        for line in f:
-            qa = json.loads(line)
-            if qa['ids'] not in done_ids:
-                data.append(qa)
-
+    data = get_avaliable_questions(path, output_path)
 
     print(f"Number of questions: {len(data)}")
 

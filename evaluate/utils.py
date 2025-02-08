@@ -10,7 +10,7 @@ from agent.const import (
     TEXT2SQL_FAST_GEMINI_CONFIG,
     TEXT2SQL_FAST_OPENAI_CONFIG,
     TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG,
-    TEXT2SQL_MEDIUM_GEMINI_CONFIG,
+    TEXT2SQL_FAST_SQL_OPENAI_CONFIG,
     TEXT2SQL_GEMINI_PRO_CONFIG,
     TEXT2SQL_THINKING_GEMINI_CONFIG,
     TEXT2SQL_4O_CONFIG
@@ -53,7 +53,7 @@ def get_text2sql_config(llm_name):
     if 'gpt-4o' in llm_name:
         if 'mini' not in llm_name:
             return TEXT2SQL_4O_CONFIG
-        return TEXT2SQL_FAST_OPENAI_CONFIG
+        return TEXT2SQL_FAST_SQL_OPENAI_CONFIG
 
     if 'deepseek-chat' in llm_name:
         return TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG
@@ -63,6 +63,49 @@ def get_text2sql_config(llm_name):
         config['sql_llm'] = llm_name    
         return config
 
+
+def get_avaliable_questions(input_path, reference_paths = None, max_questions = 2000):
+    questions = []
+    done_ids = set()
+    
+    # Read reference file and get all done ids
+    if isinstance(reference_paths, str):
+        reference_paths = [reference_paths]
+        
+    for reference_path in reference_paths:
+        if os.path.exists(reference_path):
+            if reference_path.endswith('.jsonl'):
+                with open(reference_path, 'r') as f:
+                    for line in f:
+                        msg_obj = json.loads(line)
+                        done_ids.add(msg_obj['ids'])
+            elif reference_path.endswith('.json'):
+                with open(reference_path, 'r') as f:
+                    questions = json.load(f)
+                    for question in questions:
+                        done_ids.add(question['ids'])
+        
+
+    # Read input file and get all questions
+    if input_path.endswith('.jsonl'): 
+        with open(input_path, 'r') as f:
+            for line in f:
+                question = json.loads(line)
+                if question['ids'] not in done_ids:
+                    questions.append(question)
+
+    elif input_path.endswith('.json'):
+        with open(input_path, 'r') as f:
+            questions = json.load(f)
+            for question in questions:
+                if question['ids'] not in done_ids:
+                    questions.append(question)
+    else:
+        raise ValueError("Input file must be json or jsonl")
+                                     
+
+    print(f"Total questions: {len(questions)}")
+    return questions
 
 
 def append_jsonl_to_file(json_obj, file_path):

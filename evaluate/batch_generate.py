@@ -1,5 +1,14 @@
-from utils import append_jsonl_to_file, get_available_path
+from utils import (
+    append_jsonl_to_file, 
+    get_available_path, 
+    get_text2sql_config, 
+    get_prompt_config, 
+    get_avaliable_questions
+    )
+
 import random
+import os
+import json
 
 import datetime
 
@@ -7,6 +16,8 @@ import sys
 sys.path.append('..')
 
 from initialize import initialize_text2sql
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 
 def prepare_messages(text2sql_config, prompt_config, questions, output_path = None, enhance = None):
 
@@ -31,4 +42,27 @@ def prepare_messages(text2sql_config, prompt_config, questions, output_path = No
         append_jsonl_to_file(output_path, msg_obj)
     
     return msg_obj
+
+
+
+def prepare_messages_template(text2sql_config, prompt_config, input_path, output_path, reference_path = None, enhance = None, multi_thread = False, max_workers = 10):
+
+    questions = get_avaliable_questions(input_path, [output_path, reference_path])
+
+    # Test
+    questions = questions[:10]
+
+    print(f"Total questions: {len(questions)}")
+    
+    if multi_thread:
+        print("Using multi-threading")
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = [executor.submit(prepare_messages, text2sql_config, prompt_config, question, output_path, enhance) for question in questions]
+            results = [future.result() for future in as_completed(futures)]
+    else:
+        print("Using single-threading")
+        results = [prepare_messages(text2sql_config, prompt_config, question, output_path, enhance) for question in questions]
+    
+    return results
+
 
