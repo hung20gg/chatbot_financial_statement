@@ -8,31 +8,10 @@ import random
 import os
 import sys 
 
-from utils import append_jsonl_to_file, get_available_path
+from utils import append_jsonl_to_file, get_available_path, get_text2sql_config, get_prompt_config
 sys.path.append('..')
 
-from agent.const import (
-    TEXT2SQL_FASTEST_CONFIG,
-    TEXT2SQL_FAST_GEMINI_CONFIG,
-    TEXT2SQL_FAST_OPENAI_CONFIG,
-    TEXT2SQL_DEEPSEEK_V3_CONFIG,
-    TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG,
-    TEXT2SQL_MEDIUM_GEMINI_CONFIG,
-    TEXT2SQL_GEMINI_PRO_CONFIG,
-    TEXT2SQL_THINKING_GEMINI_CONFIG,
-    TEXT2SQL_4O_CONFIG
-)
 
-from agent.prompt.prompt_controller import (
-    PromptConfig, 
-    VERTICAL_PROMPT_BASE, 
-    VERTICAL_PROMPT_UNIVERSAL,
-    HORIZONTAL_PROMPT_BASE,
-    HORIZONTAL_PROMPT_UNIVERSAL,
-    FIIN_VERTICAL_PROMPT_UNIVERSAL,
-    FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY,
-    FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI,
-)
 import agent.text2sql_utils as utils
 
 
@@ -50,29 +29,6 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-
-
-def get_text2sql_config(llm_name):
-    if 'gemini' in llm_name:
-
-        if 'thinking' in llm_name:
-            return TEXT2SQL_THINKING_GEMINI_CONFIG
-        if 'gemini-pro' in llm_name:
-            return TEXT2SQL_GEMINI_PRO_CONFIG
-        return TEXT2SQL_FAST_GEMINI_CONFIG
-    
-    if 'gpt-4o' in llm_name:
-        if 'mini' not in llm_name:
-            return TEXT2SQL_4O_CONFIG
-        return TEXT2SQL_FAST_OPENAI_CONFIG
-
-    if 'deepseek-chat' in llm_name:
-        return TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG
-
-    else:
-        config = TEXT2SQL_FAST_GEMINI_CONFIG
-        config['sql_llm'] = llm_name    
-        return config
 
 
 
@@ -297,14 +253,7 @@ def generate_sql(args):
     text2sql_config = get_text2sql_config(args.llm)
 
     # Change the template here
-    if 'openai' in args.template:
-        print("===== Using openai =====")
-        prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI
-    elif 'simplify' in args.template:
-        print("===== Using simplify =====")
-        prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY
-    else:
-        prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL
+    prompt_config = get_prompt_config(args.template)
 
     
     # Get the version

@@ -283,26 +283,14 @@ class Text2SQL(BaseAgent):
 
         return text
     
-    
-    def reasoning_text2SQL(self, task: str, company_info: Table = None, suggest_table: List[Table] = [], enhance: bool = False, inject_reasoning: str = None, adjust_table: str = 'shrink'):
-        
-        """
-        Reasoning with Text2SQL without branch reasoning.
-        
-        Input:
-            - task: str. The task to be solved, provided as a natural language string.
-            - company_info: pd.DataFrame. Information about the company relevant to the task.
-            - suggest_table: str. The suggested table for the task.
-            - history: list
-        Output:
-            - history: list.
-            - error_messages: list.
-            - execution_tables: list
-            
-        This function will convert the natural language query into SQL query and execute the SQL query
-        """
 
-        # ============== Prepare the prompt =================
+    def get_reasoning_text2sql_template(self, task: str, company_info: Table = None, suggest_table: List[Table] = [], enhance: bool = False, adjust_table: str = 'shrink'):
+        
+        """
+        Get the reasoning text2SQL template
+        """
+        
+                # ============== Prepare the prompt =================
         if company_info is None or company_info.table.empty:
             stock_code_table = ""
         else:
@@ -390,7 +378,7 @@ You will have the following database description:
 
         
         if len(self.history) == 0:
-            self.history = [
+            temp_message = [
                 {
                     "role": "system",
                     "content": system_prompt
@@ -400,14 +388,39 @@ You will have the following database description:
                     "content": init_prompt
                 }
             ]
-            temp_message = self.history.copy()
         else:
-            self.history.append({
-                "role": "user",
-                "content": new_prompt
-            })
-            temp_message = [self.history[-1]]
+            temp_message = [
+                {
+                    "role": "user",
+                    "content": new_prompt
+                }
+            ]            
+
+        return temp_message
+        
+    
+    def reasoning_text2SQL(self, task: str, company_info: Table = None, suggest_table: List[Table] = [], enhance: bool = False, inject_reasoning: str = None, adjust_table: str = 'shrink'):
+        
+        """
+        Reasoning with Text2SQL without branch reasoning.
+        
+        Input:
+            - task: str. The task to be solved, provided as a natural language string.
+            - company_info: pd.DataFrame. Information about the company relevant to the task.
+            - suggest_table: str. The suggested table for the task.
+            - history: list
+        Output:
+            - history: list.
+            - error_messages: list.
+            - execution_tables: list
             
+        This function will convert the natural language query into SQL query and execute the SQL query
+        """
+
+        # ============== Prepare the prompt =================
+        temp_message = self.get_reasoning_text2sql_template(task, company_info, suggest_table, enhance, adjust_table)
+        self.history.extend(temp_message)
+
         self._latest_task_index = len(self.history) - 1
 
         # =========== Generate SQL query =============
@@ -825,6 +838,23 @@ Only return new, detailed task. Do not return the SQL. Return in the following f
         else:
             raise NotImplementedError(f"Refine tool {refine_tool} is not implemented")
 
+
+
+    def get_solver_template_message(self, task: str, enhance: str = None, adjust_table: str|int = 0):
+
+        list_adj_table = ["shrink", "text", "keep"]
+        if isinstance(adjust_table, int):
+            choice = min(2, max(0, adjust_table))
+            adjust_table = list_adj_table[choice]
+
+        bool_enhance = False
+        if enhance is not None:
+            bool_enhance = True
+        
+        company_info, suggest_table = self.get_stock_code_and_suitable_row(task)
+
+        temp_message = self.get_reasoning_text2sql_template(task, company_info, suggest_table, bool_enhance, adjust_table)
+        return temp_message
 
     
     def solve(self, task: str, cache: bool = True, inject_reasoning: str = None, enhance: str = None, adjust_table: str|int = 0):
