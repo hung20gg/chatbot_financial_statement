@@ -12,6 +12,7 @@ from llm.llm_utils import get_code_from_text_response
 from pydantic import BaseModel, ConfigDict
 from typing import Union
 import re
+import copy
 
 import logging
 
@@ -48,22 +49,21 @@ def table_to_markdown(table: Table|pd.DataFrame|str|list, adjust:str = 'shrink',
         
     markdown = ""
     for i,t in enumerate(table):
-        if isinstance(table, pd.DataFrame):
-            if table.empty:
+        if isinstance(t, pd.DataFrame):
+            if t.empty:
                 continue
-            markdown += df_to_markdown(t)[:max_string] + "\n\n"
+            markdown += df_to_markdown(t, adjust = adjust)[:max_string] + "\n\n"
         
-        else:
-            try:
-                if t.table is None:
-                    continue
-                markdown += f"**{t.description.strip()}**\n\n"
-                markdown += df_to_markdown(t.table)[:max_string]
-                if i < len(table) - 1:
-                    markdown += "\n\n"
+        elif isinstance(t, Table):
+            if t.table is None:
+                continue
+            markdown += f"**{t.description.strip()}**\n\n"
+            markdown += df_to_markdown(t.table, adjust = adjust)[:max_string]
+            if i < len(t.table) - 1:
+                markdown += "\n\n"
             
-            except:
-                raise ValueError("Invalid table type")
+        else:
+            raise ValueError("Invalid table type")
     
     return markdown
     
@@ -96,7 +96,7 @@ def get_llm_wrapper(model_name, **kwargs):
         
         elif 'gemini' in model_name:
             logging.info(f"Using Gemini with model {model_name}")
-            return Gemini(model_name=model_name, **kwargs)
+            return Gemini(model_name=model_name, random_key='exp' in model_name, **kwargs)
         
         elif 'deepseek' in model_name:
             logging.info(f"Found DeepSeek endpoint: {model_name}")
@@ -141,23 +141,27 @@ def df_to_markdown(df, adjust:str = 'keep') -> str:
     if not isinstance(df, pd.DataFrame):
         return str(df)
     
-    if adjust == 'keep':
+    df = copy.deepcopy(df)
+    num_rows = df.shape[0]
+    num_cols = df.shape[1]
+    
+    if adjust == 'text':
         columns = df.columns
-        if len(columns) > 2:
+        if num_cols > 2:
             logging.warning("Too many columns, Using shrink")
             return df_to_markdown(df, adjust='shrink')
         
-        if len(columns) == 1:
+        if num_cols == 1:
             text_df = f"List of items *{columns[0]}*\n"
             for i, row in df.iterrows():
                 text_df += f"- {row[columns[0]]}"
 
                 # Add new line if not the last row
-                if i < len(df) - 1:
+                if i < num_rows - 1:
                     text_df += "\n"
             return text_df
         
-        elif len(columns) == 2:
+        elif num_cols == 2:
             text_df = f"List of {columns[0]} with corresponding {columns[1]}\n"
             for i, row in df.iterrows():
                 text_df += f"- {row[columns[0]]}: {row[columns[1]]}"
@@ -180,12 +184,11 @@ def df_to_markdown(df, adjust:str = 'keep') -> str:
 
         for i, row in df.iterrows():
             text_df += "| "
-            for col in columns:
-                text_df += f"{row[col]} | "
-            text_df = text_df[:-1]
+            for r in row:
+                text_df += f"{r} | "
 
             # Add new line if not the last row
-            if i < len(df) - 1:
+            if i < num_rows - 1:
                 text_df += "\n"
         return text_df
     
@@ -459,6 +462,76 @@ def prune_unnecessary_data_from_sql(tables: list[Table], messages: list[dict]):
         return tables[0]
     return tables
     
+
+def reconstruct_tables_from_sql(db, sql_message, description = ""):
+
+    errors, tables = TIR_reasoning(sql_message, db)
+
+    if len(errors) > 0:
+
+        return []
+    
+    mapping_table = []
+
+    # Get the company_info
+    stock_code = []
+    for table in tables:
+        if 'stock_code' in table.table.columns:
+            try:
+                stock_code.extend(table.table['stock_code'].tolist())
+            except:
+                pass
+
+    if len(stock_code) > 0:
+        df_company_info = db.return_company_from_stock_codes(stock_code)
+        mapping_table.append(Table(table=df_company_info, description="Company Information"))
+
+    # Get the ratio_code
+
+    ratio_code = []
+    for table in tables:
+        if 'ratio_code' in table.table.columns:
+            try:
+                ratio_code.extend(table.table['ratio_code'].tolist())
+            except:
+                pass
+    
+    set_ratio_code = set()
+    for code in ratio_code:
+        if isinstance(code, str):
+            set_ratio_code.add(code)
+    ratio_code = list(set_ratio_code)
+
+    if len(ratio_code) > 0:
+        df_ratio = db._get_mapping_ratio_from_ratio_codes(ratio_code)
+        mapping_table.append(Table(table=df_ratio, description="Ratio Mapping"))
+
+    # Get the category_code
+    category_code = []
+    for table in tables:
+        if 'category_code' in table.table.columns:
+            try:
+                category_code.extend(table.table['category_code'].tolist())
+            except:
+                pass
+
+    set_category_code = set()
+    for code in category_code:
+        if isinstance(code, str):
+            set_category_code.add(code)
+    category_code = list(set_category_code)
+
+    if len(category_code) > 0:
+        df_category = db._get_mapping_category_from_category_codes(category_code)
+        mapping_table.append(Table(table=df_category, description="Category Mapping"))
+
+    mapping_table.extend(tables)
+
+    return mapping_table
+    
+
+
+
 def check_null_table(tables: Table|pd.DataFrame):
     
     if isinstance(tables, pd.DataFrame):

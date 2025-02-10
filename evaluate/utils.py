@@ -25,6 +25,7 @@ from agent.prompt.prompt_controller import (
     FIIN_VERTICAL_PROMPT_UNIVERSAL,
     FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY,
     FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI,
+    FIIN_VERTICAL_PROMPT_UNIVERSAL_SHORT
 )
 
 
@@ -35,7 +36,11 @@ def get_prompt_config(template):
     elif 'simplify' in template:
         print("===== Using simplify =====")
         prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY
+    elif 'short' in template:
+        print("===== Using short =====")
+        prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_SHORT
     else:
+        print("===== Using universal =====")
         prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL
     return prompt_config
 
@@ -64,21 +69,28 @@ def get_text2sql_config(llm_name):
         return config
 
 
-def get_avaliable_questions(input_path, reference_paths = None, max_questions = 2000):
-    questions = []
+def get_avaliable_questions(input_path, reference_paths = [], max_questions = 2000):
+    selected_questions = []
     done_ids = set()
     
     # Read reference file and get all done ids
     if isinstance(reference_paths, str):
-        reference_paths = [reference_paths]
+        path = reference_paths.split(',')
+        reference_paths = path
         
     for reference_path in reference_paths:
         if os.path.exists(reference_path):
+            print(f"Reading reference file: {reference_path}")
+
             if reference_path.endswith('.jsonl'):
                 with open(reference_path, 'r') as f:
                     for line in f:
-                        msg_obj = json.loads(line)
-                        done_ids.add(msg_obj['ids'])
+                        try:
+                            msg_obj = json.loads(line)
+                            done_ids.add(msg_obj['ids'])
+                        except:
+                            print(f"Error reading line:")
+                            
             elif reference_path.endswith('.json'):
                 with open(reference_path, 'r') as f:
                     questions = json.load(f)
@@ -88,24 +100,26 @@ def get_avaliable_questions(input_path, reference_paths = None, max_questions = 
 
     # Read input file and get all questions
     if input_path.endswith('.jsonl'): 
+        print(f"Reading JSONL input file: {input_path}")
         with open(input_path, 'r') as f:
             for line in f:
                 question = json.loads(line)
                 if question['ids'] not in done_ids:
-                    questions.append(question)
+                    selected_questions.append(question)
 
     elif input_path.endswith('.json'):
+        print(f"Reading JSON input file: {input_path}")
         with open(input_path, 'r') as f:
             questions = json.load(f)
             for question in questions:
                 if question['ids'] not in done_ids:
-                    questions.append(question)
+                    selected_questions.append(question)
     else:
         raise ValueError("Input file must be json or jsonl")
                                      
 
-    print(f"Total questions: {len(questions)}")
-    return questions
+    print(f"Total questions: {len(selected_questions)}")
+    return selected_questions
 
 
 def append_jsonl_to_file(json_obj, file_path):

@@ -1560,7 +1560,7 @@ where
 	and quarter = 0
 	and stock_code = 'VIC'
 
--- Bad debt/ Nonperforming Loans of BIDV in 2023
+-- 70. Bad debt/ Nonperforming Loans of BIDV in 2023
 
 select
     stock_code,

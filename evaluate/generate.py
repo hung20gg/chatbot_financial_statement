@@ -22,7 +22,7 @@ sys.path.append('..')
 import agent.text2sql_utils as utils
 
 
-from .generate import prepare_messages_template
+from batch_generate import prepare_messages_template
 from initialize import initialize_text2sql
 from llm.llm_utils import get_json_from_text_response, get_code_from_text_response
 
@@ -91,7 +91,7 @@ def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=F
             append_jsonl_to_file(answer, file_path)
         
         if is_exp_model:
-            time.sleep(12)
+            time.sleep(10)
 
 
     return responses
@@ -175,7 +175,9 @@ def single_fake_messages(text2sql_config,  batch_questions, using_cache=False, f
     random_config = random.choice(['vertical', 'openai', 'openai', 'simpify', 'simpify', 'openai'])
     random_table = random.randint(0, 1)
 
-    solver = initialize_text2sql(text2sql_config, random_config)
+    prompt_config = get_prompt_config(random_config)
+
+    solver = initialize_text2sql(text2sql_config, prompt_config)
     global_history = []
     for question in batch_questions:
         prompt = question['question']
@@ -233,9 +235,7 @@ def generate_fake_messages(args):
 
     version = args.version
 
-    selected_questions = get_avaliable_questions(args.path)
-        
-    print(f"Total questions: {len(selected_questions)}")
+    
     
     base_name = os.path.basename(args.path).replace('.jsonl', '')
 
@@ -245,7 +245,12 @@ def generate_fake_messages(args):
     else:
         file_path = os.path.join(current_dir, f"../data/message_{base_name}.jsonl")
 
-    file_path = get_available_path(file_path)
+
+    selected_questions = get_avaliable_questions(args.path, file_path)
+        
+    print(f"Total questions: {len(selected_questions)}")
+
+    # file_path = get_available_path(file_path)
 
     results = _fake_solve(text2sql_config, selected_questions, using_cache=args.using_cache, file_path=file_path, max_workers=args.max_workers, multi_thread=args.multi_thread)
 

@@ -47,9 +47,7 @@ BATCH_SIZE = 32
 #       RDB       #
 #=================#
 
-def connect_to_db(db_name, user, password, host='localhost', port='5432'):
-    logging.info(f'Connecting to database {db_name}, {user}...')
-    
+def connect_to_db(db_name, user, password, host='localhost', port='5432'):    
     conn = psycopg2.connect(
         dbname=db_name,
         user=user,
@@ -283,7 +281,7 @@ def delete_tables(conn, table_names):
     
         
         
-def execute_query(query, conn=None, params = None, return_type='dataframe'):
+def execute_query(query, conn=None, params = None, return_type='dataframe', timeout=1000):
     if conn is None:
         raise ValueError("Connection is not provided")
     
@@ -293,7 +291,7 @@ def execute_query(query, conn=None, params = None, return_type='dataframe'):
         conn = connect_to_db(**conn)
     try:
         with conn.cursor() as cur:
-            
+            cur.execute(f"SET statement_timeout = {timeout};")
             cur.execute(query, params)
             result = cur.fetchall()
             

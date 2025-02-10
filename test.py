@@ -29,6 +29,7 @@ from agent.prompt.prompt_controller import (
     FIIN_VERTICAL_PROMPT_UNIVERSAL,
     FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY,
     FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI,
+    FIIN_VERTICAL_PROMPT_UNIVERSAL_SHORT
 )
 
 from ETL.dbmanager.setup import (
@@ -62,7 +63,7 @@ def test():
     text2sql_config['sql_example_top_k'] = 2
     # text2sql_config['company_top_k'] = 1
     text2sql_config['account_top_k'] = 5
-    prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI
+    prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_SHORT
 
     # try:
     if True:
@@ -78,7 +79,7 @@ def test():
         
         logging.info('Test text2sql')
         prompt = "For the year 2023, what was the Return on Equity (ROE) for Vietcombank (VCB) and Techcombank (TCB)?"
-        his, err, tab = text2sql.solve(prompt, enhance='reflection')
+        his, err, tab = text2sql.solve(prompt, enhance='correction', adjust_table='text')
         
 
         print('### ========= Reasoning ========= ###')
@@ -88,7 +89,8 @@ def test():
             print(msg['content'])
 
         print('===== Table =====')
-        print(tab[-1].table)
+        for t in tab:
+            print(t.table)
         
         
     # except Exception as e:

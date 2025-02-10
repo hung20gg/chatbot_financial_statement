@@ -81,10 +81,11 @@ llm=gpt-4o-mini
 multi_thread=True 
 version=v5
 task=generate_sql_template
-path=../data/generated_questions.jsonl
+path=../data/generated_questions.json
 reference_path=../data/gpt_4o__v5.jsonl
+template=openai
 
-python generate.py --llm $llm --version $version --multi_thread $multi_thread --task $task --path $path
+python generate.py --llm $llm --version $version --multi_thread $multi_thread --task $task --path $path --reference_path $reference_path --template $template
 ```
 
 ### For evaluating the difficulty

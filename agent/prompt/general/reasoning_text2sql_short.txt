@@ -1,0 +1,50 @@
+<task>
+
+{task}
+
+</task>
+
+<data>
+
+{suggestions_table}
+
+</data>
+
+<example>
+
+{few_shot}
+
+</example>
+ 
+<instruction>
+
+Analyze the task step-by-step then return suitable SQL query. The table result should have the following columns:
+- stock_code / industry
+- year
+- quarter
+- *_code
+- data (mean or sum or none)
+
+</instruction>
+
+### Note: 
+- Include the detailed name of the table in the following format:
+
+```sql
+-- ### detailed_table_name
+```
+- The query must not contain account name.
+- If the time is not mentioned, assume Q3 2024.
+- Do not make any assumption about the account. You must refer to the mapping data.
+- If the question requires data within the quarter time range (from 2020 to Q3 2024), use the `date_added` in the following format:
+
+```sql
+WHERE date_added BETWEEN '2020-01-01' AND '2024-09-30' 
+AND quarter !=0
+
+-- - Q1: YYYY-03-30
+-- - Q2: YYYY-06-30
+-- - Q3: YYYY-09-30
+-- - Q4: YYYY-12-30
+-- - Q0: YYYY-12-30 (Annual data)
+```
