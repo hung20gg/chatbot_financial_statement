@@ -2,6 +2,7 @@ import sys
 import os
 import pandas as pd
 import numpy as np
+
 current_path = os.path.dirname(__file__)
 sys.path.append(current_path)
 
@@ -57,15 +58,28 @@ def merge_financial_explaination(output_path: str = '../data'):
 
     df_tm.to_parquet(os.path.join(current_path, output_path, f'financial_statement_explaination_v3.parquet'))
 
-def calculate_industry_report(version: str, output_path: str = '../data'):
+
+
+def calculate_industry_financial_statement(version: str, output_path: str = '../data'):
     company_table = pd.read_csv(os.path.join(current_path, '../csv/df_company_info.csv'))
     df_fs = pd.read_parquet(os.path.join(current_path, output_path, f'financial_statement_{version}.parquet'))
     df_fs = pd.merge(df_fs, company_table[['stock_code', 'industry']], on='stock_code', how='left')
 
-    df_industry_fs = df_fs.groupby(['industry', 'year', 'quarter', 'category_code'])['data'].agg(['sum', 'mean']).reset_index()
+    df_industry_fs = df_fs.groupby(['industry', 'year', 'quarter', 'category_code', 'date_added'])['data'].agg(['sum', 'mean']).reset_index()
     df_industry_fs.rename(columns={'sum': 'data_sum', 'mean': 'data_mean'}, inplace=True)
 
     df_industry_fs.to_parquet(os.path.join(current_path, output_path, f'industry_report_{version}.parquet'))
+
+
+def calculate_industry_financial_statement_explaination(output_path: str = '../data'):
+    df_tm = pd.read_parquet(os.path.join(current_path, output_path, 'financial_statement_explaination_v3.parquet'))
+    company_table = pd.read_csv(os.path.join(current_path, '../csv/df_company_info.csv'))
+    df_tm = pd.merge(df_tm, company_table[['stock_code', 'industry']], on='stock_code', how='left')
+
+    df_industry_tm = df_tm.groupby(['industry', 'year', 'quarter', 'category_code', 'date_added'])['data'].agg(['sum', 'mean']).reset_index()
+    df_industry_tm.rename(columns={'sum': 'data_sum', 'mean': 'data_mean'}, inplace=True)
+
+    df_industry_tm.to_parquet(os.path.join(current_path, output_path, 'industry_report_explaination_v3.parquet'))
 
 
 def expand_data(version: str, output_path: str = '../data'):
@@ -77,11 +91,14 @@ def expand_data(version: str, output_path: str = '../data'):
     calculate_index(version, output_path)
 
     # Industry report
-    calculate_industry_report(version, output_path)
+    calculate_industry_financial_statement(version, output_path)
 
     if version == 'v3':
         # Merge financial explan data
         merge_financial_explaination(output_path)
+
+        # Industry report explaination
+        calculate_industry_financial_statement_explaination(output_path)
 
 if __name__ == '__main__':
     version = 'v3'

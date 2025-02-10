@@ -15,6 +15,7 @@
 
 ## Setup guide
 
+#### Ignore
 - Make `run.sh` file executable
 ```bash
 chmod +x run.sh
@@ -32,6 +33,14 @@ chmod +x run.sh
 - For GPU, Including Reranker 
 ```bash
 ./run.sh local-server --local True 
+```
+
+#### Setup maunally
+
+Create database via this scripts
+
+```bash
+python setup.py --preprocess v3 --force True --local True
 ```
 
 Or you can build the TEI local and run the following scripts

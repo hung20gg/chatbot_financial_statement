@@ -82,3 +82,8 @@ Earning Per Share,EPS,earning_per_share
 Price Earning Ratio,PE,price_earning_ratio
 Price To Book Ratio,PB,price_to_book_ratio
 Book Value Per Share,BVPS,book_value_per_share
+Days Sales Outstanding,DSO,days_sales_outstanding
+Days Inventory Outstanding,DIO,days_inventory_outstanding
+Days Payable Outstanding,DPO,days_payable_outstanding
+Cash Conversion Cycle,CCC,cash_conversion_cycle
+Inventory Turnover Ratio,ITR,inventory_turnover_ratio

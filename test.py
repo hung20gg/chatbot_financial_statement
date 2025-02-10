@@ -13,8 +13,11 @@ from agent.const import (
     TEXT2SQL_MEDIUM_GEMINI_CONFIG,
     TEXT2SQL_FASTEST_CONFIG,
     TEXT2SQL_FAST_OPENAI_CONFIG,
+    TEXT2SQL_FAST_GEMINI_CONFIG,
     TEXT2SQL_DEEPSEEK_V3_CONFIG,
-    TEXT2SQL_EXP_GEMINI_CONFIG
+    TEXT2SQL_EXP_GEMINI_CONFIG,
+    TEXT2SQL_THINKING_GEMINI_CONFIG
+
 )
 
 from agent.prompt.prompt_controller import (
@@ -24,6 +27,9 @@ from agent.prompt.prompt_controller import (
     HORIZONTAL_PROMPT_BASE,
     HORIZONTAL_PROMPT_UNIVERSAL,
     FIIN_VERTICAL_PROMPT_UNIVERSAL,
+    FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY,
+    FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI,
+    FIIN_VERTICAL_PROMPT_UNIVERSAL_SHORT
 )
 
 from ETL.dbmanager.setup import (
@@ -51,11 +57,16 @@ logging.basicConfig(
 def test():
 
     chat_config = ChatConfig(**GPT4O_MINI_CONFIG)
-    text2sql_config = TEXT2SQL_DEEPSEEK_V3_CONFIG
-    prompt_config = VERTICAL_PROMPT_UNIVERSAL
+    text2sql_config = TEXT2SQL_FAST_GEMINI_CONFIG
+    # text2sql_config['sql_llm'] = 'Qwen/Qwen2.5-Coder-32B-Instruct-GPTQ-Int4'
+    # text2sql_config = TEXT2SQL_THINKING_GEMINI_CONFIG
+    text2sql_config['sql_example_top_k'] = 2
+    # text2sql_config['company_top_k'] = 1
+    text2sql_config['account_top_k'] = 5
+    prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_SHORT
 
-    try:
-
+    # try:
+    if True:
         text2sql = initialize_text2sql(text2sql_config, prompt_config)
         
         chatbot = Chatbot(config = chat_config, text2sql = text2sql)
@@ -68,12 +79,23 @@ def test():
         
         logging.info('Test text2sql')
         prompt = "For the year 2023, what was the Return on Equity (ROE) for Vietcombank (VCB) and Techcombank (TCB)?"
-        his, err, tab = text2sql.solve(prompt)
-        print(tab[-1].table)
+        his, err, tab = text2sql.solve(prompt, enhance='correction', adjust_table='text')
         
-    except Exception as e:
-        logging.error("Failed to setup chatbot")
-        logging.error(e)
+
+        print('### ========= Reasoning ========= ###')
+        for msg in his:
+            print('\n# ===== Role: %s ===== #' % msg['role'])
+            print('# ===== Content ===== #\n')
+            print(msg['content'])
+
+        print('===== Table =====')
+        for t in tab:
+            print(t.table)
+        
+        
+    # except Exception as e:
+    #     logging.error("Failed to setup chatbot")
+    #     logging.error(e)
 
 
 if __name__ == "__main__":

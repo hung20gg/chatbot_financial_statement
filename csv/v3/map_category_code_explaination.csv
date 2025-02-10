@@ -24,6 +24,7 @@ Bank_TM_61,Cho vay bất động sản và tư vấn,(Explaination) Loans to rea
 Bank_TM_62,Cho vay ngành khách sạn và nhà hàng,(Explaination) Loans to hotels and restaurants,BS_125
 Bank_TM_63,Cho vay ngành dịch vụ tài chính,(Explaination) Loans to financial services,BS_125
 Bank_TM_64,Cho vay ngành khác,(Explaination) Loans to other industries,BS_125
+Bank_TM_65,Nợ quá hạn/ Nợ xấu,(Explaination) Nonperforming Loans/Bad debts,BS_125
 Bank_TM_66,Nợ đủ tiêu chuẩn (Nợ nhóm 1),(Explaination) Standard debts (Group 1 debts),BS_125
 Bank_TM_67,Nợ cần chú ý (Nợ nhóm 2),(Explaination) Debts needing attention (Group 2 debts),BS_125
 Bank_TM_68,Nợ dưới tiêu chuẩn (Nợ nhóm 3),(Explaination) Substandard debts (Group 3 debts),BS_125

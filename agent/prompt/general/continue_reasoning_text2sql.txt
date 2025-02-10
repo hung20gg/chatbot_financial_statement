@@ -1,18 +1,12 @@
-Here is a natural language query that you need to convert into a SQL query:
-
 <task>
+
 {task}
+
 </task>
 
-### Company details
 <data>
 
 {stock_code_table}
-
-</data>
-
-### Snapshot of the mapping table:
-<data>
 
 {suggestions_table}
 

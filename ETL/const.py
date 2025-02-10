@@ -285,6 +285,22 @@ SECURITIES_PE_RATIO_FUNCTIONS = {
     'price_to_book_ratio': ['Price', 'IS_501','IS_200', 'BS_400'],
 }
 
+
+DATE_RELATED_FUNCTIONS = {
+    'days_sales_outstanding' : ['BS_130', 'IS_010'],
+    'days_payable_outstanding' : ['BS_311', 'BS_331', 'IS_011'],
+    'days_inventory_outstanding' : ['BS_140', 'IS_011'],
+    'cash_conversion_cycle' : ['BS_130', 'BS_311', 'BS_331', 'BS_140', 'IS_011', 'IS_010'],
+}
+
+BANK_DATE_RELATED_FUNCTIONS = {
+}
+
+SECURITIES_DATE_RELATED_FUNCTIONS = {
+    'days_sales_outstanding' : ['BS_117', 'IS_020'],
+    'days_payable_outstanding' : ['BS_320', 'BS_347', 'IS_040'],
+}
+
 YoY_RATIO_FUNCTIONS = {
     'securities':{
         'Net_Revenue_Growth_YoY': 'IS_020',

@@ -1,6 +1,6 @@
 from huggingface_hub import AsyncInferenceClient
 import asyncio
-from FlagEmbedding import FlagReranker
+
 
 from pydantic import BaseModel, SkipValidation, ConfigDict
 from typing import Any, Union, Optional
@@ -39,7 +39,7 @@ class BaseRerannk(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
     name : str
-    reranker : Optional[Union[FlagReranker, AsyncInferenceClient]] = None
+    reranker : Any = None
     reranker_type : Optional[str] = None
     
     def __init__(self, **data: Any):
@@ -56,6 +56,10 @@ class BaseRerannk(BaseModel):
                     self.reranker = AsyncInferenceClient(self.name)
                     self.reranker_type = 'api'
             else:
+                
+
+                from FlagEmbedding import FlagReranker
+
                 self.reranker = FlagReranker(self.name)
                 self.reranker_type = 'local'
         

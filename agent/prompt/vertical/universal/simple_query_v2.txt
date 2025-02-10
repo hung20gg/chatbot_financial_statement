@@ -1559,3 +1559,20 @@ where
 	and year = 2022
 	and quarter = 0
 	and stock_code = 'VIC'
+
+-- 70. Bad debt/ Nonperforming Loans of BIDV in 2023
+
+select
+    stock_code,
+	quarter,
+	year,
+	category_code,
+	data
+
+from financial_statement_explaination
+
+where
+	category_code = 'Bank_TM_65' -- Price-Earning Ratio
+	and year = 2022
+	and quarter = 0
+	and stock_code = 'VIC'

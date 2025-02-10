@@ -1,7 +1,9 @@
 Here is a natural language query that you need to convert into a SQL query:
 
 <task>
+
 {task}
+
 </task>
 
 ### Company details
@@ -19,7 +21,7 @@ Here is a natural language query that you need to convert into a SQL query:
 
 </data>
 
-### Here is an example of a query that you can refer to:
+### Here are some examples of a query that you can refer to:
 
 <example>
 
@@ -29,11 +31,17 @@ Here is a natural language query that you need to convert into a SQL query:
  
 <instruction>
 
-Think step-by-step and return SQL query that suitable with the database schema based on the natural language query above.
-If possible, the table result should be in the following format:
+Analyze the task step-by-step then return SQL query that match with the database schema.
 
-|stock_code|quarter|year|category_code|data|
-|:---|:---|:---|:---|:---|
+If possible, the table result should have the following columns:
+
+- stock_code / industry
+- year
+- quarter
+- category_code / stock_code
+- data / data_mean / data_sum
+
+However, feel free to modify the table if needed.
 
 </instruction>
 
@@ -41,11 +49,26 @@ If possible, the table result should be in the following format:
 - Include the detailed suitable name (including datetime, industry, ...) for the table in the query in the following format:
 
 ```sql
-
 -- ### detailed_table_name
-
 ```
-- The `category_code_x` table contain value of both `financial_statment` and `explaination` tables
-- The user can only see the sql results, so your name should be as informative as possible
+
+- The `category_code` mapping table contain value of both `financial_statment` and `explaination` tables
+- The user can only see the query results, so your name should be as informative as possible
 - If the time is not mentioned, assume getting the current time (Q3 2024)
-- Do not make any assumption about the column name. You can refer to the mapping table above to find the suitable column name.
+- Do not make any assumption about the account name. You can refer to the mapping table above to find the suitable account.
+- The query must not contain column `ratio_name` or `en_caption`.
+- If the question requires data within the quarter time range (from 2020 to Q3 2024), you should use the `date_added` instead of `year` and `quarter`, in the following format:
+
+```sql
+WHERE date_added BETWEEN '2020-01-01' AND '2024-09-30' 
+AND quarter !=0
+
+-- Date added for each quarter:
+-- - Q1: YYYY-03-30
+-- - Q2: YYYY-06-30
+-- - Q3: YYYY-09-30
+-- - Q4: YYYY-12-30
+-- - Q0: YYYY-12-30 (Annual data is add at the end of the year)
+```
+
+- If the question requires data within annual data, you can use `year` column directly
