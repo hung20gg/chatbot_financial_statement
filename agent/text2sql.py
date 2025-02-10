@@ -214,7 +214,7 @@ class Text2SQL(BaseAgent):
         
         error_message = self.__flatten_list(error_messages, prefix="Error")
         
-        new_query = f"You have some error in the previous SQL query:\n\n <log>\n\n{error_message}\n\n</log>\n\nPlease fix the error and try again."
+        new_query = f"You have some error in the previous SQL query:\n\n <log>\n\n{error_message}\n\n</log>\n\nPlease analyze to fix the error and try again."
         history.append(
             {
                 "role": "user",
@@ -310,6 +310,7 @@ You are an expert in financial statement and database management. You will be as
         if enhance:
             enhance_prompt = """
 ### Regulation:   
+- The result of the SQL query will be displayed in the <data> tag.
 - Your should reasoning and provide the SQL query with explaination for the task in <task> and <instruction> tag.
 - For <correction> tag, you only need to provide the SQL query if the previous SQL query is incorrect.
 - For <reflection> tag, you dont need to provide the SQL query.
@@ -516,7 +517,7 @@ You are an expert in financial statement and database management. You will be as
 
 <correction>
 
-Based on the SQL table result in result tag, do you think the SQL queries is correct and can fully answer the original task? If there is no content on <result> tag, it means the preivous queries return nothing, which is incorrect.
+Based on the SQL table result in <result> tag, do you think the SQL queries is correct and can fully answer the original task? If there is no content on <result> tag, it means the preivous queries return nothing, which is incorrect.
 
 If the previous SQL is not correct, return No under *Decision* heading, think step-by-step under *Reasoning* heading again and generate the correct SQL query under *SQL Query*.
 Otherwise, you only need to return Yes under *Decision* heading. You must not provide the SQL query again.
@@ -586,7 +587,7 @@ Return in the following format (### SQL Query is optional):
 
 <reflection>
 
-Based on the SQL table result in result tag, do you think the SQL queries is correct and can fully answer the original task? If there is no content on <result> tag, it means the preivous queries return nothing, which is incorrect.
+Based on the SQL table result in <result> tag, do you think the SQL queries is correct and can fully answer the original task? If there is no content on <result> tag, it means the preivous queries return nothing, which is incorrect.
 If not, return NO under *Decision* heading, provide the reason and giving detailed tips to the correct SQL query under *Reflection* heading.
 Else, you only need to return YES under *Decision* heading.
 

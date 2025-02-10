@@ -1,6 +1,10 @@
 Here are the task:
 
+<task>
+
 {question}
+
+</task>
 
 Here are the reasoning, code execution result and critique:
 

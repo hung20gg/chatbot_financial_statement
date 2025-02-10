@@ -5,6 +5,8 @@ import os
 import sys 
 sys.path.append('..')
 
+import text2sql_utils as utils
+
 from llm.llm.chatgpt import ChatGPT, OpenAIWrapper
 from llm.llm.gemini import Gemini
 
