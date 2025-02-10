@@ -17,7 +17,7 @@ def process_financial_statements(input_parquet_path, output_parquet_path):
     def calculate_4NQ(df):
 
         df_sorted = df.sort_values(by=['stock_code', 'category_code', 'year', 'quarter']).reset_index(drop=True)
-        df_sorted['period'] = df_sorted['year'] * 10 + df_sorted['quarter']
+        df_sorted['period'] = df_sorted['year'] * 4 + df_sorted['quarter'] - 1 # year * 4 + quarter - 1
 
         df_lookup = df_sorted[['stock_code', 'category_code', 'year', 'quarter', 'data', 'period']].copy()
 
@@ -25,13 +25,6 @@ def process_financial_statements(input_parquet_path, output_parquet_path):
         df_lookup['lookback2'] = df_lookup['period'] - 1
         df_lookup['lookback3'] = df_lookup['period'] - 2
         df_lookup['lookback4'] = df_lookup['period'] - 3
-
-        df_lookup.loc[df_lookup['quarter'] == 3, 'lookback4'] = (df_lookup['year'] - 1) * 10 + 4
-        df_lookup.loc[df_lookup['quarter'] == 2, 'lookback3'] = (df_lookup['year'] - 1) * 10 + 4
-        df_lookup.loc[df_lookup['quarter'] == 2, 'lookback4'] = (df_lookup['year'] - 1) * 10 + 3
-        df_lookup.loc[df_lookup['quarter'] == 1, 'lookback2'] = (df_lookup['year'] - 1) * 10 + 4
-        df_lookup.loc[df_lookup['quarter'] == 1, 'lookback3'] = (df_lookup['year'] - 1) * 10 + 3
-        df_lookup.loc[df_lookup['quarter'] == 1, 'lookback4'] = (df_lookup['year'] - 1) * 10 + 2
 
         df_long = df_lookup.melt(
             id_vars=['stock_code', 'category_code', 'data', 'period'],
@@ -49,8 +42,8 @@ def process_financial_statements(input_parquet_path, output_parquet_path):
         )
 
         df_final = df_merged.groupby(['stock_code', 'category_code', 'period'])['data_past'].sum().reset_index()
-        df_final['year'] = df_final['period'] // 10
-        df_final['quarter'] = df_final['period'] % 10
+        df_final['year'] = df_final['period'] // 4
+        df_final['quarter'] = df_final['period'] % 4 + 1
         df_final.rename(columns={'data_past': 'data'}, inplace=True)
 
         return df_final
@@ -122,7 +115,7 @@ if __name__ == "__main__":
     output_parquet_path = "../data/financial_statement_v3_2.parquet"
 
     input_csv_path = r"D:\python\financial statement prj\chatbot_financial_statement\csv\v3\map_category_code_universal.csv"
-    output_csv_path = "../csv/v3/map_category_code_universal.csv"
+    output_csv_path = "../data/map_category_code_universal.csv"
 
     process_financial_statements(input_parquet_path, output_parquet_path)
     process_map_universal(input_csv_path, output_csv_path)
