@@ -58,12 +58,12 @@ def test():
 
     chat_config = ChatConfig(**GPT4O_MINI_CONFIG)
     text2sql_config = TEXT2SQL_FAST_GEMINI_CONFIG
-    # text2sql_config['sql_llm'] = 'Qwen/Qwen2.5-Coder-32B-Instruct-GPTQ-Int4'
+    text2sql_config['sql_llm'] = 'qwen2.5-coder-3b-test'
     # text2sql_config = TEXT2SQL_THINKING_GEMINI_CONFIG
     text2sql_config['sql_example_top_k'] = 2
     # text2sql_config['company_top_k'] = 1
     text2sql_config['account_top_k'] = 5
-    prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_SHORT
+    prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI
 
     # try:
     if True:
@@ -79,7 +79,7 @@ def test():
         
         logging.info('Test text2sql')
         prompt = "For the year 2023, what was the Return on Equity (ROE) for Vietcombank (VCB) and Techcombank (TCB)?"
-        his, err, tab = text2sql.solve(prompt, enhance='correction', adjust_table='text')
+        his, err, tab = text2sql.solve(prompt, adjust_table='text')
         
 
         print('### ========= Reasoning ========= ###')
