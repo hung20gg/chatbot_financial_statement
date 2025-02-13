@@ -58,7 +58,9 @@ PROFITABILITY_RATIO_FUNCTIONS = {
     'operating_profit_margin': ['IS_030', 'IS_010'],  # NOPAT, net_sales (IS_010)
     'net_profit_margin': ['IS_060', 'IS_010'],  # net_income (IS_060), net_sales (IS_010)
     'gross_profit_margin': ['IS_020', 'IS_010'],  # gross_profit (IS_020), net_sales (IS_010)
-    'Total_Asset_Turnover': ['IS_010', 'BS_270']  # net_sales (IS_010), avg_total_assets (BS_270)
+    'Total_Asset_Turnover': ['IS_010', 'BS_270'], # net_sales (IS_010), avg_total_assets (BS_270)
+    'return_on_assets_4nq': ['IS_060_4NQ', 'BS_270'],  # net_income (IS_060), total_assets (BS_270)
+    'return_on_equity_4nq': ['IS_060_4NQ', 'BS_400'],  # net_income (IS_060), equity (BS_400)
 }
 
 
@@ -80,6 +82,8 @@ CORP_AVG_RATIO_FUNCTIONS = {
     'return_on_average_assets': ['IS_060', 'BS_270'],  # net_income, avg_total_assets
     'return_on_average_equity': ['IS_060', 'BS_400'],  # net_income, avg_total_equity
     'return_on_average_sales':  ['IS_060', 'IS_010'],  # net_income, avg_sales
+    'return_on_average_assets_4nq': ['IS_060_4NQ', 'BS_270'],  # net_income, avg_total_assets
+    'return_on_average_equity_4nq': ['IS_060_4NQ', 'BS_400'],  # net_income, avg_total_equity
 }
 
 # YoY_RATIO_FUNCTIONS = {
@@ -156,6 +160,8 @@ BANK_PROFITABILITY_RATIO_FUNCTIONS = {
     'net_profit_margin': ['IS_021', 'IS_001'],  # net_income , net_sales
     'operating_profit_margin': ['IS_001','IS_014', ['IS_010','IS_003','IS_004']],  # NOPAT, net_sales 
     'gross_profit_margin': ['IS_003', 'IS_001'],  # gross_profit , net_sales 
+    'return_on_assets_4nq': ['IS_021_4NQ', 'BS_300'],  # net_income (IS_060), total_assets (BS_270)
+    'return_on_equity_4nq': ['IS_021_4NQ', 'BS_500'],  # net_income (IS_060), equity (BS_400)
 }
 
 BANK_CASHFLOW_RATIO_FUNCTIONS = {
@@ -255,7 +261,9 @@ SECURITIES_PROFITABILITY_RATIO_FUNCTIONS = {
     'net_profit_margin': ['IS_200', 'IS_020'],  # net_income , net_sales
     'operating_profit_margin': ['IS_200','IS_040', 'IS_020'],  # NOPAT, net_sales 
     'gross_profit_margin': ['IS_040.1', 'IS_020'],  # gross_profit , net_sales 
-    'Total_Asset_Turnover': ['IS_020', 'BS_270']  # net_sales , avg_total_assets
+    'Total_Asset_Turnover': ['IS_020', 'BS_270'],  # net_sales , avg_total_assets
+    'return_on_assets_4nq': ['IS_200_4NQ', 'BS_270'],  # net_income , total_assets
+    'return_on_equity_4nq': ['IS_200_4NQ', 'BS_400'],  # net_income , equity
 }
 
 
@@ -354,6 +362,46 @@ YoY_RATIO_FUNCTIONS = {
         'Total_Operating_Income_Growth' : 'IS_030',
         'Customer_Loans_Growth_YoY' : 'BS_160',
         }
+
+}
+QoQ_RATIO_FUNCTIONS = {
+    'securities': {
+        'Net_Revenue_Growth_QoQ': 'IS_020',
+        'Gross_Profit_Growth_QoQ': 'IS_040.1',
+        'EBITDA_Growth_QoQ': 'EBITDA',
+        'EBIT_Growth_QoQ': 'EBIT',
+        'Pre_Tax_Profit_Growth_QoQ': 'IS_090',
+        'Accounts_Receivable_Growth_QoQ': 'BS_117',
+        'Short_Term_Debt_Growth_QoQ': 'BS_312',
+        'SG&A_Expense_Growth_QoQ': ['IS_061', 'IS_062'],
+        'Total_Asset_Growth_QoQ': 'BS_270',
+        'Equity_Growth_QoQ': 'BS_400',
+        'CFO_Growth_QoQ': 'CF_060'
+    },
+    'non_bank': {
+        'Net_Revenue_Growth_QoQ': 'IS_010',
+        'Gross_Profit_Growth_QoQ': 'IS_020',
+        'EBITDA_Growth_QoQ': 'EBITDA',
+        'EBIT_Growth_QoQ': 'EBIT',
+        'Pre_Tax_Profit_Growth_QoQ': 'IS_050',
+        'Accounts_Receivable_Growth_QoQ': ['BS_131', 'BS_211'],
+        'Inventory_Growth_QoQ': 'BS_140',
+        'Short_Term_Debt_Growth_QoQ': 'BS_320',
+        'Long_Term_Debt_Growth_QoQ': 'BS_338',
+        'SG&A_Expense_Growth_QoQ': ['IS_025', 'IS_026'],
+        'Total_Asset_Growth_QoQ': 'BS_270',
+        'Equity_Growth_QoQ': 'BS_400',
+        'CFO_Growth_QoQ': 'CF_020'
+    },
+    'bank': {
+        'Customer_Deposits_Growth_QoQ' : 'BS_330',
+        'Operating_Expense_Growth_QoQ' : 'IS_014',
+        'Income_Before_Provision_Growth_QoQ' : 'IS_015',
+        'Interest_Income_Growth_QoQ' : 'IS_003',
+        'Non_Interest_Income_Growth_QoQ' : ['IS_006','IS_007','IS_008','IS_009','IS_012','IS_013'],
+        'Total_Operating_Income_Growth_QoQ' : 'IS_030',
+        'Customer_Loans_Growth_QoQ' : 'BS_160'
+}
 
 }
 

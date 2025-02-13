@@ -145,6 +145,92 @@ def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_m
 
     return pd.DataFrame(results)
 
+def __get_qoq_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_mapping=None):
+    """
+    Computes the Quarter-on-Quarter (QoQ) ratio dynamically for each quarter (Q1, Q2, Q3, Q4).
+    For Q1, compares it with Q4 of the previous year, while for other quarters, compares with the previous quarter.
+    Excludes the calculation for quarter 0 since it represents annual data.
+    """
+
+    results = []
+
+    pivot_df = data_df.pivot_table(
+        index=['stock_code', 'year', 'quarter'],
+        columns='category_code',
+        values='data',
+        aggfunc='sum'
+    )
+
+    for (stock_code, year, quarter), row in pivot_df.iterrows():
+        
+        if quarter == 0:
+            continue 
+
+        for ratio_name, category_code in ratio_mapping.items():
+            try:
+                if quarter == 1:
+                    # Special case: For Q1, compare with Q4 of the previous year
+                    if isinstance(category_code, list):
+                        # Handle sums of multiple category codes
+                        current_quarter_value = sum(row.get(code, 0) for code in category_code)
+                        previous_quarter_value = sum(
+                            pivot_df.loc[(stock_code, year - 1, 4), code]
+                            if (stock_code, year - 1, 4) in pivot_df.index and code in pivot_df.columns
+                            else 0 for code in category_code
+                        )
+                    elif category_code in ['EBIT']:
+                        current_quarter_value = get_pre_calculated_ratio(year, category_code, ratios_df_1, quarter)
+                        previous_quarter_value = get_pre_calculated_ratio(year - 1, category_code, ratios_df_1, 4)
+                    elif category_code in ['EBITDA']:
+                        current_quarter_value = get_pre_calculated_ratio(year, category_code, ratios_df_6, quarter)
+                        previous_quarter_value = get_pre_calculated_ratio(year - 1, category_code, ratios_df_6, 4)
+                    else:
+                        # Standard case: Fetch current and previous quarter values for the same category
+                        current_quarter_value = row.get(category_code, 0)
+                        previous_quarter_value = pivot_df.loc[
+                            (stock_code, year - 1, 4), category_code
+                        ] if (stock_code, year - 1, 4) in pivot_df.index else 0
+                else:
+                    # Standard case: For other quarters, compare with the previous quarter
+                    if isinstance(category_code, list):
+                        current_quarter_value = sum(row.get(code, 0) for code in category_code)
+                        previous_quarter_value = sum(
+                            pivot_df.loc[(stock_code, year, quarter - 1), code]
+                            if (stock_code, year, quarter - 1) in pivot_df.index and code in pivot_df.columns
+                            else 0 for code in category_code
+                        )
+                    elif category_code in ['EBIT']:
+                        current_quarter_value = get_pre_calculated_ratio(year, category_code, ratios_df_1, quarter)
+                        previous_quarter_value = get_pre_calculated_ratio(year, category_code, ratios_df_1, quarter - 1)
+                    elif category_code in ['EBITDA']:
+                        current_quarter_value = get_pre_calculated_ratio(year, category_code, ratios_df_6, quarter)
+                        previous_quarter_value = get_pre_calculated_ratio(year, category_code, ratios_df_6, quarter - 1)
+                    else:
+                        current_quarter_value = row.get(category_code, 0)
+                        previous_quarter_value = pivot_df.loc[
+                            (stock_code, year, quarter - 1), category_code
+                        ] if (stock_code, year, quarter - 1) in pivot_df.index else 0
+
+                # Calculate QoQ growth
+                qoq_value = None
+                if previous_quarter_value == 0 or previous_quarter_value is None:
+                    qoq_value = None 
+                else:
+                    qoq_value = (current_quarter_value - previous_quarter_value) / previous_quarter_value
+
+                results.append({
+                    'stock_code': stock_code,
+                    'year': year,
+                    'quarter': quarter,
+                    'ratio_code': ratio_name,
+                    'data': qoq_value
+                })
+
+            except Exception as e:
+                print(f"Error calculating QoQ ratio {ratio_name} for {stock_code}, Q{quarter}, {year}: {e}")
+
+    return pd.DataFrame(results)
+
 
 def __single_inventory_turnover_ratio(data_df, cost_of_goods_sold, inventory):
     # Filter and prepare inventory and COGS data
@@ -497,6 +583,12 @@ def net_profit_margin(net_profit, net_sales):
 def Total_Asset_Turnover(net_sales, avg_total_assets):
     return net_sales / avg_total_assets if avg_total_assets else None
 
+def return_on_assets_4nq(net_income_4nq, total_assets):
+    return net_income_4nq / total_assets if total_assets else None
+
+def return_on_equity_4nq(net_income_4nq, total_equity):
+    return net_income_4nq / total_equity if total_equity else None
+
 def get_profitability_ratios(data_df, func_dict, type_):
     pivot_df_5 = data_df.pivot_table(index=['stock_code', 'year', 'quarter'], 
                                  columns='category_code', 
@@ -672,6 +764,12 @@ def return_on_average_equity(net_income, avg_total_equity):
 def return_on_average_sales(net_income, avg_total_sales):
     return net_income / avg_total_sales if avg_total_sales else None
 
+def return_on_average_assets_4nq(net_income_4nq, avg_total_assets):
+    return net_income_4nq / avg_total_assets if avg_total_assets else None
+
+def return_on_average_equity_4nq(net_income_4nq, avg_total_equity):
+    return net_income_4nq / avg_total_equity if avg_total_equity else None
+
 def get_avg_ratios(data_df, func_dict, type_):
     pivot_df_7 = data_df.pivot_table(index=['stock_code', 'year', 'quarter'], 
                                  columns='category_code', 
@@ -735,6 +833,7 @@ def get_avg_ratios(data_df, func_dict, type_):
     # Convert the results to a DataFrame
     return pd.DataFrame(avg_results_7)
 
+
 #===================#
 #  Ratio from fiin  #
 #===================#
@@ -770,6 +869,7 @@ def get_constant_values(type_):
             'avg': const.CORP_AVG_RATIO_FUNCTIONS,
             'pe': const.PE_RATIO_FUNCTIONS,
             'yoy': const.YoY_RATIO_FUNCTIONS['non_bank'],
+            'qoq': const.QoQ_RATIO_FUNCTIONS['non_bank'],
             'date': const.DATE_RELATED_FUNCTIONS
         }
         
@@ -784,6 +884,7 @@ def get_constant_values(type_):
             'avg': const.BANK_AVG_RATIO_FUNCTIONS,
             'pe': const.BANK_PE_RATIO_FUNCTIONS,
             'yoy': const.YoY_RATIO_FUNCTIONS['bank'],
+            'qoq': const.QoQ_RATIO_FUNCTIONS['bank'],
             'date': const.BANK_DATE_RELATED_FUNCTIONS
         }
     
@@ -798,6 +899,7 @@ def get_constant_values(type_):
             'avg': const.SECURITIES_AVG_RATIO_FUNCTIONS,
             'pe': const.SECURITIES_PE_RATIO_FUNCTIONS,
             'yoy': const.YoY_RATIO_FUNCTIONS['securities'],
+            'qoq': const.QoQ_RATIO_FUNCTIONS['securities'],
             'date': const.SECURITIES_DATE_RELATED_FUNCTIONS
         }
         
@@ -826,7 +928,8 @@ def get_financial_ratios(data_df, type_ = 'corp', including_explaination = True)
     df_pe = get_pe_ratios(data_df, constant['pe'])
     
     df_yoy = get_yoy_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow, constant=constant['yoy'])
-    df = pd.concat([df_financial_structure, df_liquidity, df_financial_risk, df_income, df_profitability, df_cashflow, df_avg, df_pe, df_yoy, df_date], ignore_index=True)
+    df_qoq = get_yoy_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow, constant=constant['qoq'])
+    df = pd.concat([df_financial_structure, df_liquidity, df_financial_risk, df_income, df_profitability, df_cashflow, df_avg, df_pe, df_yoy, df_qoq, df_date], ignore_index=True)
     
     if type_ == 'bank' and including_explaination:
         df_tm = get_financial_ratio_tm(data_df)

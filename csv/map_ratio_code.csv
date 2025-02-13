@@ -90,3 +90,29 @@ Inventory Turnover Ratio,ITR,inventory_turnover_ratio
 Return On Average Assets,ROAA,return_on_average_assets
 Return On Average Equity,ROAE,return_on_average_equity
 Return On Average Sales,ROAS,return_on_average_sales
+Return On Average Assets 4NQ,ROAA4NQ,return_on_average_assets_4nq
+Return On Average Equity 4NQ,ROAE4NQ,return_on_average_equity_4nq
+Return On Assets 4NQ,ROA4NQ,return_on_assets_4nq
+Return On Equity 4NQ,ROE4NQ,return_on_equity_4nq
+Net Revenue Growth QoQ,NRGQoQ,Net_Revenue_Growth_QoQ
+Gross Profit Growth QoQ,GPGQoQ,Gross_Profit_Growth_QoQ
+EBITDA Growth QoQ,EBITDAQoQ,EBITDA_Growth_QoQ
+EBIT Growth QoQ,EBITGQoQ,EBIT_Growth_QoQ
+Pre Tax Profit Growth QoQ,PTPGQoQ,Pre_Tax_Profit_Growth_QoQ
+Accounts Receivable Growth QoQ,ARGQoQ,Accounts_Receivable_Growth_QoQ
+Inventory Growth QoQ,IGQoQ,Inventory_Growth_QoQ
+Short Term Debt Growth QoQ,STDGQoQ,Short_Term_Debt_Growth_QoQ
+Long Term Debt Growth QoQ,LTDGQoQ,Long_Term_Debt_Growth_QoQ
+SG&A Expense Growth QoQ,SG&AEGQoQ,SG&A_Expense_Growth_QoQ
+Total Asset Growth QoQ,TAGQoQ,Total_Asset_Growth_QoQ
+Equity Growth QoQ,EGQoQ,Equity_Growth_QoQ
+CFO Growth QoQ,CFOGQoQ,CFO_Growth_QoQ
+Customer Deposits Growth QoQ,CDGQoQ,Customer_Deposits_Growth_QoQ
+Operating Expense Growth QoQ,OEGQoQ,Operating_Expense_Growth_QoQ
+Income Before Provision Growth QoQ,IBPGQoQ,Income_Before_Provision_Growth_QoQ
+Interest Income Growth QoQ,IIGQoQ,Interest_Income_Growth_QoQ
+Non Interest Income Growth QoQ,NIIGQoQ,Non_Interest_Income_Growth_QoQ
+Total Operating Income Growth,TOIGQoQ,Total_Operating_Income_Growth_QoQ
+Customer Loans Growth QoQ,CLGQoQ,Customer_Loans_Growth_QoQ
+
+
