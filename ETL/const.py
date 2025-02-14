@@ -177,6 +177,7 @@ BANK_CASHFLOW_RATIO_FUNCTIONS = {
 BANK_FIIN_RATIO_FUNCTIONS = {
     'current_account_saving_account_ratio':  ['BS_330','Bank_TM_121','Bank_TM_124'],  
     'bad_debt_ratio': ['BS_161', ['Bank_TM_68', 'Bank_TM_69', 'Bank_TM_70' ]],
+    'non_performing_loan_coverage_ratio': ['BS_169', 'Bank_TM_65'],
 }
 
 BANK_AVG_RATIO_FUNCTIONS = {

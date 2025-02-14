@@ -115,6 +115,25 @@ class Text2SQL(BaseAgent):
         
         self.llm_responses.extend(messages)
         return get_json_from_text_response(response, new_method=True)['steps']
+    
+
+    def _llm_get_stock_code_and_suitable_row(self, task):
+        messages = [
+        {
+            "role": "user",
+            "content": self.prompt_config.GET_STOCK_CODE_AND_SUITABLE_ROW_PROMPT.format(task = task)
+        }]
+        
+        
+        logging.info("Get stock code based on company name response")
+        response = self.llm(messages)
+        messages.append(
+            {
+                "role": "assistant",
+                "content": response
+            })
+        
+        return messages
      
      
        
@@ -134,21 +153,10 @@ class Text2SQL(BaseAgent):
                 - suggestions_table: [pd.DataFrame]
         """
         
-        
-        messages = [
-        {
-            "role": "user",
-            "content": self.prompt_config.GET_STOCK_CODE_AND_SUITABLE_ROW_PROMPT.format(task = task)
-        }]
+        messages = self._llm_get_stock_code_and_suitable_row(task)
+        response = messages[-1]['content']
         
         
-        logging.info("Get stock code based on company name response")
-        response = self.llm(messages)
-        messages.append(
-            {
-                "role": "assistant",
-                "content": response
-            })
         if self.config.verbose:
             print("Get stock code based on company name response: ")
             print(response)
@@ -261,7 +269,7 @@ class Text2SQL(BaseAgent):
         while count_debug < self.max_debug_round: # Maximum 3 times to debug
             
             logging.info(f"Debug SQL code round {count_debug}")
-            history, error_messages, execute_table = self.__debug_sql(history, error_messages[-1], prefix=f"Debug Round {count_debug + 1}")
+            history, error_messages, execute_table = self.__debug_sql(history, error_messages, prefix=f"Debug Round {count_debug + 1}")
             all_error_messages.extend(error_messages)
             execution_tables.extend(execute_table)
 
@@ -271,7 +279,10 @@ class Text2SQL(BaseAgent):
                 break
             count_debug += 1
         
-        return history, all_error_messages, execution_tables
+        # return history, all_error_messages, execution_tables
+        
+        # If there is still error, return the last error
+        return history, error_messages, execution_tables
     
     @staticmethod
     def sql_dict_to_markdown(sql_dict):
@@ -364,19 +375,37 @@ You are an expert in financial statement and database management. You will be as
 
 
         # ================= Prune Tag =================
-        if few_shot == "":
+        if few_shot.strip() == "":
 
-            init_prompt.replace("<example>\n", "")
-            init_prompt.replace("</example>\n", "")
+            init_prompt.replace("<example>", "")
+            init_prompt.replace("</example>", "")
 
-            new_prompt.replace("<example>\n", "")
-            new_prompt.replace("</example>\n", "")
+            new_prompt.replace("<example>", "")
+            new_prompt.replace("</example>", "")
 
         init_prompt.replace('<data>\n\n\n</data>', "")
         init_prompt.replace('<data>\n\n\n\n\n</data>', "")
         new_prompt.replace('<data>\n\n\n</data>', "")
         new_prompt.replace('<data>\n\n\n\n\n</data>', "")
 
+        
+        clean_new_prompt = ""
+        clean_init_prompt = ""
+        lines_new = new_prompt.split("\n\n")
+        lines_init = init_prompt.split("\n\n")
+
+        for line in lines_new:
+            if line.strip() == "":
+                continue
+            clean_new_prompt += line.strip() + "\n\n"
+        
+        for line in lines_init:
+            if line.strip() == "":
+                continue
+            clean_init_prompt += line.strip() + "\n\n"
+
+        clean_init_prompt.replace("<example>\n\n</example>", "")
+        clean_new_prompt.replace("<example>\n\n</example>", "")
         # ============================================
 
         
@@ -384,18 +413,18 @@ You are an expert in financial statement and database management. You will be as
             temp_message = [
                 {
                     "role": "system",
-                    "content": system_prompt
+                    "content": system_prompt.strip()
                 },
                 {
                     "role": "user",
-                    "content": init_prompt
+                    "content": clean_init_prompt.strip()
                 }
             ]
         else:
             temp_message = [
                 {
                     "role": "user",
-                    "content": new_prompt
+                    "content": clean_new_prompt.strip()
                 }
             ]            
 
@@ -462,8 +491,13 @@ You are an expert in financial statement and database management. You will be as
         if self.config.self_debug and len(error_message) > 0:
             self.history, debug_error_messages, debug_execution_tables = self.debug_sql_code(self.history, error_message)
             
-            error_messages.extend(debug_error_messages)
-            execution_tables.extend(debug_execution_tables)
+            # Only cary last debug message
+
+            # error_messages.extend(debug_error_messages)
+            # execution_tables.extend(debug_execution_tables)
+
+            error_messages = debug_error_messages.copy()
+            execution_tables = debug_execution_tables.copy()
             
             temp_message.extend(self.history[:-2]) # Only add the debug message
             
@@ -517,10 +551,11 @@ You are an expert in financial statement and database management. You will be as
 
 <correction>
 
-Based on the SQL table result in <result> tag, do you think the SQL queries is correct and can fully answer the original task? If there is no content on <result> tag, it means the preivous queries return nothing, which is incorrect.
+Based on the SQL table result in <result> tag, do you think the SQL queries is correct and can fully answer the original task? If there is no SQL Result table on <result> tag, it means the preivous queries return nothing, which is incorrect.
 
-If the previous SQL is not correct, return No under *Decision* heading, think step-by-step under *Reasoning* heading again and generate the correct SQL query under *SQL Query*.
-Otherwise, you only need to return Yes under *Decision* heading. You must not provide the SQL query again.
+If the result of SQL query is correct and the table is suitable for <task> request, you only need to return YES under *Decision* heading. You must not provide the SQL query again.
+Otherwise, return No under *Decision* heading, think step-by-step under *Reasoning* heading again and generate the correct SQL query under *SQL Query*.
+
 
 Return in the following format (### SQL Query is optional):
 
@@ -565,10 +600,10 @@ Return in the following format (### SQL Query is optional):
         if decision.lower().replace("{",'').replace("}",'').strip() in ["no", "n", "false", "f"]:
             router = False
 
-            new_error_messages, new_execution_tables = utils.TIR_reasoning(response, self.db, verbose=self.config.verbose, prefix="Correction")
+            error_messages, execution_tables = utils.TIR_reasoning(response, self.db, verbose=self.config.verbose, prefix="Correction")
             
-            error_messages.extend(new_error_messages)
-            execution_tables.extend(new_execution_tables)
+            # error_messages.extend(new_error_messages)
+            # execution_tables.extend(new_execution_tables)
             
         return self.history, error_messages, execution_tables, router
 
@@ -587,9 +622,10 @@ Return in the following format (### SQL Query is optional):
 
 <reflection>
 
-Based on the SQL table result in <result> tag, do you think the SQL queries is correct and can fully answer the original task? If there is no content on <result> tag, it means the preivous queries return nothing, which is incorrect.
-If not, return NO under *Decision* heading, provide the reason and giving detailed tips to the correct SQL query under *Reflection* heading.
-Else, you only need to return YES under *Decision* heading.
+Based on the SQL table result in <result> tag, do you think the SQL queries is correct and can fully answer the original task? If there is no SQL Result table on <result> tag, it means the preivous queries return nothing, which is incorrect.
+
+If the result of SQL query is correct and the table is suitable for <task> request, you only need to return YES under *Decision* heading.
+Otherwise, return NO under *Decision* heading, provide the reason and giving detailed tips to the correct SQL query under *Reflection* heading.
 
 Only return new, detailed task. Do not return the SQL. Return in the following format:
 
@@ -655,10 +691,10 @@ Only return new, detailed task. Do not return the SQL. Return in the following f
 
 
             # ========= Reasoning with Text2SQL ========= #
-            self.history, new_error_messages, new_execution_tables = self.reasoning_text2SQL(new_task, company_info, suggest_table, adjust_table = adjust_table)
+            self.history, error_messages, execution_tables = self.reasoning_text2SQL(new_task, company_info, suggest_table, adjust_table = adjust_table)
             # =========================================== #
-            error_messages.extend(new_error_messages)
-            execution_tables.extend(new_execution_tables)
+            # error_messages.extend(new_error_messages)
+            # execution_tables.extend(new_execution_tables)
             
         
         print("End of reflection")
@@ -886,7 +922,7 @@ Only return new, detailed task. Do not return the SQL. Return in the following f
             execution_tables (list): A list of execution tables generated during the process.
             
         """
-        list_adj_table = ["shrink", "text", "keep"]
+        list_adj_table = ["text", "shrink", "keep"]
         if isinstance(adjust_table, int):
             choice = min(2, max(0, adjust_table))
             adjust_table = list_adj_table[choice]

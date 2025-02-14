@@ -41,9 +41,18 @@ Using *correction* for refine SQL
 llm=gemini-2.0-flash-thinking-exp-01-21
 version=v1
 path=../data/generated_questions.json
-template=openai
+template=simplify
 
-python generate.py --llm $llm --version $version --path $path --enhance correction
+python generate.py --llm $llm --version $version --path $path --template $template --enhance correction
+```
+
+```bash
+llm=gemini-2.0-flash-thinking-exp-01-21
+version=hard_v0_4
+path=../data/hard_questions_v0_4.jsonl
+template=simplify
+
+python generate.py --llm $llm --version $version --path $path --enhance correction --multi_thread True --max_workers 2
 ```
 
 Generate SQL code for evaluation dataset `sql_v0.jsonl`
@@ -95,10 +104,10 @@ Score the probability that the question can be answered with given data. (weak l
 Run the following script (remember change the argument accordingly)
 
 ```bash
-llm=gpt-4o-mini
+llm=gemini-2.0-flash
 multi_thread=True 
 task=qa_quality
-path=../data/gpt-4o-mini__v3.jsonl
+path=../data/qwen2.5-coder-3b-sft__v3.jsonl
 
 python validate.py --llm $llm --task $task --multi_thread $multi_thread --path $path
 ```

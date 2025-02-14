@@ -13,7 +13,10 @@ from agent.const import (
     TEXT2SQL_FAST_SQL_OPENAI_CONFIG,
     TEXT2SQL_GEMINI_PRO_CONFIG,
     TEXT2SQL_THINKING_GEMINI_CONFIG,
-    TEXT2SQL_4O_CONFIG
+    TEXT2SQL_4O_CONFIG,
+    TEXT2SQL_QWEN25_CODER_1B_SFT_CONFIG,
+    TEXT2SQL_QWEN25_CODER_3B_SFT_CONFIG,
+    TEXT2SQL_QWEN25_CODER_3B_DPO_CONFIG,
 )
 
 from agent.prompt.prompt_controller import (
@@ -62,6 +65,13 @@ def get_text2sql_config(llm_name):
 
     if 'deepseek-chat' in llm_name:
         return TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG
+    
+    if llm_name == 'qwen2.5-coder-3b-sft':
+        return TEXT2SQL_QWEN25_CODER_3B_SFT_CONFIG
+    if llm_name == 'qwen2.5-coder-1.5b-sft':
+        return TEXT2SQL_QWEN25_CODER_1B_SFT_CONFIG
+    if llm_name == 'qwen2.5-coder-3b-dpo':
+        return TEXT2SQL_QWEN25_CODER_3B_DPO_CONFIG
 
     else:
         config = TEXT2SQL_FAST_GEMINI_CONFIG
