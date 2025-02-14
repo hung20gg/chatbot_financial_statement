@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from . import text2sql_utils as utils
 import os
 current_dir = os.path.dirname(__file__)
+from prompt.prompt_controller import *
 
 
 class Config(BaseModel):
