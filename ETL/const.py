@@ -76,6 +76,12 @@ CASHFLOW_RATIO_FUNCTIONS = {
     'earning_quality_ratio': ['CF_020', 'IS_060'],  # operating_net_cash_flow (CF_020), net_income (IS_060)
 }
 
+CORP_AVG_RATIO_FUNCTIONS = {
+    'return_on_average_assets': ['IS_060', 'BS_270'],  # net_income, avg_total_assets
+    'return_on_average_equity': ['IS_060', 'BS_400'],  # net_income, avg_total_equity
+    'return_on_average_sales':  ['IS_060', 'IS_010'],  # net_income, avg_sales
+}
+
 # YoY_RATIO_FUNCTIONS = {
 #     'Net_Revenue_Growth_YoY': 'IS_010',
 #     'Gross_Profit_Growth_YoY': 'IS_020',
@@ -171,8 +177,14 @@ BANK_CASHFLOW_RATIO_FUNCTIONS = {
 BANK_FIIN_RATIO_FUNCTIONS = {
     'current_account_saving_account_ratio':  ['BS_330','Bank_TM_121','Bank_TM_124'],  
     'bad_debt_ratio': ['BS_161', ['Bank_TM_68', 'Bank_TM_69', 'Bank_TM_70' ]],
+    'non_performing_loan_coverage_ratio': ['BS_169', 'Bank_TM_65'],
 }
 
+BANK_AVG_RATIO_FUNCTIONS = {
+    'return_on_average_assets': ['IS_021', 'BS_300'],  # net_income, avg_total_assets
+    'return_on_average_equity': ['IS_021', 'BS_500'],  # net_income, avg_total_equity
+    'return_on_average_sales':   ['IS_021', ['IS_010','IS_003','IS_004']],  # net_income, avg_sales
+}
 # BANK_YoY_RATIO_FUNCTIONS = {
 #     'Customer_Deposits_Growth_YoY' : 'BS_330',
 #     'Operating_Expense_Growth_YoY' : 'IS_014',
@@ -263,6 +275,11 @@ SECURITIES_CASHFLOW_RATIO_FUNCTIONS = {
     'net_interest_margin': ['IS_001', 'BS_110'],  # net_interest_income , avg_earning_assets
 }
 
+SECURITIES_AVG_RATIO_FUNCTIONS = {
+    'return_on_average_assets': ['IS_200', 'BS_270'],  # net_income, avg_total_assets
+    'return_on_average_equity': ['IS_200', 'BS_400'],  # net_income, avg_total_equity
+    'return_on_average_sales':   ['IS_200', 'IS_020'],  # net_income, avg_sales
+}
 
 PE_RATIO_FUNCTIONS = {
     'earning_per_share': ['IS_070'],

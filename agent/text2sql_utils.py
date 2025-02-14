@@ -87,6 +87,8 @@ def join_and_get_difference(df1, df2):
 
 def get_llm_wrapper(model_name, **kwargs):
 
+    host = None 
+    api_key = None
 
     if '/' not in model_name: # Direct provider
 
@@ -102,10 +104,8 @@ def get_llm_wrapper(model_name, **kwargs):
             logging.info(f"Found DeepSeek endpoint: {model_name}")
             host = os.getenv('DEEPSEEK_HOST')
             api_key = os.getenv('DEEPSEEK_API_KEY')
-        else:
-            raise ValueError("Model not supported")
 
-    else: # Huggingface LLM
+    if not host: # Huggingface LLM
         host = os.getenv('LLM_HOST')
         api_key = os.getenv('LLM_API_KEY')
 

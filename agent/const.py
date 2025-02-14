@@ -27,7 +27,7 @@ class Text2SQLConfig(Config):
     
 GEMINI_FAST_CONFIG = {
     "llm": 'gemini-2.0-flash',
-    "routing_llm": 'gemini-1.5-flash-002',
+    "routing_llm": 'gemini-2.0-flash-lite-preview-02-05',
     "summary_every": -1,
     "get_task": True
 }
@@ -61,7 +61,7 @@ GPT4O_CONFIG = {
 
 GEMINI_BEST_CONFIG = {
     "llm": 'gemini-1.5-pro-002',
-    "routing_llm": 'gemini-2.0',
+    "routing_llm": 'gemini-2.0-flash',
     "summary_every": -1
 }
 
@@ -217,7 +217,7 @@ TEXT2SQL_EXP_GEMINI_CONFIG = {
 }
 
 TEXT2SQL_THINKING_GEMINI_CONFIG = {
-    "llm": 'gemini-1.5-flash',
+    "llm": 'gemini-2.0-flash',
     'sql_llm': 'gemini-2.0-flash-thinking-exp-01-21',
     "reasoning": False,
     "branch_reasoning": False,
@@ -232,9 +232,49 @@ TEXT2SQL_FASTEST_CONFIG = {
     "reasoning": False,
     "branch_reasoning": False,
 
-    "verbose": True,
-    'get_all_acount': False,
     'self_debug': False
+}
+
+
+TEXT2SQL_QWEN25_CODER_3B_SFT_CONFIG = {
+    "llm": 'qwen2.5-coder-3b-sft',
+    "sql_llm": 'qwen2.5-coder-3b-sft',
+    "reasoning": False,
+    "branch_reasoning": False,
+    'account_top_k': 4,
+    'sql_example_top_k': 1,
+
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
+}
+
+TEXT2SQL_QWEN25_CODER_3B_DPO_CONFIG = {
+    "llm": 'qwen2.5-coder-3b-dpo',
+    "sql_llm": 'qwen2.5-coder-3b-dpo',
+    "reasoning": False,
+    "branch_reasoning": False,
+    'account_top_k': 4,
+    'sql_example_top_k': 1,
+
+
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
+}
+
+TEXT2SQL_QWEN25_CODER_1B_SFT_CONFIG = {
+    "llm": 'qwen2.5-coder-1.5b-sft',
+    "sql_llm": 'qwen2.5-coder-1.5b-sft',
+    "reasoning": False,
+    "branch_reasoning": False,
+    'account_top_k': 4,
+    'sql_example_top_k': 1,
+
+
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
 }
 
 

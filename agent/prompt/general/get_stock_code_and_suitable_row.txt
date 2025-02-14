@@ -11,7 +11,7 @@ Extract the company name and/or the industry that positively mentioned based on 
 
 </question>
 
-Only return the accounts and entities extracted. Do not answer the question.
+Analyze and return the accounts and entities that useful to answer the question.
 Return in JSON format, followed by this schema. 
 
 ```
