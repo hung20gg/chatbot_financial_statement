@@ -37,7 +37,7 @@ class MessageSaver(BaseSemantic):
         self.chat_collection = self.db[chat_collection]
         self.sql_collection = self.db[sql_collection]
         
-    def ensure_database_and_collections(self, db_name, *collections):
+    def ensure_database_and_collections(self, db_name: str, *collections):
         try:
             # Access the database
             db = self.client[db_name]
@@ -53,27 +53,36 @@ class MessageSaver(BaseSemantic):
         except Exception as e:
             raise Exception(f"Error in creating database and collections: {e}")
         
-    def switch_collection(self, collection_name):
+    def switch_collection(self, collection_name: str):
         self.collection = self.db[collection_name]    
         
-    def add_sql(self, conversation_id, task, sql):
-        date_created = datetime.now()
-        if isinstance(sql, str):
-            sql = [sql]
-        
-        sql_id = str(uuid.uuid4())
-        
-        sql_log = {
-            "_id": sql_id,
-            "conversation_id": conversation_id,
-            "task": task,
-            "sql": sql,
-            "date_created": date_created
-        }
-        self.sql_collection.insert_one(sql_log)
-        return sql_id
+    def add_solver_output(self, output: dict):
 
-    def create_conversation(self, user_id):
+        # Check if the solver id exists
+
+        solver_id = output['solver_id']
+
+        if not self.sql_collection.find_one({"_id": solver_id}):
+            date_created = datetime.now()
+            solver_log = {
+                "_id": solver_id,
+                "solver_output": [output],
+                "date_created": date_created
+            }
+            self.sql_collection.insert_one(solver_log)
+        
+        else:
+            self.sql_collection.update_one(
+                {"_id": solver_id},
+                {
+                    "$push": {
+                        "solver_output": output
+                    }
+                }
+            )
+
+
+    def create_conversation(self, user_id: str):
         """Create a new conversation with OpenAI-style messages."""
         conversation_id = str(uuid.uuid4())
         date_created = datetime.now()
@@ -83,13 +92,14 @@ class MessageSaver(BaseSemantic):
             "date_created": date_created,
             "date_updated": date_created,
             "messages": [],  # Start with an empty list
-            "sql_messages": []
+            "solver_ids": []
         }
         self.chat_collection.insert_one(conversation)
         logging.info(f"Conversation created with ID: {conversation_id}")
         return conversation_id
     
-    def add_message(self, conversation_id, messages, sql_messages):
+    # Need new implementation. A message can have multiple sqls_messages
+    def add_message(self, conversation_id: str, messages: list[dict], solver_ids: list[str]):
         """Add a message to a conversation."""
         date_updated = datetime.now()
 
@@ -99,29 +109,27 @@ class MessageSaver(BaseSemantic):
             {
                 "$set": {
                     "messages": messages,
-                    "sql_messages": sql_messages,
+                    "solver_ids": solver_ids,
                     "date_updated": date_updated
                 }
             }
         )
         logging.info(f"Message added to conversation with ID: {conversation_id}")
 
-    def get_messages(self, conversation_id):
+    def get_messages(self, conversation_id: str):
         return self.chat_collection.find_one({"_id": conversation_id})
     
-    # def message_feedback(self, conversation_id, feedback):
-    #     self.chat_collection.update_one(
-    #         {"_id": conversation_id},  # Match your document
-    #         {"$set": {"messages.$[last].feedback": feedback}},  # Update the last message
-    #         array_filters=[{"last": {"$exists": True}}],  # Apply condition to the last item
-    #         sort={"messages": -1}  # Optional: ensure correct ordering
-    #     )
-        
-    def sql_feedback(self, sql_id, feedback):
+
+    def sql_feedback(self, solver_id: int, output_id: int, feedback):
+
         self.sql_collection.update_one(
-            {"_id": sql_id},  # Match your document
-            {"$set": {"feedback": feedback}},  # Update the last message
+            {"_id": solver_id, "solver_output.output_id": output_id},  # Match your document
+            {"$set": {"solver_output.$.feedback": feedback}},  # Update the last message
         )
+        # self.sql_collection.update_one(
+        #     {"_id": sql_id},  # Match your document
+        #     {"$set": {"feedback": feedback}},  # Update the last message
+        # )
             
     
 def get_semantic_layer(**kwargs):

@@ -114,7 +114,10 @@ def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=F
             solver.reset()
 
         ner_messages = solver._llm_get_stock_code_and_suitable_row(prompt)
-        his, err, tables = solver.solve(prompt, enhance=enhance)
+        output = solver.solve(prompt, enhance=enhance)
+
+        his, err, tables = output.history, output.error_messages, output.execution_tables
+        
         table_str = utils.table_to_markdown(tables)
 
         # Get the SQL code from the last response
@@ -252,8 +255,10 @@ def single_fake_messages(text2sql_config,  batch_questions, using_cache=False, f
 
         if not using_cache:
             solver.reset()
-        his, err, tables = solver.solve(prompt, inject_reasoning=reasoning, adjust_table=random_table) # Fake reasoning
 
+        output = solver.solve(prompt, inject_reasoning=reasoning, adjust_table=random_table) # Fake reasoning
+        his, err, tables = output.history, output.error_messages, output.execution_tables
+        
         global_history = his
     
     if file_path:

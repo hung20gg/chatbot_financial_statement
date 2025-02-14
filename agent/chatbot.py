@@ -2,7 +2,7 @@ from .base import BaseAgent
 
 from .const import ChatConfig
 from . import text2sql_utils as utils
-from .text2sql import Text2SQL
+from .text2sql import Text2SQL, Text2SQLOutput
 import sys
 sys.path.append('..')
 from llm.llm_utils import flatten_conversation, get_json_from_text_response, get_code_from_text_response
@@ -38,6 +38,8 @@ class Chatbot(BaseAgent):
     
     tables: List = [] 
     is_routing: bool = False
+    solver_ouputs: dict = dict()
+    solver_ids: List[str] = []
     
     def __init__(self, config: ChatConfig, text2sql: Text2SQL, **kwargs):
         super().__init__(config = config, text2sql = text2sql, **kwargs)
@@ -63,6 +65,8 @@ class Chatbot(BaseAgent):
             }
         )
         self.text2sql.reset()
+        self.solver_ids = []
+        self.solver_ouputs = dict()
         
     def create_new_chat(self, **kwargs):
         self.setup()
@@ -115,9 +119,17 @@ class Chatbot(BaseAgent):
         
         response = self.routing_llm(prompt)
         return response
+    
+
+    def routing_v2(self, user_input):
+        pass
         
+
+    def _solve_text2sql_v2(self, user_input, **kwargs):
+        pass
+    
         
-    def _solve_text2sql(self, user_input):
+    def _solve_text2sql(self, user_input, **kwargs):
         
         task = user_input
         if self.config.get_task:
@@ -126,14 +138,15 @@ class Chatbot(BaseAgent):
         
         table_strings = ""
         
-        self.sql_history, error_messages, execution_tables =  self.text2sql.solve(task)
+        output =  self.text2sql.solve(task, **kwargs)
+        self.sql_history = output.history
         
         if not os.path.exists('temp'):
             os.makedirs('temp')
         with open('temp/sql_history.json', 'w') as file:
             json.dump(self.sql_history, file)
         
-        table_strings = utils.table_to_markdown(execution_tables)
+        table_strings = utils.table_to_markdown(output.execution_tables)
 
         self.history.append(
             {
@@ -169,19 +182,22 @@ class Chatbot(BaseAgent):
         )
 
         
-        return table_strings
+        return output
         
     
-    def solve_text2sql(self, user_input):
-        return self._solve_text2sql(user_input)
+    def solve_text2sql(self, user_input, version = "v1", **kwargs):
+        if version == "v2":
+            return self._solve_text2sql_v2(user_input, **kwargs)
+        return self._solve_text2sql(user_input, **kwargs)
         
         
-    def __reasoning(self, user_input, routing = False):
+    def __reasoning(self, user_input, routing = False, version = "v1", **kwargs):
         
         table_strings = ""
         if routing:
             logging.info("Routing triggered")
-            table_strings = self.solve_text2sql(user_input)
+            output = self.solve_text2sql(user_input, version = version, **kwargs)
+            table_strings = utils.table_to_markdown(output.execution_tables)
         
         else:
             logging.info("Routing not triggered")
@@ -191,11 +207,12 @@ class Chatbot(BaseAgent):
                     'content': user_input
                 }
             )
+        print(table_strings)
         return table_strings
         
         # return response
         
-    def stream(self, user_input):
+    def stream(self, user_input, version = "v1", **kwargs):
         
         self.is_routing = False # Reset the routing flag
         
@@ -207,18 +224,22 @@ class Chatbot(BaseAgent):
         start = time.time()
         
         # Routing
-        self.is_routing = self.routing(user_input)
+        if version == "v2":
+            self.is_routing = self.routing_v2(user_input)
+        else:
+            self.is_routing = self.routing(user_input)
+
         if self.is_routing:
             yield '\n\nAnalyzing '
         
-            table_strings = self.__reasoning(user_input, self.is_routing)
+            table_strings = self.__reasoning(user_input, self.is_routing, **kwargs)
             end = time.time()
             
             yield 'in {:.2f}s\n\n'.format(end - start)
             yield table_strings + '\n\n'
         
         else:
-            table_strings = self.__reasoning(user_input, self.is_routing)
+            table_strings = self.__reasoning(user_input, version=version, routing=self.is_routing, **kwargs)
             end = time.time()
         
         logging.info(f"Reasoning time with streaming: {end - start}s")
@@ -236,7 +257,7 @@ class Chatbot(BaseAgent):
         
             
         
-    def chat(self, user_input):
+    def chat(self, user_input, version = "v1", **kwargs):
         
         self.is_routing = False # Reset the routing flag
         
@@ -247,8 +268,12 @@ class Chatbot(BaseAgent):
         
         start = time.time()
         
-        self.is_routing = self.routing(user_input)
-        table_strings = self.__reasoning(user_input, self.is_routing)
+        if version == "v2":
+            self.is_routing = self.routing_v2(user_input)
+        else:
+            self.is_routing = self.routing(user_input)
+
+        table_strings = self.__reasoning(user_input, routing=self.is_routing, version=version, **kwargs)
         response = self.llm(self.history)
         
         end = time.time()
@@ -282,48 +307,35 @@ class Chatbot(BaseAgent):
         
         
 class ChatbotSematic(Chatbot):
-    
-    text2sql: Text2SQL
-    config: ChatConfig
-    
-    llm: Any = Field(default=None) # The LLM model
-    routing_llm: Any = Field(default=None) # The SQL LLM model
-    
-    history: List[dict] = []
-    display_history: List[dict] = []
-    sql_history: List[dict] = []
-    
-    tables: List = [] 
-    is_routing: bool = False
-    last_sql_id: str = ""
-    
+        
     message_saver: BaseSemantic
-    
-    conversation_id: str = ""
-    
-    def __init__(self, message_saver: BaseSemantic, **kwargs):
-        super().__init__(message_saver= message_saver, **kwargs)
+    conversation_id: str = None
         
-        # self.llm = utils.get_llm_wrapper(model_name=config.llm, **kwargs)
-        # self.routing_llm = utils.get_llm_wrapper(model_name=config.routing_llm, **kwargs)
-        # self.setup()
-        
-    def save_sql(self, task):
-        response = self.sql_history[-1]['content']  
-        codes = get_code_from_text_response(response)
-        sqls = []
-        for code in codes:
-            if code['language'] == 'sql':
-                sqls.append(code['code'])
-                
-        self.last_sql_id = self.message_saver.add_sql(self.conversation_id, task, sqls)
-        self.sql_history[-1]['sql_id'] = self.last_sql_id
+    def save_sql(self, output: Text2SQLOutput):
+        print("Saving SQL")
+        dict_output = output.convert_to_dict()
+
+        # Save the single mesage
+        self.message_saver.add_solver_output(dict_output)
+
+        solver_id = dict_output['solver_id']
+
+        # Add new solver id to the list
+        if solver_id not in self.solver_ouputs:
+            self.solver_ouputs[solver_id] = []
+            self.solver_ids.append(solver_id)
+
+        self.solver_ouputs[solver_id].append(len(self.history) - 1)
         
         
-    def solve_text2sql(self, task):
-        table_strings = self._solve_text2sql(task)
-        self.save_sql(task)
-        return table_strings
+    def solve_text2sql(self, task, version = 'v1', **kwargs):
+        if version == 'v2':
+            output = self._solve_text2sql_v2(task, **kwargs)
+        else:
+            output = self._solve_text2sql(task, **kwargs)
+        
+        self.save_sql(output)
+        return output
         
         
     def create_new_chat(self, user_id: str = "test_user"):
@@ -338,9 +350,11 @@ class ChatbotSematic(Chatbot):
         super().get_generated_response(assistant_response, table_strings)
         
         if self.is_routing: # Previous message triggered the text2sql
-            self.history[-1]['sql_id'] = self.last_sql_id
+            
+            # Save the last sql_id
+            self.history[-1]['sql_id'] = self.solver_ouputs[self.solver_ids[-1]][-1]
         
-        self.message_saver.add_message(self.conversation_id, self.history, self.sql_history)
+        self.message_saver.add_message(self.conversation_id, self.history, self.solver_ids)
         
         
     def update_feedback(self, feedback):
@@ -352,10 +366,13 @@ class ChatbotSematic(Chatbot):
             score = -1
             
         self.history[-1]['feedback'] = score
+
+        last_solver_id = self.solver_ids[-1]
+        last_output_id = self.solver_ouputs[last_solver_id][-1]
             
         if self.is_routing:
-            self.message_saver.sql_feedback(self.last_sql_id, score)
-        self.message_saver.add_message(self.conversation_id, self.history, self.sql_history)
+            self.message_saver.sql_feedback(last_solver_id, last_output_id, score)
+        self.message_saver.add_message(self.conversation_id, self.history, self.solver_ids)
             
         
         

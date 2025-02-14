@@ -14,9 +14,11 @@ from .prompt.prompt_controller import PromptConfig, VERTICAL_PROMPT_BASE, VERTIC
 import pandas as pd
 import logging
 import time
-from pydantic import SkipValidation, Field
+from datetime import datetime
+from pydantic import SkipValidation, Field, BaseModel
 from typing import Any, List
 from copy import deepcopy
+import uuid
 
 logging.basicConfig(
     level=logging.INFO,
@@ -29,8 +31,35 @@ def steps_to_strings(steps):
         steps_string += f"Step {i+1}: \n {step}\n\n"
     return steps_string
 
+
+
+class Text2SQLOutput(BaseModel):
+    id: str = str(uuid.uuid4())
+    task: str
+    solver_id: str
+    timestamp: datetime = datetime.now()
+    history: List[dict] = []
+    error_messages: List[str] = []
+    execution_tables: List[Table] = []
+    extraction_msg: List[dict] = []
+    sql: List[str] = []
+
+    def convert_to_dict(self):
+        return {
+            "id": self.id,
+            "task": self.task,
+            "solver_id": self.solver_id,
+            "timestamp": self.timestamp,
+            "history": self.history,
+            "error_messages": self.error_messages,
+            "execution_tables": [table.convert_to_dict() for table in self.execution_tables],
+            "extraction_msg": self.extraction_msg,
+            "sql": self.sql
+        }
+
 class Text2SQL(BaseAgent):
-    
+
+    id: str = str(uuid.uuid4())
     db: BaseDBHUB # The database connection.
     max_steps: int # The maximum number of steps to break down the task
     prompt_config: PromptConfig # The prompt configuration. This is for specify prompt for horizontal or vertical database design
@@ -46,7 +75,9 @@ class Text2SQL(BaseAgent):
     _latest_task_index: int = 0 # The latest task index
 
     max_debug_round: int = 3 # The maximum number of debugging rounds
-    
+    max_solution_cache: int = 10 # The maximum number of solutions to cache
+    current_solution_cache: int = 0 # The current number of solutions cached
+
     def __init__(self, config: Config, prompt_config: PromptConfig, db, max_steps: int = 2, **kwargs):
         super().__init__(config=config, db = db, max_steps = max_steps, prompt_config = prompt_config)
         
@@ -71,6 +102,8 @@ class Text2SQL(BaseAgent):
         self.sql_dict = {}
         self._latest_task_index = 0
         self.max_debug_round = 3
+        self.current_solution_cache = 0
+        self.id = str(uuid.uuid4())
 
     
     def get_latest_task(self):
@@ -204,7 +237,7 @@ class Text2SQL(BaseAgent):
             
             table = Table(table=df, description=title)
             tables.append(table)
-        return company_df, tables
+        return company_df, tables, messages
 
     
     @staticmethod 
@@ -680,7 +713,7 @@ Only return new, detailed task. Do not return the SQL. Return in the following f
         if reflection:
 
             # ========== Get stock code and suitable row ========== #
-            company_info, suggest_table = self.get_stock_code_and_suitable_row(new_task)
+            company_info, suggest_table, extraction_msg = self.get_stock_code_and_suitable_row(new_task)
             
             tables = [company_info]
             tables.extend(suggest_table)
@@ -898,13 +931,13 @@ Only return new, detailed task. Do not return the SQL. Return in the following f
         if enhance is not None:
             bool_enhance = True
         
-        company_info, suggest_table = self.get_stock_code_and_suitable_row(task)
+        company_info, suggest_table, extraction_msg = self.get_stock_code_and_suitable_row(task)
 
         temp_message = self.get_reasoning_text2sql_template(task, company_info, suggest_table, bool_enhance, adjust_table)
         return temp_message
 
     
-    def solve(self, task: str, cache: bool = True, inject_reasoning: str = None, enhance: str = None, adjust_table: str|int = 0, mix_account: bool = True):
+    def solve(self, task: str, cache: bool = True, inject_reasoning: str = None, enhance: str = None, adjust_table: str|int = 0, mix_account: bool = True) -> Text2SQLOutput:
         """
         Solve the task with Text2SQL
         The solve method is designed to solve a given task by converting it into SQL queries using the Text2SQL model. It handles both simple and complex tasks by breaking them down into steps if necessary.
@@ -922,6 +955,10 @@ Only return new, detailed task. Do not return the SQL. Return in the following f
             execution_tables (list): A list of execution tables generated during the process.
             
         """
+        if self.current_solution_cache >= self.max_solution_cache:
+            self.reset()
+
+
         list_adj_table = ["text", "shrink", "keep"]
         if isinstance(adjust_table, int):
             choice = min(2, max(0, adjust_table))
@@ -945,7 +982,7 @@ Only return new, detailed task. Do not return the SQL. Return in the following f
 
 
         # ===== Get stock code and suitable row =====    
-        company_info, suggest_table = self.get_stock_code_and_suitable_row(str_task)
+        company_info, suggest_table, extraction_msg = self.get_stock_code_and_suitable_row(str_task)
         
         tables = [company_info]
         tables.extend(suggest_table)
@@ -966,12 +1003,16 @@ Only return new, detailed task. Do not return the SQL. Return in the following f
         else:
             self.history, error_messages, execution_tables = self.branch_reasoning_text2SQL(task, steps, company_info, suggest_table, adjust_table = adjust_table, enhance = bool_enhance)
 
+        sql_codes = utils.get_sql_code_from_text(self.history[-1]['content'])
+
         if bool_enhance:
             accept_result = False
             count_reflection = 0
             while not accept_result and count_reflection < 2: # Maximum 2 times to reflect
                 count_reflection += 1
                 logging.info(f"Enhance round {count_reflection}, using {enhance} method")
+
+                sql_codes = utils.get_sql_code_from_text(self.history[-1]['content'])
 
                 if enhance == "correction":
                     self.history, error_messages, execution_tables, accept_result = self.self_correction(error_messages, execution_tables, adjust_table=adjust_table)
@@ -990,4 +1031,15 @@ Only return new, detailed task. Do not return the SQL. Return in the following f
         
         end = time.time()
         logging.info(f"Time taken: {end-start}s")
-        return self.history, error_messages, tables
+        self.current_solution_cache += 1
+
+
+        return Text2SQLOutput(solver_id = self.id, 
+                              task = task,
+                              history = self.history, 
+                              error_messages = error_messages, 
+                              execution_tables = tables, 
+                              extraction_msg = extraction_msg, 
+                              sql = sql_codes)
+
+        # return self.history, error_messages, tables
