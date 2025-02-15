@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
+import json
 
 import sys 
 sys.path.append('..')
@@ -33,6 +34,26 @@ class Table(BaseModel):
     
     def __repr__(self):
         return f"Table(desc = {self.description}, num_rows = {len(self.table)}, num_columns = {len(self.table.columns)}"
+    
+    def model_dump(self, **kwargs):
+
+        # pd.DataFrame to dict
+        if isinstance(self.table, pd.DataFrame):
+            table = self.table.to_dict(orient='records')
+        else:
+            table = self.table
+
+        return {
+            'table': table,
+            'sql': self.sql,
+            'description': self.description
+        }
+    
+    def dict(self, **kwargs):
+        return self.model_dump(**kwargs)
+    
+    def convert_to_dict(self, **kwargs):
+        return self.model_dump(**kwargs)
     
 
 def table_to_markdown(table: Table|pd.DataFrame|str|list, adjust:str = 'shrink', max_string = 5000) -> str:
@@ -157,7 +178,7 @@ def df_to_markdown(df, adjust:str = 'keep') -> str:
                 text_df += f"- {row[columns[0]]}"
 
                 # Add new line if not the last row
-                if i < num_rows - 1:
+                if i < num_rows:
                     text_df += "\n"
             return text_df
         
@@ -167,7 +188,7 @@ def df_to_markdown(df, adjust:str = 'keep') -> str:
                 text_df += f"- {row[columns[0]]}: {row[columns[1]]}"
 
                 # Add new line if not the last row
-                if i < len(df) - 1:
+                if i < num_rows:
                     text_df += "\n"
             return text_df
         
@@ -188,7 +209,7 @@ def df_to_markdown(df, adjust:str = 'keep') -> str:
                 text_df += f"{r} | "
 
             # Add new line if not the last row
-            if i < num_rows - 1:
+            if i < num_rows:
                 text_df += "\n"
         return text_df
     
@@ -299,16 +320,10 @@ def get_content_with_heading_tag(content: str, tag: str = "###") -> dict:
 
     return result
 
-    
-def TIR_reasoning(response, db, verbose=False, prefix=""):
+def get_sql_code_from_text(response):
     codes = get_code_from_text_response(response)
-        
-    TIR_response = ""
-    execution_error = []
-    execution_table = []
     
     sql_code = []
-    
     for code in codes:
         if code['language'] == 'sql':
             codes = code['code'].split(";")
@@ -316,6 +331,16 @@ def TIR_reasoning(response, db, verbose=False, prefix=""):
                 # clean the content
                 if content.strip() != "":
                     sql_code.append(content)
+            
+    return sql_code
+
+    
+def TIR_reasoning(response, db, verbose=False, prefix=""):
+    
+    execution_error = []
+    execution_table = []
+    
+    sql_code = get_sql_code_from_text(response)
             
     for i, code in enumerate(sql_code):    
         if verbose:    

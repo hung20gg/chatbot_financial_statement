@@ -35,7 +35,7 @@ chmod +x run.sh
 ./run.sh local-server --local True 
 ```
 
-#### Setup maunally
+### Setup maunally
 
 Create database via this scripts
 
@@ -58,7 +58,7 @@ text-embeddings-router --model-id $model --port 8081
 ```
 
 ## DB In the pipeline
-- ChromaDB (Storing the embedding)
+- ChromaDB/ Milvus (Storing the embedding)
 - PostgreSQL (Storing the data)
 - MongoDB (Storing the user message)
 

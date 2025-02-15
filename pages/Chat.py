@@ -10,6 +10,7 @@ from agent.const import (
     ChatConfig,
     Text2SQLConfig,
     GEMINI_FAST_CONFIG,
+    GEMINI_FAST_CONFIG_V2,
     GPT4O_MINI_CONFIG,
     GPT4O_CONFIG,
     GEMINI_EXP_CONFIG,
@@ -59,12 +60,13 @@ if "logged_in" not in st.session_state:
 if "username" not in st.session_state:
     st.session_state.username = ""
 
+
 @st.cache_resource
 def initialize(user_name, chat_model = 'gemini-2.0-flash', text2sql_model = 'gemini-2.0-flash'):
     
     prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI
     text2sql_config = TEXT2SQL_FAST_GEMINI_CONFIG
-    chat_config = GEMINI_FAST_CONFIG
+    chat_config = GEMINI_FAST_CONFIG_V2
 
     if 'gemini-2.0-flash' in chat_model:
         chat_config = GEMINI_FAST_CONFIG
@@ -82,7 +84,7 @@ def initialize(user_name, chat_model = 'gemini-2.0-flash', text2sql_model = 'gem
     
     message_saver = get_semantic_layer()
     
-    chatbot = ChatbotSematic(config = chat_config, text2sql = text2sql, message_saver = message_saver)
+    chatbot = ChatbotSematic(config = ChatConfig(**chat_config), text2sql = text2sql, message_saver = message_saver)
     logging.info('Finish setup chatbot')
     
     chatbot.create_new_chat(user_id=user_name)
@@ -95,8 +97,11 @@ def initialize(user_name, chat_model = 'gemini-2.0-flash', text2sql_model = 'gem
 def chat(user_name):
     user_name = str(user_name)
 
-    st.session_state.chat_model = 'gemini-2.0-flash'
-    st.session_state.text2sql_model = 'gemini-2.0-flash'
+    if "chat_model" not in st.session_state:
+        st.session_state.chat_model = 'gemini-2.0-flash'
+
+    if "text2sql_model" not in st.session_state:
+        st.session_state.text2sql_model = 'gemini-2.0-flash'
     
     chatbot = initialize(user_name, text2sql_model=str(st.session_state.text2sql_model), chat_model=str(st.session_state.chat_model))
     st.session_state.chatbot = chatbot
@@ -104,13 +109,13 @@ def chat(user_name):
     chat_model = st.selectbox(
         "Chat Model:",
         ['gemini-2.0-flash', 'gpt-4o-mini'],
-        index=['gemini-2.0-flash', 'gpt-4o-mini'].index(st.session_state.selected_model)
+        index=['gemini-2.0-flash', 'gpt-4o-mini'].index(st.session_state.chat_model)
     )
     
     text2sql_model = st.selectbox(
         "Text2SQL Model:",
         ['gemini-2.0-flash', 'qwen2.5-3b-sft', 'gpt-4o-mini'],
-        index=['gemini-2.0-flash', 'qwen2.5-3b-sft', 'gpt-4o-mini'].index(st.session_state.selected_text2sql_model)
+        index=['gemini-2.0-flash', 'qwen2.5-3b-sft', 'gpt-4o-mini'].index(st.session_state.text2sql_model)
     )
 
     if chat_model != st.session_state.chat_model or text2sql_model != st.session_state.text2sql_model:
@@ -146,7 +151,7 @@ def chat(user_name):
         assistant_message = st.chat_message("assistant", avatar='graphics/assistant.png').empty()   
         
         streamed_text = ""
-        for chunk in st.session_state.chatbot.stream(input_text):
+        for chunk in st.session_state.chatbot.stream(input_text, version='v2'):
             if isinstance(chunk, str):
                 streamed_text += chunk
                 assistant_message.write(streamed_text)

@@ -58,12 +58,12 @@ def test():
 
     chat_config = ChatConfig(**GPT4O_MINI_CONFIG)
     text2sql_config = TEXT2SQL_FAST_GEMINI_CONFIG
-    text2sql_config['sql_llm'] = 'qwen2.5-coder-1.5b-test'
-    text2sql_config['llm'] = 'qwen2.5-coder-1.5b-test'
-    # text2sql_config = TEXT2SQL_THINKING_GEMINI_CONFIG
-    text2sql_config['sql_example_top_k'] = 0
-    # text2sql_config['company_top_k'] = 1
-    text2sql_config['account_top_k'] = 4
+    # text2sql_config['sql_llm'] = 'qwen2.5-coder-1.5b-test'
+    # text2sql_config['llm'] = 'qwen2.5-coder-1.5b-test'
+    # # text2sql_config = TEXT2SQL_THINKING_GEMINI_CONFIG
+    # text2sql_config['sql_example_top_k'] = 0
+    # # text2sql_config['company_top_k'] = 1
+    # text2sql_config['account_top_k'] = 4
     prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_SHORT
 
     # try:
@@ -79,20 +79,18 @@ def test():
         print(text2sql.db.vector_db_ratio.similarity_search('ROA', 2))
         
         logging.info('Test text2sql')
-        prompt = "For the year 2023, what was the Return on Equity (ROE) for Vietcombank (VCB) and Techcombank (TCB)?"
-        his, err, tab = text2sql.solve(prompt, adjust_table='text', mix_account=False)
+        prompt = "For the year 2023, what was the Return on Equity for Vietcombank and Techcombank?"
+        output = text2sql.solve(prompt, adjust_table='text', mix_account=False)
         
-
         print('### ========= Reasoning ========= ###')
-        for msg in his:
+        for msg in output.history:
             print('\n# ===== Role: %s ===== #' % msg['role'])
             print('# ===== Content ===== #\n')
             print(msg['content'])
 
         print('===== Table =====')
-        for t in tab:
+        for t in output.execution_tables:
             print(t.table)
-        
         
     # except Exception as e:
     #     logging.error("Failed to setup chatbot")

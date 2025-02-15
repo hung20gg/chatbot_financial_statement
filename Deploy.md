@@ -32,15 +32,15 @@ chmod +x run.sh
 
 - For CPU (Using OpenAI Embedding)
 ```bash
-./run.sh --openai True
+./run.sh --preprocess v3 --openai True 
 ```
 
 - For GPU (Self-hosted Embedding Server)
 ```bash
-./run.sh local-embedding --local True
+./run.sh local-embedding --preprocess v3 --local True
 ```
 
 - For GPU + Rerank (Self-hosted Embedding Server)
 ```bash
-./run.sh local-model --local True
+./run.sh local-model --preprocess v3 --local True
 ```
