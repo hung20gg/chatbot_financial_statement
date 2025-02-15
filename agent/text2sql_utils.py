@@ -178,7 +178,7 @@ def df_to_markdown(df, adjust:str = 'keep') -> str:
                 text_df += f"- {row[columns[0]]}"
 
                 # Add new line if not the last row
-                if i < num_rows - 1:
+                if i < num_rows:
                     text_df += "\n"
             return text_df
         
@@ -188,7 +188,7 @@ def df_to_markdown(df, adjust:str = 'keep') -> str:
                 text_df += f"- {row[columns[0]]}: {row[columns[1]]}"
 
                 # Add new line if not the last row
-                if i < len(df) - 1:
+                if i < num_rows:
                     text_df += "\n"
             return text_df
         
@@ -209,7 +209,7 @@ def df_to_markdown(df, adjust:str = 'keep') -> str:
                 text_df += f"{r} | "
 
             # Add new line if not the last row
-            if i < num_rows - 1:
+            if i < num_rows:
                 text_df += "\n"
         return text_df
     

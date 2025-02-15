@@ -1572,7 +1572,25 @@ select
 from financial_statement_explaination
 
 where
-	category_code = 'Bank_TM_65' -- Price-Earning Ratio
-	and year = 2022
+	category_code = 'Bank_TM_65' -- Amount Bad debt
+	and year = 2023
 	and quarter = 0
-	and stock_code = 'VIC'
+	and stock_code = 'BID'
+
+-- 71. Amount of Bad debt of Techcombank in 2023
+
+select
+    stock_code,
+	quarter,
+	year,
+	category_code,
+	data
+
+from financial_statement_explaination
+
+where
+	category_code = 'Bank_TM_65' -- Amount Bad debt
+	and year = 2023
+	and quarter = 0
+	and stock_code = 'TCB'
+

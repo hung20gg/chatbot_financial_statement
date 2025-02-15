@@ -10,6 +10,7 @@ from agent.const import (
     ChatConfig,
     Text2SQLConfig,
     GEMINI_FAST_CONFIG,
+    GEMINI_FAST_CONFIG_V2,
     GPT4O_MINI_CONFIG,
     GPT4O_CONFIG,
     GEMINI_EXP_CONFIG,
@@ -65,7 +66,7 @@ def initialize(user_name, chat_model = 'gemini-2.0-flash', text2sql_model = 'gem
     
     prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI
     text2sql_config = TEXT2SQL_FAST_GEMINI_CONFIG
-    chat_config = GEMINI_FAST_CONFIG
+    chat_config = GEMINI_FAST_CONFIG_V2
 
     if 'gemini-2.0-flash' in chat_model:
         chat_config = GEMINI_FAST_CONFIG
@@ -150,7 +151,7 @@ def chat(user_name):
         assistant_message = st.chat_message("assistant", avatar='graphics/assistant.png').empty()   
         
         streamed_text = ""
-        for chunk in st.session_state.chatbot.stream(input_text):
+        for chunk in st.session_state.chatbot.stream(input_text, version='v2'):
             if isinstance(chunk, str):
                 streamed_text += chunk
                 assistant_message.write(streamed_text)

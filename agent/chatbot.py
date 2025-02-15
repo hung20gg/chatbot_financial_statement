@@ -90,11 +90,15 @@ class Chatbot(BaseAgent):
             
             response = self.routing_llm(routing_log)
             routing = get_json_from_text_response(response, new_method=True)['trigger']
-            return routing
+            return {
+                'trigger': routing
+            }
         
         except Exception as e:
             logging.error(f"Routing error: {e}")
-            return False
+            return {
+                'trigger': False
+            }
     
     
     def summarize_and_get_task(self, messages):
@@ -122,19 +126,78 @@ class Chatbot(BaseAgent):
     
 
     def routing_v2(self, user_input):
-        pass
+        try:
+            routing_log = deepcopy(self.display_history)
+            routing_instruction = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/chat/routing_v2.txt'))
+            
+            routing_log.append(
+                {
+                    'role': 'user',
+                    'content': routing_instruction.format(user_input = user_input)
+                }
+            )
+            
+            response = self.routing_llm(routing_log)
+            print(response)
+
+            # Beautiful response
+            dict_response = utils.get_content_with_heading_tag(response, tag="###")
+            print(dict_response)
+
+            # ugly response
+            if dict_response.get('decision', None) is None:
+                words = response.split("\n")
+
+                trigger = words[0]
+                task = "\n".join(words[1:]).strip()
+
+                dict_response = {
+                    'decision': trigger,
+                    'task': task
+                }
+
+            trigger = dict_response.get('decision', 'False').lower().replace("{",'').replace("}",'').strip()
+
+            if trigger in {'true', 'yes', '1', 'y', 't'}:
+                trigger = True
+            else:
+                trigger = False
+
+            return {
+                'trigger': trigger,
+                'task': dict_response.get('task', None)
+            }
+            
+        except Exception as e:
+            logging.error(f"Routing error: {e}")
+            return {
+                'trigger': False,
+                'task': None
+            }
         
 
-    def _solve_text2sql_v2(self, user_input, **kwargs):
-        pass
-    
+    def _solve_text2sql_v2(self, user_input, routing_log, **kwargs):
         
+        task = routing_log.get('task', user_input)
+
+        return self._solver(user_input, task, **kwargs)
+    
+
     def _solve_text2sql(self, user_input, **kwargs):
+        """ 
+            Summarize and get task
+        """
         
         task = user_input
         if self.config.get_task:
             logging.info("Summarizing and getting task")
             task = self.summarize_and_get_task(self.display_history.copy())
+        
+        return self._solver(user_input, task, **kwargs)
+
+
+        
+    def _solver(self, user_input, task, **kwargs):
         
         table_strings = ""
         
@@ -191,12 +254,14 @@ class Chatbot(BaseAgent):
         return self._solve_text2sql(user_input, **kwargs)
         
         
-    def __reasoning(self, user_input, routing = False, version = "v1", **kwargs):
+    def __reasoning(self, user_input, routing_log: dict, version = "v1", **kwargs):
         
+        routing = routing_log.get('trigger', False)
+
         table_strings = ""
         if routing:
             logging.info("Routing triggered")
-            output = self.solve_text2sql(user_input, version = version, **kwargs)
+            output = self.solve_text2sql(user_input, version = version, routing_log = routing_log, **kwargs)
             table_strings = utils.table_to_markdown(output.execution_tables)
         
         else:
@@ -225,21 +290,23 @@ class Chatbot(BaseAgent):
         
         # Routing
         if version == "v2":
-            self.is_routing = self.routing_v2(user_input)
+            routing_log = self.routing_v2(user_input)
+            self.is_routing = routing_log['trigger']
         else:
-            self.is_routing = self.routing(user_input)
+            routing_log = self.routing(user_input)
+            self.is_routing = routing_log['trigger']
 
         if self.is_routing:
             yield '\n\nAnalyzing '
         
-            table_strings = self.__reasoning(user_input, self.is_routing, **kwargs)
+            table_strings = self.__reasoning(user_input, version=version, routing_log=routing_log, **kwargs)
             end = time.time()
             
             yield 'in {:.2f}s\n\n'.format(end - start)
             yield table_strings + '\n\n'
         
         else:
-            table_strings = self.__reasoning(user_input, version=version, routing=self.is_routing, **kwargs)
+            table_strings = self.__reasoning(user_input, version=version, routing_log=routing_log, **kwargs)
             end = time.time()
         
         logging.info(f"Reasoning time with streaming: {end - start}s")
@@ -269,9 +336,11 @@ class Chatbot(BaseAgent):
         start = time.time()
         
         if version == "v2":
-            self.is_routing = self.routing_v2(user_input)
+            routing_log = self.routing_v2(user_input)
+            self.is_routing = routing_log['trigger']
         else:
-            self.is_routing = self.routing(user_input)
+            routing_log = self.routing(user_input)
+            self.is_routing = routing_log['trigger']
 
         table_strings = self.__reasoning(user_input, routing=self.is_routing, version=version, **kwargs)
         response = self.llm(self.history)
@@ -329,10 +398,7 @@ class ChatbotSematic(Chatbot):
         
         
     def solve_text2sql(self, task, version = 'v1', **kwargs):
-        if version == 'v2':
-            output = self._solve_text2sql_v2(task, **kwargs)
-        else:
-            output = self._solve_text2sql(task, **kwargs)
+        output = super().solve_text2sql(task, version = version, **kwargs)
         
         self.save_sql(output)
         return output

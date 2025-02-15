@@ -56,6 +56,9 @@ class Text2SQLOutput(BaseModel):
             "extraction_msg": self.extraction_msg,
             "sql": self.sql
         }
+    
+    def model_dump(self, **kwargs):
+        return self.convert_to_dict()
 
 class Text2SQL(BaseAgent):
 
@@ -937,7 +940,7 @@ Only return new, detailed task. Do not return the SQL. Return in the following f
         return temp_message
 
     
-    def solve(self, task: str, cache: bool = True, inject_reasoning: str = None, enhance: str = None, adjust_table: str|int = 0, mix_account: bool = True) -> Text2SQLOutput:
+    def solve(self, task: str, cache: bool = True, inject_reasoning: str = None, enhance: str = None, adjust_table: str|int = 0, mix_account: bool = True, **kwargs) -> Text2SQLOutput:
         """
         Solve the task with Text2SQL
         The solve method is designed to solve a given task by converting it into SQL queries using the Text2SQL model. It handles both simple and complex tasks by breaking them down into steps if necessary.

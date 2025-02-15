@@ -33,6 +33,13 @@ GEMINI_FAST_CONFIG = {
     "get_task": True
 }
 
+GEMINI_FAST_CONFIG_V2 = {
+    "llm": 'gemini-2.0-flash',
+    "routing_llm": 'gemini-2.0-flash',
+    "summary_every": -1,
+    "get_task": True
+}
+
 GEMINI_EXP_CONFIG = {
     "llm": 'gemini-2.0-flash-exp',
     "routing_llm": 'gemini-2.0-flash-exp',
@@ -222,6 +229,7 @@ TEXT2SQL_THINKING_GEMINI_CONFIG = {
     'sql_llm': 'gemini-2.0-flash-thinking-exp-01-21',
     "reasoning": False,
     "branch_reasoning": False,
+     "max_solution_cache": 5,
 
     'self_debug': True
 }
@@ -245,6 +253,8 @@ TEXT2SQL_QWEN25_CODER_3B_SFT_CONFIG = {
     'account_top_k': 4,
     'sql_example_top_k': 1,
 
+    "max_solution_cache": 1,
+
     "verbose": False,
     'get_all_acount': False,
     'self_debug': True
@@ -258,6 +268,7 @@ TEXT2SQL_QWEN25_CODER_3B_DPO_CONFIG = {
     'account_top_k': 4,
     'sql_example_top_k': 1,
 
+    "max_solution_cache": 1,
 
     "verbose": False,
     'get_all_acount': False,
@@ -272,7 +283,7 @@ TEXT2SQL_QWEN25_CODER_1B_SFT_CONFIG = {
     'account_top_k': 4,
     'sql_example_top_k': 1,
 
-
+    "max_solution_cache": 1,
     "verbose": False,
     'get_all_acount': False,
     'self_debug': True
