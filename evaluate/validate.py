@@ -448,7 +448,10 @@ def evaluate_sql_generation(sql_path, mcq_path, llm_name, multi_thread=False, ma
     sql_data = []
     with open(sql_path) as f:
         for line in f:
-            sql_data.append(json.loads(line))
+            try:
+                sql_data.append(json.loads(line))
+            except Exception as e:
+                print(e)
     
     mcq_data = []
     with open(mcq_path) as f:

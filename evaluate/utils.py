@@ -15,8 +15,11 @@ from agent.const import (
     TEXT2SQL_THINKING_GEMINI_CONFIG,
     TEXT2SQL_4O_CONFIG,
     TEXT2SQL_QWEN25_CODER_1B_SFT_CONFIG,
+    TEXT2SQL_QWEN25_CODER_1B_DPO_CONFIG,
     TEXT2SQL_QWEN25_CODER_3B_SFT_CONFIG,
     TEXT2SQL_QWEN25_CODER_3B_DPO_CONFIG,
+    TEXT2SQL_QWEN25_CODER_1B_KTO_CONFIG,
+    TEXT2SQL_QWEN25_CODER_3B_KTO_CONFIG,
 )
 
 from agent.prompt.prompt_controller import (
@@ -72,6 +75,12 @@ def get_text2sql_config(llm_name):
         return TEXT2SQL_QWEN25_CODER_1B_SFT_CONFIG
     if llm_name == 'qwen2.5-coder-3b-dpo':
         return TEXT2SQL_QWEN25_CODER_3B_DPO_CONFIG
+    if llm_name == 'qwen2.5-coder-1.5b-dpo':
+        return TEXT2SQL_QWEN25_CODER_1B_DPO_CONFIG
+    if llm_name == 'qwen2.5-coder-1.5b-kto':
+        return TEXT2SQL_QWEN25_CODER_1B_KTO_CONFIG
+    if llm_name == 'qwen2.5-coder-3b-kto':
+        return TEXT2SQL_QWEN25_CODER_3B_KTO_CONFIG
 
     else:
         config = TEXT2SQL_FAST_GEMINI_CONFIG
