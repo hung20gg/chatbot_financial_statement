@@ -78,9 +78,9 @@ def table_to_markdown(table: Table|pd.DataFrame|str|list, adjust:str = 'shrink',
         elif isinstance(t, Table):
             if t.table is None:
                 continue
-            markdown += f"**{t.description.strip()}**\n\n"
+            markdown += f"#### {t.description.strip()}\n\n"
             markdown += df_to_markdown(t.table, adjust = adjust)[:max_string]
-            if i < len(t.table) - 1:
+            if i < len(t.table):
                 markdown += "\n\n"
             
         else:
