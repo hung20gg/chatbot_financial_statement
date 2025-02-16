@@ -998,7 +998,7 @@ def calculate_index(version = 'v3', output_path: str = '../data/'):
 
     ratio = dfs['ratio_code'].unique().tolist()
     
-    for r in ['BDR', 'EPS', 'PE', 'DSO', 'ROAA']:
+    for r in ['BDR', 'EPS', 'PE', 'DSO', 'ROAA', 'OCBYoY']:
         print(r)
         print(dfs[(dfs['ratio_code'] == r)&(dfs['quarter'] == 0)&(dfs['year'] == 2022)].head(5))
         print('========================================')

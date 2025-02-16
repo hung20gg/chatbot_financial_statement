@@ -344,3 +344,4 @@ Lưu chuyển tiền thuần trong kỳ (50 = 20+30+40),CF_050,LƯU CHUYỂN TI�
 Tiền và tương đương tiền đầu kỳ,CF_060,TIỀN VÀ TƯƠNG ĐƯƠNG TIỀN ĐẦU KỲ,CF_101,V. Tiền và các khoản tương đương tiền tại thời điểm đầu kỳ,CF_043,(Cash flow) Cash and cash equivalents at the beginning of the period,CF_110,CF_110
 Ảnh hưởng của thay đổi tỷ giá hối đoái quy đổi ngoại tệ,CF_061,,,VI. Điều chỉnh ảnh hưởng của thay đổi tỷ giá,CF_044,(Cash flow) Effects of exchange rate changes on foreign currency conversion,CF_120,CF_120
 Tiền và tương đương tiền cuối kỳ (70 = 50+60+61),CF_070,TIỀN VÀ TƯƠNG ĐƯƠNG TIỀN CUỐI KỲ,CF_103,VII. Tiền và các khoản tương đương tiền tại thời điểm cuối kỳ,CF_045,(Cash flow) Cash and cash equivalents at the end of the period,CF_130,CF_130
+,,,,,,(Balance sheet) (Bank) Outstanding Credit Balance,BS_135,BS_135
