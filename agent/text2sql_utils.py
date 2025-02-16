@@ -80,8 +80,7 @@ def table_to_markdown(table: Table|pd.DataFrame|str|list, adjust:str = 'shrink',
                 continue
             markdown += f"#### {t.description.strip()}\n\n"
             markdown += df_to_markdown(t.table, adjust = adjust)[:max_string]
-            if i < len(t.table):
-                markdown += "\n\n"
+            markdown += "\n\n"
             
         else:
             raise ValueError("Invalid table type")

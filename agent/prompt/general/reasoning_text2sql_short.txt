@@ -6,6 +6,8 @@
 
 <data>
 
+{stock_code_table}
+
 {suggestions_table}
 
 </data>
@@ -18,24 +20,24 @@
  
 <instruction>
 
-Analyze the task step-by-step then return suitable SQL query. The table result should have the following columns:
+Analyze the task and return suitable SQL query. The table result should have the following columns:
 - stock_code / industry
 - year
 - quarter
 - *_code
-- data (mean or sum or none)
+- data
+
+Feel free to modify the table if needed.
 
 </instruction>
 
 ### Note: 
-- Include the detailed name of the table in the following format:
+- Include the detailed name of the table result in the following format:
 
 ```sql
 -- ### detailed_table_name
 ```
 - The query must not contain account name.
-- If the time is not mentioned, assume Q3 2024.
-- Do not make any assumption about the account. You must refer to the mapping data.
 - If the question requires data within the quarter time range (from 2020 to Q3 2024), use the `date_added` in the following format:
 
 ```sql
@@ -45,6 +47,5 @@ AND quarter !=0
 -- - Q1: YYYY-03-30
 -- - Q2: YYYY-06-30
 -- - Q3: YYYY-09-30
--- - Q4: YYYY-12-30
--- - Q0: YYYY-12-30 (Annual data)
+-- - Q4 and Q0: YYYY-12-30
 ```

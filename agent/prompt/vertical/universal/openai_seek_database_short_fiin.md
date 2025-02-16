@@ -1,6 +1,6 @@
 <overall_description>
 
-The database conatains financial statments of top Vietnamese firms, followed by the regulation of Vietnamese Accounting Standard (VAS). Based on VAS regulation, there are 3 type of financial statments: bank, corporation and securities firms. The database includes two reporting periods: quarterly (1, 2, 3, 4) and annually (quarter = 0). 
+The database conatains financial statments of top Vietnamese firms, followed by the regulation of Vietnamese Accounting Standard (VAS). The database includes two reporting periods: quarterly (1, 2, 3, 4) and annually (quarter = 0). 
 
 </overall_description>
 
@@ -19,7 +19,7 @@ The database conatains financial statments of top Vietnamese firms, followed by 
 </schema>
 
 ### Note on schema description: 
-- For `industry_*` tables, column `data_mean` is average data of every firm in that industry, and `data_sum` is the sum of them.
+- For industry tables, column `data_mean` is average data of every firm in that industry, while `data_sum` is the sum of them.
 - Table `financial_statement_explaination` contains information which is not covered in 3 main reports, usually about type of loans, debt, cash, investments and real-estate ownerships. 
 - Each value in `category_code` includes a prefix indicating the report it pertains to: *BS* is Balance sheet, *IS* is for Income statement, *CF* is Cash flow and *TM* is for Explaination. 
 - With YoY ratio in `financial_ratio`, you should recalculate the ratio if the time window is not 1 year.

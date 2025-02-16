@@ -18,6 +18,7 @@ from agent.const import (
     TEXT2SQL_FAST_GEMINI_CONFIG,
     TEXT2SQL_FAST_OPENAI_CONFIG,
     TEXT2SQL_QWEN25_CODER_3B_SFT_CONFIG,
+    TEXT2SQL_QWEN25_CODER_1B_KTO_CONFIG,
     TEXT2SQL_4O_CONFIG
 )
 
@@ -75,8 +76,10 @@ def initialize(user_name, chat_model = 'gemini-2.0-flash', text2sql_model = 'gem
     elif 'gpt-4o' in chat_model:
         chat_config = GPT4O_CONFIG
 
-    if 'qwen2.5-3b' in text2sql_model:
+    if 'qwen2.5-3b-sft' in text2sql_model:
         text2sql_config = TEXT2SQL_QWEN25_CODER_3B_SFT_CONFIG
+    elif 'qwen2.5-1.5b-kto' in text2sql_model:
+        text2sql_config = TEXT2SQL_QWEN25_CODER_1B_KTO_CONFIG
     elif 'gpt-4o-mini' in text2sql_model:
         text2sql_config = TEXT2SQL_FAST_OPENAI_CONFIG
     
