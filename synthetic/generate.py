@@ -29,6 +29,11 @@ df.drop(columns=['stock_code'], inplace=True)
 company_table = df_profile.to_markdown()
 
 
+
+
+
+
+
 main_tasks = [
     "Financial Ratios", 
     "Accounts in Financial Statements (including Explaination parts)", 
@@ -41,9 +46,9 @@ sub_tasks = [
     "get data 1 or more company", 
     "compare 2 or more company", 
     "compare 2 or more company", 
-  #  "analyze the Subsidiaries or invested company", 
-  #  "analyze over industry average report (might be % of X in the industry)", 
-  #  "analyze company with its industry average ratio", 
+   "analyze the Subsidiaries or invested company", 
+   "analyze over industry average report (might be % of X in the industry)", 
+   "analyze company with its industry average ratio", 
     "compare within the same exchange or stock indices",
     "Ranking top 1-5-10 with or without special criterias (e.g: total asset >100B VND,  ROE > 20%)",
 ]
@@ -61,20 +66,20 @@ analyzing_types = [
     "Analysis of profitability",
     "Cash flow analysis",
     "Analysis of capital structures",
-   # "Analysis of loan types (mostly for banks, focus on loan to customer, loan type, duration, etc)",
-   # "Analysis of financial explaination details (bank loan, bond, etc)",
+   "Analysis of loan types (mostly for banks, focus on loan to customer, loan type, duration, etc)",
+   "Analysis of financial explaination details (bank loan, bond, etc)",
     # "Forecasting of financial indicators",
     # "Business valuation"
 ]
 
 times = [
     "at specific year, optionally include quater", 
-    "over time (year only)",
+    "over time",
 ]
 job_titles = [
     "Auditor",
     "Financial Analyst",
-    # "Investment Analyst",
+    "Investment Analyst",
     # "Financial Manager",
     # "Accountant",
     "Financial Consultant",
@@ -111,12 +116,13 @@ def _generate_questions(llm, main_task, sub_task, analyzing_types, time, job_tit
 
 ### Note:
 - You must ask questions to provide data only.
-- Your question must contain the name of the companies. You must not leak any other information of the company table beside company name.
+- Your question must contain the name of the companies. You must not leak any other information of the company table beside company name (Do not stock code).
 - You can ask questions in any format, but the questions must be relevant to the task.
 - You mustn't contain the word : "Include" the list of companies in the end of the question.
 - Your question should not contain prediction or forecast parts.
-- Generate easy questions only. These questions should be easy to answer and should not require any complex calculations. You are giving these question to beginner
+- - Making the question from easy to hard and more complex for each request. (Q1 is easy and final question is the most difficult)
 - When giving question within time range, only use annual data.
+- Do not list out all the companies if you are about to task to get data from an industry.
 """
     # - Making the question from easy to hard and more complex for each request. (Q1 is easy and final question is the most difficult)
    # , and you have to ask many explicit,meaningful and insightful questions about the financial reports of companies.
@@ -262,7 +268,7 @@ def generate_questions(args):
 
     # Test
 
-    batch_tasks = random.sample(batch_tasks, min(400, len(batch_tasks)))
+    batch_tasks = random.sample(batch_tasks, int(len(batch_tasks)*3/4))
     # batch_tasks = batch_tasks[:2]
 
     print(f"Number of tasks: {len(tasks)}")
@@ -294,6 +300,13 @@ def generate_questions(args):
     return results
 
 
+import re
+
+def clean_text(text):
+    pattern = r'\s\([A-Z]{3,}\)'
+    cleaned_text = re.sub(pattern, '', text)
+    return cleaned_text
+
 
 def extract_questions(questions, version):
     results = []
@@ -310,7 +323,7 @@ def extract_questions(questions, version):
             'time': questions['time'],
             'analyzing_types': questions['analyzing_types'],
             'version': version,
-            'question': question
+            'question': clean_text(question)
         }
         results.append(result)
     return results

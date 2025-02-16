@@ -52,17 +52,17 @@ version=hard_v0_4
 path=../data/hard_questions_v0_4.jsonl
 template=simplify
 
-python generate.py --llm $llm --version $version --path $path --enhance correction --multi_thread True --max_workers 2
+python generate.py --llm $llm --version $version --path $path --template $template --enhance correction --multi_thread True --max_workers 2
 ```
 
 Generate SQL code for evaluation dataset `sql_v0.jsonl`
 ```bash
-llm=gpt-4o-mini
+llm=qwen2.5-coder-1.5b-kto
 multi_thread=True 
-version=your_version_here
+version=sql_v0
 path=../data/sql_v0.jsonl
 
-python generate.py --llm $llm --version $version --multi_thread $multi_thread --path $path
+python generate.py --llm $llm --version $version --multi_thread $multi_thread --path $path --batch_size 1 --template openai
 ```
 
 
@@ -120,13 +120,13 @@ Prefer using strong LLM for better valuation
 Answer the MCQ question corresponding to the SQL question
 
 ```bash
-llm=gpt-4o-mini
+llm=gemini-2.0-flash
 multi_thread=True 
 task=evaluate
-path=../data/gpt-4o-mini__v3.jsonl
+path=../data/qwen2.5-coder-3b-dpo__sql_v0.jsonl
 mcq_path=../data/mcq_v0.jsonl
 
-python validate.py --llm $llm --task $task --multi_thread $multi_thread --path $path
+python validate.py --llm $llm --task $task --multi_thread $multi_thread --path $path --max_workers 8
 ```
 
 **Note:** The scoring function is current have some bug. Use the scoring under cell *Grade Cell* in `check.ipynb`

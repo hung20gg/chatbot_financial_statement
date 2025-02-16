@@ -245,6 +245,9 @@ TEXT2SQL_FASTEST_CONFIG = {
 }
 
 
+## ====== LOCAL CONFIGS ====== ##
+
+
 TEXT2SQL_QWEN25_CODER_3B_SFT_CONFIG = {
     "llm": 'qwen2.5-coder-3b-sft',
     "sql_llm": 'qwen2.5-coder-3b-sft',
@@ -275,9 +278,56 @@ TEXT2SQL_QWEN25_CODER_3B_DPO_CONFIG = {
     'self_debug': True
 }
 
+
+TEXT2SQL_QWEN25_CODER_3B_KTO_CONFIG = {
+    "llm": 'qwen2.5-coder-3b-kto',
+    "sql_llm": 'qwen2.5-coder-3b-kto',
+    "reasoning": False,
+    "branch_reasoning": False,
+    'account_top_k': 4,
+    'sql_example_top_k': 1,
+
+    "max_solution_cache": 1,
+
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
+}
+
+
 TEXT2SQL_QWEN25_CODER_1B_SFT_CONFIG = {
-    "llm": 'qwen2.5-coder-1.5b-sft',
-    "sql_llm": 'qwen2.5-coder-1.5b-sft',
+    "llm": 'qwen2.5-coder-1.5b-kto',
+    "sql_llm": 'qwen2.5-coder-1.5b-kto',
+    "reasoning": False,
+    "branch_reasoning": False,
+    'account_top_k': 4,
+    'sql_example_top_k': 1,
+
+    "max_solution_cache": 1,
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
+}
+
+
+TEXT2SQL_QWEN25_CODER_1B_DPO_CONFIG = {
+    "llm": 'qwen2.5-coder-1.5b-dpo',
+    "sql_llm": 'qwen2.5-coder-1.5b-dpo',
+    "reasoning": False,
+    "branch_reasoning": False,
+    'account_top_k': 4,
+    'sql_example_top_k': 1,
+
+    "max_solution_cache": 1,
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
+}
+
+
+TEXT2SQL_QWEN25_CODER_1B_KTO_CONFIG = {
+    "llm": 'qwen2.5-coder-1.5b-kto',
+    "sql_llm": 'qwen2.5-coder-1.5b-kto',
     "reasoning": False,
     "branch_reasoning": False,
     'account_top_k': 4,
