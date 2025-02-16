@@ -44,3 +44,11 @@ chmod +x run.sh
 ```bash
 ./run.sh local-model --preprocess v3 --local True
 ```
+
+### vLLM
+
+- LLM
+```
+vllm serve Qwen/Qwen2.5-Coder-3B-Instruct --enable-lora --lora-modules qwen2.5-coder-3b-sft=saves/qwen2.5-3b-coder-test-v3/lora/sft --max-model-len 4096 --max-lora-rank 64 --gpu-memory-utilization 0.8
+```
+
