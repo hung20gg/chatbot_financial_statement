@@ -370,7 +370,7 @@ def merge_questions(args):
         json.dump(results, f, indent=4)
 
 def generate_mcq_wrapper(args):
-    generate_mcq(args.llm, args.path, args.max_workers, args.multi_thread)
+    generate_mcq(args.llm, args.path, args.max_workers, args.multi_thread, args.version)
 
 import argparse
 

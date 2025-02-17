@@ -64,6 +64,18 @@ class Chatbot(BaseAgent):
                 'content': system_instruction
             }
         )
+
+        display_instruction = utils.read_file_without_comments(os.path.join(current_dir, 'prompt/chat/display.txt'))
+
+        self.display_history.append(
+            {
+                'role': 'system',
+                'content': display_instruction
+            }
+        )
+
+        
+
         self.text2sql.reset()
         self.solver_ids = []
         self.solver_ouputs = dict()
