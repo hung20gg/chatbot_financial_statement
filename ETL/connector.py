@@ -47,9 +47,7 @@ BATCH_SIZE = 32
 #       RDB       #
 #=================#
 
-def connect_to_db(db_name, user, password, host='localhost', port='5432'):
-    logging.info(f'Connecting to database {db_name}, {user}...')
-    
+def connect_to_db(db_name, user, password, host='localhost', port='5432'):    
     conn = psycopg2.connect(
         dbname=db_name,
         user=user,
@@ -283,7 +281,7 @@ def delete_tables(conn, table_names):
     
         
         
-def execute_query(query, conn=None, params = None, return_type='dataframe'):
+def execute_query(query, conn=None, params = None, return_type='dataframe', timeout=1000):
     if conn is None:
         raise ValueError("Connection is not provided")
     
@@ -293,7 +291,7 @@ def execute_query(query, conn=None, params = None, return_type='dataframe'):
         conn = connect_to_db(**conn)
     try:
         with conn.cursor() as cur:
-            
+            cur.execute(f"SET statement_timeout = {timeout};")
             cur.execute(query, params)
             result = cur.fetchall()
             
@@ -555,27 +553,27 @@ RDB_SETUP_CONFIG = {
 }
 
 FIIN_RDB_SETUP_CONFIG = {
-    'company_info' : ['../csv/df_company_info.csv', ['stock_code'], {}, True],
-    'sub_and_shareholder': ['../csv/df_sub_and_shareholders.csv', None, {'stock_code': 'company_info(stock_code)'}],
-    'map_category_code_bank': ['../csv/v3/map_category_code_bank.csv', ['category_code']],
-    'map_category_code_non_bank': ['../csv/v3/map_category_code_corp.csv', ['category_code']],
-    'map_category_code_securities': ['../csv/v3/map_category_code_sec.csv', ['category_code']],
+    # 'company_info' : ['../csv/df_company_info.csv', ['stock_code'], {}, True],
+    # 'sub_and_shareholder': ['../csv/df_sub_and_shareholders.csv', None, {'stock_code': 'company_info(stock_code)'}],
+    # 'map_category_code_bank': ['../csv/v3/map_category_code_bank.csv', ['category_code']],
+    # 'map_category_code_non_bank': ['../csv/v3/map_category_code_corp.csv', ['category_code']],
+    # 'map_category_code_securities': ['../csv/v3/map_category_code_sec.csv', ['category_code']],
     'map_category_code_ratio': ['../csv/map_ratio_code.csv', ['ratio_code']],
-    'map_category_code_universal': ['../csv/v3/map_category_code_universal.csv', ['category_code']],
+    # 'map_category_code_universal': ['../csv/v3/map_category_code_universal.csv', ['category_code']],
     
     
-    'bank_financial_report' : ['../csv/v3/bank_financial_report.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'non_bank_financial_report' : ['../csv/v3/corp_financial_report.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'securities_financial_report' : ['../csv/v3/securities_financial_report.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'financial_statement': ['../data/financial_statement_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'bank_financial_report' : ['../csv/v3/bank_financial_report.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'non_bank_financial_report' : ['../csv/v3/corp_financial_report.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'securities_financial_report' : ['../csv/v3/securities_financial_report.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'financial_statement': ['../data/financial_statement_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     
 
-    'map_category_code_explaination': ['../csv/v3/map_category_code_explaination.csv', ['category_code']],
-    'financial_statement_explaination': ['../data/financial_statement_explaination_v3.parquet', None, {'category_code': 'map_category_code_explaination(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'map_category_code_explaination': ['../csv/v3/map_category_code_explaination.csv', ['category_code']],
+    # 'financial_statement_explaination': ['../data/financial_statement_explaination_v3.parquet', None, {'category_code': 'map_category_code_explaination(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     
     
     'financial_ratio' : ['../data/financial_ratio_v3.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'industry_financial_statement': ['../data/industry_report_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)'}, False, ['date_added']],
+    # 'industry_financial_statement': ['../data/industry_report_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)'}, False, ['date_added']],
     'industry_financial_ratio': ['../data/industry_ratio_v3.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)'}, False, ['date_added']],    
 
     # 'stock_price' : ['../csv/stock_price_daily.parquet']

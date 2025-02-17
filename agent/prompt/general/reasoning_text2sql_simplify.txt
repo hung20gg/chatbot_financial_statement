@@ -25,7 +25,7 @@ Here is a natural language query that you need to convert into a SQL query:
  
 <instruction>
 
-Analyze the task step-by-step then return suitable SQL query.
+Analyze the task step-by-step and return suitable SQL query.
 
 If possible, the table result should have the following columns:
 
@@ -40,7 +40,7 @@ However, feel free to modify the table if needed.
 </instruction>
 
 ### Note: 
-- Include the detailed name of the table in the query in the following format:
+- Include the detailed name of the table result in the query in the following format:
 
 ```sql
 -- ### detailed_table_name

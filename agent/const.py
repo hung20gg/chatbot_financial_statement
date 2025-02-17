@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from . import text2sql_utils as utils
 import os
 current_dir = os.path.dirname(__file__)
+from .prompt.prompt_controller import *
 
 
 class Config(BaseModel):
@@ -26,8 +27,15 @@ class Text2SQLConfig(Config):
     self_debug: bool = False
     
 GEMINI_FAST_CONFIG = {
-    "llm": 'gemini-1.5-flash-002',
-    "routing_llm": 'gemini-1.5-flash-002',
+    "llm": 'gemini-2.0-flash',
+    "routing_llm": 'gemini-2.0-flash-lite-preview-02-05',
+    "summary_every": -1,
+    "get_task": True
+}
+
+GEMINI_FAST_CONFIG_V2 = {
+    "llm": 'gemini-2.0-flash',
+    "routing_llm": 'gemini-2.0-flash',
     "summary_every": -1,
     "get_task": True
 }
@@ -39,16 +47,10 @@ GEMINI_EXP_CONFIG = {
     "get_task": True
 }
 
-GEMINI_EXP_CONFIG = {
-    "llm": 'gemini-2.0-flash-exp',
-    "routing_llm": 'gemini-2.0-flash-exp',
-    "summary_every": -1,
-    "get_task": True
-}
 
 INBETWEEN_CHAT_CONFIG = {
     "llm": 'gpt-4o-mini',
-    "routing_llm": 'gemini-1.5-flash-002',
+    "routing_llm": 'gemini-2.0-flash-002',
     "summary_every": -1,
     "get_task": True
 }
@@ -67,7 +69,7 @@ GPT4O_CONFIG = {
 
 GEMINI_BEST_CONFIG = {
     "llm": 'gemini-1.5-pro-002',
-    "routing_llm": 'gemini-1.5-flash-002',
+    "routing_llm": 'gemini-2.0-flash',
     "summary_every": -1
 }
 
@@ -103,27 +105,32 @@ TEXT2SQL_4O_CONFIG = {
     "sql_llm": 'gpt-4o',
     "self_debug": True,
     "reasoning": False,
-    "branch_reasoning": False,
-    "company_top_k": 2,
-    "sql_example_top_k": 3,
+
     "account_top_k": 8,
-    "verbose": False,
     'get_all_acount': True,
     'self_debug': True
 }
+
 TEXT2SQL_GEMINI_PRO_CONFIG = {
-    "llm": 'gemini-1.5-pro-002',
-    "sql_llm": 'gemini-1.5-pro-002',
+    "llm": 'gemini-1.5-pro',
+    "sql_llm": 'gemini-1.5-pro',
     "self_debug": True,
-    "reasoning": False,
-    "branch_reasoning": False,
-    "company_top_k": 2,
-    "sql_example_top_k": 3,
+
     "account_top_k": 7,
-    "verbose": False,
     'get_all_acount': True,
     'self_debug': True
 }
+
+TEXT2SQL_GEMINI_PRO_EXP_CONFIG = {
+    "llm": 'gemini-2.0-pro-exp-02-05',
+    "sql_llm": 'gemini-2.0-pro-exp-02-05',
+    "self_debug": True,
+
+    "account_top_k": 7,
+    'get_all_acount': True,
+    'self_debug': True
+}
+
 
 TEXT2SQL_SWEET_SPOT_CONFIG = {
     "llm": 'gemini-1.5-flash-8b',
@@ -143,9 +150,18 @@ TEXT2SQL_FAST_OPENAI_CONFIG = {
     'self_debug': True
 }
 
+TEXT2SQL_FAST_SQL_OPENAI_CONFIG = {
+    "llm": 'gemini-2.0-flash-lite-preview-02-05',
+    "sql_llm": 'gpt-4o-mini',
+    "reasoning": False,
+    "branch_reasoning": False,
+
+    'self_debug': True
+}
+
 TEXT2SQL_FAST_GEMINI_CONFIG = {
-    "llm": 'gemini-1.5-flash',
-    "sql_llm": 'gemini-1.5-flash',
+    "llm": 'gemini-2.0-flash-lite-preview-02-05',
+    "sql_llm": 'gemini-2.0-flash',
     "reasoning": False,
     "branch_reasoning": False,
 
@@ -191,8 +207,8 @@ TEXT2SQL_MEDIUM_OPENAI_CONFIG = {
 }
 
 TEXT2SQL_MEDIUM_GEMINI_CONFIG = {
-    "llm": 'gemini-1.5-flash-002',
-    "sql_llm": 'gemini-1.5-flash-002',
+    "llm": 'gemini-1.5-flash',
+    "sql_llm": 'gemini-2.0-flash',
     "reasoning": True,
     "branch_reasoning": False,
 
@@ -200,8 +216,8 @@ TEXT2SQL_MEDIUM_GEMINI_CONFIG = {
 }
 
 TEXT2SQL_EXP_GEMINI_CONFIG = {
-    "llm": 'gemini-2.0-flash-exp',
-    "sql_llm": 'gemini-2.0-flash-exp',
+    "llm": 'gemini-2.0-flash',
+    "sql_llm": 'gemini-2.0-pro-exp-02-05',
     "reasoning": True,
     "branch_reasoning": False,
 
@@ -209,10 +225,11 @@ TEXT2SQL_EXP_GEMINI_CONFIG = {
 }
 
 TEXT2SQL_THINKING_GEMINI_CONFIG = {
-    "llm": 'gemini-2.0-flash-exp',
+    "llm": 'gemini-2.0-flash',
     'sql_llm': 'gemini-2.0-flash-thinking-exp-01-21',
     "reasoning": False,
     "branch_reasoning": False,
+     "max_solution_cache": 5,
 
     'self_debug': True
 }
@@ -224,9 +241,102 @@ TEXT2SQL_FASTEST_CONFIG = {
     "reasoning": False,
     "branch_reasoning": False,
 
-    "verbose": True,
-    'get_all_acount': False,
     'self_debug': False
+}
+
+
+## ====== LOCAL CONFIGS ====== ##
+
+
+TEXT2SQL_QWEN25_CODER_3B_SFT_CONFIG = {
+    "llm": 'qwen2.5-coder-3b-sft',
+    "sql_llm": 'qwen2.5-coder-3b-sft',
+    "reasoning": False,
+    "branch_reasoning": False,
+    'account_top_k': 4,
+    'sql_example_top_k': 1,
+
+    "max_solution_cache": 1,
+
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
+}
+
+TEXT2SQL_QWEN25_CODER_3B_DPO_CONFIG = {
+    "llm": 'qwen2.5-coder-3b-dpo',
+    "sql_llm": 'qwen2.5-coder-3b-dpo',
+    "reasoning": False,
+    "branch_reasoning": False,
+    'account_top_k': 4,
+    'sql_example_top_k': 1,
+
+    "max_solution_cache": 1,
+
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
+}
+
+
+TEXT2SQL_QWEN25_CODER_3B_KTO_CONFIG = {
+    "llm": 'qwen2.5-coder-3b-kto',
+    "sql_llm": 'qwen2.5-coder-3b-kto',
+    "reasoning": False,
+    "branch_reasoning": False,
+    'account_top_k': 4,
+    'sql_example_top_k': 1,
+
+    "max_solution_cache": 1,
+
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
+}
+
+
+TEXT2SQL_QWEN25_CODER_1B_SFT_CONFIG = {
+    "llm": 'qwen2.5-coder-1.5b-kto',
+    "sql_llm": 'qwen2.5-coder-1.5b-kto',
+    "reasoning": False,
+    "branch_reasoning": False,
+    'account_top_k': 4,
+    'sql_example_top_k': 1,
+
+    "max_solution_cache": 1,
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
+}
+
+
+TEXT2SQL_QWEN25_CODER_1B_DPO_CONFIG = {
+    "llm": 'qwen2.5-coder-1.5b-dpo',
+    "sql_llm": 'qwen2.5-coder-1.5b-dpo',
+    "reasoning": False,
+    "branch_reasoning": False,
+    'account_top_k': 4,
+    'sql_example_top_k': 1,
+
+    "max_solution_cache": 1,
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
+}
+
+
+TEXT2SQL_QWEN25_CODER_1B_KTO_CONFIG = {
+    "llm": 'qwen2.5-coder-1.5b-kto',
+    "sql_llm": 'qwen2.5-coder-1.5b-kto',
+    "reasoning": False,
+    "branch_reasoning": False,
+    'account_top_k': 4,
+    'sql_example_top_k': 1,
+
+    "max_solution_cache": 1,
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
 }
 
 

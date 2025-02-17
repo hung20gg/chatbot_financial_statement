@@ -35,14 +35,34 @@ path=../data/generated_questions.json
 python generate.py --llm $llm --version $version --multi_thread $multi_thread --path $path
 ```
 
+Using *correction* for refine SQL
+
+```bash
+llm=gemini-2.0-flash-thinking-exp-01-21
+version=v1
+path=../data/generated_questions.json
+template=simplify
+
+python generate.py --llm $llm --version $version --path $path --template $template --enhance correction
+```
+
+```bash
+llm=gemini-2.0-flash-thinking-exp-01-21
+version=hard_v0_4
+path=../data/hard_questions_v0_4.jsonl
+template=simplify
+
+python generate.py --llm $llm --version $version --path $path --template $template --enhance correction --multi_thread True --max_workers 2
+```
+
 Generate SQL code for evaluation dataset `sql_v0.jsonl`
 ```bash
-llm=gpt-4o-mini
+llm=qwen2.5-coder-3b-kto
 multi_thread=True 
-version=your_version_here
+version=sql_v0
 path=../data/sql_v0.jsonl
 
-python generate.py --llm $llm --version $version --multi_thread $multi_thread --path $path
+python generate.py --llm $llm --version $version --multi_thread $multi_thread --path $path --batch_size 1 --template openai --max_workers 2
 ```
 
 
@@ -63,6 +83,20 @@ python generate.py --llm $llm --version $version --multi_thread $multi_thread --
 ```
 
 
+### For create template for batch generation
+
+```bash
+llm=gpt-4o-mini
+multi_thread=True 
+version=v5
+task=generate_sql_template
+path=../data/generated_questions.json
+reference_path=../data/gpt_4o__v5.jsonl
+template=openai
+
+python generate.py --llm $llm --version $version --multi_thread $multi_thread --task $task --path $path --reference_path $reference_path --template $template
+```
+
 ### For evaluating the difficulty
 #### Pre request: You must have a solution file in `data` folder.
 Score the probability that the question can be answered with given data. (weak label)
@@ -70,10 +104,10 @@ Score the probability that the question can be answered with given data. (weak l
 Run the following script (remember change the argument accordingly)
 
 ```bash
-llm=gpt-4o-mini
+llm=gemini-2.0-flash
 multi_thread=True 
 task=qa_quality
-path=../data/gpt-4o-mini__v3.jsonl
+path=../data/qwen2.5-coder-3b-sft__v3.jsonl
 
 python validate.py --llm $llm --task $task --multi_thread $multi_thread --path $path
 ```
@@ -86,13 +120,13 @@ Prefer using strong LLM for better valuation
 Answer the MCQ question corresponding to the SQL question
 
 ```bash
-llm=gpt-4o-mini
+llm=gemini-2.0-flash
 multi_thread=True 
 task=evaluate
-path=../data/gpt-4o-mini__v3.jsonl
+path=../data/qwen2.5-coder-1.5b-kto__sql_v0.jsonl
 mcq_path=../data/mcq_v0.jsonl
 
-python validate.py --llm $llm --task $task --multi_thread $multi_thread --path $path
+python validate.py --llm $llm --task $task --multi_thread $multi_thread --path $path --max_workers 12
 ```
 
 **Note:** The scoring function is current have some bug. Use the scoring under cell *Grade Cell* in `check.ipynb`

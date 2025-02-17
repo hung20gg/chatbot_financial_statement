@@ -134,7 +134,8 @@ BANK_LIQUIDITY_RATIO_FUNCTIONS = {
     'long_term_debt_to_equity_capital_ratio': [['BS_350','BS_360'], 'BS_500'],  # long_term_liabilities, equity
     'time_interest_earned': [['IS_017', 'IS_002'], 'IS_002'],  # EBIT, interest_expense
     'debt_to_tangible_net_worth_ratio': ['BS_400', 'BS_500', 'BS_227'],  # total_liabilities, equity, intangible_assets
-}
+    'cost_to_income_ratio': ['IS_014', ['IS_006', 'IS_007', 'IS_008','IS_009', 'IS_012', 'IS_013']],  # total_operating_expenses, net_sales
+}   
 
 
 BANK_FINANCIAL_RATIO_FUNCTIONS = {
@@ -183,6 +184,7 @@ BANK_CASHFLOW_RATIO_FUNCTIONS = {
 BANK_FIIN_RATIO_FUNCTIONS = {
     'current_account_saving_account_ratio':  ['BS_330','Bank_TM_121','Bank_TM_124'],  
     'bad_debt_ratio': ['BS_161', ['Bank_TM_68', 'Bank_TM_69', 'Bank_TM_70' ]],
+    'non_performing_loan_coverage_ratio': ['BS_169', 'Bank_TM_65'],
 }
 
 BANK_AVG_RATIO_FUNCTIONS = {
@@ -190,6 +192,8 @@ BANK_AVG_RATIO_FUNCTIONS = {
     'return_on_average_equity': ['IS_021', 'BS_500'],  # net_income, avg_total_equity
     'return_on_average_sales':   ['IS_021', ['IS_010','IS_003','IS_004']],  # net_income, avg_sales
 }
+
+
 # BANK_YoY_RATIO_FUNCTIONS = {
 #     'Customer_Deposits_Growth_YoY' : 'BS_330',
 #     'Operating_Expense_Growth_YoY' : 'IS_014',
@@ -288,6 +292,7 @@ SECURITIES_AVG_RATIO_FUNCTIONS = {
     'return_on_average_sales':   ['IS_200', 'IS_020'],  # net_income, avg_sales
 }
 
+
 PE_RATIO_FUNCTIONS = {
     'earning_per_share': ['IS_070'],
     'price_earning_ratio': ['Price', 'IS_070'],
@@ -361,6 +366,7 @@ YoY_RATIO_FUNCTIONS = {
         'Non_Interest_Income_Growth_YoY' : ['IS_006','IS_007','IS_008','IS_009','IS_012','IS_013'],
         'Total_Operating_Income_Growth' : 'IS_030',
         'Customer_Loans_Growth_YoY' : 'BS_160',
+        'outstanding_credit_balance_YoY' : 'BS_200',
         }
 
 }

@@ -35,3 +35,15 @@ temp/*
 /models
 models/*
 models/
+
+/batch/
+/batch
+batch/*
+batch/
+
+/process/
+/process
+process/*
+process/
+
+saves/

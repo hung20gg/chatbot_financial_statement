@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
+import json
 
 import sys 
 sys.path.append('..')
@@ -12,6 +13,7 @@ from llm.llm_utils import get_code_from_text_response
 from pydantic import BaseModel, ConfigDict
 from typing import Union
 import re
+import copy
 
 import logging
 
@@ -28,10 +30,30 @@ class Table(BaseModel):
     description: str = ""
     
     def __str__(self):
-        return f"Table(desc = {self.description})"
+        return f"Table(desc = {self.description}, num_rows = {len(self.table)}, num_columns = {len(self.table.columns)}"
     
     def __repr__(self):
-        return f"Table(desc = {self.description})"
+        return f"Table(desc = {self.description}, num_rows = {len(self.table)}, num_columns = {len(self.table.columns)}"
+    
+    def model_dump(self, **kwargs):
+
+        # pd.DataFrame to dict
+        if isinstance(self.table, pd.DataFrame):
+            table = self.table.to_dict(orient='records')
+        else:
+            table = self.table
+
+        return {
+            'table': table,
+            'sql': self.sql,
+            'description': self.description
+        }
+    
+    def dict(self, **kwargs):
+        return self.model_dump(**kwargs)
+    
+    def convert_to_dict(self, **kwargs):
+        return self.model_dump(**kwargs)
     
 
 def table_to_markdown(table: Table|pd.DataFrame|str|list, adjust:str = 'shrink', max_string = 5000) -> str:
@@ -47,21 +69,21 @@ def table_to_markdown(table: Table|pd.DataFrame|str|list, adjust:str = 'shrink',
         table = [table]
         
     markdown = ""
-    for t in table:
-        if isinstance(table, pd.DataFrame):
-            if table.empty:
+    for i,t in enumerate(table):
+        if isinstance(t, pd.DataFrame):
+            if t.empty:
                 continue
-            markdown += df_to_markdown(t)[:max_string] + "\n\n"
+            markdown += df_to_markdown(t, adjust = adjust)[:max_string] + "\n\n"
         
-        else:
-            try:
-                if t.table is None:
-                    continue
-                markdown += f"**{t.description}**\n\n"
-                markdown += df_to_markdown(t.table)[:max_string] + "\n\n"
+        elif isinstance(t, Table):
+            if t.table is None:
+                continue
+            markdown += f"#### {t.description.strip()}\n\n"
+            markdown += df_to_markdown(t.table, adjust = adjust)[:max_string]
+            markdown += "\n\n"
             
-            except:
-                raise ValueError("Invalid table type")
+        else:
+            raise ValueError("Invalid table type")
     
     return markdown
     
@@ -85,6 +107,8 @@ def join_and_get_difference(df1, df2):
 
 def get_llm_wrapper(model_name, **kwargs):
 
+    host = None 
+    api_key = None
 
     if '/' not in model_name: # Direct provider
 
@@ -94,16 +118,14 @@ def get_llm_wrapper(model_name, **kwargs):
         
         elif 'gemini' in model_name:
             logging.info(f"Using Gemini with model {model_name}")
-            return Gemini(model_name=model_name, **kwargs)
+            return Gemini(model_name=model_name, random_key='exp' in model_name, **kwargs)
         
         elif 'deepseek' in model_name:
             logging.info(f"Found DeepSeek endpoint: {model_name}")
             host = os.getenv('DEEPSEEK_HOST')
             api_key = os.getenv('DEEPSEEK_API_KEY')
-        else:
-            raise ValueError("Model not supported")
 
-    else: # Huggingface LLM
+    if not host: # Huggingface LLM
         host = os.getenv('LLM_HOST')
         api_key = os.getenv('LLM_API_KEY')
 
@@ -139,21 +161,34 @@ def df_to_markdown(df, adjust:str = 'keep') -> str:
     if not isinstance(df, pd.DataFrame):
         return str(df)
     
-    if adjust == 'keep':
+    df = copy.deepcopy(df)
+    num_rows = df.shape[0]
+    num_cols = df.shape[1]
+    
+    if adjust == 'text':
         columns = df.columns
-        if len(columns) > 2:
+        if num_cols > 2:
             logging.warning("Too many columns, Using shrink")
             return df_to_markdown(df, adjust='shrink')
         
-        if len(columns) == 1:
+        if num_cols == 1:
             text_df = f"List of items *{columns[0]}*\n"
             for i, row in df.iterrows():
-                text_df += f"- {row[columns[0]]}\n"
+                text_df += f"- {row[columns[0]]}"
+
+                # Add new line if not the last row
+                if i < num_rows:
+                    text_df += "\n"
             return text_df
-        elif len(columns) == 2:
+        
+        elif num_cols == 2:
             text_df = f"List of {columns[0]} with corresponding {columns[1]}\n"
             for i, row in df.iterrows():
-                text_df += f"- {row[columns[0]]}: {row[columns[1]]}\n"
+                text_df += f"- {row[columns[0]]}: {row[columns[1]]}"
+
+                # Add new line if not the last row
+                if i < num_rows:
+                    text_df += "\n"
             return text_df
         
     if adjust == 'shrink':
@@ -169,9 +204,12 @@ def df_to_markdown(df, adjust:str = 'keep') -> str:
 
         for i, row in df.iterrows():
             text_df += "| "
-            for col in columns:
-                text_df += f"{row[col]} | "
-            text_df = text_df[:-1] + "\n"
+            for r in row:
+                text_df += f"{r} | "
+
+            # Add new line if not the last row
+            if i < num_rows:
+                text_df += "\n"
         return text_df
     
     else:
@@ -262,16 +300,29 @@ def get_table_name_from_sql(sql_text):
         return matches[0]
     return ""
     
+
+
+
+def get_content_with_heading_tag(content: str, tag: str = "###") -> dict:
     
-def TIR_reasoning(response, db, verbose=False, prefix=""):
+    pattern = tag
+    pattern = tag + r"\s*(.*?)\s*:(.*?)\n(?=" + tag + r"|$)"
+    matches = re.findall(pattern, content, re.DOTALL)
+
+    result = dict()
+    if not matches:
+        return result
+
+    # Parse matches into a dictionary
+    for key, value in matches:
+        result[key.strip().lower().replace(" ", "_")] = value.strip() if value.strip() else None
+
+    return result
+
+def get_sql_code_from_text(response):
     codes = get_code_from_text_response(response)
-        
-    TIR_response = ""
-    execution_error = []
-    execution_table = []
     
     sql_code = []
-    
     for code in codes:
         if code['language'] == 'sql':
             codes = code['code'].split(";")
@@ -279,6 +330,16 @@ def TIR_reasoning(response, db, verbose=False, prefix=""):
                 # clean the content
                 if content.strip() != "":
                     sql_code.append(content)
+            
+    return sql_code
+
+    
+def TIR_reasoning(response, db, verbose=False, prefix=""):
+    
+    execution_error = []
+    execution_table = []
+    
+    sql_code = get_sql_code_from_text(response)
             
     for i, code in enumerate(sql_code):    
         if verbose:    
@@ -294,7 +355,7 @@ def TIR_reasoning(response, db, verbose=False, prefix=""):
                 execution_error.append(f"{prefix} SQL {i+1} Error: " + table)
                 
             else:
-                table_obj = Table(table=table, sql=code, description=f"{prefix} SQL {i+1} Result: {name}")
+                table_obj = Table(table=table, sql=code, description=f"{prefix} SQL {i+1} Result: {name}".strip())
                 execution_table.append(table_obj)
     
     
@@ -425,6 +486,76 @@ def prune_unnecessary_data_from_sql(tables: list[Table], messages: list[dict]):
         return tables[0]
     return tables
     
+
+def reconstruct_tables_from_sql(db, sql_message, description = ""):
+
+    errors, tables = TIR_reasoning(sql_message, db)
+
+    if len(errors) > 0:
+
+        return []
+    
+    mapping_table = []
+
+    # Get the company_info
+    stock_code = []
+    for table in tables:
+        if 'stock_code' in table.table.columns:
+            try:
+                stock_code.extend(table.table['stock_code'].tolist())
+            except:
+                pass
+
+    if len(stock_code) > 0:
+        df_company_info = db.return_company_from_stock_codes(stock_code)
+        mapping_table.append(Table(table=df_company_info, description="Company Information"))
+
+    # Get the ratio_code
+
+    ratio_code = []
+    for table in tables:
+        if 'ratio_code' in table.table.columns:
+            try:
+                ratio_code.extend(table.table['ratio_code'].tolist())
+            except:
+                pass
+    
+    set_ratio_code = set()
+    for code in ratio_code:
+        if isinstance(code, str):
+            set_ratio_code.add(code)
+    ratio_code = list(set_ratio_code)
+
+    if len(ratio_code) > 0:
+        df_ratio = db._get_mapping_ratio_from_ratio_codes(ratio_code)
+        mapping_table.append(Table(table=df_ratio, description="Ratio Mapping"))
+
+    # Get the category_code
+    category_code = []
+    for table in tables:
+        if 'category_code' in table.table.columns:
+            try:
+                category_code.extend(table.table['category_code'].tolist())
+            except:
+                pass
+
+    set_category_code = set()
+    for code in category_code:
+        if isinstance(code, str):
+            set_category_code.add(code)
+    category_code = list(set_category_code)
+
+    if len(category_code) > 0:
+        df_category = db._get_mapping_category_from_category_codes(category_code)
+        mapping_table.append(Table(table=df_category, description="Category Mapping"))
+
+    mapping_table.extend(tables)
+
+    return mapping_table
+    
+
+
+
 def check_null_table(tables: Table|pd.DataFrame):
     
     if isinstance(tables, pd.DataFrame):

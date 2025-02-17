@@ -84,9 +84,14 @@ def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_m
     Computes the Year-over-Year (YoY) ratio dynamically for each quarter (Q1, Q2, Q3, Q4)
     and for annual data (Q0).
     """
+    """
+    Computes the Year-over-Year (YoY) ratio dynamically for each quarter (Q1, Q2, Q3, Q4)
+    and for annual data (Q0).
+    """
 
     results = []
     
+    # Pivot the data for easier lookup
     # Pivot the data for easier lookup
     pivot_df = data_df.pivot_table(
         index=['stock_code', 'year', 'quarter'],
@@ -99,10 +104,14 @@ def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_m
     for (stock_code, year, quarter), row in pivot_df.iterrows():
         
         # Process YoY growth calculation for each quarter dynamically
+        
+        # Process YoY growth calculation for each quarter dynamically
         for ratio_name, category_code in ratio_mapping.items():
             try:
                 # Fetch current and previous year values dynamically
+                # Fetch current and previous year values dynamically
                 if isinstance(category_code, list):
+                    # Handle sums of multiple category codes
                     # Handle sums of multiple category codes
                     current_year_value = sum(row.get(code, 0) for code in category_code)
                     previous_year_value = sum(
@@ -118,10 +127,12 @@ def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_m
                     previous_year_value = get_pre_calculated_ratio(year - 1, category_code, ratios_df_6, quarter)
                 else:
                     # Standard case: Fetch current and previous year's values for the same quarter
+                    # Standard case: Fetch current and previous year's values for the same quarter
                     current_year_value = row.get(category_code, 0)
                     previous_year_value = pivot_df.loc[
                         (stock_code, year - 1, quarter), category_code
                     ] if (stock_code, year - 1, quarter) in pivot_df.index else 0
+                
                 
                 # Calculate YoY growth
                 yoy_value = None
@@ -129,6 +140,16 @@ def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_m
                     yoy_value = None  # Avoid division by zero
                 else:
                     yoy_value = (current_year_value - previous_year_value) / previous_year_value
+
+                # Store results
+                results.append({
+                    'stock_code': stock_code,
+                    'year': year,
+                    'quarter': quarter,
+                    'ratio_code': ratio_name,
+                    'data': yoy_value
+                })
+
 
                 # Store results
                 results.append({
@@ -232,33 +253,101 @@ def __get_qoq_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_m
     return pd.DataFrame(results)
 
 
-def __single_inventory_turnover_ratio(data_df, cost_of_goods_sold, inventory):
+def __get_average_data(data_df, category_code):
+    if isinstance(category_code, str):
+        category_code = [category_code]
+
+    category_code = np.array(category_code)
+
+    # Filter and prepare data
+   
+   # Sum the data of the given category code if it is a list
+    selected_data = (
+        data_df[data_df['category_code'].isin(category_code)]
+        .sort_values(by=['stock_code', 'year', 'quarter'])
+    )
+    if len(category_code) > 1:
+        df = selected_data.groupby(['stock_code', 'year', 'quarter'])['data'].sum().reset_index()
+
+    else:
+        df = selected_data
+
+    df['prev'] = df['data'].shift(1)
+
+    df['average_data'] = (df['data'] + df['prev'].fillna(0)) / 2
+    return df[['stock_code', 'year', 'quarter', 'average_data']]
+
+    # Calculate the average value
+    
+
+
+def get_average_data(data_df, category_code, duration: str = 'all'):
+    """
+    Calculate the average value of a given category code for the given quarter.
+    """
+    
+
+
+    is_yearly = False
+    is_quarterly = False
+
+    if duration == 'all':
+        is_yearly = True
+        is_quarterly = True
+    elif duration == 'yearly':
+        is_yearly = True
+    elif duration == 'quarterly':
+        is_quarterly = True
+
+    dfs = []
+
+    if is_yearly:
+
+        data_yearly = data_df[data_df['quarter'] == 0]
+        dfs.append(__get_average_data(data_yearly, category_code))
+    
+    if is_quarterly:
+        
+        data_quarterly = data_df[data_df['quarter'] != 0]
+        dfs.append(__get_average_data(data_quarterly, category_code))
+
+    return pd.concat(dfs)
+
+
+def __single_cost_of_fund(data_df, cost, funds):
     # Filter and prepare inventory and COGS data
-    inventory_data = (
-        data_df[data_df['category_code'] == inventory]
-        .sort_values(by=['year', 'quarter'])
-        .assign(previous_inventory=lambda df: df['data'].shift(1))
-    )
+    df_cost = data_df[data_df['category_code'] == cost]
 
-    # Calculate average inventory
-    inventory_data['average_inventory'] = (inventory_data['data'] + inventory_data['previous_inventory'].fillna(0)) / 2
+    # Calculate the average inventory
+    avg_funds = get_average_data(data_df, funds, duration='all')
 
-    # Prepare and sort COGS data
-    cogs_data = data_df[data_df['category_code'] == cost_of_goods_sold].sort_values(by=['year', 'quarter'])
+    # Merge the data
+    merged_data = pd.merge(avg_funds, df_cost, on=['stock_code', 'year', 'quarter'], how='inner')
 
-    # Merge inventory and COGS data
-    merged_data = pd.merge(
-        inventory_data[['stock_code', 'year', 'quarter', 'average_inventory']],
-        cogs_data[['stock_code', 'year', 'quarter', 'data']],
-        on=['stock_code', 'year', 'quarter'],
-        how='inner'
-    )
+    merged_data['data'] = - merged_data['data'] / merged_data['average_data'].replace(0, np.nan)
 
-    # Calculate inventory turnover ratio safely (avoid division by zero)
-    merged_data['data'] = merged_data['data'] / merged_data['average_inventory'].replace({0: np.nan})
 
     # Set the ratio code and select relevant columns
-    merged_data = merged_data.assign(ratio_code='inventory_turnover_ratio').drop(columns=['average_inventory'])
+    merged_data = merged_data.assign(ratio_code='cost_of_fund').drop(columns=['average_data'])
+
+    return merged_data
+
+
+def __single_inventory_turnover_ratio(data_df, cost_of_goods_sold, inventory):
+    # Filter and prepare inventory and COGS data
+    cogs = data_df[data_df['category_code'] == cost_of_goods_sold]
+
+    # Calculate the average inventory
+    avg_inventory = get_average_data(data_df, inventory, duration='all')
+
+    # Merge the data
+    merged_data = pd.merge(avg_inventory, cogs, on=['stock_code', 'year', 'quarter'], how='inner')
+
+    merged_data['data'] = merged_data['data'] / merged_data['average_data'].replace(0, np.nan)
+
+
+    # Set the ratio code and select relevant columns
+    merged_data = merged_data.assign(ratio_code='inventory_turnover_ratio').drop(columns=['average_data'])
 
     return merged_data
 
@@ -268,6 +357,8 @@ def router(function_name, *args, **kwargs):
         return __get_yoy_ratios(*args, **kwargs)
     elif function_name == 'get_inventory_turnover_ratio':
         return __single_inventory_turnover_ratio(*args, **kwargs)
+    elif function_name == 'get_cost_of_fund':
+        return __single_cost_of_fund(*args, **kwargs)
     else:
         return None
 
@@ -298,21 +389,22 @@ def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, multi_pro
                 ])
         if type_ == 'corp': # Add inventory turnover ratio for Corporation only
             
-            inputs.append(
-                [
-                    'get_inventory_turnover_ratio',
-                    df_symbol[df_symbol['quarter'] != 0],
-                    'BS_141',
-                    'IS_011'
-                ]
-            )
 
             inputs.append(
                 [
                     'get_inventory_turnover_ratio',
-                    df_symbol[df_symbol['quarter'] == 0],
+                    df_symbol,
                     'BS_141',
                     'IS_011'
+                ]
+            )
+        if type_ == 'bank':
+            inputs.append(
+                [
+                    'get_cost_of_fund',
+                    df_symbol,
+                    'IS_002',
+                    ['BS_310', 'BS_320', 'BS_330', 'BS_340', 'BS_360']
                 ]
             )
     
@@ -443,6 +535,9 @@ def time_interest_earned(EBIT, interest_expense):
 def debt_to_tangible_net_worth_ratio(total_liabilities, equity, intangible_assets):
     return total_liabilities / (equity - intangible_assets) if (equity - intangible_assets) else None
 
+
+def cost_to_income_ratio(total_operating_expenses, net_sales):
+    return total_operating_expenses / net_sales if net_sales else None
 
 def get_liquidity_ratios(data_df, func_dict):
     return __get_financial_ratio(data_df, func_dict)
@@ -844,6 +939,9 @@ def current_account_saving_account_ratio(total_deposit, demand_deposit, margin_d
 def bad_debt_ratio(total_loan, bad_debt):
     return bad_debt / total_loan if total_loan else None
 
+def non_performing_loan_coverage_ratio(allowance, bad_debt):
+    return allowance / bad_debt if bad_debt else None
+
 def get_financial_ratio_tm(data_df):
     return __get_financial_ratio(data_df, const.BANK_FIIN_RATIO_FUNCTIONS)
     
@@ -867,6 +965,7 @@ def get_constant_values(type_):
             'profitability': const.PROFITABILITY_RATIO_FUNCTIONS,
             'cashflow': const.CASHFLOW_RATIO_FUNCTIONS,
             'avg': const.CORP_AVG_RATIO_FUNCTIONS,
+            'avg': const.CORP_AVG_RATIO_FUNCTIONS,
             'pe': const.PE_RATIO_FUNCTIONS,
             'yoy': const.YoY_RATIO_FUNCTIONS['non_bank'],
             'qoq': const.QoQ_RATIO_FUNCTIONS['non_bank'],
@@ -882,6 +981,7 @@ def get_constant_values(type_):
             'profitability': const.BANK_PROFITABILITY_RATIO_FUNCTIONS,
             'cashflow': const.BANK_CASHFLOW_RATIO_FUNCTIONS,
             'avg': const.BANK_AVG_RATIO_FUNCTIONS,
+            'avg': const.BANK_AVG_RATIO_FUNCTIONS,
             'pe': const.BANK_PE_RATIO_FUNCTIONS,
             'yoy': const.YoY_RATIO_FUNCTIONS['bank'],
             'qoq': const.QoQ_RATIO_FUNCTIONS['bank'],
@@ -896,6 +996,7 @@ def get_constant_values(type_):
             'income': const.SECURITIES_INCOME_RATIO_FUNCTIONS,
             'profitability': const.SECURITIES_PROFITABILITY_RATIO_FUNCTIONS,
             'cashflow': const.SECURITIES_CASHFLOW_RATIO_FUNCTIONS,
+            'avg': const.SECURITIES_AVG_RATIO_FUNCTIONS,
             'avg': const.SECURITIES_AVG_RATIO_FUNCTIONS,
             'pe': const.SECURITIES_PE_RATIO_FUNCTIONS,
             'yoy': const.YoY_RATIO_FUNCTIONS['securities'],
@@ -922,6 +1023,7 @@ def get_financial_ratios(data_df, type_ = 'corp', including_explaination = True)
     df_income = get_income_ratios(data_df, constant['income'])
     df_profitability = get_profitability_ratios(data_df, constant['profitability'],type_)
     df_cashflow = get_cashflow_ratios(data_df, constant['cashflow'], type_)
+    df_avg = get_avg_ratios(data_df, constant['avg'], type_)
     df_avg = get_avg_ratios(data_df, constant['avg'], type_)
     df_date = get_date_related_ratios(data_df, constant['date'])
     
@@ -1096,18 +1198,23 @@ def calculate_index(version = 'v3', output_path: str = '../data/'):
     print(df_industry_ratios[(df_industry_ratios['ratio_code'] == 'BDR') & (df_industry_ratios['year'] == 2023)].head(10))
     df_industry_ratios.to_parquet(os.path.join(current_path, output_path, f'industry_ratio_{version}.parquet'), index=False)
 
-    ratio = dfs['ratio_code'].unique().tolist()
     
-    for r in ['BDR', 'EPS', 'PE', 'DSO']:
-        print(r)
-        print(dfs[(dfs['ratio_code'] == r)&(dfs['quarter'] == 0)&(dfs['year'] == 2022)].head(5))
-        print('========================================')
+
+    return dfs, df_industry_ratios
 
 if __name__ == '__main__':
     
     start = time.time()
     print("Test financial ratios")
-    calculate_index(version='v3')
+    dfs, df_industry_ratios = calculate_index(version='v3')
 
     end = time.time()
+
+    ratio = dfs['ratio_code'].unique().tolist()
+    
+    for r in ['BDR', 'EPS', 'TAT', 'DSO', 'ROAA', 'COF']:
+        print(r)
+        print(dfs[(dfs['ratio_code'] == r)&(dfs['quarter'] == 0)&(dfs['year'] == 2022)].head(5))
+        print('========================================')
+
     print(f"Time: {end - start}")

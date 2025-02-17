@@ -32,15 +32,23 @@ chmod +x run.sh
 
 - For CPU (Using OpenAI Embedding)
 ```bash
-./run.sh --openai True
+./run.sh --preprocess v3 --openai True 
 ```
 
 - For GPU (Self-hosted Embedding Server)
 ```bash
-./run.sh local-embedding --local True
+./run.sh local-embedding --preprocess v3 --local True
 ```
 
 - For GPU + Rerank (Self-hosted Embedding Server)
 ```bash
-./run.sh local-model --local True
+./run.sh local-model --preprocess v3 --local True
 ```
+
+### vLLM
+
+- LLM
+```
+vllm serve Qwen/Qwen2.5-Coder-3B-Instruct --enable-lora --lora-modules qwen2.5-coder-3b-sft=saves/qwen2.5-3b-coder-test-v3/lora/sft --max-model-len 4096 --max-lora-rank 64 --gpu-memory-utilization 0.8
+```
+

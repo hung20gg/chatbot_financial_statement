@@ -20,7 +20,7 @@ CREATE TABLE company_info(
 
 --  /* Snapshot 
 
---  stock_code industry  is_bank  is_securities  exchange  stock_indices 
+--  stock_code  industry  is_bank  is_securities  exchange  stock_indices 
 --   VIC  Real Estate  false  false  HOSE  VN30  
 -- */
 

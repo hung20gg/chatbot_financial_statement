@@ -346,6 +346,37 @@ class HubVerticalUniversal(BaseDBHUB):
 
         return list(collect_code)
     
+
+    def _get_mapping_ratio_from_ratio_codes(self, ratio_codes):
+        placeholder = ', '.join(['%s' for _ in ratio_codes])
+        query = f"SELECT ratio_code, ratio_name FROM map_category_code_ratio WHERE ratio_code IN ({placeholder})"
+        return self.query(query, params=ratio_codes, return_type='dataframe')
+
+    def _get_mapping_category_from_category_codes(self, collect_code):
+
+        collect_code_fs = [code for code in collect_code if 'TM' not in code]
+        collect_code_tm = [code for code in collect_code if 'TM' in code]
+
+        placeholder_fs = ', '.join(['%s' for _ in collect_code_fs])
+        placeholder_tm = ', '.join(['%s' for _ in collect_code_tm])
+
+        dfs = []
+
+        if len(collect_code_fs) != 0:
+            query = f"SELECT category_code, en_caption FROM map_category_code_universal WHERE category_code IN ({placeholder_fs})"
+            df = self.query(query, params=collect_code_fs) 
+            dfs.append(df)
+        
+        if len(collect_code_tm) != 0:
+            query = f"SELECT category_code, en_caption FROM map_category_code_explaination WHERE category_code IN ({placeholder_tm})"
+            df_tm = self.query(query, params=collect_code_tm) 
+            
+            dfs.append(df_tm)
+        df = pd.concat(dfs)
+        return df
+
+
+    
     def search_return_df(self, texts, top_k, type_ = None, **kwargs) -> pd.DataFrame:
         
         """
@@ -353,42 +384,17 @@ class HubVerticalUniversal(BaseDBHUB):
         
         Return the result as a DataFrame.
         """
-        collect_code = self.accounts_search(texts, top_k, type_ = type_)
-        print(collect_code)
+        collect_code = self.accounts_search(texts, top_k, type_ = type_)        
         
-        collect_code_fs = [code for code in collect_code if 'TM' not in code]
-        collect_code_tm = [code for code in collect_code if 'TM' in code]
-        
-        placeholder = ', '.join(['%s' for _ in collect_code])
-        placeholder_fs = ', '.join(['%s' for _ in collect_code_fs])
-        placeholder_tm = ', '.join(['%s' for _ in collect_code_tm])
-        
-        
-        
-        if type_ == 'ratio':
-            query = f"SELECT ratio_code, ratio_name FROM map_category_code_ratio WHERE ratio_code IN ({placeholder})"
-            
-            return self.query(query, params=collect_code) 
+        if type_ == 'ratio':            
+            return self._get_mapping_ratio_from_ratio_codes(collect_code)
         
         else:
-            dfs = []
-            
-            if len(collect_code_fs) != 0:
-                query = f"SELECT category_code, en_caption FROM map_category_code_universal WHERE category_code IN ({placeholder_fs})"
-                df = self.query(query, params=collect_code_fs) 
-                dfs.append(df)
-            
-            if len(collect_code_tm) != 0:
-                query = f"SELECT category_code, en_caption FROM map_category_code_explaination WHERE category_code IN ({placeholder_tm})"
-                df_tm = self.query(query, params=collect_code_tm) 
-                
-                dfs.append(df_tm)
-            df = pd.concat(dfs)
-            return df
+            return self._get_mapping_category_from_category_codes(collect_code)
     
     # ================== Search for suitable Mapping table ================== #
     
-    def _return_mapping_table(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = True):
+    def _return_mapping_table(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = True, mix_account = True):
         
         start = time.time()
         
@@ -408,11 +414,13 @@ class HubVerticalUniversal(BaseDBHUB):
 
         if len(financial_statement_row) != 0:  
             category_dfs.append(self.search_return_df(financial_statement_row, top_k, type_='fs'))
-            ratio_dfs.append(self.search_return_df(financial_statement_row, top_k//3, type_='ratio'))
+            if mix_account:
+                ratio_dfs.append(self.search_return_df(financial_statement_row, top_k//3, type_='ratio'))
 
         if len(financial_ratio_row) != 0:
             category_dfs.append(self.search_return_df(financial_ratio_row, top_k, type_='fs'))
-            ratio_dfs.append(self.search_return_df(financial_ratio_row, top_k//3, type_='ratio'))
+            if mix_account:
+                ratio_dfs.append(self.search_return_df(financial_ratio_row, top_k//4, type_='ratio'))
         
         if len(category_dfs) != 0:
             return_table['category_code_mapping'] = pd.concat(category_dfs).drop_duplicates()
@@ -424,7 +432,7 @@ class HubVerticalUniversal(BaseDBHUB):
         return return_table
     
     
-    def _return_mapping_table_multithread(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = True):
+    def _return_mapping_table_multithread(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = True, mix_account = True):
                 
         start = time.time()
         
@@ -442,11 +450,13 @@ class HubVerticalUniversal(BaseDBHUB):
                 
         if len(financial_statement_row) != 0:  
             tasks.append(('category_code_mapping', financial_statement_row, top_k, 'fs'))
-            tasks.append(('ratio_code_mapping', financial_statement_row, top_k//3, 'ratio'))
+            if mix_account:
+                tasks.append(('ratio_code_mapping', financial_statement_row, top_k//3, 'ratio'))
 
         if len(financial_ratio_row) != 0:
             tasks.append(('ratio_code_mapping', financial_ratio_row, top_k, 'ratio'))
-            tasks.append(('category_code_mapping', financial_ratio_row, top_k//3, 'fs'))
+            if mix_account:
+                tasks.append(('category_code_mapping', financial_ratio_row, top_k//4, 'fs'))
 
         def process_task(task):
             table_name, financial_statement_row, top_k, type_ = task

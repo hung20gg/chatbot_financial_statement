@@ -2,7 +2,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import sys
 import random 
 
-from utils import get_available_path, append_jsonl_to_file
+from utils import get_available_path, append_jsonl_to_file, get_avaliable_questions
 sys.path.append('..')
 import pandas as pd
 import numpy as np
@@ -43,7 +43,7 @@ Note:
 </question>
 
 <table>
-{table}
+{table[:5000]}
 </table>
 
 Return final answer in JSON format.
@@ -80,16 +80,15 @@ def parallel_validate_qa(llm, *args):
 
 def evaluate_qa_quality(path, llm_name, multi_thread=False, max_workers=4):
     
-    data = []
-    with open(path) as f:
-        for line in f:
-            data.append(json.loads(line))
-            
-    path = path.split('/')[-1]
-    output_file_name = llm_name.replace('/', '__') + '-scored-' + path     
+
+        
+    basename = path.split('/')[-1]
+    output_file_name = llm_name.replace('/', '__') + '-scored-' + basename     
     output_path = os.path.join('../data', output_file_name)  
     
-    output_path = get_available_path(output_path)
+    data = get_avaliable_questions(path, output_path)
+
+    print(f"Number of questions: {len(data)}")
 
     results = []
 
@@ -449,7 +448,10 @@ def evaluate_sql_generation(sql_path, mcq_path, llm_name, multi_thread=False, ma
     sql_data = []
     with open(sql_path) as f:
         for line in f:
-            sql_data.append(json.loads(line))
+            try:
+                sql_data.append(json.loads(line))
+            except Exception as e:
+                print(e)
     
     mcq_data = []
     with open(mcq_path) as f:

@@ -41,7 +41,19 @@ ETL/
 │   ├── mapping_data/    # Category code mappings
 │   ├── base.py          # Abstract crawler classes
 │   └── cafef_crawler.py # CafeF implementation
-├── connector.py         # Database connectivity
+│
+├── dbmanager/
+│   ├── abstract_semantic_layer.py
+│   ├── abstracthub.py          
+│   ├── hub_horizontal.py    
+│   ├── hub_vertical.py     
+│   ├── mongodb.py    
+│   ├── rerank.py       # Reranker module
+│   └── setup.py        # Setup DBHUB and Semantic Layers
+│
+├── const.py            # Params for financial ratio calculation
+├── ratio_index.py      # Calculate financial ratio  
+├── connector.py        # Database connectivity
 ├── etl.py              # Main ETL orchestration
 └── craw_data.ipynb     # Crawling examples
 ```
