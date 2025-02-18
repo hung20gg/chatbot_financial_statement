@@ -1,6 +1,7 @@
 beautifulsoup4
 chromadb
 google-generativeai
+google-genai
 huggingface-hub
 langchain
 langchain-chroma
