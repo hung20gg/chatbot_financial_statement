@@ -419,10 +419,10 @@ You are an expert in financial statement and database management. You will be as
             new_prompt.replace("<example>", "")
             new_prompt.replace("</example>", "")
 
-        init_prompt.replace('<data>\n\n\n</data>', "")
-        init_prompt.replace('<data>\n\n\n\n\n</data>', "")
-        new_prompt.replace('<data>\n\n\n</data>', "")
-        new_prompt.replace('<data>\n\n\n\n\n</data>', "")
+        # init_prompt.replace('<data>\n\n\n</data>', "")
+        # init_prompt.replace('<data>\n\n\n\n\n</data>', "")
+        # new_prompt.replace('<data>\n\n\n</data>', "")
+        # new_prompt.replace('<data>\n\n\n\n\n</data>', "")
 
         
         clean_new_prompt = ""
@@ -439,6 +439,9 @@ You are an expert in financial statement and database management. You will be as
             if line.strip() == "":
                 continue
             clean_init_prompt += line.strip() + "\n\n"
+
+        clean_init_prompt.replace("<data>\n\n</data>", "")
+        clean_new_prompt.replace("<data>\n\n</data>", "")
 
         clean_init_prompt.replace("<example>\n\n</example>", "")
         clean_new_prompt.replace("<example>\n\n</example>", "")

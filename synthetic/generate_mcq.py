@@ -131,13 +131,118 @@ def _generate_mcq(llm, data, mcq_style, file_path='tmp.jsonl'):
         print("Error in generating MCQ =====")
         return
 
-def generate_mcq(llm, input_path, max_workers=10, multi_thread=False):
+
+def _generate_mcq_v2(llm, data, mcq_style, file_path='tmp.jsonl'):
+    """
+    Generate multiple MCQ from a question and a table
+    """
+    system_prompt = f"""
+    You are an auditor, and you are tasked to giving multiple choice questions to test the knowledge of your colleague. 
+    Each question should have 4 choices, and only one correct answer.
+    You will be given a general task in <task> tag, and reference tables in <table> tag.
+    Your task is to generate multiple choice question based on the task and the table.
+
+    Your question should be precise and clear, and make sure the question can only be answered by the information in the table.
+    You should also provide the correct answer and explanation for the correct answer.
+    If you think the provided table is not enough to generate a question, refuse the task and ask for more information.
+    """
+
+    messages = [
+        {
+            "role": "system",
+            "content": system_prompt
+        },
+        {
+            "role": "user",
+            "content": f"""
+    You will have the following data:
+
+    <task>
+    {data['question']}
+    </task>
+
+    <table>
+    {data['table']}
+    </table>
+
+    Your task is to generate 1-5 MCQs based on the task and the table. Choose the number of questions accordingly.
+    
+    After generating the question, think step by step to answer them.
+    """
+        },
+    ]
+
+    # Generate question
+    response = llm(messages)
+
+    messages.append(
+        {
+            "role": "assistant",
+            "content": response
+        }
+    )
+
+    messages.append(
+        {
+            "role": "user",
+            "content": """
+    Based on the multiple choices questions, return them in JSON
+
+    Assume the "choice 2" is the correct answer of a question. The JSON format should be:
+    ```json
+    [{
+        "question": "multiple choice question",
+        "choices": [
+            "choice 1", 
+            "choice 2",
+            "choice 3",
+            "choice 4"
+        ],
+        "answer": 1,
+        "explanation": "explanation"
+    }]
+    ```
+
+    If no question is provided, return an empty JSON object.
+    """
+        }
+    )
+
+    # Get the question in JSON format
+    response = llm(messages)
+
+    
+    mcq = get_json_from_text_response(response, new_method=True)
+
+    try:
+    # Store the question
+        
+        questions = []
+        for q in mcq:
+            question = dict()
+            question['ids'] = str(uuid.uuid4())
+            question['question_ids'] = data['ids']
+            question['question'] = q['question']
+            question['choices'] = q['choices']
+            question['answer'] = q['answer']
+            question['explanation'] = q['explanation']
+            questions.append(question)
+
+
+            append_jsonl_to_file(question, file_path)
+    except:
+        print("Error in generating MCQ =====")
+        return
+
+
+def generate_mcq(llm, input_path, max_workers=8, multi_thread=False, version="v1"):
     llm = get_llm_wrapper(llm)
     print("Generating MCQ...")
     
     
     basename = os.path.basename(input_path)
-    output_path = f"../data/mcq_{basename}"
+    basename ='.'.join(basename.split('.')[:-1])
+    output_path = f"../data/mcq_{basename}_{version}.jsonl"
 
     done_ids = set()
     if os.path.exists(output_path):
@@ -165,7 +270,10 @@ def generate_mcq(llm, input_path, max_workers=10, multi_thread=False):
     results = []
     if multi_thread:
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = [executor.submit(_generate_mcq, llm, data[i], mcq_styles[random.randint(0, len(mcq_styles)-1)], output_path) for i in range(len(data))]
+            if version == "v1":
+                futures = [executor.submit(_generate_mcq, llm, data[i], mcq_styles[random.randint(0, len(mcq_styles)-1)], output_path) for i in range(len(data))]
+            else:
+                futures = [executor.submit(_generate_mcq_v2, llm, data[i], mcq_styles[random.randint(0, len(mcq_styles)-1)], output_path) for i in range(len(data))]
             
             for future in as_completed(futures):
                 results.extend(future.result())
@@ -174,16 +282,20 @@ def generate_mcq(llm, input_path, max_workers=10, multi_thread=False):
 
     else:
         for i in range(len(data)):
-            _generate_mcq(llm, data[i], mcq_styles[random.randint(0, len(mcq_styles)-1)], output_path)
+            if version == "v1":
+                _generate_mcq(llm, data[i], mcq_styles[random.randint(0, len(mcq_styles)-1)], output_path)
+            else:
+                _generate_mcq_v2(llm, data[i], mcq_styles[random.randint(0, len(mcq_styles)-1)], output_path)
 
 
 def generate():
-    llm = 'gpt-4o-mini'
-    input_path = '../data/gemini-1.5-flash__v0.jsonl'
+    llm = 'gemini-2.0-flash-lite-preview-02-05'
+    input_path = '../data/sql_v0.jsonl'
 
-    max_workers = 1
+    max_workers = 5
+    versoion = "v2"
 
-    generate_mcq(llm, input_path, max_workers=max_workers, multi_thread=True)
+    generate_mcq(llm, input_path, max_workers=max_workers, multi_thread=True, version=versoion)
 
 if __name__ == "__main__":
     generate()

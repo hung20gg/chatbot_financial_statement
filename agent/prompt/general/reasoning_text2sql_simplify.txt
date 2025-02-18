@@ -40,7 +40,7 @@ However, feel free to modify the table if needed.
 </instruction>
 
 ### Note: 
-- Include the detailed name of the table in the query in the following format:
+- Include the detailed name of the table result in the query in the following format:
 
 ```sql
 -- ### detailed_table_name

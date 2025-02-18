@@ -58,8 +58,8 @@ def test():
 
     chat_config = ChatConfig(**GPT4O_MINI_CONFIG)
     text2sql_config = TEXT2SQL_FAST_GEMINI_CONFIG
-    text2sql_config['sql_llm'] = 'qwen2.5-coder-3b-dpo'
-    text2sql_config['llm'] = 'qwen2.5-coder-3b-dpo'
+    text2sql_config['sql_llm'] = 'qwen2.5-coder-3b-sft'
+    text2sql_config['llm'] = 'qwen2.5-coder-3b-sft'
     # # text2sql_config = TEXT2SQL_THINKING_GEMINI_CONFIG
     text2sql_config['sql_example_top_k'] = 0
     # text2sql_config['company_top_k'] = 1
@@ -79,7 +79,8 @@ def test():
         print(text2sql.db.vector_db_ratio.similarity_search('ROA', 2))
         
         logging.info('Test text2sql')
-        prompt = "For the year 2023, what was the average Return on Equity of the banking industry?"
+        prompt = "For the year 2023, what was the average Return on Equity of banking industry?"
+        prompt = "ROAA of banking industry from 2016 to 2023"
         output = text2sql.solve(prompt, adjust_table='text', mix_account=False)
         
         print('### ========= Reasoning ========= ###')

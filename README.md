@@ -1,21 +1,82 @@
 # Chatbot_financial_statement
 
-## Major Update 3
-- Having universal code 
-- Ready to deploy
-- Setup 2 Docker image, MongoDB and Text2SQL
-- If you have gpu, you can also use Text Embedding Inference (TEI) image for fast embedding
-- Gonna make an image in the future 
+### Update 17-02-2025: Just need the evaluation dataset
+
+## File structures
+
+### Agent
+
+This is the codebase for Text2SQL Agent and Chatbot
+
+- Agent: Text2SQL solver, Text2SQL configs
+- Chatbot: Normal Chatbot, Chatbot with Semantic Layers.
+- Prompts
+- Implementation of MCTS
+
+### ETL
+
+This is the codebase for database setup and DB utils for Text2SQL solver and Chatbot (access to Postgre and vectordb) 
+
+- DBManager: Connect to RDB and doing vector search and rerank. Also include Semantic Layers
+- Connector: Utils and setup for RDB and vectordb
+- Ratio_index, const, etl: Create financial ratio, merge financial statements
+
+### Synthetic
+
+- Generate synthetic data, including SQL and MCQs-related questions.
+
+### Evaluate
+
+- Generate SQL query based on the given question
+- Evaluate the quality of the SQL generated
+
+### Page
+
+- Host the Chatbot via steamlit
+
+### Trainer
+
+- GPRO Trainer
+
+## LLM Available
+
+### Gemini:
+
+- Gemini 2.0 Flash
+- Gemini 2.0 Flash Thinking Exp
+
+### GPT
+
+- GPT 4o mini (Local test: 0.65)
+- GPT 4o
+
+### Deepseek
+
+- Deepseek-chat
+
+### Qwen
+
+- Qwen2.5-Coder-3B-SFT (Local test: 0.72)
+- Qwen2.5-Coder-3B-KTO
+- Qwen2.5-Coder-3B-DPO
+- Qwen2.5-Coder-1.5B-SFT
+- Qwen2.5-Coder-1.5B-KTO
+- Qwen2.5-Coder-1.5B-DPO
+
+## Database design
+
+- Horizontal: Each account/ratio is a columns in the main table
+- Vertical: Each account/ratio is a row in the main table
+
 
 ## Prompting Strategy
 - General: 2-step Text2sql. First asking LLM to analyze the problem and choose which category do they want to access. Then adding snapshot of the table into prompt, so it can correctly select the right column.
 - Reasoning: After having snapshot, ask LLM to generate SQL directly to solve the problem
-- Partial sql. Instead of query to find the solution, breakdown steps and solve it one-by-one
 - Include debugging
 
 ## Setup guide
-
-#### Ignore
+<details>
+<summary>Ignore</summary>
 - Make `run.sh` file executable
 ```bash
 chmod +x run.sh
@@ -34,16 +95,29 @@ chmod +x run.sh
 ```bash
 ./run.sh local-server --local True 
 ```
+</details>
 
 ### Setup maunally
 
-Create database via this scripts
+Clone the reporitoty and create environment
 
 ```bash
-python setup.py --preprocess v3 --force True --local True
+git clone https://github.com/hung20gg/chatbot_financial_statement.git
+git clonehttps://github.com/hung20gg/llm.git
+cd chatbot_financial_statement
+
+conda create -y -n text2sql
+conda activate text2sql
+pip install -r requirements.txt
 ```
 
-Or you can build the TEI local and run the following scripts
+Create database via this scripts (notice the version)
+
+```bash
+python setup.py --preprocess v3 --force True --local True --vectordb chromadb
+```
+
+Build the TEI local and run the following scripts (check the [TEI repo](https://github.com/huggingface/text-embeddings-inference) for setup)
 
 - For embedding:
 ```bash
@@ -57,6 +131,11 @@ model=BAAI/bge-reranker-v2-m3
 text-embeddings-router --model-id $model --port 8081
 ```
 
+Run the `test.py` file to check the setup status
+```bash
+python test.py
+```
+
 ## DB In the pipeline
 - ChromaDB/ Milvus (Storing the embedding)
 - PostgreSQL (Storing the data)
@@ -64,5 +143,49 @@ text-embeddings-router --model-id $model --port 8081
 
 
 
-
 Check and add the index for full-text search in [ETL\index_full_text_search.md](ETL\index_full_text_search.md)
+
+## Train & evaluate
+
+### Database
+
+By dividing into different database, we can test on the scalability of the model when handling changes in database
+
+- Training DB (v3): 100 companies
+- Evaluating DB (v3.2): 200+ companies + QoQ ratio + 4 nearest quarter ratio
+
+### Training strategy
+Using [LLaMA-Factory CLI](https://github.com/hiyouga/LLaMA-Factory) for LoRA tuning (r=64)
+- Model choice: Qwen2.5 Coder 1.5B/3B (7B if funded)
+- SFT (good)
+- Proof Preference Learning (DPO, KTO) is not good  (done)
+- SFT with external dataset + merge-kit.
+
+### Evaluation set
+
+- Real question from reports.
+- Synthetic data as eval set.
+
+### MCQ evaluation
+
+- v1: 1 SQL → 1 MCQ
+- v2: 1 SQL → multiple MCQs. Average them, or get int(avg(scores))
+
+## Versioning v1 (training) and v2 (testing) database
+
+Notice: Do not change the content in `csv` folder
+
+Changes of training and testing dataset:
+
+- Increase in the number of companies
+- Increase in the number of accounts and query format
+- Changes in industry average
+
+Change the `DB_NAME` in `.env` file to another version to load
+
+## TO DO
+- [ ] Add new v3.2 companies into the database
+- [ ] Evaluation dataset
+- [ ] Moving logging & vectordb to Elastic Search 
+- [ ] FastAPI backend 
+- [ ] Write unit tests  

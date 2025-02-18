@@ -130,7 +130,8 @@ BANK_LIQUIDITY_RATIO_FUNCTIONS = {
     'long_term_debt_to_equity_capital_ratio': [['BS_350','BS_360'], 'BS_500'],  # long_term_liabilities, equity
     'time_interest_earned': [['IS_017', 'IS_002'], 'IS_002'],  # EBIT, interest_expense
     'debt_to_tangible_net_worth_ratio': ['BS_400', 'BS_500', 'BS_227'],  # total_liabilities, equity, intangible_assets
-}
+    'cost_to_income_ratio': ['IS_014', ['IS_006', 'IS_007', 'IS_008','IS_009', 'IS_012', 'IS_013']],  # total_operating_expenses, net_sales
+}   
 
 
 BANK_FINANCIAL_RATIO_FUNCTIONS = {
@@ -354,6 +355,7 @@ YoY_RATIO_FUNCTIONS = {
         'Non_Interest_Income_Growth_YoY' : ['IS_006','IS_007','IS_008','IS_009','IS_012','IS_013'],
         'Total_Operating_Income_Growth' : 'IS_030',
         'Customer_Loans_Growth_YoY' : 'BS_160',
+        'outstanding_credit_balance_YoY' : 'BS_200'
         }
 
 }

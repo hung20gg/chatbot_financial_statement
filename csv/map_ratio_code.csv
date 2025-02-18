@@ -91,3 +91,6 @@ Return On Average Assets,ROAA,return_on_average_assets
 Return On Average Equity,ROAE,return_on_average_equity
 Return On Average Sales,ROAS,return_on_average_sales
 Non-Performing Loan Coverage Ratio,NPLCR,non_performing_loan_coverage_ratio
+Outstanding Credit Balance YoY,OCBYoY,outstanding_credit_balance_YoY
+Cost of Fund,COF,cost_of_fund
+Cost to Income Ratio,CIR,cost_to_income_ratio
