@@ -45,7 +45,7 @@ from ETL.dbmanager import get_semantic_layer, BaseRerannk
 
 
 
-def initialize_text2sql(text2sql_config, prompt_config):
+def initialize_text2sql(text2sql_config, prompt_config, **kwargs):
     text2sql_config = Text2SQLConfig(**text2sql_config)
     prompt_config = PromptConfig(**prompt_config)
 
@@ -78,7 +78,7 @@ def initialize_text2sql(text2sql_config, prompt_config):
     db = setup_db(db_config, reranker=reranker)
     logging.info('Finish setup db')
 
-    text2sql = Text2SQL(config = text2sql_config, prompt_config=prompt_config, db = db, max_steps=2)
+    text2sql = Text2SQL(config = text2sql_config, prompt_config=prompt_config, db = db, max_steps=2, **kwargs)
     logging.info('Finish setup text2sql')
 
     return text2sql

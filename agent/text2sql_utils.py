@@ -7,7 +7,7 @@ import sys
 sys.path.append('..')
 
 from llm.llm.chatgpt import ChatGPT, OpenAIWrapper
-from llm.llm.gemini import Gemini
+from llm.llm.gemini import Gemini, RotateGemini
 
 from llm.llm_utils import get_code_from_text_response
 from pydantic import BaseModel, ConfigDict
@@ -105,7 +105,7 @@ def join_and_get_difference(df1, df2):
     return df1, diff
 
 
-def get_llm_wrapper(model_name, **kwargs):
+def get_llm_wrapper(model_name, rotate_key=False, **kwargs):
 
     host = None 
     api_key = None
@@ -118,6 +118,8 @@ def get_llm_wrapper(model_name, **kwargs):
         
         elif 'gemini' in model_name:
             logging.info(f"Using Gemini with model {model_name}")
+            if rotate_key:
+                return RotateGemini(model_name=model_name, **kwargs)
             return Gemini(model_name=model_name, random_key='exp' in model_name, **kwargs)
         
         elif 'deepseek' in model_name:

@@ -38,13 +38,13 @@ logging.basicConfig(
 )
 
 
-def single_ner(text2sql_config, prompt_config, batch_questions, using_cache=False, enhance = None, file_path=None):
+def single_ner(text2sql_config, prompt_config, batch_questions, using_cache=False, enhance = None, file_path=None, rotate_key = False):
     """
     Run a single ner on a batch of questions
     """
 
     # Initialize the solver
-    solver = initialize_text2sql(text2sql_config, prompt_config)
+    solver = initialize_text2sql(text2sql_config, prompt_config, rotate_key=rotate_key)
     is_exp_model = 'exp' in text2sql_config['sql_llm']
 
     responses = []
@@ -79,8 +79,8 @@ def single_ner(text2sql_config, prompt_config, batch_questions, using_cache=Fals
         if file_path:
             append_jsonl_to_file(answer, file_path)
         
-        if is_exp_model:
-            time.sleep(8)
+        # if is_exp_model:
+        #     time.sleep(5)
 
 
     return responses
@@ -113,10 +113,11 @@ def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=F
         if not using_cache:
             solver.reset()
 
-        ner_messages = solver._llm_get_stock_code_and_suitable_row(prompt)
+        # ner_messages = solver._llm_get_stock_code_and_suitable_row(prompt)
         output = solver.solve(prompt, enhance=enhance)
 
         his, err, tables = output.history, output.error_messages, output.execution_tables
+        ner_messages = output.extraction_msg
         
         table_str = utils.table_to_markdown(tables)
 
@@ -155,7 +156,7 @@ def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=F
     return responses
 
 
-def _solve(text2sql_config, prompt_config, questions, using_cache=False, version = None, enhance = None, batch_size=5, max_workers=4, multi_thread=False, task = 'sql'):
+def _solve(text2sql_config, prompt_config, questions, using_cache=False, version = None, enhance = None, batch_size=5, max_workers=4, multi_thread=False, task = 'sql', rotate_key = False):
     """
     Run a single solver on a batch of questions in parallel
     """
@@ -357,11 +358,15 @@ def generate_sql(args):
 
     selected_questions = get_avaliable_questions(file_path, output_path)
 
+    if args.rotate_api:
+        print("Using rotate API")
+        rotate_key = True
+
         
     print(f"Total questions: {len(selected_questions)}")
 
     # Run the solver
-    results = _solve(text2sql_config, prompt_config, selected_questions, using_cache=args.using_cache, version=version, enhance=args.enhance, batch_size=args.batch_size, max_workers=args.max_workers, multi_thread=args.multi_thread)
+    results = _solve(text2sql_config, prompt_config, selected_questions, using_cache=args.using_cache, version=version, enhance=args.enhance, batch_size=args.batch_size, max_workers=args.max_workers, multi_thread=args.multi_thread, rotate_key=args.rotate_api)
 
 
 
@@ -448,6 +453,7 @@ def get_args():
     parser.add_argument('--template', default='vertical', type=str)
     parser.add_argument('--enhance', default=None, type=str)
     parser.add_argument('--reference_path', default=None, type=str)
+    parser.add_argument('--rotate_api', action='store_true')
     return parser.parse_args()
 
 
