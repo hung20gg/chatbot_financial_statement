@@ -3,7 +3,7 @@ import os
 
 # Ensure directories exist
 os.makedirs("../data", exist_ok=True)
-os.makedirs("../csv/v3", exist_ok=True)
+os.makedirs("../data", exist_ok=True)
 
 def process_financial_statements(input_parquet_path, output_parquet_path):
     """

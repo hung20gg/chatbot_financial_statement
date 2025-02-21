@@ -84,11 +84,6 @@ def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_m
     Computes the Year-over-Year (YoY) ratio dynamically for each quarter (Q1, Q2, Q3, Q4)
     and for annual data (Q0).
     """
-    """
-    Computes the Year-over-Year (YoY) ratio dynamically for each quarter (Q1, Q2, Q3, Q4)
-    and for annual data (Q0).
-    """
-
     results = []
     
     # Pivot the data for easier lookup
@@ -103,16 +98,9 @@ def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_m
     # Iterate through the pivoted data
     for (stock_code, year, quarter), row in pivot_df.iterrows():
         
-        # Process YoY growth calculation for each quarter dynamically
-        
-        # Process YoY growth calculation for each quarter dynamically
         for ratio_name, category_code in ratio_mapping.items():
             try:
-                # Fetch current and previous year values dynamically
-                # Fetch current and previous year values dynamically
                 if isinstance(category_code, list):
-                    # Handle sums of multiple category codes
-                    # Handle sums of multiple category codes
                     current_year_value = sum(row.get(code, 0) for code in category_code)
                     previous_year_value = sum(
                         pivot_df.loc[(stock_code, year - 1, quarter), code]
@@ -126,8 +114,6 @@ def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_m
                     current_year_value = get_pre_calculated_ratio(year, category_code, ratios_df_6, quarter)
                     previous_year_value = get_pre_calculated_ratio(year - 1, category_code, ratios_df_6, quarter)
                 else:
-                    # Standard case: Fetch current and previous year's values for the same quarter
-                    # Standard case: Fetch current and previous year's values for the same quarter
                     current_year_value = row.get(category_code, 0)
                     previous_year_value = pivot_df.loc[
                         (stock_code, year - 1, quarter), category_code
@@ -151,17 +137,7 @@ def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_m
                 })
 
 
-                # Store results
-                results.append({
-                    'stock_code': stock_code,
-                    'year': year,
-                    'quarter': quarter,
-                    'ratio_code': ratio_name,
-                    'data': yoy_value
-                })
-
             except Exception as e:
-                # Handle missing or invalid data gracefully
                 print(f"Error calculating YoY ratio {ratio_name} for {stock_code}, Q{quarter}, {year}: {e}")
 
     return pd.DataFrame(results)
