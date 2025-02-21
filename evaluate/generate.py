@@ -30,6 +30,7 @@ from llm.llm_utils import get_json_from_text_response, get_code_from_text_respon
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 MAX_QUESTION = 2000
+DB_VERSION = 'v3'
 
 import logging
 logging.basicConfig(
@@ -44,7 +45,7 @@ def single_ner(text2sql_config, prompt_config, batch_questions, using_cache=Fals
     """
 
     # Initialize the solver
-    solver = initialize_text2sql(text2sql_config, prompt_config, rotate_key=rotate_key)
+    solver = initialize_text2sql(text2sql_config, prompt_config, version=DB_VERSION, rotate_key=rotate_key)
     is_exp_model = 'exp' in text2sql_config['sql_llm']
 
     responses = []
@@ -98,7 +99,7 @@ def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=F
     text2sql_config['account_top_k'] = random.randint(4, 6)
 
     # Initialize the solver
-    solver = initialize_text2sql(text2sql_config, prompt_config)
+    solver = initialize_text2sql(text2sql_config, prompt_config, version=DB_VERSION,)
     is_exp_model = 'exp' in text2sql_config['sql_llm']
 
     responses = []
@@ -248,7 +249,7 @@ def single_fake_messages(text2sql_config,  batch_questions, using_cache=False, f
 
     prompt_config = get_prompt_config(random_config)
 
-    solver = initialize_text2sql(text2sql_config, prompt_config)
+    solver = initialize_text2sql(text2sql_config, prompt_config, version=DB_VERSION)
     global_history = []
     for question in batch_questions:
         prompt = question['question']

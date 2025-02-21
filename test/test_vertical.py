@@ -31,6 +31,9 @@ args = parser.parse_args()
 
 
 if __name__ == "__main__":
+    version = 'v3.2'
+
+
     db_config = DBConfig(**TEI_VERTICAL_UNIVERSAL_CONFIG)
     
     # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -40,7 +43,7 @@ if __name__ == "__main__":
     
     reranker = BaseRerannk(name='http://localhost:8081/rerank')
     
-    db = setup_db(db_config, reranker = reranker, vectordb=args.vectordb)
+    db = setup_db(db_config, reranker = reranker, vectordb=args.vectordb, version = version)
     logging.info('Finish setup db')
     
     print(db.find_stock_code_similarity('Ngân hàng TMCP Ngoại Thương Việt Nam', 2))

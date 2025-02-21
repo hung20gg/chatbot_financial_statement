@@ -66,7 +66,7 @@ TEI_VERTICAL_UNIVERSAL_CONFIG = {
 }
 
 
-def setup_db(config: DBConfig, vectordb = 'chromadb', multi_thread = True, reranker = None):
+def setup_db(config: DBConfig, version = 'v3', vectordb = 'chromadb', multi_thread = True, reranker = None):
     conn = {
         'db_name': os.getenv('DB_NAME'),
         'user': os.getenv('DB_USER'),
@@ -88,7 +88,7 @@ def setup_db(config: DBConfig, vectordb = 'chromadb', multi_thread = True, reran
     db_type = 'vertical' if 'vertical' in config.database_choice else 'horizontal'
     
     if vectordb == 'chromadb':
-        persist_client = PersistentClient(path = os.path.join(current_directory, f'../../data/vector_db_{db_type}_{"local" if local_model else "openai"}'), settings = Settings())
+        persist_client = PersistentClient(path = os.path.join(current_directory, f'../../data/vector_db_{db_type}_{"local" if local_model else "openai"}_{version}'), settings = Settings())
     elif vectordb == 'milvus':
         persist_client = 'http://localhost:19530'
     else:

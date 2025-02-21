@@ -38,6 +38,9 @@ if __name__ == "__main__":
 
     if args.get('preprocess'):
         expand_data(args.get('preprocess'))
+    else:
+        # Default version to v3
+        args['preprocess'] = 'v3'
     
     setup_everything(args)
     

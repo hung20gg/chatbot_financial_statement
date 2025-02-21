@@ -117,6 +117,11 @@ Create database via this scripts (notice the version)
 python setup.py --preprocess v3 --force True --local True --vectordb chromadb
 ```
 
+For using data of 200 companies
+```bash
+python setup.py --preprocess v3.2 --force True --local True --vectordb chromadb
+```
+
 Build the TEI local and run the following scripts (check the [TEI repo](https://github.com/huggingface/text-embeddings-inference) for setup)
 
 - For embedding:
