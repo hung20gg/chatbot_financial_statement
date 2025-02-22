@@ -17,6 +17,8 @@ from agent.const import (
     INBETWEEN_CHAT_CONFIG,
     TEXT2SQL_FAST_GEMINI_CONFIG,
     TEXT2SQL_FAST_OPENAI_CONFIG,
+    TEXT2SQL_THINKING_GEMINI_CONFIG,
+    TEXT2SQL_4O_CONFIG,
     TEXT2SQL_QWEN25_CODER_3B_SFT_CONFIG,
     TEXT2SQL_QWEN25_CODER_1B_KTO_CONFIG,
     TEXT2SQL_4O_CONFIG
@@ -26,17 +28,8 @@ from agent.prompt.prompt_controller import (
     PromptConfig, 
     VERTICAL_PROMPT_BASE, 
     VERTICAL_PROMPT_UNIVERSAL,
-    FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY,
-    FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI
-)
-
-from ETL.dbmanager.setup import (
-    DBConfig,
-    BGE_VERTICAL_BASE_CONFIG,
-    BGE_VERTICAL_UNIVERSAL_CONFIG,
-    OPENAI_VERTICAL_UNIVERSAL_CONFIG,
-    TEI_VERTICAL_UNIVERSAL_CONFIG,
-    setup_db
+    FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY_EXTEND,
+    FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI_EXTEND
 )
 
 from ETL.dbmanager import get_semantic_layer, BaseRerannk
@@ -61,11 +54,16 @@ if "logged_in" not in st.session_state:
 if "username" not in st.session_state:
     st.session_state.username = ""
 
+# =======  Versioning ======== #
+st.session_state.version = "v3.2"
+st.session_state.chat_version = "v2"
+st.session_state.rotate_api = True
+# ============================ #
 
 @st.cache_resource
 def initialize(user_name, chat_model = 'gemini-2.0-flash', text2sql_model = 'gemini-2.0-flash'):
     
-    prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI
+    prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI_EXTEND
     text2sql_config = TEXT2SQL_FAST_GEMINI_CONFIG
     chat_config = GEMINI_FAST_CONFIG_V2
 
@@ -82,8 +80,12 @@ def initialize(user_name, chat_model = 'gemini-2.0-flash', text2sql_model = 'gem
         text2sql_config = TEXT2SQL_QWEN25_CODER_1B_KTO_CONFIG
     elif 'gpt-4o-mini' in text2sql_model:
         text2sql_config = TEXT2SQL_FAST_OPENAI_CONFIG
+    elif 'gpt-4o' in text2sql_model:
+        text2sql_config = TEXT2SQL_4O_CONFIG
+    elif 'gemini-2.0-flash-thinking-exp-01-21' in text2sql_model:
+        text2sql_config = TEXT2SQL_THINKING_GEMINI_CONFIG
     
-    text2sql = initialize_text2sql(text2sql_config, prompt_config)
+    text2sql = initialize_text2sql(text2sql_config, prompt_config, version = st.session_state.version, rotate_key = st.session_state.rotate_api)
     
     message_saver = get_semantic_layer()
     
@@ -117,8 +119,8 @@ def chat(user_name):
     
     text2sql_model = st.selectbox(
         "Text2SQL Model:",
-        ['gemini-2.0-flash', 'qwen2.5-3b-sft', 'gpt-4o-mini'],
-        index=['gemini-2.0-flash', 'qwen2.5-3b-sft', 'gpt-4o-mini'].index(st.session_state.text2sql_model)
+        ['gemini-2.0-flash', 'qwen2.5-3b-sft', 'gpt-4o-mini', 'gpt-4o', 'gemini-2.0-flash-thinking-exp-01-21'],
+        index=['gemini-2.0-flash', 'qwen2.5-3b-sft', 'gpt-4o-mini' , 'gpt-4o', 'gemini-2.0-flash-thinking-exp-01-21'].index(st.session_state.text2sql_model)
     )
 
     if chat_model != st.session_state.chat_model or text2sql_model != st.session_state.text2sql_model:
@@ -154,7 +156,7 @@ def chat(user_name):
         assistant_message = st.chat_message("assistant", avatar='graphics/assistant.png').empty()   
         
         streamed_text = ""
-        for chunk in st.session_state.chatbot.stream(input_text, version='v2'):
+        for chunk in st.session_state.chatbot.stream(input_text, version=st.session_state.chat_version):
             if isinstance(chunk, str):
                 streamed_text += chunk
                 assistant_message.write(streamed_text)

@@ -109,3 +109,11 @@ TOT_FIIN_VERTICAL_PROMPT_UNIVERSAL = {
     "BRANCH_REASONING_TEXT2SQL_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/branch_reasoning_text2sql.txt'), start=['//']),
     "CONTINUE_REASONING_TEXT2SQL_PROMPT": utils.read_file_without_comments(os.path.join(current_dir, 'general/continue_reasoning_text2sql.txt'), start=['//'])
 }
+
+# Extend
+
+FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI_EXTEND = FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI
+FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI_EXTEND['OPENAI_SEEK_DATABASE_PROMPT'] = utils.read_file_without_comments(os.path.join(current_dir, 'vertical/universal/openai_seek_database_fiin_extend.md'), start=['//'])
+
+FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY_EXTEND = FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY
+FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY_EXTEND['OPENAI_SEEK_DATABASE_PROMPT'] = utils.read_file_without_comments(os.path.join(current_dir, 'vertical/universal/seek_database_simplify_fiin_extend.md'), start=['//'])

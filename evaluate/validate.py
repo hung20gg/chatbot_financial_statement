@@ -317,12 +317,44 @@ def merge_mcq_and_sql(mcq, sql):
             question['table'] = sql_question['table']
 
             questions.append(question)
-    
-    # Test
-    # questions = questions[:10]
 
     return questions
             
+
+def merge_mcq_and_sql_v2(mcq, sql):
+    
+    mcq_dict = dict()
+    for ques in mcq:
+        # Get the question ids
+        ids = ques['question_ids']
+        if ids not in mcq_dict.keys():
+            mcq_dict[ids] = []
+
+        # Append the MCQ to the list
+        mcq_dict[ques['ids']].append(ques)
+    
+    print("Number of SQL questions: ", len(sql))
+
+    sql_dict = dict()
+    for ques in sql:
+        sql_dict[ques['ids']] = ques
+
+    print("Number of MCQ questions: ", len(mcq))
+
+    questions = []
+    for sql_question in sql:
+
+        # Match the SQL with the MCQ 
+        ids = sql_question['ids']
+        if ids in mcq_dict.keys():
+            for mcq in mcq_dict[ids]:
+                question = create_mcq_text(mcq)
+                question['ids'] = ids
+                question['table'] = sql_question['table']
+
+                questions.append(question)
+
+    return questions
 
 
 import re

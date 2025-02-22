@@ -100,6 +100,16 @@ CREATE TABLE financial_statement_explaination(
     data float, 
     date_added timestamp 
 )
+
+CREATE TABLE industry_financial_statement_explaination(
+    industry VARCHAR(255),
+    year int, 
+    quarter int,
+    category_code VARCHAR(255),
+    data_mean float,
+    data_sun float, 
+    date_added timestamp 
+);
 ```
 
 ### Note on schema description: 

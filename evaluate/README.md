@@ -39,7 +39,7 @@ Using *correction* for refine SQL
 
 ```bash
 llm=gemini-2.0-flash-thinking-exp-01-21
-version=v1
+version=v7
 path=../data/generated_questions.json
 template=simplify
 
@@ -57,9 +57,9 @@ python generate.py --llm $llm --version $version --path $path --template $templa
 
 Generate SQL code for evaluation dataset `sql_v0.jsonl`
 ```bash
-llm=qwen2.5-coder-3b-kto
+llm=qwen2.5-coder-1.5b-sft
 multi_thread=True 
-version=sql_v0
+version=sql_v0_1
 path=../data/sql_v0.jsonl
 
 python generate.py --llm $llm --version $version --multi_thread $multi_thread --path $path --batch_size 1 --template openai --max_workers 2
@@ -123,7 +123,7 @@ Answer the MCQ question corresponding to the SQL question
 llm=gemini-2.0-flash
 multi_thread=True 
 task=evaluate
-path=../data/qwen2.5-coder-1.5b-kto__sql_v0.jsonl
+path=../data/qwen2.5-coder-1.5b-sft__sql_v0_1.jsonl
 mcq_path=../data/mcq_v0.jsonl
 
 python validate.py --llm $llm --task $task --multi_thread $multi_thread --path $path --max_workers 12

@@ -17,13 +17,14 @@ The database includes two reporting periods: quarterly and annually. Quarterly r
 - **financial_ratio**(ratio_code, stock_code, year, quarter, data, date_added)
 - **industry_financial_ratio**(industry, ratio_code, year, quarter, data_mean, date_added)
 - **financial_statement_explaination**(category_code, stock_code, year, quarter, data, date_added)
+- **industry_financial_statement_explaination**(industry, year, quarter, category_code, data_mean, data_sun, date_added)
 
 </schema>
 
 ### Note on schema description: 
 - For `industry_` tables, column `data_mean` is average data of all firms in that industry, and `data_sum` is the sum of them.
 - Table `financial_statement_explaination` contains information which is not covered in 3 main reports, usually about type of loans, debt, cash, investments and real-estate ownerships. 
-- Each value in `category_code` includes a prefix indicating the report it pertains to: *BS* is Balance sheet, *IS* is for Income statement, *CF* is Cash flow and *TM* is for Explaination. For `category_code` in `financial_statement_explaination`, there are 4 additional prefix: *Crop*, *Bank*, *Sec* and *Share* for specific type of organization.
+- Each value in `category_code` includes a prefix indicating the report it pertains to: *BS* is Balance sheet, *IS* is for Income statement, *CF* is Cash flow and *TM* is for Explaination. For `category_code` in financial_statement_explaination databases, there are 4 additional prefix: *Crop*, *Bank*, *Sec* and *Share* for specific type of organization.
 - With YoY ratio in `financial_ratio`, you should recalculate the ratio if the time window is not 1 year.
 
 ### Note on query:

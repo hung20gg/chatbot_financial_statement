@@ -1,24 +1,11 @@
-from agent import Chatbot, Text2SQL
+from agent import Chatbot, Text2SQL, Text2SQLMessage
 from agent.const import (
     ChatConfig,
     Text2SQLConfig,
-    GEMINI_FAST_CONFIG,
-    GPT4O_MINI_CONFIG,
-    GPT4O_CONFIG,
-    TEXT2SQL_MEDIUM_GEMINI_CONFIG,
-    TEXT2SQL_FASTEST_CONFIG,
-    TEXT2SQL_FAST_OPENAI_CONFIG,
-    TEXT2SQL_DEEPSEEK_V3_CONFIG,
-    TEXT2SQL_EXP_GEMINI_CONFIG
 )
 
 from agent.prompt.prompt_controller import (
     PromptConfig, 
-    VERTICAL_PROMPT_BASE, 
-    VERTICAL_PROMPT_UNIVERSAL,
-    HORIZONTAL_PROMPT_BASE,
-    HORIZONTAL_PROMPT_UNIVERSAL,
-    FIIN_VERTICAL_PROMPT_UNIVERSAL,
 )
 
 from ETL.dbmanager.setup import (
@@ -45,7 +32,7 @@ from ETL.dbmanager import get_semantic_layer, BaseRerannk
 
 
 
-def initialize_text2sql(text2sql_config, prompt_config):
+def initialize_text2sql(text2sql_config, prompt_config, version = 'v3', message = False, **kwargs) -> Text2SQL:
     text2sql_config = Text2SQLConfig(**text2sql_config)
     prompt_config = PromptConfig(**prompt_config)
 
@@ -75,10 +62,13 @@ def initialize_text2sql(text2sql_config, prompt_config):
     reranker = BaseRerannk(name=os.getenv('RERANKER_SERVER_URL'))
     logging.info(f'Finish setup reranker, using reranker {reranker.reranker_type}')
 
-    db = setup_db(db_config, reranker=reranker)
+    db = setup_db(db_config, reranker=reranker, version=version)
     logging.info('Finish setup db')
 
-    text2sql = Text2SQL(config = text2sql_config, prompt_config=prompt_config, db = db, max_steps=2)
+    if message:
+        text2sql = Text2SQLMessage(config = text2sql_config, prompt_config=prompt_config, db = db, max_steps=2, **kwargs)
+    else:
+        text2sql = Text2SQL(config = text2sql_config, prompt_config=prompt_config, db = db, max_steps=2, **kwargs)
     logging.info('Finish setup text2sql')
 
     return text2sql
