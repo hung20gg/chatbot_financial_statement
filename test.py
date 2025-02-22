@@ -32,16 +32,6 @@ from agent.prompt.prompt_controller import (
     FIIN_VERTICAL_PROMPT_UNIVERSAL_SHORT
 )
 
-from ETL.dbmanager.setup import (
-    DBConfig,
-    BGE_VERTICAL_BASE_CONFIG,
-    BGE_VERTICAL_UNIVERSAL_CONFIG,
-    BGE_HORIZONTAL_BASE_CONFIG,
-    TEI_VERTICAL_UNIVERSAL_CONFIG,
-    OPENAI_VERTICAL_UNIVERSAL_CONFIG,
-    setup_db
-)
-
 import os
 from initialize import initialize_text2sql
 

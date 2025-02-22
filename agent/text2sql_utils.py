@@ -396,6 +396,14 @@ def check_openai_response(messages):
     
     return True
     
+def flatten_messages(messages):
+    str_messages = ""
+    for message in messages:
+        role = message.get('role', 'user')
+        content = message.get('content', '')
+        str_messages += f"### ===== {role.upper()} =====\n\n{content}\n\n"
+
+    return str_messages
     
 def reformat_messages(messages):
     

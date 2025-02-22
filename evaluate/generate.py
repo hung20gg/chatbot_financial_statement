@@ -90,7 +90,7 @@ def single_ner(text2sql_config, prompt_config, batch_questions, using_cache=Fals
 
 ## ============ SQL SOLVER ============ ##
 
-def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=False, enhance = None, file_path=None):
+def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=False, enhance = None, file_path=None, rotate_key = False):
     """
     Run a single solver on a batch of questions
     """
@@ -99,7 +99,7 @@ def single_solver(text2sql_config, prompt_config, batch_questions, using_cache=F
     text2sql_config['account_top_k'] = random.randint(4, 6)
 
     # Initialize the solver
-    solver = initialize_text2sql(text2sql_config, prompt_config, version=DB_VERSION,)
+    solver = initialize_text2sql(text2sql_config, prompt_config, version=DB_VERSION, rotate_key=rotate_key)
     is_exp_model = 'exp' in text2sql_config['sql_llm']
 
     responses = []
@@ -221,9 +221,9 @@ def _solve(text2sql_config, prompt_config, questions, using_cache=False, version
         print("Using multi-threading")
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             if task == 'sql':
-                futures = [executor.submit(single_solver, text2sql_config, prompt_config, batch_question, using_cache, enhance, output_path) for batch_question in batch_questions]
+                futures = [executor.submit(single_solver, text2sql_config, prompt_config, batch_question, using_cache, enhance, output_path, rotate_key) for batch_question in batch_questions]
             else:
-                futures = [executor.submit(single_ner, text2sql_config, prompt_config, batch_question, using_cache, enhance, output_path) for batch_question in batch_questions]
+                futures = [executor.submit(single_ner, text2sql_config, prompt_config, batch_question, using_cache, enhance, output_path, rotate_key) for batch_question in batch_questions]
 
             for future in as_completed(futures):
                 results.extend(future.result())

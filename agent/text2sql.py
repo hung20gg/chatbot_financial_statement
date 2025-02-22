@@ -81,7 +81,7 @@ class Text2SQL(BaseAgent):
     max_solution_cache: int = 10 # The maximum number of solutions to cache
     current_solution_cache: int = 0 # The current number of solutions cached
 
-    def __init__(self, config: Config, prompt_config: PromptConfig, db, max_steps: int = 2, **kwargs):
+    def __init__(self, config: Text2SQLConfig, prompt_config: PromptConfig, db, max_steps: int = 2, **kwargs):
         super().__init__(config=config, db = db, max_steps = max_steps, prompt_config = prompt_config)
         
         self.db = db
@@ -325,7 +325,7 @@ class Text2SQL(BaseAgent):
         text = ""
         count_sql = 0
         for key, value in sql_dict.items():
-            text += f"**{key}** \n\n```sql\n{value}```"
+            text += f"**{key}** \n\n```sql\n{value}\n```"
             
             # Add new line
             count_sql += 1
@@ -1049,3 +1049,209 @@ Only return new, detailed task. Do not return the SQL. Return in the following f
                               sql = sql_codes)
 
         # return self.history, error_messages, tables
+
+
+
+class Text2SQLMessage(Text2SQL):
+    def stream_reasoning_text2SQL(self, task: str, company_info: Table = None, suggest_table: List[Table] = [], enhance: bool = False, adjust_table: str = 'shrink'):
+        
+        """
+        Reasoning with Text2SQL without branch reasoning.
+        
+        Input:
+            - task: str. The task to be solved, provided as a natural language string.
+            - company_info: pd.DataFrame. Information about the company relevant to the task.
+            - suggest_table: str. The suggested table for the task.
+            - history: list
+        Output:
+            - history: list.
+            - error_messages: list.
+            - execution_tables: list
+            
+        This function will convert the natural language query into SQL query and execute the SQL query
+        """
+
+        # ============== Prepare the prompt =================
+        temp_message = self.get_reasoning_text2sql_template(task, company_info, suggest_table, enhance, adjust_table)
+        
+        yield utils.flatten_messages(temp_message)
+
+        self.history.extend(temp_message)
+
+        self._latest_task_index = len(self.history) - 1
+
+        # =========== Generate SQL query =============
+        response = ""
+        yield "### ===== Text2SQL Solver ====="
+        generator = self.sql_llm.stream(self.history)
+        for text in generator:
+            if text: # OpenAI model may return None
+                yield text
+                response += text
+
+        if self.config.verbose:
+            print(response)
+
+        # ============================================
+        
+
+        # ===== Execute SQL Query with TIR reasoning =====
+        error_messages = []
+        execution_tables = []
+        
+        error_message, execution_table = utils.TIR_reasoning(response, self.db, verbose=self.config.verbose)
+        
+        error_messages.extend(error_message)
+        execution_tables.extend(execution_table)
+        
+        self.history.append(
+            {
+                "role": "assistant",
+                "content": response
+            }
+        )
+        temp_message.append(self.history[-1])
+
+        # ===============================================
+        
+
+        # ========== Self-debug the SQL code ============
+        if self.config.self_debug and len(error_message) > 0:
+            self.history, debug_error_messages, debug_execution_tables = self.debug_sql_code(self.history, error_message)
+            
+            # Only cary last debug message
+
+            # error_messages.extend(debug_error_messages)
+            # execution_tables.extend(debug_execution_tables)
+
+            error_messages = debug_error_messages.copy()
+            execution_tables = debug_execution_tables.copy()
+            
+            temp_message.extend(self.history[:-2]) # Only add the debug message
+            
+        # ===============================================
+
+        self.llm_responses.extend(utils.reformat_messages(temp_message))   
+        
+        return self.history, error_messages, execution_tables
+
+
+
+    def stream(self, task: str, cache: bool = True, enhance: str = None, adjust_table: str|int = 0,  **kwargs):
+        """
+        Solve the task with Text2SQL
+        The solve method is designed to solve a given task by converting it into SQL queries using the Text2SQL model. It handles both simple and complex tasks by breaking them down into steps if necessary.
+
+        Parameters:
+
+            task (str): The task to be solved, provided as a natural language string.
+            cache (bool): A boolean value indicating whether to use the cache for the company information and suggested tables.
+            inject_reasoning (str): If provided, the reasoning will be injected into the conversation history, instead of generating it from the model.
+
+        Returns:
+
+            history (list): A list of the conversation history.
+            error_messages (list): A list of error messages from SQL query.
+            execution_tables (list): A list of execution tables generated during the process.
+            
+        """
+        
+
+        if self.current_solution_cache >= self.max_solution_cache:
+            self.reset()
+        len_prev_history = max(len(self.history)+2 , 3) # Including system prompt
+
+        list_adj_table = ["text", "shrink", "keep"]
+        if isinstance(adjust_table, int):
+            choice = min(2, max(0, adjust_table))
+            adjust_table = list_adj_table[choice]
+
+        bool_enhance = False
+        if enhance is not None:
+            self.max_debug_round = 1
+            bool_enhance = True
+        else:
+            self.max_debug_round = 3
+        
+        start = time.time()
+
+        # ===== Simplify the task with branch reasoning (Break down step) =====
+        str_task = task
+
+
+        # ===== Get stock code and suitable row =====    
+        company_info, suggest_table, extraction_msg = self.get_stock_code_and_suitable_row(str_task)
+
+        yield utils.flatten_messages(extraction_msg)
+        
+        tables = [company_info]
+        tables.extend(suggest_table)
+
+        if cache:
+            company_info, suggest_table = self.update_suggest_data(deepcopy(company_info), deepcopy(suggest_table))
+        
+
+        # ===== Reasoning with Text2SQL =====
+        generator = self.stream_reasoning_text2SQL(task, company_info, suggest_table, adjust_table = adjust_table, enhance = bool_enhance)
+
+        while True:
+            try:
+                yield next(generator)
+            except StopIteration as e:
+                self.history, error_messages, execution_tables = e.value
+                break
+        
+        
+        # Yield the debug message
+        debug_messages = utils.flatten_messages(self.history[len_prev_history:])
+        if debug_messages.strip() != "":
+            yield '\n\n'
+            yield debug_messages
+
+        # First time solving
+        response = ""
+        if len(error_messages) > 0:
+            response += "### Initial Error:\n"+self.__flatten_list(error_messages, prefix="Error") +"\n\n"
+        if len(execution_tables) > 0:
+            response += "### Initial Execution Tables:\n"+utils.table_to_markdown(execution_tables, adjust=adjust_table)
+
+        if response != "":
+            yield '\n\n'
+            yield response
+
+        
+        
+        if bool_enhance:
+            accept_result = False
+            count_reflection = 0
+
+            # Response by correction
+           
+            while not accept_result and count_reflection < 2:
+                count_reflection += 1
+                logging.info(f"Enhance round {count_reflection}, using {enhance} method")
+
+                sql_codes = utils.get_sql_code_from_text(self.history[-1]['content'])
+
+                if enhance == "correction":
+                    self.history, error_messages, execution_tables, accept_result = self.self_correction(error_messages, execution_tables, adjust_table=adjust_table)
+                elif enhance == "reflection":
+                    self.history, error_messages, execution_tables, accept_result = self.self_reflection(error_messages, execution_tables, cache=cache, adjust_table=adjust_table)
+
+                new_history = self.history[len_prev_history:]
+                response = utils.flatten_messages(new_history)
+                if response.strip() != "":
+                    yield '\n\n'
+                    yield response
+
+                len_prev_history = len(self.history)
+        end = time.time()
+        yield f"\n\n[Time taken: {end-start}s]\n\n"
+
+        error_message, execution_table = utils.TIR_reasoning(self.history[-1]['content'], self.db, verbose=self.config.verbose)
+        if len(error_message) > 0:
+            yield "### Final Error:\n"+self.__flatten_list(error_message, prefix="Error") +"\n\n"
+        if len(execution_table) > 0:
+            yield "### Final Execution Tables:\n"+utils.table_to_markdown(execution_table, adjust=adjust_table)
+        
+
