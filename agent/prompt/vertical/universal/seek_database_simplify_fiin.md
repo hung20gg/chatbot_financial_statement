@@ -46,7 +46,7 @@ CREATE TABLE financial_statement(
     year int, -- The reported financial year
     quarter int, --  The quarter reported (either 0, 1, 2, 3, 4). 
     category_code VARCHAR(255),
-    data float, -- in Million VND except ratio
+    data float, -- in Million VND except EPS
     date_added timestamp
 );
 
@@ -63,8 +63,8 @@ CREATE TABLE industry_financial_statement(
     year int, 
     quarter int,
     category_code VARCHAR(255),
-    data_mean float, -- Mean value of every firm in that industry
-    data_sun float, -- Total value of every firm in that industry
+    data_mean float, -- Mean value of all firms in that industry
+    data_sun float, -- Total value of all firms in that industry
     date_added timestamp 
 );
 

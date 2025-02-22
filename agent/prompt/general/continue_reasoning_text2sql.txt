@@ -20,6 +20,6 @@
  
 <instruction>
 
-Think step-by-step and return SQL query that suitable with the database schema based on the natural language query above
+Think step-by-step and return SQL query based on the task above.
 
 </instruction>

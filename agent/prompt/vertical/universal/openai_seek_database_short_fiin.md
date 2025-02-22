@@ -19,7 +19,7 @@ The database conatains financial statments of Vietnamese firms, followed by the 
 </schema>
 
 ### Note on schema description: 
-- For industry tables, column `data_mean` is average data of every firm in that industry, while `data_sum` is the sum of them.
+- For industry tables, column `data_mean` is average data of all firms in that industry, while `data_sum` is the sum of them.
 - Table `financial_statement_explaination` contains information which is not covered in 3 main reports, usually about type of loans, debt, cash, investments and real-estate ownerships.  
 - With YoY ratio in `financial_ratio`, you should recalculate the ratio if the time window is not 1 year.
 

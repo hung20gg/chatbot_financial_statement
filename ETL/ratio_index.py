@@ -822,7 +822,7 @@ def bad_debt_ratio(total_loan, bad_debt):
     return bad_debt / total_loan if total_loan else None
 
 def non_performing_loan_coverage_ratio(allowance, bad_debt):
-    return allowance / bad_debt if bad_debt else None
+    return -allowance / bad_debt if bad_debt else None
 
 def get_financial_ratio_tm(data_df):
     return __get_financial_ratio(data_df, const.BANK_FIIN_RATIO_FUNCTIONS)
@@ -1019,7 +1019,7 @@ def calculate_index(version = 'v3', output_path: str = '../data/'):
         print(f"Processing {type_} data")
 
         # Read the financial statement data
-        data_df = pd.read_parquet(os.path.join(current_path, f'../csv/{version}/{type_}_financial_report.parquet'))
+        data_df = pd.read_parquet(os.path.join(current_path, f'../data/{version}/{type_}_financial_report.parquet'))
         
         # Get the stock price data based on type
         df_stock_price_type = df_stock_price_quarter[df_stock_price_quarter['stock_code'].isin(data_df['stock_code'].unique())]
@@ -1028,7 +1028,7 @@ def calculate_index(version = 'v3', output_path: str = '../data/'):
 
         # Get the explaination if the type is bank and INCLUDING_FIIN is True
         if including_explaination and type_ == 'bank':
-            tm_df = pd.read_parquet(os.path.join(current_path, '../csv/v3/bank_explaination.parquet'))
+            tm_df = pd.read_parquet(os.path.join(current_path, '../data/v3/bank_explaination.parquet'))
             data_df = pd.concat([data_df, tm_df], ignore_index=True)
         
         

@@ -296,8 +296,8 @@ TEXT2SQL_QWEN25_CODER_3B_KTO_CONFIG = {
 
 
 TEXT2SQL_QWEN25_CODER_1B_SFT_CONFIG = {
-    "llm": 'qwen2.5-coder-1.5b-kto',
-    "sql_llm": 'qwen2.5-coder-1.5b-kto',
+    "llm": 'qwen2.5-coder-1.5b-sft',
+    "sql_llm": 'qwen2.5-coder-1.5b-sft',
     "reasoning": False,
     "branch_reasoning": False,
     'account_top_k': 4,

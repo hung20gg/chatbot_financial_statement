@@ -117,6 +117,11 @@ Create database via this scripts (notice the version)
 python setup.py --preprocess v3 --force True --local True --vectordb chromadb
 ```
 
+For using data of 200 companies
+```bash
+python setup.py --preprocess v3.2 --force True --local True --vectordb chromadb
+```
+
 Build the TEI local and run the following scripts (check the [TEI repo](https://github.com/huggingface/text-embeddings-inference) for setup)
 
 - For embedding:
@@ -184,7 +189,8 @@ Changes of training and testing dataset:
 Change the `DB_NAME` in `.env` file to another version to load
 
 ## TO DO
-- [ ] Add new v3.2 companies into the database
+- [v] Add new v3.2 companies into the database
+- [v] Text2SQL UI
 - [ ] Evaluation dataset
 - [ ] Moving logging & vectordb to Elastic Search 
 - [ ] FastAPI backend 

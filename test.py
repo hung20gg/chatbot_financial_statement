@@ -32,16 +32,6 @@ from agent.prompt.prompt_controller import (
     FIIN_VERTICAL_PROMPT_UNIVERSAL_SHORT
 )
 
-from ETL.dbmanager.setup import (
-    DBConfig,
-    BGE_VERTICAL_BASE_CONFIG,
-    BGE_VERTICAL_UNIVERSAL_CONFIG,
-    BGE_HORIZONTAL_BASE_CONFIG,
-    TEI_VERTICAL_UNIVERSAL_CONFIG,
-    OPENAI_VERTICAL_UNIVERSAL_CONFIG,
-    setup_db
-)
-
 import os
 from initialize import initialize_text2sql
 
@@ -54,21 +44,21 @@ logging.basicConfig(
 
 
 
-def test():
+def test(version = 'v3'):
 
     chat_config = ChatConfig(**GPT4O_MINI_CONFIG)
     text2sql_config = TEXT2SQL_FAST_GEMINI_CONFIG
-    text2sql_config['sql_llm'] = 'qwen2.5-coder-3b-sft'
-    text2sql_config['llm'] = 'qwen2.5-coder-3b-sft'
-    # # text2sql_config = TEXT2SQL_THINKING_GEMINI_CONFIG
-    text2sql_config['sql_example_top_k'] = 0
-    # text2sql_config['company_top_k'] = 1
-    text2sql_config['account_top_k'] = 4
+    # text2sql_config['sql_llm'] = 'qwen2.5-3b-coder-test-v3/sft/v2.1'
+    # text2sql_config['llm'] = 'qwen2.5-3b-coder-test-v3/sft/v2.1'
+    # text2sql_config['sql_example_top_k'] = 0
+    # # text2sql_config['company_top_k'] = 1
+    # text2sql_config['account_top_k'] = 4
     prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI
+    
 
     # try:
     if True:
-        text2sql = initialize_text2sql(text2sql_config, prompt_config)
+        text2sql = initialize_text2sql(text2sql_config, prompt_config, version=version)
         
         chatbot = Chatbot(config = chat_config, text2sql = text2sql)
         logging.info('Finish setup chatbot')
@@ -79,7 +69,7 @@ def test():
         print(text2sql.db.vector_db_ratio.similarity_search('ROA', 2))
         
         logging.info('Test text2sql')
-        prompt = "For the year 2023, what was the average Return on Equity of banking industry?"
+        # prompt = "For the year 2023, what was the Return on Equity of banking industry?"
         prompt = "ROAA of banking industry from 2016 to 2023"
         output = text2sql.solve(prompt, adjust_table='text', mix_account=False)
         
@@ -100,5 +90,5 @@ def test():
 
 if __name__ == "__main__":
     
-    
-    test()
+    version = 'v3.2'
+    test(version)

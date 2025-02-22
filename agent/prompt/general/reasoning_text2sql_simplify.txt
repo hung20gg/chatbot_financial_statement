@@ -46,7 +46,6 @@ However, feel free to modify the table if needed.
 -- ### detailed_table_name
 ```
 - The query must not contain column `ratio_name` or `en_caption`.
-- If the time is not mentioned, assume getting the current time (Q3 2024)
 - Do not make any assumption about the account name. You must refer to the mapping table.
 - If the question requires data within the quarter time range (from 2020 to Q3 2024), you should use the `date_added` in the following format:
 

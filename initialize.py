@@ -1,4 +1,4 @@
-from agent import Chatbot, Text2SQL
+from agent import Chatbot, Text2SQL, Text2SQLMessage
 from agent.const import (
     ChatConfig,
     Text2SQLConfig,
@@ -45,7 +45,7 @@ from ETL.dbmanager import get_semantic_layer, BaseRerannk
 
 
 
-def initialize_text2sql(text2sql_config, prompt_config):
+def initialize_text2sql(text2sql_config, prompt_config, version = 'v3', message = False, **kwargs) -> Text2SQL:
     text2sql_config = Text2SQLConfig(**text2sql_config)
     prompt_config = PromptConfig(**prompt_config)
 
@@ -75,10 +75,13 @@ def initialize_text2sql(text2sql_config, prompt_config):
     reranker = BaseRerannk(name=os.getenv('RERANKER_SERVER_URL'))
     logging.info(f'Finish setup reranker, using reranker {reranker.reranker_type}')
 
-    db = setup_db(db_config, reranker=reranker)
+    db = setup_db(db_config, reranker=reranker, version=version)
     logging.info('Finish setup db')
 
-    text2sql = Text2SQL(config = text2sql_config, prompt_config=prompt_config, db = db, max_steps=2)
+    if message:
+        text2sql = Text2SQLMessage(config = text2sql_config, prompt_config=prompt_config, db = db, max_steps=2, **kwargs)
+    else:
+        text2sql = Text2SQL(config = text2sql_config, prompt_config=prompt_config, db = db, max_steps=2, **kwargs)
     logging.info('Finish setup text2sql')
 
     return text2sql
