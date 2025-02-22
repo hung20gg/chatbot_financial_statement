@@ -1,6 +1,8 @@
 # Chatbot_financial_statement
 
-### Update 17-02-2025: Just need the evaluation dataset
+#### Update 22-02-2025: New Text2SQL UI + add new db
+
+#### Update 17-02-2025: Just need the evaluation dataset
 
 ## File structures
 

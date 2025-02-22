@@ -2,23 +2,10 @@ from agent import Chatbot, Text2SQL, Text2SQLMessage
 from agent.const import (
     ChatConfig,
     Text2SQLConfig,
-    GEMINI_FAST_CONFIG,
-    GPT4O_MINI_CONFIG,
-    GPT4O_CONFIG,
-    TEXT2SQL_MEDIUM_GEMINI_CONFIG,
-    TEXT2SQL_FASTEST_CONFIG,
-    TEXT2SQL_FAST_OPENAI_CONFIG,
-    TEXT2SQL_DEEPSEEK_V3_CONFIG,
-    TEXT2SQL_EXP_GEMINI_CONFIG
 )
 
 from agent.prompt.prompt_controller import (
     PromptConfig, 
-    VERTICAL_PROMPT_BASE, 
-    VERTICAL_PROMPT_UNIVERSAL,
-    HORIZONTAL_PROMPT_BASE,
-    HORIZONTAL_PROMPT_UNIVERSAL,
-    FIIN_VERTICAL_PROMPT_UNIVERSAL,
 )
 
 from ETL.dbmanager.setup import (

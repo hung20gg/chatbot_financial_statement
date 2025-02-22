@@ -28,8 +28,8 @@ from agent.prompt.prompt_controller import (
     PromptConfig, 
     VERTICAL_PROMPT_BASE, 
     VERTICAL_PROMPT_UNIVERSAL,
-    FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY,
-    FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI
+    FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY_EXTEND,
+    FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI_EXTEND
 )
 
 from ETL.dbmanager import get_semantic_layer, BaseRerannk
@@ -63,7 +63,7 @@ st.session_state.rotate_api = True
 @st.cache_resource
 def initialize(user_name, chat_model = 'gemini-2.0-flash', text2sql_model = 'gemini-2.0-flash'):
     
-    prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI
+    prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI_EXTEND
     text2sql_config = TEXT2SQL_FAST_GEMINI_CONFIG
     chat_config = GEMINI_FAST_CONFIG_V2
 
