@@ -51,7 +51,7 @@ def test(version = 'v3'):
     # text2sql_config['sql_example_top_k'] = 0
     # # text2sql_config['company_top_k'] = 1
     # text2sql_config['account_top_k'] = 4
-    prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI
+    prompt_config = FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI_EXTEND
     
 
     # try:
@@ -88,5 +88,5 @@ def test(version = 'v3'):
 
 if __name__ == "__main__":
     
-    version = 'v3.2'
+    version = 'v3'
     test(version)
