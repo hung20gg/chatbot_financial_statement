@@ -6,7 +6,6 @@ chromadb.api.client.SharedSystemClient.clear_system_cache()
 from agent import Chatbot, Text2SQL
 from agent.const import (
     ChatConfig,
-    Text2SQLConfig,
     GEMINI_FAST_CONFIG,
     GPT4O_MINI_CONFIG,
     GPT4O_CONFIG,
@@ -20,15 +19,14 @@ from agent.const import (
 
 )
 
-from agent.prompt.prompt_controller import (
-    PromptConfig, 
+from agent.prompt.prompt_controller import ( 
     VERTICAL_PROMPT_BASE, 
     VERTICAL_PROMPT_UNIVERSAL,
     HORIZONTAL_PROMPT_BASE,
     HORIZONTAL_PROMPT_UNIVERSAL,
     FIIN_VERTICAL_PROMPT_UNIVERSAL,
-    FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY,
-    FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI,
+    FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY_EXTEND,
+    FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI_EXTEND,
     FIIN_VERTICAL_PROMPT_UNIVERSAL_SHORT
 )
 

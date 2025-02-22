@@ -575,6 +575,7 @@ FIIN_RDB_SETUP_CONFIG = {
     'financial_ratio' : ['../data/financial_ratio_v3.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'industry_financial_statement': ['../data/industry_report_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)'}, False, ['date_added']],
     'industry_financial_ratio': ['../data/industry_ratio_v3.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)'}, False, ['date_added']],    
+    'industry_financial_statement_explaination' : ['../data/industry_report_explaination_v3.parquet', None, {'category_code': 'map_category_code_explaination(category_code)'}, False, ['date_added']],
 
     # 'stock_price' : ['../csv/stock_price_daily.parquet']
 }
