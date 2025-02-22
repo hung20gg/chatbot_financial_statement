@@ -189,8 +189,8 @@ Changes of training and testing dataset:
 Change the `DB_NAME` in `.env` file to another version to load
 
 ## TO DO
-- [v] Add new v3.2 companies into the database
-- [v] Text2SQL UI
+- [x] Add new v3.2 companies into the database
+- [x] Text2SQL UI
 - [ ] Evaluation dataset
 - [ ] Moving logging & vectordb to Elastic Search 
 - [ ] FastAPI backend 
