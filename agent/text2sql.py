@@ -1082,7 +1082,7 @@ class Text2SQLMessage(Text2SQL):
 
         # =========== Generate SQL query =============
         response = ""
-        yield "### ===== Text2SQL Solver ====="
+        yield "### ===== Text2SQL Solver =====\n"
         generator = self.sql_llm.stream(self.history)
         for text in generator:
             if text: # OpenAI model may return None
