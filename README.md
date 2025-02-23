@@ -1,5 +1,7 @@
 # Chatbot_financial_statement
 
+#### Update 23-02-2025: EVF is a bank
+
 #### Update 22-02-2025: New Text2SQL UI + add new db
 
 #### Update 17-02-2025: Just need the evaluation dataset

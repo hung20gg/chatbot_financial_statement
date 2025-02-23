@@ -37,7 +37,7 @@ def merge_financial_statement(version: str, output_path: str = '../data'):
     df_corp.rename(columns={'category_code': 'corp_code'}, inplace=True)
 
     df_sec = pd.merge(df_sec, df_mapping[['sec_code', 'category_code']], how='left', on='sec_code')
-    df_corp = pd.merge(df_corp, df_mapping[['corp_code', 'category_code']], how='left', on='corp_code')
+    df_corp = pd.merge(df_corp, df_mapping[['corp_code', 'category_code']], how='outer', on='corp_code')
     df_bank = pd.merge(df_bank, df_mapping[['bank_code', 'category_code']], how='left', on='bank_code')
 
     df_bank.drop(columns=['bank_code'], inplace=True)
@@ -45,7 +45,7 @@ def merge_financial_statement(version: str, output_path: str = '../data'):
     df_corp.drop(columns=['corp_code'], inplace=True)
 
     df_fs = pd.concat([df_bank, df_sec, df_corp], ignore_index=True)
-    df_fs.dropna(subset=['category_code'], inplace=True)
+    df_fs.dropna(subset=['stock_code'], inplace=True)
 
     df_fs.to_parquet(os.path.join(current_path, output_path, f'financial_statement_{version}.parquet'))
 
@@ -113,6 +113,8 @@ def prepare_files(version: str, extended = False, output_path: str = '../data'):
         df_company_info = pd.read_csv(os.path.join(current_path, '../csv/new/df_company_info.csv'))
         df_sub_and_shareholders = pd.read_csv(os.path.join(current_path, '../csv/new/df_sub_and_shareholders.csv'))
 
+        print('===== Extended to',len(df_company_info) ,'companies ======')
+
         # Need code to change map code here
         # @pphanhh
 
@@ -142,6 +144,13 @@ def prepare_files(version: str, extended = False, output_path: str = '../data'):
 
     
     print('===== Using',len(df_company_info) ,'companies ======')
+    bank_unique_stock_code = bank_explaination['stock_code'].nunique()
+    corp_unique_stock_code = corp_explaination['stock_code'].nunique()
+    securities_unique_stock_code = securities_explaination['stock_code'].nunique()
+
+    print('===== Bank:', bank_unique_stock_code, 'Corp:', corp_unique_stock_code, 'Securities:', securities_unique_stock_code, '=====')
+
+    assert len(df_company_info) == bank_unique_stock_code + corp_unique_stock_code + securities_unique_stock_code + 4, 'Number of companies is not correct'
 
     
     # Save all the file into the output path
@@ -165,6 +174,8 @@ def prepare_files(version: str, extended = False, output_path: str = '../data'):
         corp_financial_report.to_parquet(os.path.join(current_path, output_path, version, f'corp_financial_report.parquet'))
         securities_financial_report.to_parquet(os.path.join(current_path, output_path, version, f'securities_financial_report.parquet'))
 
+    return bank_unique_stock_code + corp_unique_stock_code + securities_unique_stock_code
+
 
 def expand_data(version: str, output_path: str = '../data'):
 
@@ -178,13 +189,17 @@ def expand_data(version: str, output_path: str = '../data'):
     if suffix_version == '2':
         expand = True
 
-    prepare_files(prefix_version, expand, output_path)
+    num_stock_code = prepare_files(prefix_version, expand, output_path)
     
     # Merge financial statement
     merge_financial_statement(prefix_version, output_path)
 
     # Ratio index
-    calculate_index(prefix_version, output_path)
+    df_ratio,_ = calculate_index(prefix_version, output_path)
+
+    ratio_stock_code = df_ratio['stock_code'].nunique()
+    print('===== Ratio:', ratio_stock_code, '=====')
+    assert num_stock_code == ratio_stock_code, 'Number of companies is not correct'
 
     # Industry report
     calculate_industry_financial_statement(prefix_version, output_path)
