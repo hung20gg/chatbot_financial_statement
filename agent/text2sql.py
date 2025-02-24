@@ -25,6 +25,10 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
+
+INDUSTRY_METHOD = 'similarity'
+
+
 def steps_to_strings(steps):
     steps_string = "\nBreak down the task into steps:\n\n"
     for i, step in enumerate(steps):
@@ -227,7 +231,8 @@ class Text2SQL(BaseAgent):
                                                 stock_code = stock_code, 
                                                 top_k =self.config.account_top_k, 
                                                 get_all_tables=self.config.get_all_acount,
-                                                mix_account = mix_account)    
+                                                mix_account = mix_account,
+                                                industry_selection = INDUSTRY_METHOD)    
         
         # Return data
         

@@ -53,6 +53,13 @@ if __name__ == "__main__":
     
     # print(db.vector_db_fs.similarity_search('total assets', 2, 'bank'))
     
+    print(db.get_exact_industry_bm25('bank'))
+    logging.info('Test get exact industry bm25')
+
+    print(db.get_exact_industry_sim_search('bank'))
+    logging.info('Test get exact industry sim search')
+
+
     print(db.search_return_df('ROA', 5, 'ratio'))
     logging.info('Test search return account')
     

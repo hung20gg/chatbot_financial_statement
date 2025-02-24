@@ -148,7 +148,7 @@ class HubVerticalBase(BaseDBHUB):
 
     # ================== Search for suitable Mapping table ================== #
     
-    def _return_mapping_table(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = True):
+    def _return_mapping_table(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = True, industry_selection = 'bm25'):
         
         start = time.time()
         check_status_table = {
@@ -170,10 +170,16 @@ class HubVerticalBase(BaseDBHUB):
             except Exception as e:
                 print(e)
                 pass   
-         
+
+        exact_industries = []
+        if len(industry) != 0:
+            if industry_selection == 'bm25':
+                exact_industries = self.get_exact_industry_bm25(industry)
+            else:
+                exact_industries = self.get_exact_industry_sim_search(industry)
+
         # Avoid override from the previous check
         if len(industry) != 0 and not get_all_tables:
-            exact_industries = self.get_exact_industry_bm25(industry)
             for ind in exact_industries:
                 if ind == 'Banking':
                     check_status_table['category_code_non_bank'] = True
@@ -190,7 +196,6 @@ class HubVerticalBase(BaseDBHUB):
         }    
 
         if len(industry) != 0:
-            exact_industries = self.get_exact_industry_bm25(industry)
             df_industry = pd.DataFrame(exact_industries, columns=['industry'])
             return_table['industry'] = df_industry
                 
@@ -210,7 +215,7 @@ class HubVerticalBase(BaseDBHUB):
         return return_table
 
 
-    def _return_mapping_table_multithread(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = True):
+    def _return_mapping_table_multithread(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = True, industry_selection = 'bm25'):
                 
         start = time.time()
         
@@ -233,6 +238,13 @@ class HubVerticalBase(BaseDBHUB):
             except Exception as e:
                 print(e)
                 pass   
+
+        if len(industry) != 0:
+            if industry_selection == 'bm25':
+                exact_industries = self.get_exact_industry_bm25(industry)
+            else:
+                exact_industries = self.get_exact_industry_sim_search(industry)
+
          
         # Avoid override from the previous check
         if len(industry) != 0 and not get_all_tables:
@@ -253,7 +265,7 @@ class HubVerticalBase(BaseDBHUB):
         }   
 
         if len(industry) != 0:
-            exact_industries = self.get_exact_industry_bm25(industry)
+
             df_industry = pd.DataFrame(exact_industries, columns=['industry'])
             return_table['industry'] = df_industry
         
@@ -394,7 +406,7 @@ class HubVerticalUniversal(BaseDBHUB):
     
     # ================== Search for suitable Mapping table ================== #
     
-    def _return_mapping_table(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = True, mix_account = True):
+    def _return_mapping_table(self, financial_statement_row = [], financial_ratio_row = [], industry = [],  top_k =5, mix_account = True, industry_selection = 'bm25', **kwargs):
         
         start = time.time()
         
@@ -404,7 +416,11 @@ class HubVerticalUniversal(BaseDBHUB):
         }     
 
         if len(industry) != 0:
-            exact_industries = self.get_exact_industry_bm25(industry)
+            if industry_selection == 'bm25':
+                exact_industries = self.get_exact_industry_bm25(industry)
+            else:
+                exact_industries = self.get_exact_industry_sim_search(industry)
+            
             df_industry = pd.DataFrame(exact_industries, columns=['industry'])
             return_table['industry'] = df_industry   
 
@@ -432,7 +448,7 @@ class HubVerticalUniversal(BaseDBHUB):
         return return_table
     
     
-    def _return_mapping_table_multithread(self, financial_statement_row = [], financial_ratio_row = [], industry = [], stock_code = [], top_k =5, get_all_tables = True, mix_account = True):
+    def _return_mapping_table_multithread(self, financial_statement_row = [], financial_ratio_row = [], industry = [], top_k =5, mix_account = True, industry_selection = 'bm25', **kwargs):
                 
         start = time.time()
         
@@ -442,7 +458,12 @@ class HubVerticalUniversal(BaseDBHUB):
         }   
         
         if len(industry) != 0:
-            exact_industries = self.get_exact_industry_bm25(industry)
+            if industry_selection == 'bm25':
+                exact_industries = self.get_exact_industry_bm25(industry)
+            else:
+                exact_industries = self.get_exact_industry_sim_search(industry)
+            print("Exact industries")
+            print(exact_industries)
             df_industry = pd.DataFrame(exact_industries, columns=['industry'])
             return_table['industry'] = df_industry
 
