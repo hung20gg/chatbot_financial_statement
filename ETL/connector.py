@@ -738,7 +738,16 @@ def setup_everything(config: dict):
                 import torch
             
                 logging.warning("Embedding server is not running, using local model")
-                device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+                if torch.backends.mps.is_available():
+                    device = torch.device("mps")  # Use Metal on macOS
+                elif torch.cuda.is_available():
+                    device = torch.device("cuda")  # Use CUDA if available
+                elif torch.backends.rocm.is_available():
+                    device = torch.device("rocm")
+                else:
+                    device = torch.device("cpu")   # Default to CPU
+
+                print(f"Using device: {device}")
                 model = HuggingFaceEmbeddings(model_name=local_model, model_kwargs = {'device': device})
                 setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client, model, vectordb=config.get('vectordb'), **db_conn)
                 

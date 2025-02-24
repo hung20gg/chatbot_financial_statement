@@ -479,7 +479,9 @@ def price_earning_ratio(price, eps):
     return price / eps if eps else None
 
 def book_value_per_share(eps, net_income, equity):
-    return (eps * net_income) / equity if equity else None
+    if eps == 0:
+        return 0
+    return equity/(net_income / eps) if net_income else None
 
 def price_to_book_ratio(price, eps, net_income, equity):
     bvps = book_value_per_share(eps, net_income, equity)
@@ -1086,7 +1088,7 @@ if __name__ == '__main__':
 
     ratio = dfs['ratio_code'].unique().tolist()
     
-    for r in ['BDR', 'EPS', 'TAT', 'DSO', 'ROAA', 'COF']:
+    for r in ['BDR', 'EPS', 'BVPS', 'PB', 'DSO', 'ROAA', 'COF']:
         print(r)
         print(dfs[(dfs['ratio_code'] == r)&(dfs['quarter'] == 0)&(dfs['year'] == 2022)].head(5))
         print('========================================')
