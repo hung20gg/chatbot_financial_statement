@@ -1067,8 +1067,8 @@ def modify_days_ratio(data_df):
 
 
 
-def industry_ratios(data_df, metric = 'BS_400', top_n = 5, output_path = '../data/'):
-    df_company = pd.read_csv(os.path.join(current_path, '../csv/df_company_info.csv'))
+def industry_ratios(data_df, metric = 'BS_400', top_n = 20, output_path = '../data/'):
+    df_company = pd.read_csv(os.path.join(current_path, '../data/df_company_info.csv'))
     
     # Read the financial statement data to get top 10 industries
     df_fs = pd.read_parquet(os.path.join(current_path, output_path, 'financial_statement_v3.parquet'))

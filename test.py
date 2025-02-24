@@ -88,5 +88,5 @@ def test(version = 'v3'):
 
 if __name__ == "__main__":
     
-    version = 'v3.2'
+    version = 'v3'
     test(version)

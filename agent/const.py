@@ -28,7 +28,7 @@ class Text2SQLConfig(Config):
     
 GEMINI_FAST_CONFIG = {
     "llm": 'gemini-2.0-flash',
-    "routing_llm": 'gemini-2.0-flash-lite-preview-02-05',
+    "routing_llm": 'gemini-2.0-flash',
     "summary_every": -1,
     "get_task": True
 }
