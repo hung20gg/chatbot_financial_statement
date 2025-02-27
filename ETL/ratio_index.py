@@ -335,6 +335,8 @@ def router(function_name, *args, **kwargs):
         return __single_inventory_turnover_ratio(*args, **kwargs)
     elif function_name == 'get_cost_of_fund':
         return __single_cost_of_fund(*args, **kwargs)
+    elif function_name == 'get_qoq_ratios':
+        return __get_qoq_ratios(*args, **kwargs)
     else:
         return None
 
@@ -396,6 +398,38 @@ def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, multi_pro
 
     return pd.concat(results)
 
+
+def get_qoq_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, multi_process=True, constant=None):
+    """
+    Calculate QoQ ratios for the given dataset using multi-processing.
+    Uses pre-calculated financial structure (ratios_df_1) and cash flow (ratios_df_6) ratios.
+    """
+
+    results = []
+    symbols = data_df['stock_code'].unique()
+
+    inputs = []
+    for symbol in symbols:
+        df_symbol = data_df[data_df['stock_code'] == symbol]
+
+        inputs.append([
+            df_symbol,
+            type_,
+            ratios_df_1[ratios_df_1['stock_code'] == symbol] if ratios_df_1 is not None else None,
+            ratios_df_6[ratios_df_6['stock_code'] == symbol] if ratios_df_6 is not None else None,
+            constant
+        ])
+
+    if multi_process:
+        with Pool(4) as p:
+            jobs_results = p.starmap(__get_qoq_ratios, inputs)
+            for job_result in jobs_results:
+                results.append(job_result)
+    else:
+        for args in inputs:
+            results.append(__get_qoq_ratios(*args))
+
+    return pd.concat(results, ignore_index=True)
 
 
 
@@ -656,11 +690,11 @@ def net_profit_margin(net_profit, net_sales):
 def Total_Asset_Turnover(net_sales, avg_total_assets):
     return net_sales / avg_total_assets if avg_total_assets else None
 
-def return_on_assets_4nq(net_income_4nq, total_assets):
-    return net_income_4nq / total_assets if total_assets else None
+def return_on_assets_ttm(net_income_ttm, total_assets):
+    return net_income_ttm / total_assets if total_assets else None
 
-def return_on_equity_4nq(net_income_4nq, total_equity):
-    return net_income_4nq / total_equity if total_equity else None
+def return_on_equity_ttm(net_income_ttm, total_equity):
+    return net_income_ttm / total_equity if total_equity else None
 
 def get_profitability_ratios(data_df, func_dict, type_):
     pivot_df_5 = data_df.pivot_table(index=['stock_code', 'year', 'quarter'], 
@@ -837,11 +871,11 @@ def return_on_average_equity(net_income, avg_total_equity):
 def return_on_average_sales(net_income, avg_total_sales):
     return net_income / avg_total_sales if avg_total_sales else None
 
-def return_on_average_assets_4nq(net_income_4nq, avg_total_assets):
-    return net_income_4nq / avg_total_assets if avg_total_assets else None
+def return_on_average_assets_ttm(net_income_ttm, avg_total_assets):
+    return net_income_ttm / avg_total_assets if avg_total_assets else None
 
-def return_on_average_equity_4nq(net_income_4nq, avg_total_equity):
-    return net_income_4nq / avg_total_equity if avg_total_equity else None
+def return_on_average_equity_ttm(net_income_ttm, avg_total_equity):
+    return net_income_ttm / avg_total_equity if avg_total_equity else None
 
 def get_avg_ratios(data_df, func_dict, type_):
     pivot_df_7 = data_df.pivot_table(index=['stock_code', 'year', 'quarter'], 
@@ -943,7 +977,6 @@ def get_constant_values(type_):
             'profitability': const.PROFITABILITY_RATIO_FUNCTIONS,
             'cashflow': const.CASHFLOW_RATIO_FUNCTIONS,
             'avg': const.CORP_AVG_RATIO_FUNCTIONS,
-            'avg': const.CORP_AVG_RATIO_FUNCTIONS,
             'pe': const.PE_RATIO_FUNCTIONS,
             'yoy': const.YoY_RATIO_FUNCTIONS['non_bank'],
             'qoq': const.QoQ_RATIO_FUNCTIONS['non_bank'],
@@ -959,7 +992,6 @@ def get_constant_values(type_):
             'profitability': const.BANK_PROFITABILITY_RATIO_FUNCTIONS,
             'cashflow': const.BANK_CASHFLOW_RATIO_FUNCTIONS,
             'avg': const.BANK_AVG_RATIO_FUNCTIONS,
-            'avg': const.BANK_AVG_RATIO_FUNCTIONS,
             'pe': const.BANK_PE_RATIO_FUNCTIONS,
             'yoy': const.YoY_RATIO_FUNCTIONS['bank'],
             'qoq': const.QoQ_RATIO_FUNCTIONS['bank'],
@@ -974,7 +1006,6 @@ def get_constant_values(type_):
             'income': const.SECURITIES_INCOME_RATIO_FUNCTIONS,
             'profitability': const.SECURITIES_PROFITABILITY_RATIO_FUNCTIONS,
             'cashflow': const.SECURITIES_CASHFLOW_RATIO_FUNCTIONS,
-            'avg': const.SECURITIES_AVG_RATIO_FUNCTIONS,
             'avg': const.SECURITIES_AVG_RATIO_FUNCTIONS,
             'pe': const.SECURITIES_PE_RATIO_FUNCTIONS,
             'yoy': const.YoY_RATIO_FUNCTIONS['securities'],
@@ -1002,13 +1033,12 @@ def get_financial_ratios(data_df, type_ = 'corp', including_explaination = True)
     df_profitability = get_profitability_ratios(data_df, constant['profitability'],type_)
     df_cashflow = get_cashflow_ratios(data_df, constant['cashflow'], type_)
     df_avg = get_avg_ratios(data_df, constant['avg'], type_)
-    df_avg = get_avg_ratios(data_df, constant['avg'], type_)
     df_date = get_date_related_ratios(data_df, constant['date'])
     
     df_pe = get_pe_ratios(data_df, constant['pe'])
     
     df_yoy = get_yoy_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow, constant=constant['yoy'])
-    df_qoq = get_yoy_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow, constant=constant['qoq'])
+    df_qoq = get_qoq_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow, constant=constant['qoq'])
     df = pd.concat([df_financial_structure, df_liquidity, df_financial_risk, df_income, df_profitability, df_cashflow, df_avg, df_pe, df_yoy, df_qoq, df_date], ignore_index=True)
     
     if type_ == 'bank' and including_explaination:
@@ -1018,7 +1048,7 @@ def get_financial_ratios(data_df, type_ = 'corp', including_explaination = True)
     # Map ratio_code to ratio_name
     df.rename(columns={'ratio_code': 'function_name'}, inplace=True)
 
-    map_df = pd.read_csv(os.path.join(current_path ,'../csv/map_ratio_code.csv'))
+    map_df = pd.read_csv(os.path.join(current_path ,'../data/map_ratio_code.csv'))
     map_df['function_name'] = map_df['function_name'].str.strip()
     
     
@@ -1190,7 +1220,7 @@ if __name__ == '__main__':
 
     ratio = dfs['ratio_code'].unique().tolist()
     
-    for r in ['BDR', 'EPS', 'BVPS', 'PB', 'DSO', 'ROAA', 'COF']:
+    for r in ['BDR', 'EPS', 'BVPS', 'PB', 'DSO', 'ROAATTM']:
         print(r)
         print(dfs[(dfs['ratio_code'] == r)&(dfs['quarter'] == 0)&(dfs['year'] == 2022)].head(5))
         print('========================================')

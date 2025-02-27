@@ -59,8 +59,8 @@ PROFITABILITY_RATIO_FUNCTIONS = {
     'net_profit_margin': ['IS_060', 'IS_010'],  # net_income (IS_060), net_sales (IS_010)
     'gross_profit_margin': ['IS_020', 'IS_010'],  # gross_profit (IS_020), net_sales (IS_010)
     'Total_Asset_Turnover': ['IS_010', 'BS_270'], # net_sales (IS_010), avg_total_assets (BS_270)
-    'return_on_assets_4nq': ['IS_060_4NQ', 'BS_270'],  # net_income (IS_060), total_assets (BS_270)
-    'return_on_equity_4nq': ['IS_060_4NQ', 'BS_400'],  # net_income (IS_060), equity (BS_400)
+    'return_on_assets_ttm': ['IS_060_TTM', 'BS_270'],  # net_income (IS_060), total_assets (BS_270)
+    'return_on_equity_ttm': ['IS_060_TTM', 'BS_400'],  # net_income (IS_060), equity (BS_400)
 }
 
 
@@ -82,8 +82,8 @@ CORP_AVG_RATIO_FUNCTIONS = {
     'return_on_average_assets': ['IS_060', 'BS_270'],  # net_income, avg_total_assets
     'return_on_average_equity': ['IS_060', 'BS_400'],  # net_income, avg_total_equity
     'return_on_average_sales':  ['IS_060', 'IS_010'],  # net_income, avg_sales
-    'return_on_average_assets_4nq': ['IS_060_4NQ', 'BS_270'],  # net_income, avg_total_assets
-    'return_on_average_equity_4nq': ['IS_060_4NQ', 'BS_400'],  # net_income, avg_total_equity
+    'return_on_average_assets_ttm': ['IS_060_TTM', 'BS_270'],  # net_income, avg_total_assets
+    'return_on_average_equity_ttm': ['IS_060_TTM', 'BS_400'],  # net_income, avg_total_equity
 }
 
 # YoY_RATIO_FUNCTIONS = {
@@ -161,8 +161,8 @@ BANK_PROFITABILITY_RATIO_FUNCTIONS = {
     'net_profit_margin': ['IS_021', 'IS_001'],  # net_income , net_sales
     'operating_profit_margin': ['IS_001','IS_014', ['IS_010','IS_003','IS_004']],  # NOPAT, net_sales 
     'gross_profit_margin': ['IS_003', 'IS_001'],  # gross_profit , net_sales 
-    'return_on_assets_4nq': ['IS_021_4NQ', 'BS_300'],  # net_income (IS_060), total_assets (BS_270)
-    'return_on_equity_4nq': ['IS_021_4NQ', 'BS_500'],  # net_income (IS_060), equity (BS_400)
+    'return_on_assets_ttm': ['IS_021_TTM', 'BS_300'],  # net_income (IS_060), total_assets (BS_270)
+    'return_on_equity_ttm': ['IS_021_TTM', 'BS_500'],  # net_income (IS_060), equity (BS_400)
 }
 
 BANK_CASHFLOW_RATIO_FUNCTIONS = {
@@ -266,8 +266,8 @@ SECURITIES_PROFITABILITY_RATIO_FUNCTIONS = {
     'operating_profit_margin': ['IS_200','IS_040', 'IS_020'],  # NOPAT, net_sales 
     'gross_profit_margin': ['IS_040.1', 'IS_020'],  # gross_profit , net_sales 
     'Total_Asset_Turnover': ['IS_020', 'BS_270'],  # net_sales , avg_total_assets
-    'return_on_assets_4nq': ['IS_200_4NQ', 'BS_270'],  # net_income , total_assets
-    'return_on_equity_4nq': ['IS_200_4NQ', 'BS_400'],  # net_income , equity
+    'return_on_assets_ttm': ['IS_200_TTM', 'BS_270'],  # net_income , total_assets
+    'return_on_equity_ttm': ['IS_200_TTM', 'BS_400'],  # net_income , equity
 }
 
 
@@ -406,7 +406,11 @@ QoQ_RATIO_FUNCTIONS = {
         'Interest_Income_Growth_QoQ' : 'IS_003',
         'Non_Interest_Income_Growth_QoQ' : ['IS_006','IS_007','IS_008','IS_009','IS_012','IS_013'],
         'Total_Operating_Income_Growth_QoQ' : 'IS_030',
-        'Customer_Loans_Growth_QoQ' : 'BS_160'
+        'Customer_Loans_Growth_QoQ' : 'BS_160',
+        'Total_Asset_Growth_QoQ' : 'BS_300',
+        'Equity_Growth_QoQ': 'BS_500',
+        'Pre_Tax_Profit_Growth_QoQ':'IS_017'
+
 }
 
 }
