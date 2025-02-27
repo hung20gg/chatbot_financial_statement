@@ -70,6 +70,7 @@ def process_financial_statements(input_parquet_path: str, output_parquet_path: s
             how='left',
             suffixes=('', '_original')
         )
+        report_TTM['date_added'] = report_TTM['date_added'].combine_first(financial_report.get('date_added'))
         report_TTM.drop(columns=['category_code_original', 'original_category_code'], inplace=True)
 
         missing_cols = [col for col in financial_report.columns if col not in report_TTM.columns]
@@ -79,7 +80,7 @@ def process_financial_statements(input_parquet_path: str, output_parquet_path: s
         report_TTM = report_TTM[financial_report.columns]
 
         combined_report = pd.concat([financial_report, report_TTM], ignore_index=True)
-
+    
         combined_report.to_parquet(output_parquet_path, index=False)
         print(f"Financial statement saved to {output_parquet_path}")
 
