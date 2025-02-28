@@ -80,7 +80,6 @@ CORP_AVG_RATIO_FUNCTIONS = {
     'return_on_average_assets': ['IS_060', 'BS_270'],  # net_income, avg_total_assets
     'return_on_average_equity': ['IS_060', 'BS_400'],  # net_income, avg_total_equity
     'return_on_average_sales':  ['IS_060', 'IS_010'],  # net_income, avg_sales
-    'Basic_Earning_Power_Ratio': [['IS_050', 'IS_023'], 'BS_270'],  # EBIT, total_assets
     'Total_Asset_Turnover': ['IS_010', 'BS_270'], # net_sales (IS_010), avg_total_assets (BS_270)
 }
 
@@ -193,7 +192,6 @@ BANK_AVG_RATIO_FUNCTIONS = {
     'return_on_average_assets': ['IS_021', 'BS_300'],  # net_income, avg_total_assets
     'return_on_average_equity': ['IS_021', 'BS_500'],  # net_income, avg_total_equity
     'return_on_average_sales':   ['IS_021', ['IS_010','IS_003','IS_004']],  # net_income, avg_sales
-    'Basic_Earning_Power_Ratio': [['IS_017', 'IS_002'], 'BS_300'],  # EBIT , total_assets 
 }
 BANK_AVG_TTM_RATIO_FUNCTIONS = {
     'return_on_average_assets_ttm': ['IS_021_TTM', 'BS_300'],
@@ -272,6 +270,7 @@ SECURITIES_PROFITABILITY_RATIO_FUNCTIONS = {
     'gross_profit_margin': ['IS_040.1', 'IS_020'],  # gross_profit , net_sales 
     'return_on_assets_ttm': ['IS_200_TTM', 'BS_270'],  # net_income , total_assets
     'return_on_equity_ttm': ['IS_200_TTM', 'BS_400'],  # net_income , equity
+
 }
 
 
@@ -294,8 +293,6 @@ SECURITIES_AVG_RATIO_FUNCTIONS = {
     'return_on_average_assets': ['IS_200', 'BS_270'],  # net_income, avg_total_assets
     'return_on_average_equity': ['IS_200', 'BS_400'],  # net_income, avg_total_equity
     'return_on_average_sales':   ['IS_200', 'IS_020'],  # net_income, avg_sales
-    'Total_Asset_Turnover': ['IS_020', 'BS_270'],  # net_sales , avg_total_assets
-    'Basic_Earning_Power_Ratio': [['IS_090','IS_052'], 'BS_270'],  # EBIT , total_assets 
 }
 
 SECURITIES_AVG_TTM_RATIO_FUNCTIONS = {
