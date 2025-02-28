@@ -6,6 +6,9 @@ import numpy as np
 current_path = os.path.dirname(__file__)
 sys.path.append(current_path)
 
+# Import functions from updatedb_ttm.py
+from updatedb_ttm import process_financial_statements, process_map_universal
+
 # from crawler.cafef_crawler import CafeFCrawlerFS
 from ratio_index import calculate_index
 
@@ -20,7 +23,21 @@ from ratio_index import calculate_index
 #         self.fs_crawler = CafeFCrawlerFS(args)
 
 
+def assert_category_code_consistency(df_report, df_mapping):
 
+    assert "category_code" in df_report.columns, "Error: 'category_code' missing in financial report!"
+    assert "category_code" in df_mapping.columns, "Error: 'category_code' missing in mapping file!"
+
+    report_codes = set(df_report["category_code"].dropna().unique())
+    mapping_codes = set(df_mapping["category_code"].dropna().unique())
+
+    missing_in_mapping = report_codes - mapping_codes  
+    missing_in_report = mapping_codes - report_codes  
+
+    assert not missing_in_mapping, f"Error: The following category_code(s) are in report but NOT in mapping: {missing_in_mapping}"
+    
+
+   
 
 def merge_financial_statement(version: str, output_path: str = '../data'):
     
@@ -47,8 +64,10 @@ def merge_financial_statement(version: str, output_path: str = '../data'):
     df_fs = pd.concat([df_bank, df_sec, df_corp], ignore_index=True)
     df_fs.dropna(subset=['stock_code'], inplace=True)
 
-    df_fs.to_parquet(os.path.join(current_path, output_path, f'financial_statement_{version}.parquet'))
+    output_file = os.path.join(current_path, output_path, f'financial_statement_{version}.parquet')
+    df_fs.to_parquet(output_file)
 
+    return output_file 
 def merge_financial_explaination( output_path: str = '../data'):
     df_sec_tm = pd.read_parquet(os.path.join(current_path,  '../data/v3/securities_explaination.parquet'))
     df_bank_tm = pd.read_parquet(os.path.join(current_path,  '../data/v3/bank_explaination.parquet'))
@@ -93,9 +112,10 @@ def prepare_files(version: str, extended = False, output_path: str = '../data'):
     df_sub_and_shareholders = pd.read_csv(os.path.join(current_path, '../csv/df_sub_and_shareholders.csv'))
     df_map_ratio_code = pd.read_csv(os.path.join(current_path, f'../csv/map_ratio_code.csv'))
 
-    bank_explaination = pd.read_parquet(os.path.join(current_path, f'../csv/{version}/bank_explaination.parquet'))
-    corp_explaination = pd.read_parquet(os.path.join(current_path, f'../csv/{version}/corp_explaination.parquet'))
-    securities_explaination = pd.read_parquet(os.path.join(current_path, f'../csv/{version}/securities_explaination.parquet'))
+    bank_financial_report = pd.read_parquet(os.path.join(current_path, f'../csv/{version}/bank_financial_report.parquet'))
+    corp_financial_report = pd.read_parquet(os.path.join(current_path, f'../csv/{version}/corp_financial_report.parquet'))
+    securities_financial_report = pd.read_parquet(os.path.join(current_path, f'../csv/{version}/securities_financial_report.parquet'))
+
 
     map_category_code_bank = pd.read_csv(os.path.join(current_path, f'../csv/{version}/map_category_code_bank.csv'))
     map_category_code_corp = pd.read_csv(os.path.join(current_path, f'../csv/{version}/map_category_code_corp.csv'))
@@ -104,22 +124,17 @@ def prepare_files(version: str, extended = False, output_path: str = '../data'):
 
     if version == 'v3':
         map_category_code_explaination = pd.read_csv(os.path.join(current_path, f'../csv/{version}/map_category_code_explaination.csv'))
-        bank_financial_report = pd.read_parquet(os.path.join(current_path, f'../csv/{version}/bank_financial_report.parquet'))
-        corp_financial_report = pd.read_parquet(os.path.join(current_path, f'../csv/{version}/corp_financial_report.parquet'))
-        securities_financial_report = pd.read_parquet(os.path.join(current_path, f'../csv/{version}/securities_financial_report.parquet'))
+        bank_explaination = pd.read_parquet(os.path.join(current_path, f'../csv/{version}/bank_explaination.parquet'))
+        corp_explaination = pd.read_parquet(os.path.join(current_path, f'../csv/{version}/corp_explaination.parquet'))
+        securities_explaination = pd.read_parquet(os.path.join(current_path, f'../csv/{version}/securities_explaination.parquet'))
 
     # Merge data if extended
     if extended:
         df_company_info = pd.read_csv(os.path.join(current_path, '../csv/new/df_company_info.csv'))
         df_sub_and_shareholders = pd.read_csv(os.path.join(current_path, '../csv/new/df_sub_and_shareholders.csv'))
-
+        df_map_ratio_code = pd.read_csv(os.path.join(current_path, f'../csv/new/map_ratio_code.csv'))
         print('===== Extended to',len(df_company_info) ,'companies ======')
 
-        # Need code to change map code here
-        # @pphanhh
-
-
-        
         bank_financial_report2 = pd.read_parquet(os.path.join(current_path, f'../csv/new/{version}/bank_financial_report.parquet'))
         corp_financial_report2 = pd.read_parquet(os.path.join(current_path, f'../csv/new/{version}/corp_financial_report.parquet'))
         securities_financial_report2 = pd.read_parquet(os.path.join(current_path, f'../csv/new/{version}/securities_financial_report.parquet'))
@@ -177,6 +192,8 @@ def prepare_files(version: str, extended = False, output_path: str = '../data'):
     return bank_unique_stock_code + corp_unique_stock_code + securities_unique_stock_code
 
 
+# ==== Main function ==== #
+
 def expand_data(version: str, output_path: str = '../data'):
 
     versions = version.split('.')
@@ -191,8 +208,48 @@ def expand_data(version: str, output_path: str = '../data'):
 
     num_stock_code = prepare_files(prefix_version, expand, output_path)
     
-    # Merge financial statement
-    merge_financial_statement(prefix_version, output_path)
+    data_folder = os.path.join(current_path, output_path)
+
+    # Merge financial statements and get output file path
+    merged_fs_path = merge_financial_statement(prefix_version, output_path)
+
+
+    if 'v3' in version:
+        merge_financial_explaination(output_path)
+        calculate_industry_financial_statement_explaination(output_path)
+        
+        # Process TTM (Trailing Twelve Months) Financial Statements
+        if expand: 
+            # process universal report
+            output_ttm_path = os.path.join(data_folder, f'financial_statement_{prefix_version}.parquet')
+            df_report = process_financial_statements(merged_fs_path, output_ttm_path)  
+
+            # process bank, corp, securities report
+            print("===== Processing TTM Financial Statements for Bank, Corp, Securities =====")
+            for company_type in ["bank", "corp", "securities"]:
+                input_parquet = os.path.join(data_folder,prefix_version, f"{company_type}_financial_report.parquet")
+                output_parquet = os.path.join(data_folder,prefix_version, f"{company_type}_financial_report.parquet")
+
+                df_report = process_financial_statements(
+                    input_parquet, output_parquet, company_type
+                )
+            # Process Universal Mapping File
+            df_map= process_map_universal(
+                os.path.join(data_folder,prefix_version, "map_category_code_universal.csv"),
+                os.path.join(data_folder,prefix_version, "map_category_code_universal.csv")
+            )
+            
+            # Process Mapping Files for Bank, Corp, and Securities
+            for file_type in ["bank", "corp", "sec"]:
+                df_map = process_map_universal(
+                    os.path.join(data_folder,prefix_version, f"map_category_code_{file_type}.csv"),
+                    os.path.join(data_folder,prefix_version, f"map_category_code_{file_type}.csv")
+                )
+
+            assert_category_code_consistency(df_report,df_map)
+
+    # Industry report
+    calculate_industry_financial_statement(prefix_version, output_path)
 
     # Ratio index
     df_ratio,_ = calculate_index(prefix_version, output_path)
@@ -201,15 +258,6 @@ def expand_data(version: str, output_path: str = '../data'):
     print('===== Ratio:', ratio_stock_code, '=====')
     assert num_stock_code == ratio_stock_code, 'Number of companies is not correct'
 
-    # Industry report
-    calculate_industry_financial_statement(prefix_version, output_path)
-
-    if 'v3' in version:
-        # Merge financial explan data
-        merge_financial_explaination(output_path)
-
-        # Industry report explaination
-        calculate_industry_financial_statement_explaination(output_path)
 
 if __name__ == '__main__':
     version = 'v3.2'

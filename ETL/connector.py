@@ -766,8 +766,6 @@ def setup_everything(config: dict):
                     device = torch.device("mps")  # Use Metal on macOS
                 elif torch.cuda.is_available():
                     device = torch.device("cuda")  # Use CUDA if available
-                elif torch.backends.rocm.is_available():
-                    device = torch.device("rocm")
                 else:
                     device = torch.device("cpu")   # Default to CPU
 
