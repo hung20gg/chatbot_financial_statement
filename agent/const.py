@@ -178,7 +178,7 @@ TEXT2SQL_DEEPSEEK_V3_CONFIG = {
 }
 
 TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG = {
-    "llm": 'gemini-1.5-flash',
+    "llm": 'gemini-2.0-flash',
     "sql_llm": 'deepseek-chat',
     "reasoning": False,
     "branch_reasoning": False,
