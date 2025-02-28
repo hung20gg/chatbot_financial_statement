@@ -80,6 +80,7 @@ CORP_AVG_RATIO_FUNCTIONS = {
     'return_on_average_assets': ['IS_060', 'BS_270'],  # net_income, avg_total_assets
     'return_on_average_equity': ['IS_060', 'BS_400'],  # net_income, avg_total_equity
     'return_on_average_sales':  ['IS_060', 'IS_010'],  # net_income, avg_sales
+    'Basic_Earning_Power_Ratio': [['IS_050', 'IS_023'], 'BS_270'],  # EBIT, total_assets
     'Total_Asset_Turnover': ['IS_010', 'BS_270'], # net_sales (IS_010), avg_total_assets (BS_270)
 }
 
@@ -269,7 +270,6 @@ SECURITIES_PROFITABILITY_RATIO_FUNCTIONS = {
     'net_profit_margin': ['IS_200', 'IS_020'],  # net_income , net_sales
     'operating_profit_margin': ['IS_200','IS_040', 'IS_020'],  # NOPAT, net_sales 
     'gross_profit_margin': ['IS_040.1', 'IS_020'],  # gross_profit , net_sales 
-    'Total_Asset_Turnover': ['IS_020', 'BS_270'],  # net_sales , avg_total_assets
     'return_on_assets_ttm': ['IS_200_TTM', 'BS_270'],  # net_income , total_assets
     'return_on_equity_ttm': ['IS_200_TTM', 'BS_400'],  # net_income , equity
 }
@@ -294,6 +294,7 @@ SECURITIES_AVG_RATIO_FUNCTIONS = {
     'return_on_average_assets': ['IS_200', 'BS_270'],  # net_income, avg_total_assets
     'return_on_average_equity': ['IS_200', 'BS_400'],  # net_income, avg_total_equity
     'return_on_average_sales':   ['IS_200', 'IS_020'],  # net_income, avg_sales
+    'Total_Asset_Turnover': ['IS_020', 'BS_270'],  # net_sales , avg_total_assets
     'Basic_Earning_Power_Ratio': [['IS_090','IS_052'], 'BS_270'],  # EBIT , total_assets 
 }
 
