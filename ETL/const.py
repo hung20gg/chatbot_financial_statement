@@ -445,3 +445,11 @@ INDUSTRIES_TRANSLATION = {
     "Ô tô và phụ tùng": "Automobiles and Parts",
     "Viễn thông": "Telecommunications"
 }
+
+
+IGNORE_TTM_CODES_IS = ['IS_022', 'IS_023', 'IS_024', 'IS_025', 'IS_081', 'IS_082', 'IS_046', 'IS_047', 'IS_048', 'IS_041', 'IS_024', 'IS_004', 'IS_005', 'IS_006', 'IS_007', 'IS_110', 'IS_111', 'IS_112', 'IS_120', 'IS_101', 'IS_102']
+IGNORE_TTM_CODES_CF = ['CF_002', 'CF_009', 'CF_010', 'CF_011', 'CF_021', 'CF_080', 'CF_081', 'CF_057', 'CF_058', 'CF_120', 
+ 'CF_021', 'CF_022', 'CF_023', 'CF_024', 'CF_025', 'CF_026', 'CF_027', 'CF_028', 'CF_029', 'CF_030', 
+ 'CF_031', 'CF_032', 'CF_033', 'CF_200', 'CF_201', 'CF_202', 'CF_203', 'CF_204', 'CF_205', 'CF_206', 
+ 'CF_207', 'CF_210', 'CF_211', 'CF_212', 'CF_213', 'CF_034', 'CF_035', 'CF_036', 'CF_037', 'CF_038', 
+ 'CF_039', 'CF_040', 'CF_041', 'CF_042', 'CF_043']

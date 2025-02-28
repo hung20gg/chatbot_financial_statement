@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 import copy 
+import const
 
 current_path = os.path.dirname(__file__)  # Path to etl/
 project_root = os.path.abspath(os.path.join(current_path, os.pardir))  # Move up one level
@@ -72,7 +73,14 @@ def process_map_universal(input_csv_path: str, output_csv_path: str) -> pd.DataF
 
             filtered_df = map_universal[map_universal['category_code'].str.startswith(('IS_', 'CF_'), na=False)].copy()
 
+            remove_mask_is = filtered_df['category_code'].isin(const.IGNORE_TTM_CODES_IS)
+            remove_mask_cf = filtered_df['category_code'].isin(const.IGNORE_TTM_CODES_CF)
+
+            filtered_df = filtered_df[~(remove_mask_is | remove_mask_cf)]
+
             filtered_df['category_code'] = filtered_df['category_code'] + '_TTM'
+
+            print("Adding TTM suffix to category_code", filtered_df['category_code'].nunique())
 
             for col in ['corp_code', 'sec_code', 'bank_code']:
                 if col in filtered_df.columns:
