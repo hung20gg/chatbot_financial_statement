@@ -1,0 +1,120 @@
+ratio_name,ratio_code,function_name
+Equity Ratio,ER,equity_ratio
+Long Term Asset Self Financing Ratio,LTASFR,long_term_asset_self_financing_ratio
+Fixed Asset Self Financing Ratio,FASFR,fixed_asset_self_financing_ratio
+General Solvency Ratio,GSR,general_solvency_ratio
+Return On Investment,ROI,return_on_investment
+Basic Earning Power,BEP,basic_earning_power
+Debt To Assets Ratio,DTAR,debt_to_assets_ratio
+Debt To Equity Ratio,DTER,debt_to_equity_ratio
+Short Term Debt To Assets Ratio,STDTAR,short_term_debt_to_assets_ratio
+Interest Coverage Ratio,ICR,interest_coverage_ratio
+Long Term Debt To Equity Ratio,LTDTER,long_term_debt_to_equity_ratio
+Short Term Debt To Equity Ratio,STDTER,short_term_debt_to_equity_ratio
+Receivables To Payables Ratio,RTPR,receivables_to_payables_ratio
+Receivables To Total Assets Ratio,RTTAR,receivables_to_total_assets_ratio
+Debt To Total Capital Ratio,DTTCR,debt_to_total_capital_ratio
+Receivables To Sales Ratio,RTSR,receivables_to_sales_ratio
+Allowance For Doubtful Accounts Ratio,AFDAR,allowance_for_doubtful_accounts_ratio
+Asset To Debt Ratio,ATDR,asset_to_debt_ratio
+Current Ratio,CurrentR,current_ratio
+Quick Ratio,QR, quick_ratio
+Cash Ratio,CashR, cash_ratio
+Long Term Debt Coverage Ratio,LTDCR,long_term_debt_coverage_ratio
+Long Term Debt To Equity Capital Ratio,LTDTECR,long_term_debt_to_equity_capital_ratio
+Time Interest Earned,TIE,time_interest_earned
+Debt To Tangible Net Worth Ratio,DTTNWR,debt_to_tangible_net_worth_ratio
+Financial Leverage,FL,financial_leverage
+Allowance For Doubtful Accounts To Total Assets Ratio,AFDATTAR,allowance_for_doubtful_accounts_to_total_assets_ratio
+Permanent Financing Ratio,PFR,permanent_financing_ratio
+Financial Income To Net Revenue Ratio,FITNRR,financial_income_to_net_revenue_ratio
+Return On Assets,ROA,return_on_assets
+Return On Fixed Assets,ROFA,return_on_fixed_assets
+Return On Long Term Operating Assets,ROLTOA,return_on_long_term_operating_assets
+Basic Earning Power Ratio,BEPR,Basic_Earning_Power_Ratio
+Return On Equity,ROE,Return_on_equity
+Profitability Of Cost Of Goods Sold,POCOGS,profitability_of_cost_of_goods_sold
+Price Spread Ratio,PSR,price_spread_ratio
+Profitability Of Operating Expenses,POOE,profitability_of_operating_expenses
+Return On Sales,ROS,Return_on_sales
+Operating Profit Margin,OPM,operating_profit_margin
+Gross Profit Margin,GPM,gross_profit_margin
+Return on Invested Capital,ROIC,ROIC
+EBIT,EBIT,EBIT
+EBITDA,EBITDA,EBITDA
+Free Cash Flow,FCF,free_cash_flow
+Free Cash Flow To Operating Cash Flow Ratio,FCFTOCFR,free_cash_flow_to_operating_cash_flow_ratio
+Cash Interest Coverage,CIC,cash_interest_coverage
+Cash Flow From Sales To Sales,CFFSTS,cash_flow_from_sales_to_sales
+Cash Flow Margin,CFM,cash_flow_margin
+Earning Quality Ratio,EQR,earning_quality_ratio
+Cash Debt Coverage Ratio,CDCR,cash_debt_coverage_ratio
+Cash Return On Assets,CROA,cash_return_on_assets
+Cash Return On Fixed Assets,CROFA,cash_return_on_fixed_assets
+CFO To Total Equity,CFOTTE,CFO_to_total_equity
+Net Interest Margin,NIM,net_interest_margin
+Allowance for loan customers ratio,ALCR,allowance_for_loan_customers_ratio
+Net profit margin,NPM,net_profit_margin
+Current Account Saving Account Ratio,CASA,current_account_saving_account_ratio
+Bad Debt Ratio,BDR,bad_debt_ratio
+Net Revenue Growth YoY,NRGYoY,Net_Revenue_Growth_YoY
+Gross Profit Growth YoY,GPGYoY,Gross_Profit_Growth_YoY
+EBITDA Growth YoY,EBITDAGYoY,EBITDA_Growth_YoY
+EBIT Growth YoY,EBITGYoY,EBIT_Growth_YoY
+Pre Tax Profit Growth YoY,PTPGYoY,Pre_Tax_Profit_Growth_YoY
+Accounts Receivable Growth YoY,ARGYoY,Accounts_Receivable_Growth_YoY
+Inventory Growth YoY,IGYoY,Inventory_Growth_YoY
+Short Term Debt Growth YoY,STDGYoY,Short_Term_Debt_Growth_YoY
+Long Term Debt Growth YoY,LTDGYoY,Long_Term_Debt_Growth_YoY
+SG&A Expense Growth YoY,SG&AEGYoY,SG&A_Expense_Growth_YoY
+Total Asset Growth YoY,TAGYoY,Total_Asset_Growth_YoY
+Equity Growth YoY,EGYoY,Equity_Growth_YoY
+CFO Growth YoY,CFOGYoY,CFO_Growth_YoY
+Customer Deposits Growth YoY,CDGYoY,Customer_Deposits_Growth_YoY
+Operating Expense Growth YoY,OEGYoY,Operating_Expense_Growth_YoY
+Income Before Provision Growth YoY,IBPGYoY,Income_Before_Provision_Growth_YoY
+Interest Income Growth YoY,IIGYoY,Interest_Income_Growth_YoY
+Non Interest Income Growth YoY,NIIGYoY,Non_Interest_Income_Growth_YoY
+Total Operating Income Growth,TOIGYoY,Total_Operating_Income_Growth
+Customer Loans Growth YoY,CLGYoY,Customer_Loans_Growth_YoY
+Total Asset Turnover,TAT,Total_Asset_Turnover
+Earning Per Share,EPS,earning_per_share
+Price Earning Ratio,PE,price_earning_ratio
+Price To Book Ratio,PB,price_to_book_ratio
+Book Value Per Share,BVPS,book_value_per_share
+Days Sales Outstanding,DSO,days_sales_outstanding
+Days Inventory Outstanding,DIO,days_inventory_outstanding
+Days Payable Outstanding,DPO,days_payable_outstanding
+Cash Conversion Cycle,CCC,cash_conversion_cycle
+Inventory Turnover Ratio,ITR,inventory_turnover_ratio
+Return On Average Assets,ROAA,return_on_average_assets
+Return On Average Equity,ROAE,return_on_average_equity
+Return On Average Sales,ROAS,return_on_average_sales
+Non-Performing Loan Coverage Ratio,NPLCR,non_performing_loan_coverage_ratio
+Outstanding Credit Balance YoY,OCBYoY,outstanding_credit_balance_YoY
+Cost of Fund,COF,cost_of_fund
+Cost to Income Ratio,CIR,cost_to_income_ratio
+Return On Average Assets TTM,ROAATTM,return_on_average_assets_ttm
+Return On Average Equity TTM,ROAETTM,return_on_average_equity_ttm
+Return On Assets TTM,ROATTM,return_on_assets_ttm
+Return On Equity TTM,ROETTM,return_on_equity_ttm
+Net Revenue Growth QoQ,NRGQoQ,Net_Revenue_Growth_QoQ
+Gross Profit Growth QoQ,GPGQoQ,Gross_Profit_Growth_QoQ
+EBITDA Growth QoQ,EBITDAQoQ,EBITDA_Growth_QoQ
+EBIT Growth QoQ,EBITGQoQ,EBIT_Growth_QoQ
+Pre Tax Profit Growth QoQ,PTPGQoQ,Pre_Tax_Profit_Growth_QoQ
+Accounts Receivable Growth QoQ,ARGQoQ,Accounts_Receivable_Growth_QoQ
+Inventory Growth QoQ,IGQoQ,Inventory_Growth_QoQ
+Short Term Debt Growth QoQ,STDGQoQ,Short_Term_Debt_Growth_QoQ
+Long Term Debt Growth QoQ,LTDGQoQ,Long_Term_Debt_Growth_QoQ
+SG&A Expense Growth QoQ,SG&AEGQoQ,SG&A_Expense_Growth_QoQ
+Total Asset Growth QoQ,TAGQoQ,Total_Asset_Growth_QoQ
+Equity Growth QoQ,EGQoQ,Equity_Growth_QoQ
+CFO Growth QoQ,CFOGQoQ,CFO_Growth_QoQ
+Customer Deposits Growth QoQ,CDGQoQ,Customer_Deposits_Growth_QoQ
+Operating Expense Growth QoQ,OEGQoQ,Operating_Expense_Growth_QoQ
+Income Before Provision Growth QoQ,IBPGQoQ,Income_Before_Provision_Growth_QoQ
+Interest Income Growth QoQ,IIGQoQ,Interest_Income_Growth_QoQ
+Non Interest Income Growth QoQ,NIIGQoQ,Non_Interest_Income_Growth_QoQ
+Total Operating Income Growth,TOIGQoQ,Total_Operating_Income_Growth_QoQ
+Customer Loans Growth QoQ,CLGQoQ,Customer_Loans_Growth_QoQ
