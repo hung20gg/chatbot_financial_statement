@@ -48,7 +48,6 @@ PROFITABILITY_RATIO_FUNCTIONS = {
     'return_on_assets': ['IS_060', 'BS_270'],  # net_income (IS_060), total_assets (BS_270)
     'return_on_fixed_assets': ['IS_060', 'BS_220'],  # net_income (IS_060), average_fixed_assets (BS_220)
     'return_on_long_term_operating_assets':['IS_060', ['BS_240','BS_210','BS_220','BS_230','BS_260']],  # net_income (IS_060), average_long_term_operating_assets (BS_240)
-    'Basic_Earning_Power_Ratio': [['IS_050', 'IS_023'], 'BS_270'],  # EBIT (IS_050 + IS_023), total_assets (BS_270)
     'Return_on_equity': ['IS_060', 'BS_400'],  # net_income (IS_060), equity (BS_400)
     # 'return_on_common_equity': ['IS_060', 'CF_036', 'BS_400'],  # net_income (IS_060), preferred_dividends (CF_036), average_common_equity (BS_400)
     'profitability_of_cost_of_goods_sold': ['IS_030', 'IS_011'],  # net_income_from_operating (IS_030), COGS (IS_011)
@@ -58,7 +57,6 @@ PROFITABILITY_RATIO_FUNCTIONS = {
     'operating_profit_margin': ['IS_030', 'IS_010'],  # NOPAT, net_sales (IS_010)
     'net_profit_margin': ['IS_060', 'IS_010'],  # net_income (IS_060), net_sales (IS_010)
     'gross_profit_margin': ['IS_020', 'IS_010'],  # gross_profit (IS_020), net_sales (IS_010)
-    'Total_Asset_Turnover': ['IS_010', 'BS_270'], # net_sales (IS_010), avg_total_assets (BS_270)
     'return_on_assets_ttm': ['IS_060_TTM', 'BS_270'],  # net_income (IS_060), total_assets (BS_270)
     'return_on_equity_ttm': ['IS_060_TTM', 'BS_400'],  # net_income (IS_060), equity (BS_400)
 }
@@ -82,6 +80,10 @@ CORP_AVG_RATIO_FUNCTIONS = {
     'return_on_average_assets': ['IS_060', 'BS_270'],  # net_income, avg_total_assets
     'return_on_average_equity': ['IS_060', 'BS_400'],  # net_income, avg_total_equity
     'return_on_average_sales':  ['IS_060', 'IS_010'],  # net_income, avg_sales
+    'Total_Asset_Turnover': ['IS_010', 'BS_270'], # net_sales (IS_010), avg_total_assets (BS_270)
+}
+
+CORP_AVG_TTM_RATIO_FUNCTIONS = {
     'return_on_average_assets_ttm': ['IS_060_TTM', 'BS_270'],  # net_income, avg_total_assets
     'return_on_average_equity_ttm': ['IS_060_TTM', 'BS_400'],  # net_income, avg_total_equity
 }
@@ -151,7 +153,6 @@ BANK_PROFITABILITY_RATIO_FUNCTIONS = {
     'return_on_assets': ['IS_021', 'BS_300'],  # net_income , total_assets 
     'return_on_fixed_assets': ['IS_021', 'BS_220'],  # net_income , average_fixed_assets 
     'return_on_long_term_operating_assets': ['IS_021', ['BS_210','BS_220','BS_240']],  # net_income , average_long_term_operating_assets 
-    'Basic_Earning_Power_Ratio': [['IS_017', 'IS_002'], 'BS_300'],  # EBIT , total_assets 
     'Return_on_equity': ['IS_021', 'BS_500'],  # net_income , equity 
     # 'return_on_common_equity': ['IS_060', 'CF_036', 'BS_400'],  # net_income (IS_060), preferred_dividends (CF_036), average_common_equity (BS_400)
     'profitability_of_cost_of_goods_sold': ['IS_015', 'IS_005'],  # net_income_from_operating (IS_030), COGS (IS_011)
@@ -191,8 +192,12 @@ BANK_AVG_RATIO_FUNCTIONS = {
     'return_on_average_assets': ['IS_021', 'BS_300'],  # net_income, avg_total_assets
     'return_on_average_equity': ['IS_021', 'BS_500'],  # net_income, avg_total_equity
     'return_on_average_sales':   ['IS_021', ['IS_010','IS_003','IS_004']],  # net_income, avg_sales
+    'Basic_Earning_Power_Ratio': [['IS_017', 'IS_002'], 'BS_300'],  # EBIT , total_assets 
 }
-
+BANK_AVG_TTM_RATIO_FUNCTIONS = {
+    'return_on_average_assets_ttm': ['IS_021_TTM', 'BS_300'],
+    'return_on_average_equity_ttm': ['IS_021_TTM', 'BS_500'],
+}
 
 # BANK_YoY_RATIO_FUNCTIONS = {
 #     'Customer_Deposits_Growth_YoY' : 'BS_330',
@@ -258,7 +263,6 @@ SECURITIES_PROFITABILITY_RATIO_FUNCTIONS = {
     'return_on_assets': ['IS_200', 'BS_270'],  # net_income , total_assets 
     'return_on_fixed_assets': ['IS_200', 'BS_220'],  # net_income , average_fixed_assets 
     'return_on_long_term_operating_assets': ['IS_200', ['BS_211','BS_220','BS_230','BS_240','BS_250']],  # net_income , average_long_term_operating_assets 
-    'Basic_Earning_Power_Ratio': [['IS_090','IS_052'], 'BS_270'],  # EBIT , total_assets 
     'Return_on_equity': ['IS_200', 'BS_400'],  # net_income , equity 
     'profitability_of_operating_expenses': ['IS_200','IS_040', 'IS_040'],  # net_income_from_operating , total_operating_expenses 
     'Return_on_sales': ['IS_200', 'IS_020'],  # net_income , net_sales 
@@ -290,6 +294,12 @@ SECURITIES_AVG_RATIO_FUNCTIONS = {
     'return_on_average_assets': ['IS_200', 'BS_270'],  # net_income, avg_total_assets
     'return_on_average_equity': ['IS_200', 'BS_400'],  # net_income, avg_total_equity
     'return_on_average_sales':   ['IS_200', 'IS_020'],  # net_income, avg_sales
+    'Basic_Earning_Power_Ratio': [['IS_090','IS_052'], 'BS_270'],  # EBIT , total_assets 
+}
+
+SECURITIES_AVG_TTM_RATIO_FUNCTIONS = {
+    'return_on_average_assets_ttm': ['IS_200_TTM', 'BS_270'],
+    'return_on_average_equity_ttm': ['IS_200_TTM', 'BS_400'],
 }
 
 

@@ -8,79 +8,46 @@ project_root = os.path.abspath(os.path.join(current_path, os.pardir))  # Move up
 data_folder = os.path.join(project_root, "data")  
  
 
+def calculate_TTM(financial_report):
+    financial_report = financial_report[financial_report['quarter'] != 0]
+
+    financial_report = financial_report.sort_values(by=['stock_code', 'category_code', 'year', 'quarter'])
+
+    financial_report['period'] = financial_report['year'] * 4 + financial_report['quarter'] - 1
+
+    financial_report['data_TTM'] = (
+        financial_report.groupby(['stock_code', 'category_code'])['data']
+        .transform(lambda x: x.rolling(window=4, min_periods=4).sum())
+    )
+
+    financial_report['date_added_TTM'] = (
+        financial_report.groupby(['stock_code', 'category_code'])['date_added']
+        .transform(lambda x: x.shift(0))
+    )
+    financial_report = financial_report.dropna(subset=['data_TTM'])
+
+    financial_report['category_code'] = financial_report['category_code'] + '_TTM'
+
+    return financial_report[['stock_code', 'category_code', 'year', 'quarter', 'data_TTM', 'date_added_TTM']].rename(
+        columns={'data_TTM': 'data', 'date_added_TTM': 'date_added'}
+    )
+
 def process_financial_statements(input_parquet_path: str, output_parquet_path: str,company_type:str = None) -> pd.DataFrame: 
-    """
-    Processes financial statements and computes TTM rolling sums.
-    """
     combined_report = None
     if os.path.exists(input_parquet_path):
 
         financial_report = pd.read_parquet(input_parquet_path)
+
         financial_report = financial_report.dropna(subset=['category_code'])
-
-        def calculate_TTM(df):
-            df_sorted = df.sort_values(by=['stock_code', 'category_code', 'year', 'quarter']).reset_index(drop=True)
-            df_sorted['period'] = df_sorted['year'] * 4 + df_sorted['quarter'] - 1  
-
-            df_lookup = df_sorted[['stock_code', 'category_code', 'year', 'quarter', 'data', 'period']].copy()
-            df_lookup['lookback1'] = df_lookup['period']
-            df_lookup['lookback2'] = df_lookup['period'] - 1
-            df_lookup['lookback3'] = df_lookup['period'] - 2
-            df_lookup['lookback4'] = df_lookup['period'] - 3
-
-            df_long = df_lookup.melt(
-                id_vars=['stock_code', 'category_code', 'data', 'period'],
-                value_vars=['lookback1', 'lookback2', 'lookback3', 'lookback4'],
-                var_name='lookback_type',
-                value_name='lookup_period'
-            )
-
-            df_merged = df_long.merge(
-                df_sorted[['stock_code', 'category_code', 'period', 'data']],
-                left_on=['stock_code', 'category_code', 'lookup_period'],
-                right_on=['stock_code', 'category_code', 'period'],
-                how='left',
-                suffixes=('', '_past')
-            )
-
-            df_final = df_merged.groupby(['stock_code', 'category_code', 'period'])['data_past'].sum().reset_index()
-            df_final['year'] = df_final['period'] // 4
-            df_final['quarter'] = df_final['period'] % 4 + 1
-            df_final.rename(columns={'data_past': 'data'}, inplace=True)
-
-            return df_final
-
         print(f"Processing {company_type or 'Universal'} Financial Report")
 
         is_report = financial_report[financial_report['category_code'].str.startswith('IS')]
         cf_report = financial_report[financial_report['category_code'].str.startswith('CF')]
 
-        is_report_TTM = calculate_TTM(is_report.copy()) if not is_report.empty else None
-        cf_report_TTM = calculate_TTM(cf_report.copy()) if not cf_report.empty else None
+        is_report_TTM = calculate_TTM(is_report.copy()) 
+        cf_report_TTM = calculate_TTM(cf_report.copy()) 
 
-        report_TTM = pd.concat([df for df in [is_report_TTM, cf_report_TTM] if df is not None], ignore_index=True)
-
-        report_TTM['category_code'] = report_TTM['category_code'] + '_TTM'
-        report_TTM['original_category_code'] = report_TTM['category_code'].str.replace('_TTM', '', regex=True)
-
-        report_TTM = report_TTM.merge(
-            financial_report[['stock_code', 'year', 'quarter', 'category_code', 'date_added']],
-            left_on=['stock_code', 'year', 'quarter', 'original_category_code'],
-            right_on=['stock_code', 'year', 'quarter', 'category_code'],
-            how='left',
-            suffixes=('', '_original')
-        )
-        report_TTM['date_added'] = report_TTM['date_added'].combine_first(financial_report.get('date_added'))
-        report_TTM.drop(columns=['category_code_original', 'original_category_code'], inplace=True)
-
-        missing_cols = [col for col in financial_report.columns if col not in report_TTM.columns]
-        for col in missing_cols:
-            report_TTM[col] = None
-
-        report_TTM = report_TTM[financial_report.columns]
-
-        combined_report = pd.concat([financial_report, report_TTM], ignore_index=True)
-    
+        combined_report = pd.concat([financial_report, is_report_TTM, cf_report_TTM], ignore_index=True)
         combined_report.to_parquet(output_parquet_path, index=False)
         print(f"Financial statement saved to {output_parquet_path}")
 
@@ -88,6 +55,7 @@ def process_financial_statements(input_parquet_path: str, output_parquet_path: s
         print(f"File not found: {input_parquet_path}. Skipping.")
 
     return combined_report
+    
 
 def process_map_universal(input_csv_path: str, output_csv_path: str) -> pd.DataFrame: 
     
