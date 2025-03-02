@@ -14,6 +14,7 @@ from agent.const import (
     TEXT2SQL_QWEN25_CODER_3B_SFT_CONFIG,
     TEXT2SQL_QWEN25_CODER_3B_KTO_CONFIG,
     TEXT2SQL_GEMINI_PRO_EXP_CONFIG,
+    TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG,
     TEXT2SQL_4O_CONFIG
 )
 
@@ -74,7 +75,8 @@ def initialize(text2sql_model = 'gemini-2.0-flash'):
         text2sql_config = TEXT2SQL_THINKING_GEMINI_CONFIG
     elif 'gemini-2.0-pro-exp' in text2sql_model:
         text2sql_config = TEXT2SQL_GEMINI_PRO_EXP_CONFIG
-    
+    elif 'deepseek-chat' in text2sql_model:
+        text2sql_config = TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG
     chatbot = initialize_text2sql(text2sql_config, prompt_config, version = st.session_state.version, message=True, rotate_key = st.session_state.rotate_api)
 
     st.session_state.history = []
@@ -103,8 +105,8 @@ def chat(user_name):
     
     text2sql_model = st.selectbox(
         "Text2SQL Model:",
-        ['gemini-2.0-flash', 'qwen2.5-3b-kto', 'gpt-4o-mini', 'gpt-4o', 'gemini-2.0-flash-thinking-exp-01-21', 'gemini-2.0-pro-exp-02-05'],
-        index=['gemini-2.0-flash', 'qwen2.5-3b-kto', 'gpt-4o-mini' , 'gpt-4o', 'gemini-2.0-flash-thinking-exp-01-21', 'gemini-2.0-pro-exp-02-05'].index(st.session_state.text2sql_model)
+        ['gemini-2.0-flash', 'qwen2.5-3b-kto', 'deepseek-chat', 'gpt-4o-mini', 'gpt-4o', 'gemini-2.0-flash-thinking-exp-01-21', 'gemini-2.0-pro-exp-02-05'],
+        index=['gemini-2.0-flash', 'qwen2.5-3b-kto', 'deepseek-chat', 'gpt-4o-mini' , 'gpt-4o', 'gemini-2.0-flash-thinking-exp-01-21', 'gemini-2.0-pro-exp-02-05'].index(st.session_state.text2sql_model)
     )
 
     if text2sql_model != st.session_state.text2sql_model:

@@ -60,7 +60,7 @@ if __name__ == "__main__":
     logging.info('Test get exact industry sim search')
 
 
-    print(db.search_return_df('ROA', 5, 'ratio'))
+    print(db.search_return_df('Return On Assets TTM', 5, 'ratio'))
     logging.info('Test search return account')
     
     print(db.search_return_df('Deposit', 10, 'fs'))
