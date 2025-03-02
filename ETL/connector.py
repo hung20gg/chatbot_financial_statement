@@ -583,9 +583,9 @@ FIIN_RDB_SETUP_CONFIG = {
     'map_category_code_universal': ['../data/v3/map_category_code_universal.csv', ['category_code']],
     
     
-    'bank_financial_report' : ['../data/v3/bank_financial_report.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'non_bank_financial_report' : ['../data/v3/corp_financial_report.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'securities_financial_report' : ['../data/v3/securities_financial_report.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'bank_financial_report' : ['../data/v3/bank_financial_report.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'non_bank_financial_report' : ['../data/v3/corp_financial_report.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'securities_financial_report' : ['../data/v3/securities_financial_report.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'financial_statement': ['../data/financial_statement_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     
 

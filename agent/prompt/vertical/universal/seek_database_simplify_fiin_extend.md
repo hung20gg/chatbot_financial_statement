@@ -115,7 +115,9 @@ CREATE TABLE industry_financial_statement_explaination(
 ### Note on schema description: 
 - Each value in `category_code` includes a prefix indicating the report it pertains to: *BS* is Balance sheet, *IS* is for Income statement, *CF* is Cash flow and *TM* is for Explaination.
 - For `category_code` in `financial_statement_explaination`, there are 4 additional prefix: *Crop*, *Bank*, *Sec* and *Share* for specific type of organization.
-- With YoY ratio in `financial_ratio`, you should recalculate the ratio if the time window is not 1 year.
+- With YoY ratio, you should recalculate the ratio if the time window is not 1 year.
+- With QoQ ratio, you should recalculate the ratio if the time window is not 1 quarter.
+- The suffix "TTM" in category_code and ratio_code indicates a financial account or ratio that represents the cumulative sum of the 4 previous quarters, and can be interpreted as annual data.
 
 ### Note on creating query:
 - You will be provided a mapping table with caption for `category_code` and `ratio_code`, and you are only allow to use that reference to select suitable code.

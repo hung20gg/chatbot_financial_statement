@@ -238,8 +238,7 @@ def expand_data(version: str, output_path: str = '../data'):
             
             # process universal report
 
-            output_ttm_path = os.path.join(data_folder, f'financial_statement_{prefix_version}.parquet')
-            df_report = process_financial_statements(merged_fs_path, output_ttm_path, version=prefix_version)  
+            df_report = process_financial_statements(merged_fs_path, merged_fs_path, version=prefix_version)  
 
             # process bank, corp, securities report
             print("===== Processing TTM Financial Statements for Bank, Corp, Securities =====")

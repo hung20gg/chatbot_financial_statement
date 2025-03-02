@@ -344,31 +344,39 @@ YoY_RATIO_FUNCTIONS = {
     'securities':{
         'Net_Revenue_Growth_YoY': 'IS_020',
         'Gross_Profit_Growth_YoY': 'IS_040.1',
+        'Net_Income_Growth_YoY': 'IS_200',
         'EBITDA_Growth_YoY': 'EBITDA',
         'EBIT_Growth_YoY': 'EBIT',
         'Pre_Tax_Profit_Growth_YoY': 'IS_090',
         'Accounts_Receivable_Growth_YoY': 'BS_117',
-        'Short_Term_Debt_Growth_YoY': 'BS_312',
+        'Short_Term_Debt_Growth_YoY': 'BS_310',
+        'Long_Term_Debt_Growth_YoY': 'BS_330',
         'SG&A_Expense_Growth_YoY': ['IS_061', 'IS_062'],  # Summing up these codes
         'Total_Asset_Growth_YoY': 'BS_270',
         'Equity_Growth_YoY': 'BS_400',
-        'CFO_Growth_YoY': 'CF_060'},
+        'Liability_Growth_YoY': 'BS_300',
+        'CFO_Growth_YoY': 'CF_060'
+        },
     'non_bank':{
+
         'Net_Revenue_Growth_YoY': 'IS_010',
         'Gross_Profit_Growth_YoY': 'IS_020',
+        'Net_Income_Growth_YoY': 'IS_060',
         'EBITDA_Growth_YoY': 'EBITDA',
         'EBIT_Growth_YoY': 'EBIT',
         'Pre_Tax_Profit_Growth_YoY': 'IS_050',
         'Accounts_Receivable_Growth_YoY': ['BS_131', 'BS_211'],  # Summing up these codes
         'Inventory_Growth_YoY': 'BS_140',
-        'Short_Term_Debt_Growth_YoY': 'BS_320',
-        'Long_Term_Debt_Growth_YoY': 'BS_338',
+        'Short_Term_Debt_Growth_YoY': 'BS_310',
+        'Long_Term_Debt_Growth_YoY': 'BS_340',
         'SG&A_Expense_Growth_YoY': ['IS_025', 'IS_026'],  # Summing up these codes
         'Total_Asset_Growth_YoY': 'BS_270',
         'Equity_Growth_YoY': 'BS_400',
+        'Liability_Growth_YoY': 'BS_300',
         'CFO_Growth_YoY': 'CF_020'
     },
     'bank':{
+        'Net_Income_Growth_YoY' : 'IS_021',
         'Customer_Deposits_Growth_YoY' : 'BS_330',
         'Operating_Expense_Growth_YoY' : 'IS_014',
         'Income_Before_Provision_Growth_YoY' : 'IS_015',
@@ -376,6 +384,7 @@ YoY_RATIO_FUNCTIONS = {
         'Non_Interest_Income_Growth_YoY' : ['IS_006','IS_007','IS_008','IS_009','IS_012','IS_013'],
         'Total_Operating_Income_Growth' : 'IS_030',
         'Customer_Loans_Growth_YoY' : 'BS_160',
+        'Equity_Growth_YoY': 'BS_500',
         'outstanding_credit_balance_YoY' : 'BS_200',
         }
 
@@ -384,32 +393,38 @@ QoQ_RATIO_FUNCTIONS = {
     'securities': {
         'Net_Revenue_Growth_QoQ': 'IS_020',
         'Gross_Profit_Growth_QoQ': 'IS_040.1',
+        'Net_Income_Growth_QoQ': 'IS_200',
         'EBITDA_Growth_QoQ': 'EBITDA',
         'EBIT_Growth_QoQ': 'EBIT',
         'Pre_Tax_Profit_Growth_QoQ': 'IS_090',
         'Accounts_Receivable_Growth_QoQ': 'BS_117',
-        'Short_Term_Debt_Growth_QoQ': 'BS_312',
+        'Short_Term_Debt_Growth_QoQ': 'BS_310',
+        'Long_Term_Debt_Growth_QoQ': 'BS_330',
         'SG&A_Expense_Growth_QoQ': ['IS_061', 'IS_062'],
         'Total_Asset_Growth_QoQ': 'BS_270',
         'Equity_Growth_QoQ': 'BS_400',
+        'Liability_Growth_QoQ': 'BS_300',
         'CFO_Growth_QoQ': 'CF_060'
     },
     'non_bank': {
         'Net_Revenue_Growth_QoQ': 'IS_010',
         'Gross_Profit_Growth_QoQ': 'IS_020',
+        'Net_Income_Growth_QoQ': 'IS_060',
         'EBITDA_Growth_QoQ': 'EBITDA',
         'EBIT_Growth_QoQ': 'EBIT',
         'Pre_Tax_Profit_Growth_QoQ': 'IS_050',
         'Accounts_Receivable_Growth_QoQ': ['BS_131', 'BS_211'],
         'Inventory_Growth_QoQ': 'BS_140',
-        'Short_Term_Debt_Growth_QoQ': 'BS_320',
-        'Long_Term_Debt_Growth_QoQ': 'BS_338',
+        'Short_Term_Debt_Growth_QoQ': 'BS_310',
+        'Long_Term_Debt_Growth_QoQ': 'BS_340',
         'SG&A_Expense_Growth_QoQ': ['IS_025', 'IS_026'],
         'Total_Asset_Growth_QoQ': 'BS_270',
         'Equity_Growth_QoQ': 'BS_400',
+        'Liability_Growth_QoQ': 'BS_300',
         'CFO_Growth_QoQ': 'CF_020'
     },
     'bank': {
+        'Net_Income_Growth_QoQ' : 'IS_021',
         'Customer_Deposits_Growth_QoQ' : 'BS_330',
         'Operating_Expense_Growth_QoQ' : 'IS_014',
         'Income_Before_Provision_Growth_QoQ' : 'IS_015',
