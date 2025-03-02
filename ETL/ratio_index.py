@@ -1042,6 +1042,9 @@ def bad_debt_ratio(total_loan, bad_debt):
 def non_performing_loan_coverage_ratio(allowance, bad_debt):
     return -allowance / bad_debt if bad_debt else None
 
+def loan_to_deposit_ratio(total_loan, total_deposit):
+    return total_loan / total_deposit if total_deposit else None
+
 def get_financial_ratio_tm(data_df):
     return __get_financial_ratio(data_df, const.BANK_FIIN_RATIO_FUNCTIONS)
     
