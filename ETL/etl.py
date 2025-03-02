@@ -220,9 +220,26 @@ def expand_data(version: str, output_path: str = '../data'):
         
         # Process TTM (Trailing Twelve Months) Financial Statements
         if expand: 
+            
+            # Process Universal Mapping File
+            df_map= process_map_universal(
+                os.path.join(data_folder,prefix_version, "map_category_code_universal.csv"),
+                os.path.join(data_folder,prefix_version, "map_category_code_universal.csv"),
+                version=prefix_version
+            )
+            
+            # Process Mapping Files for Bank, Corp, and Securities
+            for file_type in ["bank", "corp", "sec"]:
+                df_map = process_map_universal(
+                    os.path.join(data_folder,prefix_version, f"map_category_code_{file_type}.csv"),
+                    os.path.join(data_folder,prefix_version, f"map_category_code_{file_type}.csv"),
+                    version=prefix_version
+                )
+            
             # process universal report
+
             output_ttm_path = os.path.join(data_folder, f'financial_statement_{prefix_version}.parquet')
-            df_report = process_financial_statements(merged_fs_path, output_ttm_path)  
+            df_report = process_financial_statements(merged_fs_path, output_ttm_path, version=prefix_version)  
 
             # process bank, corp, securities report
             print("===== Processing TTM Financial Statements for Bank, Corp, Securities =====")
@@ -231,20 +248,9 @@ def expand_data(version: str, output_path: str = '../data'):
                 output_parquet = os.path.join(data_folder,prefix_version, f"{company_type}_financial_report.parquet")
 
                 df_report = process_financial_statements(
-                    input_parquet, output_parquet, company_type
+                    input_parquet, output_parquet, company_type, version=prefix_version
                 )
-            # Process Universal Mapping File
-            df_map= process_map_universal(
-                os.path.join(data_folder,prefix_version, "map_category_code_universal.csv"),
-                os.path.join(data_folder,prefix_version, "map_category_code_universal.csv")
-            )
             
-            # Process Mapping Files for Bank, Corp, and Securities
-            for file_type in ["bank", "corp", "sec"]:
-                df_map = process_map_universal(
-                    os.path.join(data_folder,prefix_version, f"map_category_code_{file_type}.csv"),
-                    os.path.join(data_folder,prefix_version, f"map_category_code_{file_type}.csv")
-                )
 
             assert_category_code_consistency(df_report,df_map)
 

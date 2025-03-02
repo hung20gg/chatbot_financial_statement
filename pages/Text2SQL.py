@@ -77,7 +77,6 @@ def initialize(text2sql_model = 'gemini-2.0-flash'):
         text2sql_config = TEXT2SQL_GEMINI_PRO_EXP_CONFIG
     elif 'deepseek-chat' in text2sql_model:
         text2sql_config = TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG
-    
     chatbot = initialize_text2sql(text2sql_config, prompt_config, version = st.session_state.version, message=True, rotate_key = st.session_state.rotate_api)
 
     st.session_state.history = []

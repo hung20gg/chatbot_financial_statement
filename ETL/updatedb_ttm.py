@@ -33,8 +33,40 @@ def calculate_TTM(financial_report):
         columns={'data_TTM': 'data', 'date_added_TTM': 'date_added'}
     )
 
-def process_financial_statements(input_parquet_path: str, output_parquet_path: str,company_type:str = None) -> pd.DataFrame: 
+
+def get_unnecessary_code(df_mapping_universal: pd.DataFrame, company_type: str) -> list[str]: # either file path or com
+    if 'bank' in company_type:
+        df_crop = df_mapping_universal[['bank_code', 'category_code']]
+        df_crop = df_crop.rename(columns={'bank_code': 'code'})
+    elif 'corp' in company_type:
+        df_crop = df_mapping_universal[['corp_code', 'category_code']]
+        df_crop = df_crop.rename(columns={'corp_code': 'code'})
+    else:
+        df_crop = df_mapping_universal[['sec_code', 'category_code']]
+        df_crop = df_crop.rename(columns={'sec_code': 'code'})
+    
+    # Mask drop category_code
+    mask_drop_1 = df_crop['category_code'].isin(const.IGNORE_TTM_CODES_IS)
+    mask_drop_2 = df_crop['category_code'].isin(const.IGNORE_TTM_CODES_CF)
+    df_crop = df_crop[~(mask_drop_1 | mask_drop_2)]
+    crop_code = df_crop['code'].unique()
+
+    return crop_code
+
+
+def process_financial_statements(input_parquet_path: str, output_parquet_path: str,company_type:str = None, version = 'v3') -> pd.DataFrame: 
     combined_report = None
+
+    if company_type:
+        df_mapping_universal = pd.read_csv(os.path.join(data_folder, version, "map_category_code_universal.csv"))
+
+        crop_code = get_unnecessary_code(df_mapping_universal, company_type)
+    else:
+        ignore_code = const.IGNORE_TTM_CODES_IS + const.IGNORE_TTM_CODES_CF
+        all_code = pd.read_csv(os.path.join(data_folder, version, "map_category_code_universal.csv"))['category_code'].unique()
+        crop_code = [code for code in all_code if code not in ignore_code]
+
+
     if os.path.exists(input_parquet_path):
 
         financial_report = pd.read_parquet(input_parquet_path)
@@ -44,6 +76,9 @@ def process_financial_statements(input_parquet_path: str, output_parquet_path: s
 
         is_report = financial_report[financial_report['category_code'].str.startswith('IS')]
         cf_report = financial_report[financial_report['category_code'].str.startswith('CF')]
+
+        is_report = is_report[is_report['category_code'].isin(crop_code)]
+        cf_report = cf_report[cf_report['category_code'].isin(crop_code)]
 
         is_report_TTM = calculate_TTM(is_report.copy()) 
         cf_report_TTM = calculate_TTM(cf_report.copy()) 
@@ -58,7 +93,7 @@ def process_financial_statements(input_parquet_path: str, output_parquet_path: s
     return combined_report
     
 
-def process_map_universal(input_csv_path: str, output_csv_path: str) -> pd.DataFrame: 
+def process_map_universal(input_csv_path: str, output_csv_path: str, version = 'v3') -> pd.DataFrame: 
     
     concate_df = None
     if os.path.exists(input_csv_path):
@@ -68,6 +103,8 @@ def process_map_universal(input_csv_path: str, output_csv_path: str) -> pd.DataF
         print("Existing columns:", list(map_universal.columns))
 
         filename = os.path.basename(input_csv_path)
+
+        df_map_universal = pd.read_csv(os.path.join(data_folder, version, "map_category_code_universal.csv"))
 
         if filename == "map_category_code_universal.csv":
 
@@ -84,11 +121,13 @@ def process_map_universal(input_csv_path: str, output_csv_path: str) -> pd.DataF
 
             for col in ['corp_code', 'sec_code', 'bank_code']:
                 if col in filtered_df.columns:
-                    filtered_df[col] = filtered_df[col].astype(str) + '_TTM'
+                    # if filtered_df[col]:
+                        filtered_df[col] = filtered_df[col].astype(str) + '_TTM'
 
             for col in ['Corp', 'Securities', 'Bank', 'en_caption']:
                 if col in filtered_df.columns:
-                    filtered_df[col] = filtered_df[col].astype(str) + ' (Trailing Twelve Months)'
+                    # if filtered_df[col]:
+                        filtered_df[col] = filtered_df[col].astype(str) + ' (Trailing Twelve Months)'
 
             # Handle NaN cases (if some columns had missing values)
             filtered_df.replace({'nan (Trailing Twelve Months)': None}, inplace=True)
@@ -99,10 +138,16 @@ def process_map_universal(input_csv_path: str, output_csv_path: str) -> pd.DataF
   
             print(f"Universal mapping saved to {output_csv_path}")
 
+        
+        
         elif filename in ["map_category_code_bank.csv", "map_category_code_corp.csv", "map_category_code_sec.csv"]:
             print(f"Processing {filename} Mapping File")  
 
+            crop_code = get_unnecessary_code(df_map_universal, filename)
+
             filtered_df = map_universal[map_universal['category_code'].str.startswith(('IS_', 'CF_'), na=False)].copy()
+
+            filtered_df = filtered_df[filtered_df['category_code'].isin(crop_code)]
 
             filtered_df['category_code'] = filtered_df['category_code'] + '_TTM'
 
