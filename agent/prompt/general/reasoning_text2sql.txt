@@ -71,4 +71,4 @@ AND quarter !=0
 ```
 
 - If the question requires data within annual data, you can use `year` column directly
-- If the query seems complex, you can break it down to smaller tasks and solve them indivually
+- If the query seems complex (asking for multiple account/ratios), you can break it down to smaller tasks and solve them individually

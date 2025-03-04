@@ -25,12 +25,12 @@ Return in JSON format, followed by this schema.
 
 Note:
 - Return an empty list if no related data is found.
-- If the question include "4 nearest quarter", "trailing twelve month (TTM)","YoY" or "QoQ", include it into `financial_ratio` and/or `financial_statement_account`
+- If the question include tag "4 nearest quarter", "trailing twelve month (TTM)","YoY" or "QoQ", include the name and tag into `financial_ratio` and/or `financial_statement_account`
 - If "YoY" and "QoQ" ratio are mentioned, include the original account in `financial_statement_account` and the ratio in `financial_ratio`.
 
 <example>
 ### Question: 
-Net Income YoY of HPG in 2023
+Net Income YoY and ROE 4 nearest quarter of HPG in 2023
 
 ### Response:
 ```json
@@ -38,7 +38,7 @@ Net Income YoY of HPG in 2023
         "industry": [],
         "company_name": ["HPG"],
         "financial_statement_account": ["Net Income"],
-        "financial_ratio": ["Net Income YoY"]
+        "financial_ratio": ["Net Income YoY", "ROE 4 nearest quarter"]
     }}
 ```
 

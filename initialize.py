@@ -39,7 +39,7 @@ def initialize_text2sql(text2sql_config, prompt_config, version = 'v3', message 
     embedding_server = os.getenv('EMBEDDING_SERVER_URL')
     
     if version == 'v3.2':
-        text2sql_config.account_top_k = int(text2sql_config.account_top_k * 1.5)
+        text2sql_config.account_top_k = int(text2sql_config.account_top_k * 1.25)
 
     # Setup db
     if check_embedding_server(embedding_server):

@@ -1694,3 +1694,34 @@ WHERE
     AND date_added BETWEEN '2022-01-01' AND '2023-09-30'
     AND quarter != 0
 LIMIT 10;
+
+// -- 78. Total Accrued expenses of HPG in 2019
+
+-- 79. Bad debt coverage ratio of banks in 2019
+-- ### industry_nplcr_banks_2019
+SELECT 
+    industry,
+    year,
+    quarter,
+    ratio_code,
+    data_mean
+FROM industry_financial_ratio
+WHERE ratio_code = 'NPLCR'  -- Non-Performing Loan Coverage Ratio
+  AND industry = 'Banking'
+  AND year = 2019
+  AND quarter = 0
+LIMIT 100;
+
+-- 80. Total Inventory and Provision for Inventory of HPG in 2022
+SELECT 
+    stock_code,
+    year,
+    quarter,
+    category_code,
+    data
+FROM financial_statement
+WHERE 
+    stock_code = 
+    AND category_code IN ('BS_161', 'BS_162') -- Current Inventories, Provision for decline in value of inventories
+    AND year = 2022
+LIMIT 100;

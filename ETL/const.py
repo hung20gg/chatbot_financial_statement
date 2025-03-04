@@ -377,15 +377,18 @@ YoY_RATIO_FUNCTIONS = {
     },
     'bank':{
         'Net_Income_Growth_YoY' : 'IS_021',
+        'Gross_Profit_Growth_YoY' : 'IS_003',
         'Customer_Deposits_Growth_YoY' : 'BS_330',
         'Operating_Expense_Growth_YoY' : 'IS_014',
         'Income_Before_Provision_Growth_YoY' : 'IS_015',
         'Interest_Income_Growth_YoY' : 'IS_003',
+        'Pre_Tax_Profit_Growth_YoY' : 'IS_017',
         'Non_Interest_Income_Growth_YoY' : ['IS_006','IS_007','IS_008','IS_009','IS_012','IS_013'],
         'Total_Operating_Income_Growth' : 'IS_030',
         'Customer_Loans_Growth_YoY' : 'BS_160',
         'Total_Asset_Growth_YoY' : 'BS_300',
         'Equity_Growth_YoY': 'BS_500',
+        'Liability_Growth_YoY': 'BS_400',
         'outstanding_credit_balance_YoY' : 'BS_200',
         }
 
@@ -426,15 +429,18 @@ QoQ_RATIO_FUNCTIONS = {
     },
     'bank': {
         'Net_Income_Growth_QoQ' : 'IS_021',
+        'Gross_Profit_Growth_QoQ' : 'IS_003',
         'Customer_Deposits_Growth_QoQ' : 'BS_330',
         'Operating_Expense_Growth_QoQ' : 'IS_014',
         'Income_Before_Provision_Growth_QoQ' : 'IS_015',
         'Interest_Income_Growth_QoQ' : 'IS_003',
+        'Pre_Tax_Profit_Growth_QoQ' : 'IS_017',
         'Non_Interest_Income_Growth_QoQ' : ['IS_006','IS_007','IS_008','IS_009','IS_012','IS_013'],
         'Total_Operating_Income_Growth_QoQ' : 'IS_030',
         'Customer_Loans_Growth_QoQ' : 'BS_160',
         'Total_Asset_Growth_QoQ' : 'BS_300',
         'Equity_Growth_QoQ': 'BS_500',
+        'Liability_Growth_QoQ': 'BS_400',
         'Pre_Tax_Profit_Growth_QoQ':'IS_017'
 
 }

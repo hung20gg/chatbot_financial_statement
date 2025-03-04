@@ -1421,7 +1421,9 @@ if __name__ == '__main__':
 
     for r in ['ROATTM', 'GPGQoQ']:
         print(r)
-        print(dfs[(dfs['ratio_code'] == r)&(dfs['quarter'] == 2)&(dfs['year'] == 2022)].head(5))
+
+        bank_code = ['BID', 'CTG', 'VCB', 'MBB', 'ACB', 'TCB', 'VPB', 'HDB', 'TPB', 'EIB']
+        print(dfs[(dfs['ratio_code'] == r)&(dfs['quarter'] == 2)&(dfs['year'] == 2022)&(dfs['stock_code'].isin(bank_code))].head(10))
         print('========================================')
 
     print(f"Time: {end - start}")

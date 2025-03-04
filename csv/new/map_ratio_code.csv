@@ -96,10 +96,10 @@ Non-Performing Loan Coverage Ratio,NPLCR,non_performing_loan_coverage_ratio
 Outstanding Credit Balance YoY,OCBYoY,outstanding_credit_balance_YoY
 Cost of Fund,COF,cost_of_fund
 Cost to Income Ratio,CIR,cost_to_income_ratio
-Return On Average Assets TTM,ROAATTM,return_on_average_assets_ttm
-Return On Average Equity TTM,ROAETTM,return_on_average_equity_ttm
-Return On Assets TTM,ROATTM,return_on_assets_ttm
-Return On Equity TTM,ROETTM,return_on_equity_ttm
+Return On Average Assets (Trailing Twelve Months),ROAATTM,return_on_average_assets_ttm
+Return On Average Equity (Trailing Twelve Months),ROAETTM,return_on_average_equity_ttm
+Return On Assets (Trailing Twelve Months),ROATTM,return_on_assets_ttm
+Return On Equity (Trailing Twelve Months),ROETTM,return_on_equity_ttm
 Net Revenue Growth QoQ,NRGQoQ,Net_Revenue_Growth_QoQ
 Gross Profit Growth QoQ,GPGQoQ,Gross_Profit_Growth_QoQ
 Net Income Growth QoQ,NIGQoQ,Net_Income_Growth_QoQ
