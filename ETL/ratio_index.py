@@ -365,7 +365,7 @@ def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, constant=
         
         inputs.append([
                     'get_yoy_ratio',
-                    df_symbol[df_symbol['quarter'] == 0],
+                    df_symbol,
                     grouped_ratio_1.get_group(symbol) if is_ratio_df else None,
                     grouped_ratio_6.get_group(symbol) if is_ratio_df else None,
                     constant
@@ -487,8 +487,7 @@ def return_on_investment(net_income, total_investment):
     return net_income / total_investment if total_investment else None
 
 def ROIC(NOPAT, invested_capital):
-    if invested_capital is None:
-        return NOPAT / invested_capital if invested_capital else None
+    return NOPAT / invested_capital if invested_capital else None
 
 def return_on_long_term_capital(EBIT, average_long_term_capital):
     return EBIT / average_long_term_capital if average_long_term_capital else None
@@ -1142,16 +1141,41 @@ def get_constant_values(type_):
 def run_function(func, *args):
     return func(*args)
 
+
+def remove_unwanted_ratios(constant, map_df):
+
+    new_constant = dict()
+    for key, value in constant.items():
+        new_value = dict()
+        for ratio, inputs in value.items():
+            if ratio in map_df['function_name'].values:
+                new_value[ratio] = inputs
+        
+        # Only add the key if there are ratios to calculate
+        if new_value:
+            new_constant[key] = new_value
+    return new_constant
+
+
 def get_financial_ratios(data_df, type_ = 'corp', including_explaination = True):
+
+
+    map_df = pd.read_csv(os.path.join(current_path ,'../data/map_ratio_code.csv'))
+    map_df['function_name'] = map_df['function_name'].str.strip()
     
     constant = get_constant_values(type_)
+    constant = remove_unwanted_ratios(constant, map_df)
+
+    dfs = []
 
     time_start = time.time()
     df_financial_structure = get_financial_structure_ratios(data_df, constant['financial_structure'])
+    dfs.append(df_financial_structure)
     print("FS", df_financial_structure.columns, time.time() - time_start)
     
     time_start = time.time()
     df_liquidity = get_liquidity_ratios(data_df, constant['liquidity'])
+    dfs.append(df_liquidity)
     print("LQ", df_liquidity.columns, time.time() - time_start)
 
     df_financial_risk = get_financial_risk_ratio(data_df, constant['financial_risk'])
@@ -1159,31 +1183,61 @@ def get_financial_ratios(data_df, type_ = 'corp', including_explaination = True)
     df_profitability = get_profitability_ratios(data_df, constant['profitability'],type_)
     df_cashflow = get_cashflow_ratios(data_df, constant['cashflow'], type_)
 
+    dfs.extend([df_financial_risk, df_income, df_profitability, df_cashflow])
+
     time_start = time.time()
     df_avg = get_avg_ratios(data_df, constant['avg'], type_)
     print("AVG", df_avg.columns, time.time() - time_start)
 
-    time_start = time.time()
-    df_date = get_date_related_ratios(data_df, constant['date'])
-    print("Date", df_date.columns, time.time() - time_start)
-    
-    time_start = time.time()
-    df_pe = get_pe_ratios(data_df, constant['pe'])
-    print("PE", df_pe.columns, time.time() - time_start)
-    
-    time_start = time.time()
-    df_yoy = get_yoy_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow, constant=constant['yoy'])
-    print("YoY", df_yoy.columns, time.time() - time_start)
-    
-    time_start = time.time()
-    df_avg_ttm = get_avg_ttm_ratios(data_df, constant['avg_ttm'])
-    print("AVG TTM", df_avg_ttm.columns, time.time() - time_start)
+    dfs.append(df_avg)
 
-    time_start = time.time()
-    df_qoq = get_qoq_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow, constant=constant['qoq'])
-    print("QoQ", df_qoq.columns, time.time() - time_start)
+    try:
+       
+        if 'data' in constant['date']:
+            time_start = time.time()
+            df_date = get_date_related_ratios(data_df, constant['date'])
+            print("Date", df_date.columns, time.time() - time_start)
+            dfs.append(df_date)
+    except Exception as e:
+        print(f"Error calculating date-related ratios: {e}")
+    
+    try:
+        if 'pe' in constant:
+            time_start = time.time()
+            df_pe = get_pe_ratios(data_df, constant['pe'])
+            print("PE", df_pe.columns, time.time() - time_start)
+            dfs.append(df_pe)
+    except Exception as e:
+        print(f"Error calculating Price ratios: {e}")
+    
+    try:
+        if 'yoy' in constant:
+            time_start = time.time()
+            df_yoy = get_yoy_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow, constant=constant['yoy'])
+            print("YoY", df_yoy.columns, time.time() - time_start)
+            dfs.append(df_yoy)
+    except Exception as e:
+        print(f"Error calculating YoY ratios: {e}")
+    
+    try:
+        if 'avg_ttm' in constant:
+            time_start = time.time()
+            df_avg_ttm = get_avg_ttm_ratios(data_df, constant['avg_ttm'])
+            print("AVG TTM", df_avg_ttm.columns, time.time() - time_start)
+            dfs.append(df_avg_ttm)
+    except Exception as e:
+        print(f"Error calculating TTM ratios: {e}")
 
-    df = pd.concat([df_financial_structure, df_liquidity, df_financial_risk, df_income, df_profitability, df_cashflow, df_avg, df_pe, df_yoy, df_qoq, df_date,df_avg_ttm], ignore_index=True)
+    try:
+        if 'qoq' in constant:
+            time_start = time.time()
+            df_qoq = get_qoq_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow, constant=constant['qoq'])
+            print("QoQ", df_qoq.columns, time.time() - time_start)
+            dfs.append(df_qoq)
+    except Exception as e:
+        print(f"Error calculating QoQ ratios: {e}")
+
+    df = pd.concat(dfs, ignore_index=True)
     
     if type_ == 'bank' and including_explaination:
         df_tm = get_financial_ratio_tm(data_df)
@@ -1192,8 +1246,6 @@ def get_financial_ratios(data_df, type_ = 'corp', including_explaination = True)
     # Map ratio_code to ratio_name
     df.rename(columns={'ratio_code': 'function_name'}, inplace=True)
 
-    map_df = pd.read_csv(os.path.join(current_path ,'../data/map_ratio_code.csv'))
-    map_df['function_name'] = map_df['function_name'].str.strip()
     
     
     df = pd.merge(df, map_df, on='function_name', how='left')

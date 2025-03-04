@@ -59,3 +59,4 @@ AND quarter !=0
 -- - Q4: YYYY-12-30
 -- - Q0: YYYY-12-30 (Annual data)
 ```
+- If the query seems complex, you can break it down to smaller tasks and solve them indivually

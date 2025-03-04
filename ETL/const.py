@@ -6,7 +6,7 @@ FINANCIAL_STRUCTURE_RATIO_FUNCTIONS = {
     'fixed_asset_self_financing_ratio': [['BS_400', 'BS_330'], ['BS_220','BS_240']],  # permanent_capital (equity + long_term_liabilities), fixed_assets
     'general_solvency_ratio': ['BS_270', 'BS_300'],  #  total_assets, total_liabilities
     'return_on_investment': ['IS_060', 'BS_270'],  # net_income, total_investment (using total assets as example)
-    'ROIC': ['IS_060', ['BS_320', 'BS_338', 'BS_400']],  # NOPAT, invested_capital
+    'ROIC': ['IS_061', ['BS_320', 'BS_338', 'BS_400']],  # NOPAT, invested_capital
     # 'return_on_long_term_capital': ['IS_050', 'BS_330'],  # EBIT, long_term_liabilities
     'basic_earning_power': [['IS_050', 'IS_023'], 'BS_270'],  # EBIT, total_assets
     'debt_to_assets_ratio': ['BS_300', 'BS_270'],  # total_liabilities, total_assets
@@ -385,6 +385,7 @@ YoY_RATIO_FUNCTIONS = {
         'Non_Interest_Income_Growth_YoY' : ['IS_006','IS_007','IS_008','IS_009','IS_012','IS_013'],
         'Total_Operating_Income_Growth' : 'IS_030',
         'Customer_Loans_Growth_YoY' : 'BS_160',
+        'Total_Asset_Growth_YoY' : 'BS_300',
         'Equity_Growth_YoY': 'BS_500',
         'outstanding_credit_balance_YoY' : 'BS_200',
         'Pre_Tax_Profit_Growth_YoY':'IS_017'

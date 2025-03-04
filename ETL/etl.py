@@ -214,7 +214,7 @@ def expand_data(version: str, output_path: str = '../data'):
     merged_fs_path = merge_financial_statement(prefix_version, output_path)
 
 
-    if 'v3' in version:
+    if prefix_version == 'v3':
         merge_financial_explaination(output_path)
         calculate_industry_financial_statement_explaination(output_path)
         
