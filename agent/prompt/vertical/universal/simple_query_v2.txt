@@ -1606,7 +1606,7 @@ WHERE
     stock_code = 'VIC'
     AND year = 2024
     AND quarter IN (1, 2, 3)
-    AND category_code = 'IS_020'  -- Net Revenue from sales and services rendered
+    AND category_code = 'IS_001'  -- Gross Revenue
 GROUP BY
     stock_code,
     year
@@ -1677,4 +1677,20 @@ WHERE
     AND year = 2024
     AND quarter = 3
     AND ratio_code = 'GPGQoQ'
+LIMIT 10;
+
+-- 77. Gross Revenue of HPG from Q1 2022 to Q3 2023
+SELECT 
+    stock_code,
+    year,
+    quarter,
+    category_code,
+    data
+FROM 
+    financial_statement
+WHERE 
+    stock_code = 'NLG' -- Gross Revenue
+    AND category_code = 'IS_001'
+    AND date_added BETWEEN '2022-01-01' AND '2023-09-30'
+    AND quarter != 0
 LIMIT 10;

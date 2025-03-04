@@ -249,7 +249,7 @@ class Text2SQL(BaseAgent):
 
     
     @staticmethod 
-    def __flatten_list(list_of_str, prefix = "error"):
+    def _flatten_list(list_of_str, prefix = "error"):
         if isinstance(list_of_str, str):
             list_of_str = [list_of_str]
 
@@ -261,7 +261,7 @@ class Text2SQL(BaseAgent):
     
     def __debug_sql(self, history, error_messages: List[str], prefix = "Debug"):
         
-        error_message = self.__flatten_list(error_messages, prefix="Error")
+        error_message = self._flatten_list(error_messages, prefix="Error")
         
         new_query = f"You have some error in the previous SQL query:\n\n <log>\n\n{error_message}\n\n</log>\n\nPlease analyze to fix the error and try again."
         history.append(
@@ -1216,7 +1216,7 @@ class Text2SQLMessage(Text2SQL):
         # First time solving
         response = ""
         if len(error_messages) > 0:
-            response += "### Initial Error:\n"+self.__flatten_list(error_messages, prefix="Error") +"\n\n"
+            response += "### Initial Error:\n"+self._flatten_list(error_messages, prefix="Error") +"\n\n"
         if len(execution_tables) > 0:
             response += "### Initial Execution Tables:\n"+utils.table_to_markdown(execution_tables, adjust=adjust_table)
 
@@ -1255,7 +1255,7 @@ class Text2SQLMessage(Text2SQL):
 
         error_message, execution_table = utils.TIR_reasoning(self.history[-1]['content'], self.db, verbose=self.config.verbose)
         if len(error_message) > 0:
-            yield "### Final Error:\n"+self.__flatten_list(error_message, prefix="Error") +"\n\n"
+            yield "### Final Error:\n"+self._flatten_list(error_message, prefix="Error") +"\n\n"
         if len(execution_table) > 0:
             yield "### Final Execution Tables:\n"+utils.table_to_markdown(execution_table, adjust=adjust_table)
         

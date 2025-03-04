@@ -49,3 +49,4 @@ AND quarter !=0
 -- - Q3: YYYY-09-30
 -- - Q4 and Q0: YYYY-12-30
 ```
+- If the query seem complex, you can break it down to smaller tasks
