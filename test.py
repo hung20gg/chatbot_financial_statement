@@ -56,7 +56,7 @@ def test(version = 'v3'):
 
     # try:
     if True:
-        text2sql = initialize_text2sql(text2sql_config, prompt_config, version=version)
+        text2sql = initialize_text2sql(text2sql_config, prompt_config, version=version,message = True)
         
         chatbot = Chatbot(config = chat_config, text2sql = text2sql)
         logging.info('Finish setup chatbot')
@@ -68,24 +68,26 @@ def test(version = 'v3'):
         
         logging.info('Test text2sql')
         # prompt = "For the year 2023, what was the Return on Equity of banking industry?"
-        prompt = "Net Income QoQ of HPG in Q3 2024"
-        output = text2sql.solve(prompt, adjust_table='text', mix_account=False, enhance='correction')
+        prompt = "Top 5 banks with the highest pre-tax profit growth in Q3 2023"
+        for text in text2sql.stream(prompt, adjust_table='text', mix_account=False, enhance='correction'):
+            print(text)
+    #     output = text2sql.solve(prompt, adjust_table='text', mix_account=False, enhance='correction')
 
-        print(output.extraction_msg)
+    #     print(output.extraction_msg)
         
-        print('### ========= Reasoning ========= ###')
-        for msg in output.history:
-            print('\n# ===== Role: %s ===== #' % msg['role'])
-            print('# ===== Content ===== #\n')
-            print(msg['content'])
+    #     print('### ========= Reasoning ========= ###')
+    #     for msg in output.history:
+    #         print('\n# ===== Role: %s ===== #' % msg['role'])
+    #         print('# ===== Content ===== #\n')
+    #         print(msg['content'])
 
-        print('===== Table =====')
-        for t in output.execution_tables:
-            print(t.table)
+    #     print('===== Table =====')
+    #     for t in output.execution_tables:
+    #         print(t.table)
         
-    # except Exception as e:
-    #     logging.error("Failed to setup chatbot")
-    #     logging.error(e)
+    # # except Exception as e:
+    # #     logging.error("Failed to setup chatbot")
+    # #     logging.error(e)
 
 
 if __name__ == "__main__":

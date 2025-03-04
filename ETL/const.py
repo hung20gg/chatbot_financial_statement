@@ -387,6 +387,7 @@ YoY_RATIO_FUNCTIONS = {
         'Customer_Loans_Growth_YoY' : 'BS_160',
         'Equity_Growth_YoY': 'BS_500',
         'outstanding_credit_balance_YoY' : 'BS_200',
+        'Pre_Tax_Profit_Growth_YoY':'IS_017'
         }
 
 }
