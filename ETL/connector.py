@@ -574,29 +574,29 @@ RDB_SETUP_CONFIG = {
 }
 
 FIIN_RDB_SETUP_CONFIG = {
-    # 'company_info' : ['../data/df_company_info.csv', ['stock_code'], {}, True],
-    # 'sub_and_shareholder': ['../data/df_sub_and_shareholders.csv', None, {'stock_code': 'company_info(stock_code)'}],
-    # 'map_category_code_bank': ['../data/v3/map_category_code_bank.csv', ['category_code']],
-    # 'map_category_code_non_bank': ['../data/v3/map_category_code_corp.csv', ['category_code']],
-    # 'map_category_code_securities': ['../data/v3/map_category_code_sec.csv', ['category_code']],
-    # 'map_category_code_ratio': ['../data/map_ratio_code.csv', ['ratio_code']],
-    # 'map_category_code_universal': ['../data/v3/map_category_code_universal.csv', ['category_code']],
+    'company_info' : ['../data/df_company_info.csv', ['stock_code'], {}, True],
+    'sub_and_shareholder': ['../data/df_sub_and_shareholders.csv', None, {'stock_code': 'company_info(stock_code)'}],
+    'map_category_code_bank': ['../data/v3/map_category_code_bank.csv', ['category_code']],
+    'map_category_code_non_bank': ['../data/v3/map_category_code_corp.csv', ['category_code']],
+    'map_category_code_securities': ['../data/v3/map_category_code_sec.csv', ['category_code']],
+    'map_category_code_ratio': ['../data/map_ratio_code.csv', ['ratio_code']],
+    'map_category_code_universal': ['../data/v3/map_category_code_universal.csv', ['category_code']],
     
     
-    # # 'bank_financial_report' : ['../data/v3/bank_financial_report.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    # # 'non_bank_financial_report' : ['../data/v3/corp_financial_report.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    # # 'securities_financial_report' : ['../data/v3/securities_financial_report.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    # 'financial_statement': ['../data/financial_statement_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'bank_financial_report' : ['../data/v3/bank_financial_report.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'non_bank_financial_report' : ['../data/v3/corp_financial_report.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'securities_financial_report' : ['../data/v3/securities_financial_report.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'financial_statement': ['../data/financial_statement_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     
 
-    # 'map_category_code_explaination': ['../data/v3/map_category_code_explaination.csv', ['category_code']],
-    # 'financial_statement_explaination': ['../data/financial_statement_explaination_v3.parquet', None, {'category_code': 'map_category_code_explaination(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    'map_category_code_explaination': ['../data/v3/map_category_code_explaination.csv', ['category_code']],
+    'financial_statement_explaination': ['../data/financial_statement_explaination_v3.parquet', None, {'category_code': 'map_category_code_explaination(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     
     
     'financial_ratio' : ['../data/financial_ratio_v3.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    # 'industry_financial_statement': ['../data/industry_report_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)'}, False, ['date_added']],
+    'industry_financial_statement': ['../data/industry_report_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)'}, False, ['date_added']],
     'industry_financial_ratio': ['../data/industry_ratio_v3.parquet', None, {'ratio_code': 'map_category_code_ratio(ratio_code)'}, False, ['date_added']],    
-    # 'industry_financial_statement_explaination' : ['../data/industry_report_explaination_v3.parquet', None, {'category_code': 'map_category_code_explaination(category_code)'}, False, ['date_added']],
+    'industry_financial_statement_explaination' : ['../data/industry_report_explaination_v3.parquet', None, {'category_code': 'map_category_code_explaination(category_code)'}, False, ['date_added']],
 
     # 'stock_price' : ['../csv/stock_price_daily.parquet']
 }

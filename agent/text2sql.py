@@ -84,6 +84,7 @@ class Text2SQL(BaseAgent):
     max_debug_round: int = 3 # The maximum number of debugging rounds
     max_solution_cache: int = 10 # The maximum number of solutions to cache
     current_solution_cache: int = 0 # The current number of solutions cached
+    temperature: float = 0.4
 
     def __init__(self, config: Text2SQLConfig, prompt_config: PromptConfig, db, max_steps: int = 2, **kwargs):
         super().__init__(config=config, db = db, max_steps = max_steps, prompt_config = prompt_config)
@@ -139,7 +140,7 @@ class Text2SQL(BaseAgent):
         ]
     
         logging.info("Simplify branch reasoning response")
-        response = self.llm(messages)
+        response = self.llm(messages, temperature=self.temperature)
         if self.config.verbose:
             print("Branch reasoning response: ")
             print(response)
@@ -166,7 +167,7 @@ class Text2SQL(BaseAgent):
         
         
         logging.info("Get stock code based on company name response")
-        response = self.llm(messages)
+        response = self.llm(messages, temperature=self.temperature)
         messages.append(
             {
                 "role": "assistant",
@@ -271,7 +272,7 @@ class Text2SQL(BaseAgent):
             }
         )
         
-        response = self.sql_llm(history)
+        response = self.sql_llm(history, temperature=self.temperature)
 
         history.append({
                 "role": "assistant",
@@ -503,7 +504,7 @@ You are an expert in financial statement and database management. You will be as
         if inject_reasoning is not None: # Inject reasoning
             response = inject_reasoning
         else:
-            response = self.sql_llm(self.history)
+            response = self.sql_llm(self.history, temperature=self.temperature)
 
         if self.config.verbose:
             print(response)
@@ -625,7 +626,7 @@ Return in the following format (### SQL Query is optional):
             "content": correction_prompt
         })
 
-        response = self.sql_llm(self.history)
+        response = self.sql_llm(self.history, temperature=self.temperature)
 
         if self.config.verbose:
             print(response)
@@ -694,7 +695,7 @@ Only return new, detailed task. Do not return the SQL. Return in the following f
             "content": reflection_prompt
         })
 
-        reflection_response = self.sql_llm(self.history)
+        reflection_response = self.sql_llm(self.history, temperature=self.temperature)
 
         if self.config.verbose:
             print(reflection_response)
@@ -836,7 +837,7 @@ Only return new, detailed task. Do not return the SQL. Return in the following f
                     "content": f"The previous result of is \n\n<result>\n\n{previous_result}\n\n<result>\n\n <instruction>\n\nThink step-by-step and do the {step}\n\n</instruction>\n\nHere are the samples SQL you might need\n\n{self.db.find_sql_query(step, top_k=self.config.sql_example_top_k)}\n\n"
                 })
             
-            response = self.sql_llm(self.history)
+            response = self.sql_llm(self.history, temperature=self.temperature)
             if self.config.verbose:
                 print(response)
             

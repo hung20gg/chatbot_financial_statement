@@ -50,3 +50,4 @@ AND quarter !=0
 -- - Q4 and Q0: YYYY-12-30
 ```
 - If the query seem complex, you can break it down to smaller tasks
+- If not specified, you should set the LIMIT to 50

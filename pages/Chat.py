@@ -76,8 +76,6 @@ def initialize(user_name, chat_model = 'gemini-2.0-flash', text2sql_model = 'gem
 
     if 'qwen2.5-3b-sft' in text2sql_model:
         text2sql_config = TEXT2SQL_QWEN25_CODER_3B_SFT_CONFIG
-    elif 'qwen2.5-1.5b-kto' in text2sql_model:
-        text2sql_config = TEXT2SQL_QWEN25_CODER_1B_KTO_CONFIG
     elif 'gpt-4o-mini' in text2sql_model:
         text2sql_config = TEXT2SQL_FAST_OPENAI_CONFIG
     elif 'gpt-4o' in text2sql_model:
@@ -103,7 +101,7 @@ def chat(user_name):
     user_name = str(user_name)
 
     if "chat_model" not in st.session_state:
-        st.session_state.chat_model = 'gemini-2.0-flash'
+        st.session_state.chat_model = 'gpt-4o-mini'
 
     if "text2sql_model" not in st.session_state:
         st.session_state.text2sql_model = 'gemini-2.0-flash'
@@ -116,6 +114,14 @@ def chat(user_name):
         ['gemini-2.0-flash', 'gpt-4o-mini'],
         index=['gemini-2.0-flash', 'gpt-4o-mini'].index(st.session_state.chat_model)
     )
+
+    routing_version = st.selectbox(
+        "Routing Version:",
+        ['v1', 'v2'],
+        index=['v1', 'v2'].index(st.session_state.chat_version)
+    )
+
+    st.session_state.chat_version = routing_version
     
     text2sql_model = st.selectbox(
         "Text2SQL Model:",

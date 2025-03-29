@@ -40,11 +40,16 @@ def _generate_mcq(llm, data, mcq_style, file_path='tmp.jsonl'):
     You are an auditor, and you are tasked to giving multiple choice question to test the knowledge of your colleague. 
     Each question should have 4 choices, and only one correct answer.
     You will be given a general task in <task> tag, and reference tables in <table> tag.
-    Your task is to generate multiple choice question based on the task and the table.
+    Your task is to generate multiple choice question based on the task.
 
-    Your question should be precise and clear, and make sure the question can only be answered by the information in the table.
-    You should also provide the correct answer and explanation for the correct answer.
-    If you think the provided table is not enough to generate a question, refuse the task and ask for more information.
+    Note:
+    - There should be only one correct answer.
+    - Your question should be the evaluation of the "SQL" table corresponding to the task. These question will be used as benchmark for the quality of the table.
+    - Do not create question focus on the "Mapping" table.
+    - Do not create question that the element (normally columns) in the table was not the main focus of the question.
+    - Your question should be precise and clear, and make sure the question can only be answered by the information in the table.
+    - You have to provide the correct answer and explanation for the correct answer.
+    - If you think the provided table is not enough to generate a question, refuse the task.
     """
 
     messages = [
@@ -139,12 +144,18 @@ def _generate_mcq_v2(llm, data, mcq_style, file_path='tmp.jsonl'):
     system_prompt = f"""
     You are an auditor, and you are tasked to giving multiple choice questions to test the knowledge of your colleague. 
     Each question should have 4 choices, and only one correct answer.
-    You will be given a general task in <task> tag, and reference tables in <table> tag.
+    You will be given a general task in <task> tag, and reference tables in <table> tag. Sometime, the reference tables might seem lack of information, however, that is enough to generate the question.
     Your task is to generate multiple choice question based on the task and the table.
 
-    Your question should be precise and clear, and make sure the question can only be answered by the information in the table.
-    You should also provide the correct answer and explanation for the correct answer.
-    If you think the provided table is not enough to generate a question, refuse the task and ask for more information.
+    Note:
+    - There should be only one correct
+    - The question should be straightforward and can be answered without any additional calculation step.
+    - Your question should be the evaluation of the "SQL" table corresponding to the task. These question will be used as benchmark for the quality of the table.
+    - Do not create question focus on the "Mapping" table.
+    - Do not create question that the element (normally columns) in the table was not the main focus of the question.
+    - Your question should be precise and clear, and make sure the question can only be answered by the information in the table.
+    - You have to provide the correct answer and explanation for the correct answer.
+    - If you think the provided table is not enough to generate a question, refuse the task.
     """
 
     messages = [
@@ -165,9 +176,9 @@ def _generate_mcq_v2(llm, data, mcq_style, file_path='tmp.jsonl'):
     {data['table']}
     </table>
 
-    Your task is to generate 1-5 MCQs based on the task and the table. Choose the number of questions accordingly.
+    Your task is to generate 1-5 MCQs based on the task and the table. Choose the number of questions accordingly. If the data is long, prefer to generate more questions.
     
-    After generating the question, think step by step to answer them.
+    After generating the question, answer them.
     """
         },
     ]
@@ -236,7 +247,7 @@ def _generate_mcq_v2(llm, data, mcq_style, file_path='tmp.jsonl'):
 
 
 def generate_mcq(llm, input_path, max_workers=8, multi_thread=False, version="v1"):
-    llm = get_llm_wrapper(llm)
+    llm = get_llm_wrapper(llm, rotate_key=True)
     print("Generating MCQ...")
     
     
@@ -250,7 +261,7 @@ def generate_mcq(llm, input_path, max_workers=8, multi_thread=False, version="v1
             for line in f:
                 data = json.loads(line)
                 done_ids.add(data['ids'])
-
+    print("Number of done questions:", len(done_ids))
     data = []
     with open(input_path, 'r') as f:
         for line in f:
@@ -259,7 +270,8 @@ def generate_mcq(llm, input_path, max_workers=8, multi_thread=False, version="v1
                 if line['ids'] in done_ids:
                     continue
                 data.append(line)
-            except:
+            except Exception as e:
+                print(e)
                 continue
 
     print("Number of questions:", len(data))
@@ -289,10 +301,10 @@ def generate_mcq(llm, input_path, max_workers=8, multi_thread=False, version="v1
 
 
 def generate():
-    llm = 'gemini-2.0-flash-lite-preview-02-05'
-    input_path = '../data/sql_v0.jsonl'
+    llm = 'gemini-2.0-flash-thinking-exp-01-21'
+    input_path = '../data/redo_sql_v3.jsonl'
 
-    max_workers = 5
+    max_workers = 2
     versoion = "v2"
 
     generate_mcq(llm, input_path, max_workers=max_workers, multi_thread=True, version=versoion)

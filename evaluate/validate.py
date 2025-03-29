@@ -331,7 +331,7 @@ def merge_mcq_and_sql_v2(mcq, sql):
             mcq_dict[ids] = []
 
         # Append the MCQ to the list
-        mcq_dict[ques['ids']].append(ques)
+        mcq_dict[ids].append(ques)
     
     print("Number of SQL questions: ", len(sql))
 
@@ -349,44 +349,49 @@ def merge_mcq_and_sql_v2(mcq, sql):
         if ids in mcq_dict.keys():
             for mcq in mcq_dict[ids]:
                 question = create_mcq_text(mcq)
-                question['ids'] = ids
-                question['table'] = sql_question['table']
+                question['ids'] = mcq['ids']
+                question['question_ids'] = ids
 
+                question['sql_question'] = sql_question['question']
+                question['table'] = sql_question['table']
                 questions.append(question)
+                print(f"Question: {question['mcq_question']}")
 
     return questions
 
 
 import re
 
-def single_scoring_mcq(llm, response, output_path):
-    llm = get_llm_wrapper(model_name=llm)
+def single_scoring_mcq(llm, response, output_path, rotate_key=False):
+    llm = get_llm_wrapper(model_name=llm, rotate_key=rotate_key)
 
     mcq = response['mcq_question']
     choice = response['choice']
     correct_choice = response['answer']
     table = response['table']
+    sql_question = response['sql_question']
 
     system_prompt = """
-You will be given a multiple-choice question with 5 choices, and a reference table in the following format:
+You will be given a multiple-choice question with 5 choices, a SQL-related task and reference tables from that SQL task, in the following tag:
 
 <question>
-{question}
-</question>
 
 <table>
-{table}
-</table>
 
 <choices>
-{choices}
-</choices>
 
+You will be asked to choose the correct answer for the MCQs based on the SQL task and the reference tables provided.
 Notice that there is only one correct answer. If you cannot derive the answer, return choice E.
 You will loss 1 point for each wrong answer and gain 1 point for correct answer, however, you will not be penalized if you choose choice E.
 So, you can choose to skip the question if you are not sure about the answer.
 
-Analyze carefully and return your choice (A, B, C, D, E) in {$choice} format. For example: {A}.
+Analyze carefully and return your choice (A, B, C, D, E) in JSON format. For example:
+    
+    ```json
+    {
+        "choice": "A"
+    }
+    ```
 """
 
     prompt = f"""
@@ -394,14 +399,23 @@ Analyze carefully and return your choice (A, B, C, D, E) in {$choice} format. Fo
 {mcq}
 </question>
 
-<table>
-{table}
-</table>
-
 <choices>
 {choice}
 </choices>
+
+<table>
+### SQL Task
+{sql_question}
+
+### Reference Table
+{table}
+</table>
 """
+    
+    # print(f"Question: {mcq}")
+    # print(f"Choices: {choice}")
+    # print(sql_question)
+    # print(table)
     messages = [
         {
             "role": "system",
@@ -417,11 +431,7 @@ Analyze carefully and return your choice (A, B, C, D, E) in {$choice} format. Fo
     cant_answer = False
 
     try:
-        pattern = r'\{(.*?)\}'
-        choice = re.search(pattern, answer).group(1)
-
-        # Clean the choice
-        choice = choice.upper().replace(' ', '').replace('$','').replace('\n', '').replace('\t', '').replace('.', '').replace(',', '').replace('(', '').replace(')', '').strip()
+        choice = get_json_from_text_response(answer, new_method=True)['choice'].upper()
 
         print(f"Choice: {choice}")
         print(f"Correct choice: {correct_choice}")
@@ -433,7 +443,8 @@ Analyze carefully and return your choice (A, B, C, D, E) in {$choice} format. Fo
             cant_answer = True
         else:
             score = 0
-    except:
+    except Exception as e:
+        print(e)
         score = 0
         cant_answer = True
 
@@ -441,20 +452,22 @@ Analyze carefully and return your choice (A, B, C, D, E) in {$choice} format. Fo
     result['ids'] = response['ids']
     result['score'] = score
     result['cant_answer'] = cant_answer
+    if 'question_ids' in response:
+        result['question_ids'] = response['question_ids']
 
     append_jsonl_to_file(result, output_path)
 
     return result
 
 
-def scoring_mcq(llm, responses, output_path, max_workers=4, multi_thread=False):
+def scoring_mcq(llm, responses, output_path, max_workers=4, multi_thread=False, rotate_key=False):
     
     total_questions = len(responses)
     results = []
 
     if multi_thread:
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            future_to_task = {executor.submit(single_scoring_mcq, llm, response, output_path): response for response in responses}
+            future_to_task = {executor.submit(single_scoring_mcq, llm, response, output_path, rotate_key): response for response in responses}
             for future in as_completed(future_to_task):
                 response = future_to_task[future]
                 results.append(response)
@@ -495,9 +508,10 @@ def evaluate_sql_generation(sql_path, mcq_path, llm_name, multi_thread=False, ma
 
     output_path = get_available_path(output_path)
 
-    responses = merge_mcq_and_sql(mcq_data, sql_data)
+    responses = merge_mcq_and_sql_v2(mcq_data, sql_data)
+    print(f"Number of questions: {len(responses)}")
 
-    return scoring_mcq(llm_name, responses, output_path, max_workers, multi_thread)
+    return scoring_mcq(llm_name, responses, output_path, max_workers, multi_thread, rotate_key=args.rotate_api)
 
 
 import argparse
@@ -511,6 +525,8 @@ def parse_args():
     parser.add_argument('--multi_thread', type=bool, default=False, help='Use multi-threading or not')
     parser.add_argument('--template', type=str, default='vertical', help='Template for the difficulty evaluation')
     parser.add_argument('--max_workers', type=int, default=4, help='Max workers for multi-threading')
+    parser.add_argument('--rotate_api', action='store_true')
+
     return parser.parse_args()
 
 

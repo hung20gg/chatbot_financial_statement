@@ -65,8 +65,6 @@ def initialize(text2sql_model = 'gemini-2.0-flash'):
 
     if 'qwen2.5-3b-sft' in text2sql_model:
         text2sql_config = TEXT2SQL_QWEN25_CODER_3B_SFT_CONFIG
-    elif 'qwen2.5-3b-kto' in text2sql_model:
-        text2sql_config = TEXT2SQL_QWEN25_CODER_3B_KTO_CONFIG
     elif 'gpt-4o-mini' in text2sql_model:
         text2sql_config = TEXT2SQL_FAST_OPENAI_CONFIG
     elif 'gpt-4o' in text2sql_model:
@@ -105,8 +103,8 @@ def chat(user_name):
     
     text2sql_model = st.selectbox(
         "Text2SQL Model:",
-        ['gemini-2.0-flash', 'qwen2.5-3b-kto', 'deepseek-chat', 'gpt-4o-mini', 'gpt-4o', 'gemini-2.0-flash-thinking-exp-01-21', 'gemini-2.0-pro-exp-02-05'],
-        index=['gemini-2.0-flash', 'qwen2.5-3b-kto', 'deepseek-chat', 'gpt-4o-mini' , 'gpt-4o', 'gemini-2.0-flash-thinking-exp-01-21', 'gemini-2.0-pro-exp-02-05'].index(st.session_state.text2sql_model)
+        ['gemini-2.0-flash', 'qwen2.5-3b-sft', 'deepseek-chat', 'gpt-4o-mini', 'gpt-4o', 'gemini-2.0-flash-thinking-exp-01-21', 'gemini-2.0-pro-exp-02-05'],
+        index=['gemini-2.0-flash', 'qwen2.5-3b-sft', 'deepseek-chat', 'gpt-4o-mini' , 'gpt-4o', 'gemini-2.0-flash-thinking-exp-01-21', 'gemini-2.0-pro-exp-02-05'].index(st.session_state.text2sql_model)
     )
 
     if text2sql_model != st.session_state.text2sql_model:

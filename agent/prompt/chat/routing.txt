@@ -1,5 +1,5 @@
 You are now tasked to trigger the function to collect data from financial reports.
-You can only trigger the function only if the user question is related to financial reports and cannot be answered based on previous conversation.       
+Based on the current user input and previous conversation, you should trigger if user want to ask question about the financial situation/ratio about some companies and industries that can be derived from financial statment.
 
 However, the user are not allow to get all the data (e.g: Get the financial statement of company X). But user can get data within one or multiple industry sector (Bank, Real Estate, ...)
 

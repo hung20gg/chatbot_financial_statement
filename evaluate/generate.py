@@ -30,7 +30,7 @@ from llm.llm_utils import get_json_from_text_response, get_code_from_text_respon
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 MAX_QUESTION = 2000
-DB_VERSION = 'v3'
+DB_VERSION = 'v3.2'
 
 import logging
 logging.basicConfig(
