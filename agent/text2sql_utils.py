@@ -497,14 +497,77 @@ def prune_unnecessary_data_from_sql(tables: list[Table], messages: list[dict]):
     return tables
     
 
-def reconstruct_tables_from_sql(db, sql_message, description = ""):
+# def reconstruct_tables_from_sql(db, sql_message, description = ""):
+
+#     errors, tables = TIR_reasoning(sql_message, db)
+
+#     if len(errors) > 0:
+
+#         return []
+    
+#     mapping_table = []
+
+#     # Get the company_info
+#     stock_code = []
+#     for table in tables:
+#         if 'stock_code' in table.table.columns:
+#             try:
+#                 stock_code.extend(table.table['stock_code'].tolist())
+#             except:
+#                 pass
+
+#     if len(stock_code) > 0:
+#         df_company_info = db.return_company_from_stock_codes(stock_code)
+#         mapping_table.append(Table(table=df_company_info, description="Company Information"))
+
+#     # Get the ratio_code
+
+#     ratio_code = []
+#     for table in tables:
+#         if 'ratio_code' in table.table.columns:
+#             try:
+#                 ratio_code.extend(table.table['ratio_code'].tolist())
+#             except:
+#                 pass
+    
+#     set_ratio_code = set()
+#     for code in ratio_code:
+#         if isinstance(code, str):
+#             set_ratio_code.add(code)
+#     ratio_code = list(set_ratio_code)
+
+#     if len(ratio_code) > 0:
+#         df_ratio = db._get_mapping_ratio_from_ratio_codes(ratio_code)
+#         mapping_table.append(Table(table=df_ratio, description="Ratio Mapping"))
+
+#     # Get the category_code
+#     category_code = []
+#     for table in tables:
+#         if 'category_code' in table.table.columns:
+#             try:
+#                 category_code.extend(table.table['category_code'].tolist())
+#             except:
+#                 pass
+
+#     set_category_code = set()
+#     for code in category_code:
+#         if isinstance(code, str):
+#             set_category_code.add(code)
+#     category_code = list(set_category_code)
+
+#     if len(category_code) > 0:
+#         df_category = db._get_mapping_category_from_category_codes(category_code)
+#         mapping_table.append(Table(table=df_category, description="Category Mapping"))
+
+#     mapping_table.extend(tables)
+
+#     return mapping_table
+    
+
+def reconstruct_tables_from_sql(db, sql_message):
 
     errors, tables = TIR_reasoning(sql_message, db)
 
-    if len(errors) > 0:
-
-        return []
-    
     mapping_table = []
 
     # Get the company_info
@@ -516,48 +579,35 @@ def reconstruct_tables_from_sql(db, sql_message, description = ""):
             except:
                 pass
 
-    if len(stock_code) > 0:
-        df_company_info = db.return_company_from_stock_codes(stock_code)
-        mapping_table.append(Table(table=df_company_info, description="Company Information"))
+    codes = set()
+    mentioned_codes = []
 
-    # Get the ratio_code
-
-    ratio_code = []
     for table in tables:
-        if 'ratio_code' in table.table.columns:
-            try:
-                ratio_code.extend(table.table['ratio_code'].tolist())
-            except:
-                pass
+        for column in table.table.columns:
+            if column in ['code', 'category_code', 'ratio_code', 'metrics']:
+                mentioned_codes.extend(table.table[column].tolist())
     
-    set_ratio_code = set()
-    for code in ratio_code:
+    for code in mentioned_codes:
         if isinstance(code, str):
-            set_ratio_code.add(code)
-    ratio_code = list(set_ratio_code)
+            codes.add(code)
 
-    if len(ratio_code) > 0:
-        df_ratio = db._get_mapping_ratio_from_ratio_codes(ratio_code)
-        mapping_table.append(Table(table=df_ratio, description="Ratio Mapping"))
+    codes = list(codes)
 
-    # Get the category_code
-    category_code = []
-    for table in tables:
-        if 'category_code' in table.table.columns:
-            try:
-                category_code.extend(table.table['category_code'].tolist())
-            except:
-                pass
+    if len(codes) > 0:
+        try:
+            df_ratio = db._get_mapping_ratio_from_ratio_codes(codes)
+            if not df_ratio.empty:
+                mapping_table.append(Table(table=df_ratio, description="Ratio Mapping"))
 
-    set_category_code = set()
-    for code in category_code:
-        if isinstance(code, str):
-            set_category_code.add(code)
-    category_code = list(set_category_code)
+        except Exception as e:
+            print("Unable to collect ratio code", e)
 
-    if len(category_code) > 0:
-        df_category = db._get_mapping_category_from_category_codes(category_code)
-        mapping_table.append(Table(table=df_category, description="Category Mapping"))
+        try:
+            df_category = db._get_mapping_category_from_category_codes(codes)
+            if not df_category.empty:
+                mapping_table.append(Table(table=df_category, description="Category Mapping"))
+        except Exception as e:
+            print("Unable to collect category code", e)
 
     mapping_table.extend(tables)
 
@@ -608,5 +658,7 @@ if __name__ == '__main__':
         }
     ]
 
-    response = llm(message)
-    print(response)
+    generator = llm.stream(message)
+    for text in generator:
+        print(text, sep=" ")
+

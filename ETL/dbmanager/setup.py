@@ -86,7 +86,7 @@ def setup_db(config: DBConfig, version = 'v3', vectordb = 'chromadb', multi_thre
         local_model = True
         
     db_type = 'vertical' if 'vertical' in config.database_choice else 'horizontal'
-    
+
     if vectordb == 'chromadb':
         persist_client = PersistentClient(path = os.path.join(current_directory, f'../../data/vector_db_{db_type}_{"local" if local_model else "openai"}_{version}'), settings = Settings())
     elif vectordb == 'milvus':
@@ -119,10 +119,14 @@ def setup_db(config: DBConfig, version = 'v3', vectordb = 'chromadb', multi_thre
     
     collection_chromadb = 'company_name_chroma'
     vector_db_company = create_vector_db(collection_chromadb, persist_client, config.embedding, vectordb)
+
+    collection_chromadb = 'industry'
+    vector_db_industry = create_vector_db(collection_chromadb, persist_client, config.embedding, vectordb)
     
     
     if config.database_choice == 'vertical_base':
         return HubVerticalBase(conn = conn, 
+                               vector_db_industry = vector_db_industry,
                                  vector_db_bank = bank_vector_store, 
                                  vector_db_non_bank = none_bank_vector_store, 
                                  vector_db_securities = sec_vector_store,
@@ -135,6 +139,7 @@ def setup_db(config: DBConfig, version = 'v3', vectordb = 'chromadb', multi_thre
         
     elif config.database_choice == 'vertical_universal':
         return HubVerticalUniversal(conn = conn, 
+                                    vector_db_industry = vector_db_industry,
                                      vector_db_ratio = ratio_vector_store,
                                      vector_db_fs = universal_vector_store,
                                      vector_db_company = vector_db_company,

@@ -1,5 +1,7 @@
 # Chatbot_financial_statement
 
+#### Update 23-02-2025: EVF is a bank
+
 #### Update 22-02-2025: New Text2SQL UI + add new db
 
 #### Update 17-02-2025: Just need the evaluation dataset
@@ -101,17 +103,79 @@ chmod +x run.sh
 
 ### Setup maunally
 
+
+
 Clone the reporitoty and create environment
 
 ```bash
 git clone https://github.com/hung20gg/chatbot_financial_statement.git
-git clonehttps://github.com/hung20gg/llm.git
 cd chatbot_financial_statement
+git clonehttps://github.com/hung20gg/llm.git
 
 conda create -y -n text2sql
 conda activate text2sql
 pip install -r requirements.txt
 ```
+
+**Prepare env file**
+Create a `.env` file and put all the necessary key into it
+```
+OPENAI_API_KEY=your_api_key
+GEMINI_API_KEY=your_api_key
+
+DB_NAME=
+DB_USER=
+DB_PASSWORD=
+DB_HOST=
+DB_PORT=
+
+MONGO_DB_HOST=
+MONGO_DB_USER=
+MONGO_DB_PASSWORD=
+MONGO_DB_PORT=
+
+EMBEDDING_SERVER_URL=http://localhost:8080
+EMBEDDING_MODEL=BAAI/bge-base-en-v1.5
+
+RERANKER_SERVER_URL=http://localhost:8081
+RERANKER_MODEL=BAAI/bge-reranker-v2-m3
+
+LOCAL_EMBEDDING=True
+
+
+DEEPSEEK_HOST=https://api.deepseek.com
+DEEPSEEK_API_KEY=your_api_key
+
+LLM_HOST=http://localhost:8000/v1
+```
+Then run
+```
+# Linux, macos
+source .env
+
+# Window
+.env
+```
+
+#### Local Embedding
+**Note** Build the TEI local and run the following scripts (check the [TEI repo](https://github.com/huggingface/text-embeddings-inference) for setup)
+
+- For embedding:
+```bash
+model=BAAI/bge-base-en-v1.5
+text-embeddings-router --model-id $model --port 8080
+```
+
+- For Reranker (it is ok not to have reranker)
+```bash
+model=BAAI/bge-reranker-v2-m3
+text-embeddings-router --model-id $model --port 8081
+```
+
+#### Setup database
+Using any existing database or using Docker Image for:
+- Postgre
+- MongoDB (optional)
 
 Create database via this scripts (notice the version)
 
@@ -124,26 +188,14 @@ For using data of 200 companies
 python setup.py --preprocess v3.2 --force True --local True --vectordb chromadb
 ```
 
-Build the TEI local and run the following scripts (check the [TEI repo](https://github.com/huggingface/text-embeddings-inference) for setup)
-
-- For embedding:
-```bash
-model=BAAI/bge-base-en-v1.5
-text-embeddings-router --model-id $model --port 8080
-```
-
-- For Reranker
-```bash
-model=BAAI/bge-reranker-v2-m3
-text-embeddings-router --model-id $model --port 8081
-```
+**Note:** If you are not using local embedding, remove `--local True` and replace with `--openai True`
 
 Run the `test.py` file to check the setup status
 ```bash
 python test.py
 ```
 
-## DB In the pipeline
+### DB In the pipeline
 - ChromaDB/ Milvus (Storing the embedding)
 - PostgreSQL (Storing the data)
 - MongoDB (Storing the user message)

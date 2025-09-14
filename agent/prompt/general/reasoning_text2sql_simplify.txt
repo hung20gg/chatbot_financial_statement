@@ -59,3 +59,5 @@ AND quarter !=0
 -- - Q4: YYYY-12-30
 -- - Q0: YYYY-12-30 (Annual data)
 ```
+- If the query seems complex (asking for multiple account/ratios), you can break it down to smaller tasks and solve them individually
+- If not specified, you should set the LIMIT to 50

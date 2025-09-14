@@ -10,8 +10,6 @@ import pandas as pd
 import numpy as np 
 from tqdm import tqdm
 
-from multiprocessing import Pool
-
 
 import time
 
@@ -79,12 +77,11 @@ def get_pre_calculated_ratio(year, ratio_code, ratios_df, quarter=0):
     except (IndexError, KeyError):
         return None
 
-def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_mapping=None):
+def __get_yoy_ratios(data_df, ratios_df_1=None, ratios_df_6=None, ratio_mapping=None):
     """
     Computes the Year-over-Year (YoY) ratio dynamically for each quarter (Q1, Q2, Q3, Q4)
     and for annual data (Q0).
     """
-
     results = []
     
     # Pivot the data for easier lookup
@@ -98,12 +95,9 @@ def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_m
     # Iterate through the pivoted data
     for (stock_code, year, quarter), row in pivot_df.iterrows():
         
-        # Process YoY growth calculation for each quarter dynamically
         for ratio_name, category_code in ratio_mapping.items():
             try:
-                # Fetch current and previous year values dynamically
                 if isinstance(category_code, list):
-                    # Handle sums of multiple category codes
                     current_year_value = sum(row.get(code, 0) for code in category_code)
                     previous_year_value = sum(
                         pivot_df.loc[(stock_code, year - 1, quarter), code]
@@ -117,11 +111,11 @@ def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_m
                     current_year_value = get_pre_calculated_ratio(year, category_code, ratios_df_6, quarter)
                     previous_year_value = get_pre_calculated_ratio(year - 1, category_code, ratios_df_6, quarter)
                 else:
-                    # Standard case: Fetch current and previous year's values for the same quarter
                     current_year_value = row.get(category_code, 0)
                     previous_year_value = pivot_df.loc[
                         (stock_code, year - 1, quarter), category_code
                     ] if (stock_code, year - 1, quarter) in pivot_df.index else 0
+                
                 
                 # Calculate YoY growth
                 yoy_value = None
@@ -139,9 +133,95 @@ def __get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, ratio_m
                     'data': yoy_value
                 })
 
+
             except Exception as e:
-                # Handle missing or invalid data gracefully
                 print(f"Error calculating YoY ratio {ratio_name} for {stock_code}, Q{quarter}, {year}: {e}")
+
+    return pd.DataFrame(results)
+
+def __get_qoq_ratios(data_df, ratios_df_1=None, ratios_df_6=None, ratio_mapping=None):
+    """
+    Computes the Quarter-on-Quarter (QoQ) ratio dynamically for each quarter (Q1, Q2, Q3, Q4).
+    For Q1, compares it with Q4 of the previous year, while for other quarters, compares with the previous quarter.
+    Excludes the calculation for quarter 0 since it represents annual data.
+    """
+
+    results = []
+
+    pivot_df = data_df.pivot_table(
+        index=['stock_code', 'year', 'quarter'],
+        columns='category_code',
+        values='data',
+        aggfunc='sum'
+    )
+
+    for (stock_code, year, quarter), row in pivot_df.iterrows():
+        
+        if quarter == 0:
+            continue 
+
+        for ratio_name, category_code in ratio_mapping.items():
+            try:
+                if quarter == 1:
+                    # Special case: For Q1, compare with Q4 of the previous year
+                    if isinstance(category_code, list):
+                        # Handle sums of multiple category codes
+                        current_quarter_value = sum(row.get(code, 0) for code in category_code)
+                        previous_quarter_value = sum(
+                            pivot_df.loc[(stock_code, year - 1, 4), code]
+                            if (stock_code, year - 1, 4) in pivot_df.index and code in pivot_df.columns
+                            else 0 for code in category_code
+                        )
+                    elif category_code in ['EBIT']:
+                        current_quarter_value = get_pre_calculated_ratio(year, category_code, ratios_df_1, quarter)
+                        previous_quarter_value = get_pre_calculated_ratio(year - 1, category_code, ratios_df_1, 4)
+                    elif category_code in ['EBITDA']:
+                        current_quarter_value = get_pre_calculated_ratio(year, category_code, ratios_df_6, quarter)
+                        previous_quarter_value = get_pre_calculated_ratio(year - 1, category_code, ratios_df_6, 4)
+                    else:
+                        # Standard case: Fetch current and previous quarter values for the same category
+                        current_quarter_value = row.get(category_code, 0)
+                        previous_quarter_value = pivot_df.loc[
+                            (stock_code, year - 1, 4), category_code
+                        ] if (stock_code, year - 1, 4) in pivot_df.index else 0
+                else:
+                    # Standard case: For other quarters, compare with the previous quarter
+                    if isinstance(category_code, list):
+                        current_quarter_value = sum(row.get(code, 0) for code in category_code)
+                        previous_quarter_value = sum(
+                            pivot_df.loc[(stock_code, year, quarter - 1), code]
+                            if (stock_code, year, quarter - 1) in pivot_df.index and code in pivot_df.columns
+                            else 0 for code in category_code
+                        )
+                    elif category_code in ['EBIT']:
+                        current_quarter_value = get_pre_calculated_ratio(year, category_code, ratios_df_1, quarter)
+                        previous_quarter_value = get_pre_calculated_ratio(year, category_code, ratios_df_1, quarter - 1)
+                    elif category_code in ['EBITDA']:
+                        current_quarter_value = get_pre_calculated_ratio(year, category_code, ratios_df_6, quarter)
+                        previous_quarter_value = get_pre_calculated_ratio(year, category_code, ratios_df_6, quarter - 1)
+                    else:
+                        current_quarter_value = row.get(category_code, 0)
+                        previous_quarter_value = pivot_df.loc[
+                            (stock_code, year, quarter - 1), category_code
+                        ] if (stock_code, year, quarter - 1) in pivot_df.index else 0
+
+                # Calculate QoQ growth
+                qoq_value = None
+                if previous_quarter_value == 0 or previous_quarter_value is None:
+                    qoq_value = None 
+                else:
+                    qoq_value = (current_quarter_value - previous_quarter_value) / previous_quarter_value
+
+                results.append({
+                    'stock_code': stock_code,
+                    'year': year,
+                    'quarter': quarter,
+                    'ratio_code': ratio_name,
+                    'data': qoq_value
+                })
+
+            except Exception as e:
+                print(f"Error calculating QoQ ratio {ratio_name} for {stock_code}, Q{quarter}, {year}: {e}")
 
     return pd.DataFrame(results)
 
@@ -221,7 +301,7 @@ def __single_cost_of_fund(data_df, cost, funds):
 
 
     # Set the ratio code and select relevant columns
-    merged_data = merged_data.assign(ratio_code='cost_of_fund').drop(columns=['average_data'])
+    merged_data = merged_data.assign(ratio_code='cost_of_fund').drop(columns=['average_data', 'category_code'])
 
     return merged_data
 
@@ -240,7 +320,7 @@ def __single_inventory_turnover_ratio(data_df, cost_of_goods_sold, inventory):
 
 
     # Set the ratio code and select relevant columns
-    merged_data = merged_data.assign(ratio_code='inventory_turnover_ratio').drop(columns=['average_data'])
+    merged_data = merged_data.assign(ratio_code='inventory_turnover_ratio').drop(columns=['average_data', 'category_code'])
 
     return merged_data
 
@@ -252,11 +332,13 @@ def router(function_name, *args, **kwargs):
         return __single_inventory_turnover_ratio(*args, **kwargs)
     elif function_name == 'get_cost_of_fund':
         return __single_cost_of_fund(*args, **kwargs)
+    elif function_name == 'get_qoq_ratios':
+        return __get_qoq_ratios(*args, **kwargs)
     else:
         return None
 
 # This code run so long, gonna optimize it later @pphanhh
-def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, multi_process=True, constant=None):
+def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, constant=None):
     """
     Calculate YoY ratios for the given dataset and function dictionary.
     Uses pre-calculated financial structure (ratios_df_1) and cash flow (ratios_df_6) ratios.
@@ -264,25 +346,32 @@ def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, multi_pro
 
     # Initialize results
     results = []
-
-    symbols = data_df['stock_code'].unique()
-
     inputs = []
-    for symbol in symbols:
 
-        df_symbol = data_df[data_df['stock_code'] == symbol]
+    grouped_data = data_df.groupby('stock_code')
 
+    is_ratio_df = False
+    if ratios_df_1 is not None and ratios_df_6 is not None:
+        is_ratio_df = True
+        grouped_ratio_6 = ratios_df_6.groupby('stock_code')
+        grouped_ratio_1 = ratios_df_1.groupby('stock_code')
+
+    print("Before", data_df.shape)
+
+    for symbol, df_symbol in grouped_data:
+
+    # #     df_symbol = data_df[data_df['stock_code'] == symbol]
+        
         inputs.append([
                     'get_yoy_ratio',
                     df_symbol,
-                    type_,
-                    ratios_df_1[ratios_df_1['stock_code'] == symbol] if ratios_df_1 is not None else None,
-                    ratios_df_6[ratios_df_6['stock_code'] == symbol] if ratios_df_6 is not None else None,
+                    grouped_ratio_1.get_group(symbol) if is_ratio_df else None,
+                    grouped_ratio_6.get_group(symbol) if is_ratio_df else None,
                     constant
                 ])
+        
+        
         if type_ == 'corp': # Add inventory turnover ratio for Corporation only
-            
-
             inputs.append(
                 [
                     'get_inventory_turnover_ratio',
@@ -300,19 +389,72 @@ def get_yoy_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None, multi_pro
                     ['BS_310', 'BS_320', 'BS_330', 'BS_340', 'BS_360']
                 ]
             )
+
+    for args in inputs:
+        results.append(router(*args))
     
-    if multi_process:
-        with Pool(4) as p:
-            jobs_results = p.starmap(router, inputs)
-            for job_result in jobs_results:
-                results.append(job_result)
+    cleaneed_results = []
+    for result in results:
+        if result is not None:
+            cleaneed_results.append(result)
+    
+    if len(cleaneed_results) == 0:
+        return pd.DataFrame()
+    return pd.concat(cleaneed_results)
 
-    else:
-        for args in inputs:
-            results.append(__get_yoy_ratios(*args))
 
-    return pd.concat(results)
+def get_qoq_ratios(data_df, type_, ratios_df_1=None, ratios_df_6=None,  constant=None):
+    """
+    Calculate QoQ ratios for the given dataset using multi-processing.
+    Uses pre-calculated financial structure (ratios_df_1) and cash flow (ratios_df_6) ratios.
+    """
 
+    results = []
+    inputs = []
+
+    print("Before", data_df.shape)
+    all_category_code_required = set()
+    for ratio_name, category_code in constant.items():
+        if isinstance(category_code, list):
+            all_category_code_required.update(category_code)
+        else:
+            all_category_code_required.add(category_code)
+    all_category_code_required = np.array(list(all_category_code_required))
+    print("Required category code", len(all_category_code_required))
+
+    data_df = data_df[data_df['category_code'].isin(all_category_code_required)]
+    print("After", data_df.shape)
+
+    grouped_data = data_df.groupby('stock_code')
+
+    is_ratio_df = False
+    if ratios_df_1 is not None and ratios_df_6 is not None:
+        is_ratio_df = True
+        grouped_ratio_6 = ratios_df_6.groupby('stock_code')
+        grouped_ratio_1 = ratios_df_1.groupby('stock_code')
+
+    for symbol, df_symbol in grouped_data:
+
+    # #     df_symbol = data_df[data_df['stock_code'] == symbol]
+        
+        inputs.append([
+                    df_symbol[df_symbol['quarter'] != 0],
+                    grouped_ratio_1.get_group(symbol) if is_ratio_df else None,
+                    grouped_ratio_6.get_group(symbol) if is_ratio_df else None,
+                    constant
+                ])
+
+    for args in inputs:
+        results.append(__get_qoq_ratios(*args))
+
+    cleaneed_results = []
+    for result in results:
+        if result is not None:
+            cleaneed_results.append(result)
+    
+    if len(cleaneed_results) == 0:
+        return pd.DataFrame()
+    return pd.concat(cleaneed_results)
 
 
 
@@ -344,8 +486,7 @@ def return_on_investment(net_income, total_investment):
     return net_income / total_investment if total_investment else None
 
 def ROIC(NOPAT, invested_capital):
-    if invested_capital is None:
-        return NOPAT / invested_capital if invested_capital else None
+    return NOPAT / invested_capital if invested_capital else None
 
 def return_on_long_term_capital(EBIT, average_long_term_capital):
     return EBIT / average_long_term_capital if average_long_term_capital else None
@@ -479,7 +620,9 @@ def price_earning_ratio(price, eps):
     return price / eps if eps else None
 
 def book_value_per_share(eps, net_income, equity):
-    return (eps * net_income) / equity if equity else None
+    if eps == 0:
+        return 0
+    return equity/(net_income / eps) if net_income else None
 
 def price_to_book_ratio(price, eps, net_income, equity):
     bvps = book_value_per_share(eps, net_income, equity)
@@ -568,8 +711,12 @@ def gross_profit_margin(gross_profit, net_sales):
 def net_profit_margin(net_profit, net_sales):
     return net_profit / net_sales if net_sales else None
 
-def Total_Asset_Turnover(net_sales, avg_total_assets):
-    return net_sales / avg_total_assets if avg_total_assets else None
+
+def return_on_assets_ttm(net_income_ttm, total_assets):
+    return net_income_ttm / total_assets if total_assets else None
+
+def return_on_equity_ttm(net_income_ttm, total_equity):
+    return net_income_ttm / total_equity if total_equity else None
 
 def get_profitability_ratios(data_df, func_dict, type_):
     pivot_df_5 = data_df.pivot_table(index=['stock_code', 'year', 'quarter'], 
@@ -589,7 +736,7 @@ def get_profitability_ratios(data_df, func_dict, type_):
                     value_sum = sum([row[i] for i in input_name if i in row.index])
                     input_values.append(value_sum)
                 else:
-                    if type_ =='non_bank' and input_name in ['BS_220', ['BS_240','BS_210','BS_220','BS_230','BS_260'], 'BS_270']:  
+                    if type_ =='non_bank' and input_name in ['BS_220', ['BS_240','BS_210','BS_220','BS_230','BS_260']]:  
                         prev_q0_value = get_previous_year_q0_value(pivot_df_5,stock_code, year, input_name)
                         current_value = row[input_name] if input_name in row.index else None
                         if current_value is not None and prev_q0_value is not None:
@@ -598,7 +745,7 @@ def get_profitability_ratios(data_df, func_dict, type_):
                         else:
                             input_values.append(None)
 
-                    elif type_ == 'bank' and input_name in ['BS_300', ['BS_210','BS_220','BS_240'],'BS_220']: 
+                    elif type_ == 'bank' and input_name in [ ['BS_210','BS_220','BS_240'],'BS_220']: 
                         prev_q0_value = get_previous_year_q0_value(pivot_df_5, stock_code, year, input_name)
                         current_value = row[input_name] if input_name in row.index else None
                         if current_value is not None and prev_q0_value is not None:
@@ -607,7 +754,7 @@ def get_profitability_ratios(data_df, func_dict, type_):
                         else:
                             input_values.append(None)
                     
-                    elif type_ == 'securities' and input_name in ['BS_220', 'BS_270',['BS_211','BS_220','BS_230','BS_240','BS_250']]:
+                    elif type_ == 'securities' and input_name in ['BS_220',['BS_211','BS_220','BS_230','BS_240','BS_250']]:
                         prev_q0_value = get_previous_year_q0_value(pivot_df_5, stock_code, year, input_name)
                         current_value = row[input_name] if input_name in row.index else None
                         if current_value is not None and prev_q0_value is not None:
@@ -622,6 +769,8 @@ def get_profitability_ratios(data_df, func_dict, type_):
             if None not in input_values:
                 # Call the corresponding function to calculate the ratio
                 ratio_value = globals()[ratio](*input_values)
+
+
                 profitability_results_5.append({
                     'stock_code': stock_code,
                     'year': year,
@@ -736,70 +885,96 @@ def get_cashflow_ratios(data_df, func_dict, type_):
 #===================#
 #  Average ratios   #
 #===================#
-
-# @pphanhh
-
 def return_on_average_assets(net_income, avg_total_assets):
     return net_income / avg_total_assets if avg_total_assets else None
 
 def return_on_average_equity(net_income, avg_total_equity):
     return net_income / avg_total_equity if avg_total_equity else None  
-
 def return_on_average_sales(net_income, avg_total_sales):
     return net_income / avg_total_sales if avg_total_sales else None
 
+def Total_Asset_Turnover(net_sales, avg_total_assets):
+    return net_sales / avg_total_assets if avg_total_assets else None
+
 def get_avg_ratios(data_df, func_dict, type_):
-    pivot_df_7 = data_df.pivot_table(index=['stock_code', 'year', 'quarter'], 
-                                 columns='category_code', 
-                                 values='data', 
-                                 aggfunc='sum')
+    pivot_df_7 = data_df.pivot_table(index=['stock_code', 'year', 'quarter'],
+                                   columns='category_code',
+                                   values='data',
+                                   aggfunc='sum')
     
     avg_results_7 = []
 
-    # Iterate through the pivot table to calculate the cash flow ratios
-    for index, row in pivot_df_7.iterrows():
-        stock_code, year, quarter= index
+    avg_accounts = {
+        'bank': ['BS_300', 'BS_500', ['IS_010', 'IS_003', 'IS_004']],
+        'non_bank': ['BS_270', 'BS_400', 'IS_010'],
+        'securities': ['BS_270', 'BS_400', 'IS_020']
+    }
+    
+    avg_denominator_ratios = [
+        'return_on_average_assets', 
+        'return_on_average_equity', 
+        'return_on_average_sales', 
+        'Total_Asset_Turnover'
+    ]
+    
+    def get_value(pivot_df, stock_code, year, quarter, input_name):
+        try:
+            if isinstance(input_name, list):
+                return sum([pivot_df.loc[(stock_code, year, quarter), i] 
+                          for i in input_name if i in pivot_df.columns])
+            else:
+                return pivot_df.loc[(stock_code, year, quarter), input_name]
+        except:
+            return None
+
+    def get_previous_year_q0_value(pivot_df, stock_code, year, input_name):
+        return get_value(pivot_df, stock_code, year - 1, 0, input_name)
+    
+    def calculate_average(pivot_df, stock_code, year, quarter, input_name):
+        current = get_value(pivot_df, stock_code, year, quarter, input_name)
+        previous = get_previous_year_q0_value(pivot_df, stock_code, year, input_name)
         
+        if current is not None and previous is not None:
+            return (current + previous) / 2
+        return None
+
+    for index, row in pivot_df_7.iterrows():
+        stock_code, year, quarter = index
+   
         for ratio, inputs in func_dict.items():
             input_values = []
-            for input_name in inputs:
-                if isinstance(input_name, list):  # Sum for cases like capital_expenditures or total_revenue
-                    value_sum = sum([row[i] for i in input_name if i in row.index])
-                    input_values.append(value_sum)
-                else:
-                    if type_ == 'bank' and input_name in ['BS_300', 'BS_500',['IS_010','IS_003','IS_004']] :
-                        prev_q0_value = get_previous_year_q0_value(pivot_df_7, stock_code, year, input_name)
-                        current_value = row[input_name] if input_name in row.index else None
-                        if current_value is not None and prev_q0_value is not None:
-                            avg_value = (current_value + prev_q0_value) / 2
-                            input_values.append(avg_value)
-                        else:
-                            input_values.append(None)
-                            
-                    elif type_ == 'non_bank' and input_name in ['BS_270','BS_400','IS_010']: 
-                        prev_q0_value = get_previous_year_q0_value(pivot_df_7, stock_code, year, input_name)
-                        current_value = row[input_name] if input_name in row.index else None
-                        if current_value is not None and prev_q0_value is not None:
-                            avg_value = (current_value + prev_q0_value) / 2
-                            input_values.append(avg_value)
-                        else:
-                            input_values.append(None)
+
+            if ratio in avg_denominator_ratios:
+                # First input (numerator) - no averaging
+                numerator = get_value(pivot_df_7, stock_code, year, quarter, inputs[0])
+                input_values.append(numerator)
+                
+                # Second input (denominator) - needs averaging
+                denominator = calculate_average(pivot_df_7, stock_code, year, quarter, inputs[1])
+                input_values.append(denominator)
+            else:
+
+                for i, input_name in enumerate(inputs):
+
+                    needs_averaging = False
+
+                    if not isinstance(input_name, list) and input_name in avg_accounts[type_]:
+                        needs_averaging = True
+           
+                    if (isinstance(input_name, list) and type_ == 'bank' and 
+                        set(input_name) == set(['IS_010', 'IS_003', 'IS_004'])):
+                        needs_averaging = True
                     
-                    elif type_ == 'securities' and input_name in ['BS_270', 'BS_4000','IS_020']:
-                        prev_q0_value = get_previous_year_q0_value(pivot_df_7, stock_code, year, input_name)
-                        current_value = row[input_name] if input_name in row.index else None
-                        if current_value is not None and prev_q0_value is not None:
-                            avg_value = (current_value + prev_q0_value) / 2
-                            input_values.append(avg_value)
-                        else:
-                            input_values.append(None)
+                    if needs_averaging:
+                        value = calculate_average(pivot_df_7, stock_code, year, quarter, input_name)
                     else:
-                        input_values.append(row[input_name] if input_name in row.index else None)
+                        value = get_value(pivot_df_7, stock_code, year, quarter, input_name)
+                    
+                    input_values.append(value)
             
-            # Check if all required data is available
             if None not in input_values:
-                # Call the corresponding function to calculate the ratio
                 ratio_value = globals()[ratio](*input_values)
+                
                 avg_results_7.append({
                     'stock_code': stock_code,
                     'year': year,
@@ -807,9 +982,76 @@ def get_avg_ratios(data_df, func_dict, type_):
                     'ratio_code': ratio,
                     'data': ratio_value
                 })
-
-    # Convert the results to a DataFrame
+    
     return pd.DataFrame(avg_results_7)
+
+#===================#
+#  AVG TTM ratios   #
+#===================#
+
+def return_on_average_assets_ttm(net_income_ttm, avg_total_assets_ttm):
+    return net_income_ttm / avg_total_assets_ttm if avg_total_assets_ttm else None
+
+def return_on_average_equity_ttm(net_income_ttm, avg_total_equity_ttm):
+    return net_income_ttm / avg_total_equity_ttm if avg_total_equity_ttm else None
+
+def get_avg_ttm_ratios(data_df, func_dict):
+   
+    data_df = data_df[data_df['quarter'] != 0].copy()
+
+    pivot_df_8 = data_df.pivot_table(
+        index=['stock_code', 'year', 'quarter'],
+        columns='category_code',
+        values='data',
+        aggfunc='sum'
+    )
+
+    results_8 = []
+
+    net_income_ttm_code = func_dict['return_on_average_assets_ttm'][0]  # e.g., 'IS_060_TTM'
+    total_assets_code = func_dict['return_on_average_assets_ttm'][1]    # e.g., 'BS_270'
+    total_equity_code = func_dict['return_on_average_equity_ttm'][1]    # e.g., 'BS_400'
+    
+    pivot_df_8 = pivot_df_8.sort_index()
+    def rolling_avg(series):
+        if len(series) < 4:
+            return None  # Ensure at least 4 periods exist
+        return (series.iloc[0] + series.iloc[-1]) / 2
+
+    pivot_df_8['avg_total_assets_ttm'] = (
+        pivot_df_8.groupby(level=0)[total_assets_code]
+        .rolling(window=4, min_periods=4)
+        .apply(rolling_avg, raw=False)
+        .reset_index(level=0, drop=True)
+    )
+
+    pivot_df_8['avg_total_equity_ttm'] = (
+        pivot_df_8.groupby(level=0)[total_equity_code]
+        .rolling(window=4, min_periods=4)
+        .apply(rolling_avg, raw=False)
+        .reset_index(level=0, drop=True)
+    )
+
+    for (stock_code, year, quarter), row in pivot_df_8.iterrows():
+        # print(row.index)
+        try:
+            net_income_ttm = row.get(net_income_ttm_code, None)
+            
+            avg_total_assets_ttm = row.get('avg_total_assets_ttm', None)
+            avg_total_equity_ttm = row.get('avg_total_equity_ttm', None)
+       
+            roa_ttm = return_on_average_assets_ttm(net_income_ttm, avg_total_assets_ttm) if net_income_ttm is not None else None
+            roe_ttm = return_on_average_equity_ttm(net_income_ttm, avg_total_equity_ttm) if net_income_ttm is not None else None
+
+            if roa_ttm is not None:
+                results_8.append({'stock_code': stock_code, 'year': year, 'quarter': quarter, 'ratio_code':'return_on_average_assets_ttm', 'data': roa_ttm})
+            if roe_ttm is not None:
+                results_8.append({'stock_code': stock_code, 'year': year, 'quarter': quarter, 'ratio_code': 'return_on_average_equity_ttm', 'data': roe_ttm})
+
+        except Exception as e:
+            print(f"Error calculating TTM ratios for {stock_code}, Q{quarter}, {year}: {e}")
+
+    return pd.DataFrame(results_8)
 
 #===================#
 #  Ratio from fiin  #
@@ -849,7 +1091,9 @@ def get_constant_values(type_):
             'avg': const.CORP_AVG_RATIO_FUNCTIONS,
             'pe': const.PE_RATIO_FUNCTIONS,
             'yoy': const.YoY_RATIO_FUNCTIONS['non_bank'],
-            'date': const.DATE_RELATED_FUNCTIONS
+            'qoq': const.QoQ_RATIO_FUNCTIONS['non_bank'],
+            'date': const.DATE_RELATED_FUNCTIONS,
+            'avg_ttm': const.CORP_AVG_TTM_RATIO_FUNCTIONS
         }
         
     elif type_ == 'bank':
@@ -863,7 +1107,9 @@ def get_constant_values(type_):
             'avg': const.BANK_AVG_RATIO_FUNCTIONS,
             'pe': const.BANK_PE_RATIO_FUNCTIONS,
             'yoy': const.YoY_RATIO_FUNCTIONS['bank'],
-            'date': const.BANK_DATE_RELATED_FUNCTIONS
+            'qoq': const.QoQ_RATIO_FUNCTIONS['bank'],
+            'date': const.BANK_DATE_RELATED_FUNCTIONS,
+            'avg_ttm': const.BANK_AVG_TTM_RATIO_FUNCTIONS
         }
     
     elif type_ == 'securities':
@@ -877,7 +1123,9 @@ def get_constant_values(type_):
             'avg': const.SECURITIES_AVG_RATIO_FUNCTIONS,
             'pe': const.SECURITIES_PE_RATIO_FUNCTIONS,
             'yoy': const.YoY_RATIO_FUNCTIONS['securities'],
-            'date': const.SECURITIES_DATE_RELATED_FUNCTIONS
+            'qoq': const.QoQ_RATIO_FUNCTIONS['securities'],
+            'date': const.SECURITIES_DATE_RELATED_FUNCTIONS,
+            'avg_ttm': const.SECURITIES_AVG_TTM_RATIO_FUNCTIONS
         }
         
     else:
@@ -889,23 +1137,103 @@ def get_constant_values(type_):
 def run_function(func, *args):
     return func(*args)
 
+
+def remove_unwanted_ratios(constant, map_df):
+
+    new_constant = dict()
+    for key, value in constant.items():
+        new_value = dict()
+        for ratio, inputs in value.items():
+            if ratio in map_df['function_name'].values:
+                new_value[ratio] = inputs
+        
+        # Only add the key if there are ratios to calculate
+        if new_value:
+            new_constant[key] = new_value
+    return new_constant
+
+
 def get_financial_ratios(data_df, type_ = 'corp', including_explaination = True):
+
+
+    map_df = pd.read_csv(os.path.join(current_path ,'../data/map_ratio_code.csv'))
+    map_df['function_name'] = map_df['function_name'].str.strip()
     
     constant = get_constant_values(type_)
+    constant = remove_unwanted_ratios(constant, map_df)
 
+    dfs = []
+
+    time_start = time.time()
     df_financial_structure = get_financial_structure_ratios(data_df, constant['financial_structure'])
+    dfs.append(df_financial_structure)
+    print("FS", df_financial_structure.columns, time.time() - time_start)
+    
+    time_start = time.time()
     df_liquidity = get_liquidity_ratios(data_df, constant['liquidity'])
+    dfs.append(df_liquidity)
+    print("LQ", df_liquidity.columns, time.time() - time_start)
+
     df_financial_risk = get_financial_risk_ratio(data_df, constant['financial_risk'])
     df_income = get_income_ratios(data_df, constant['income'])
     df_profitability = get_profitability_ratios(data_df, constant['profitability'],type_)
     df_cashflow = get_cashflow_ratios(data_df, constant['cashflow'], type_)
+
+    dfs.extend([df_financial_risk, df_income, df_profitability, df_cashflow])
+
+    time_start = time.time()
     df_avg = get_avg_ratios(data_df, constant['avg'], type_)
-    df_date = get_date_related_ratios(data_df, constant['date'])
+    print("AVG", df_avg.columns, time.time() - time_start)
+
+    dfs.append(df_avg)
+
+    try:
+       
+        if 'data' in constant['date']:
+            time_start = time.time()
+            df_date = get_date_related_ratios(data_df, constant['date'])
+            print("Date", df_date.columns, time.time() - time_start)
+            dfs.append(df_date)
+    except Exception as e:
+        print(f"Error calculating date-related ratios: {e}")
     
-    df_pe = get_pe_ratios(data_df, constant['pe'])
+    try:
+        if 'pe' in constant:
+            time_start = time.time()
+            df_pe = get_pe_ratios(data_df, constant['pe'])
+            print("PE", df_pe.columns, time.time() - time_start)
+            dfs.append(df_pe)
+    except Exception as e:
+        print(f"Error calculating Price ratios: {e}")
     
-    df_yoy = get_yoy_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow, constant=constant['yoy'])
-    df = pd.concat([df_financial_structure, df_liquidity, df_financial_risk, df_income, df_profitability, df_cashflow, df_avg, df_pe, df_yoy, df_date], ignore_index=True)
+    try:
+        if 'yoy' in constant:
+            time_start = time.time()
+            df_yoy = get_yoy_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow, constant=constant['yoy'])
+            print("YoY", df_yoy.columns, time.time() - time_start)
+            dfs.append(df_yoy)
+    except Exception as e:
+        print(f"Error calculating YoY ratios: {e}")
+    
+    try:
+        if 'avg_ttm' in constant:
+            time_start = time.time()
+            df_avg_ttm = get_avg_ttm_ratios(data_df, constant['avg_ttm'])
+            print("AVG TTM", df_avg_ttm.columns, time.time() - time_start)
+            dfs.append(df_avg_ttm)
+    except Exception as e:
+        print(f"Error calculating TTM ratios: {e}")
+
+    try:
+        if 'qoq' in constant:
+            time_start = time.time()
+            df_qoq = get_qoq_ratios(data_df, type_, ratios_df_1=df_financial_structure, ratios_df_6=df_cashflow, constant=constant['qoq'])
+            print("QoQ", df_qoq.columns, time.time() - time_start)
+            dfs.append(df_qoq)
+    except Exception as e:
+        print(f"Error calculating QoQ ratios: {e}")
+
+    df = pd.concat(dfs, ignore_index=True)
     
     if type_ == 'bank' and including_explaination:
         df_tm = get_financial_ratio_tm(data_df)
@@ -914,8 +1242,6 @@ def get_financial_ratios(data_df, type_ = 'corp', including_explaination = True)
     # Map ratio_code to ratio_name
     df.rename(columns={'ratio_code': 'function_name'}, inplace=True)
 
-    map_df = pd.read_csv(os.path.join(current_path ,'../csv/map_ratio_code.csv'))
-    map_df['function_name'] = map_df['function_name'].str.strip()
     
     
     df = pd.merge(df, map_df, on='function_name', how='left')
@@ -965,8 +1291,8 @@ def modify_days_ratio(data_df):
 
 
 
-def industry_ratios(data_df, metric = 'BS_400', top_n = 5, output_path = '../data/'):
-    df_company = pd.read_csv(os.path.join(current_path, '../csv/df_company_info.csv'))
+def industry_ratios(data_df, metric = 'BS_400', top_n = 20, output_path = '../data/'):
+    df_company = pd.read_csv(os.path.join(current_path, '../data/df_company_info.csv'))
     
     # Read the financial statement data to get top 10 industries
     df_fs = pd.read_parquet(os.path.join(current_path, output_path, 'financial_statement_v3.parquet'))
@@ -1052,6 +1378,8 @@ def calculate_index(version = 'v3', output_path: str = '../data/'):
 
     # Concatenate the dataframes
     dfs = pd.concat(dfs, ignore_index=True)
+    ttm_account = dfs.ratio_code.str.contains('TTM')
+    dfs = dfs[~((dfs['quarter'] == 0) & ttm_account)]
     
     assert dfs['ratio_code'].isna().sum()==0 , "Null value in ratio_code"
     assert dfs['date_added'].isna().sum()==0 , "Null value in date_added"
@@ -1086,9 +1414,16 @@ if __name__ == '__main__':
 
     ratio = dfs['ratio_code'].unique().tolist()
     
-    for r in ['BDR', 'EPS', 'TAT', 'DSO', 'ROAA', 'COF']:
+    for r in ['BDR', 'EPS', 'BVPS', 'PB', 'DSO', 'ROAATTM', 'GPGYoY', 'GPGQoQ']:
         print(r)
         print(dfs[(dfs['ratio_code'] == r)&(dfs['quarter'] == 0)&(dfs['year'] == 2022)].head(5))
+        print('========================================')
+
+    for r in ['ROATTM', 'GPGQoQ']:
+        print(r)
+
+        bank_code = ['BID', 'CTG', 'VCB', 'MBB', 'ACB', 'TCB', 'VPB', 'HDB', 'TPB', 'EIB']
+        print(dfs[(dfs['ratio_code'] == r)&(dfs['quarter'] == 2)&(dfs['year'] == 2022)&(dfs['stock_code'].isin(bank_code))].head(10))
         print('========================================')
 
     print(f"Time: {end - start}")

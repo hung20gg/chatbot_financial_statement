@@ -20,6 +20,7 @@ class BaseDBHUB(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
     conn: SkipValidation
+    vector_db_industry: Optional[VectorStore] = None
     vector_db_company: VectorStore
     vector_db_sql: VectorStore
     multi_threading: bool = False
@@ -222,6 +223,20 @@ class BaseDBHUB(BaseModel):
                     exact_industries.add(item)
         return list(exact_industries)
     
+    def get_exact_industry_sim_search(self, industries):
+        
+        if self.vector_db_industry is None:
+            logging.warning("Vector database for industry is not available. Switching to BM25 search.")
+            return self.get_exact_industry_bm25(industries)
+
+        if not isinstance(industries, list):
+            industries = [industries]
+        exact_industries = set()
+        for industry in industries:
+            result = self._similarity_search(self.vector_db_industry, industry, 2)
+            for item in result:
+                exact_industries.add(item.page_content)
+        return list(exact_industries)
     
     # ================== Search for suitable Mapping table ================== #
 

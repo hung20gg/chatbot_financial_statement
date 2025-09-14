@@ -59,10 +59,10 @@ Generate SQL code for evaluation dataset `sql_v0.jsonl`
 ```bash
 llm=qwen2.5-coder-1.5b-sft
 multi_thread=True 
-version=sql_v0_1
-path=../data/sql_v0.jsonl
+version=take1-8000
+path=../data/sql_v3.jsonl
 
-python generate.py --llm $llm --version $version --multi_thread $multi_thread --path $path --batch_size 1 --template openai --max_workers 2
+python generate.py --llm $llm --version $version --multi_thread $multi_thread --path $path --batch_size 1 --template openai --max_workers 1 --enhance correction --rotate_api
 ```
 
 
@@ -123,10 +123,10 @@ Answer the MCQ question corresponding to the SQL question
 llm=gemini-2.0-flash
 multi_thread=True 
 task=evaluate
-path=../data/qwen2.5-coder-1.5b-sft__sql_v0_1.jsonl
-mcq_path=../data/mcq_v0.jsonl
+path=../data/gemini-2.0-flash__take3.jsonl
+mcq_path=../data/mcq_sql_v3_v2.jsonl
 
-python validate.py --llm $llm --task $task --multi_thread $multi_thread --path $path --max_workers 12
+python validate.py --llm $llm --task $task  --path $path --mcq_path $mcq_path --max_workers 8 --multi_thread $multi_thread --rotate_api
 ```
 
 **Note:** The scoring function is current have some bug. Use the scoring under cell *Grade Cell* in `check.ipynb`

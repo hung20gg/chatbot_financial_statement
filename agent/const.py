@@ -28,7 +28,7 @@ class Text2SQLConfig(Config):
     
 GEMINI_FAST_CONFIG = {
     "llm": 'gemini-2.0-flash',
-    "routing_llm": 'gemini-2.0-flash-lite-preview-02-05',
+    "routing_llm": 'gemini-2.0-flash',
     "summary_every": -1,
     "get_task": True
 }
@@ -151,7 +151,7 @@ TEXT2SQL_FAST_OPENAI_CONFIG = {
 }
 
 TEXT2SQL_FAST_SQL_OPENAI_CONFIG = {
-    "llm": 'gemini-2.0-flash-lite-preview-02-05',
+    "llm": 'gemini-2.0-flash-lite',
     "sql_llm": 'gpt-4o-mini',
     "reasoning": False,
     "branch_reasoning": False,
@@ -160,7 +160,7 @@ TEXT2SQL_FAST_SQL_OPENAI_CONFIG = {
 }
 
 TEXT2SQL_FAST_GEMINI_CONFIG = {
-    "llm": 'gemini-2.0-flash-lite-preview-02-05',
+    "llm": 'gemini-2.0-flash',
     "sql_llm": 'gemini-2.0-flash',
     "reasoning": False,
     "branch_reasoning": False,
@@ -178,7 +178,7 @@ TEXT2SQL_DEEPSEEK_V3_CONFIG = {
 }
 
 TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG = {
-    "llm": 'gemini-1.5-flash',
+    "llm": 'gemini-2.0-flash',
     "sql_llm": 'deepseek-chat',
     "reasoning": False,
     "branch_reasoning": False,
@@ -207,7 +207,7 @@ TEXT2SQL_MEDIUM_OPENAI_CONFIG = {
 }
 
 TEXT2SQL_MEDIUM_GEMINI_CONFIG = {
-    "llm": 'gemini-1.5-flash',
+    "llm": 'gemini-2.0-flash',
     "sql_llm": 'gemini-2.0-flash',
     "reasoning": True,
     "branch_reasoning": False,
@@ -246,6 +246,22 @@ TEXT2SQL_FASTEST_CONFIG = {
 
 
 ## ====== LOCAL CONFIGS ====== ##
+
+TEXT2SQL_QWEN25_CODER_7B_SFT_CONFIG = {
+    "llm": 'qwen2.5-coder-7b-sft',
+    "sql_llm": 'qwen2.5-coder-7b-sft',
+    "reasoning": False,
+    "branch_reasoning": False,
+    'account_top_k': 4,
+    'sql_example_top_k': 1,
+
+    "max_solution_cache": 1,
+
+    "verbose": False,
+    'get_all_acount': False,
+    'self_debug': True
+}
+
 
 
 TEXT2SQL_QWEN25_CODER_3B_SFT_CONFIG = {

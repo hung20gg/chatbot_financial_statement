@@ -20,6 +20,7 @@ from agent.const import (
     TEXT2SQL_QWEN25_CODER_3B_DPO_CONFIG,
     TEXT2SQL_QWEN25_CODER_1B_KTO_CONFIG,
     TEXT2SQL_QWEN25_CODER_3B_KTO_CONFIG,
+    TEXT2SQL_QWEN25_CODER_7B_SFT_CONFIG
 )
 
 from agent.prompt.prompt_controller import (
@@ -64,7 +65,7 @@ def get_text2sql_config(llm_name):
     if 'gpt-4o' in llm_name:
         if 'mini' not in llm_name:
             return TEXT2SQL_4O_CONFIG
-        return TEXT2SQL_FAST_SQL_OPENAI_CONFIG
+        return TEXT2SQL_FAST_OPENAI_CONFIG
 
     if 'deepseek-chat' in llm_name:
         return TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG
@@ -81,10 +82,13 @@ def get_text2sql_config(llm_name):
         return TEXT2SQL_QWEN25_CODER_1B_KTO_CONFIG
     if llm_name == 'qwen2.5-coder-3b-kto':
         return TEXT2SQL_QWEN25_CODER_3B_KTO_CONFIG
+    if llm_name == 'qwen2.5-coder-7b-sft':
+        return TEXT2SQL_QWEN25_CODER_7B_SFT_CONFIG
 
     else:
         config = TEXT2SQL_FAST_GEMINI_CONFIG
-        config['sql_llm'] = llm_name    
+        config['sql_llm'] = llm_name   
+        config['llm'] = llm_name 
         return config
 
 

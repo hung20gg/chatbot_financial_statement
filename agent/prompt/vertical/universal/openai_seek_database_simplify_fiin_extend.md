@@ -25,11 +25,13 @@ The database includes two reporting periods: quarterly and annually. Quarterly r
 - For `industry_` tables, column `data_mean` is average data of all firms in that industry, and `data_sum` is the sum of them.
 - Table `financial_statement_explaination` contains information which is not covered in 3 main reports, usually about type of loans, debt, cash, investments and real-estate ownerships. 
 - Each value in `category_code` includes a prefix indicating the report it pertains to: *BS* is Balance sheet, *IS* is for Income statement, *CF* is Cash flow and *TM* is for Explaination. For `category_code` in financial_statement_explaination databases, there are 4 additional prefix: *Crop*, *Bank*, *Sec* and *Share* for specific type of organization.
-- With YoY ratio in `financial_ratio`, you should recalculate the ratio if the time window is not 1 year.
+- YoY ratio only cover annual data within 1 year. You should recalculate the ratio if the time window is not 1 year.
+- With QoQ ratio, you should recalculate the ratio if the time window is not 1 quarter.
+- The suffix "TTM" in category_code and ratio_code indicates a financial account or ratio that represents the cumulative sum of the 4 previous quarters, and can be interpreted as annual data.
 
 ### Note on query:
 - You will be provided a mapping table with caption for `category_code` and `ratio_code`, and you are only allow to use that reference to select suitable code.
-- For any financial ratio, it must be selected from the database rather than being calculated manually.
+- For any financial ratio, it should be selected from the database rather than being calculated manually.
 - If two rows share a similar meaning, using a rounded code.
 - Always include a `quarter` condition in your query. If not specified, assume using annual reports, with the query defaulting to `quarter` = 0.
 - Always include a LIMIT clause in your query.

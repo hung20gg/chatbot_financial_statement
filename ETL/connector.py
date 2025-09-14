@@ -503,6 +503,27 @@ def setup_vector_db_company_name(collection_name, persist_directory, table, mode
     with ThreadPoolExecutor() as executor:
         executor.map(lambda company: process_company(vector_db, company), companies)
 
+
+       
+def setup_vector_db_industry(collection_name, persist_directory, table, model_name, vectordb, **db_conn):
+    conn = connect_to_db(**db_conn)
+    logging.info("Connected to database")
+    try:
+        with conn.cursor() as cur:
+            cur.execute(f"SELECT  DISTINCT(industry)  FROM {table}")
+            industries = cur.fetchall()
+            industries = [(industry[0]) for industry in industries if industry[0] is not None]
+    finally:
+        conn.close()
+    
+    vector_db = create_vector_db(collection_name, persist_directory, model_name, vectordb)
+    
+    def process_company(vector_db, company):
+        vector_db.add_texts(list(company), ids=[str(uuid.uuid4()) for _ in company])
+        
+    
+    process_company(vector_db, industries)
+
         
 def setup_vector_db_sql_query(collection_name, persist_directory, txt_path, model_name, vectordb, **db_conn):
     
@@ -562,9 +583,9 @@ FIIN_RDB_SETUP_CONFIG = {
     'map_category_code_universal': ['../data/v3/map_category_code_universal.csv', ['category_code']],
     
     
-    'bank_financial_report' : ['../data/v3/bank_financial_report.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'non_bank_financial_report' : ['../data/v3/corp_financial_report.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
-    'securities_financial_report' : ['../data/v3/securities_financial_report.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'bank_financial_report' : ['../data/v3/bank_financial_report.parquet', None, {'category_code': 'map_category_code_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'non_bank_financial_report' : ['../data/v3/corp_financial_report.parquet', None, {'category_code': 'map_category_code_non_bank(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
+    # 'securities_financial_report' : ['../data/v3/securities_financial_report.parquet', None, {'category_code': 'map_category_code_securities(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     'financial_statement': ['../data/financial_statement_v3.parquet', None, {'category_code': 'map_category_code_universal(category_code)', 'stock_code': 'company_info(stock_code)'}, False, ['date_added']],
     
 
@@ -586,6 +607,7 @@ FIIN_DELETE_ORDER = list(FIIN_RDB_SETUP_CONFIG.keys())[::-1] # delete in reverse
 
 
 VERTICAL_VECTORDB_SETUP_CONFIG = {
+    'industry': ['company_info'],
     'company_name_chroma': ['company_info'],
     'category_bank_chroma': ['map_category_code_bank'],
     'category_non_bank_chroma': ['map_category_code_non_bank'],
@@ -622,7 +644,9 @@ def setup_vector_db(config, persist_directory, model_name = 'text-embedding-3-sm
         params.append(vectordb)
         print(params)
 
-        if 'sql_query' in table:
+        if table == 'industry':
+            setup_vector_db_industry(table, persist_directory, *params, **db_conn)
+        elif 'sql_query' in table:
             setup_vector_db_sql_query(table, persist_directory, *params)
         elif table == 'company_name_chroma':
             setup_vector_db_company_name(table, persist_directory, *params, **db_conn)
@@ -738,7 +762,14 @@ def setup_everything(config: dict):
                 import torch
             
                 logging.warning("Embedding server is not running, using local model")
-                device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+                if torch.backends.mps.is_available():
+                    device = torch.device("mps")  # Use Metal on macOS
+                elif torch.cuda.is_available():
+                    device = torch.device("cuda")  # Use CUDA if available
+                else:
+                    device = torch.device("cpu")   # Default to CPU
+
+                print(f"Using device: {device}")
                 model = HuggingFaceEmbeddings(model_name=local_model, model_kwargs = {'device': device})
                 setup_vector_db(VERTICAL_VECTORDB_SETUP_CONFIG, client, model, vectordb=config.get('vectordb'), **db_conn)
                 

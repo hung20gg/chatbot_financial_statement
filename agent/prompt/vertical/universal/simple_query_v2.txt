@@ -1594,3 +1594,134 @@ where
 	and quarter = 0
 	and stock_code = 'TCB'
 
+-- 72. Total revenue of first 3 quarters/ 9 months of VIC in 2024
+
+SELECT
+    stock_code,
+    year,
+    SUM(data) AS total_revenue_9_months
+FROM
+    financial_statement
+WHERE
+    stock_code = 'VIC'
+    AND year = 2024
+    AND quarter IN (1, 2, 3)
+    AND category_code = 'IS_001'  -- Gross Revenue
+GROUP BY
+    stock_code,
+    year
+LIMIT 1;
+
+-- 73. ROA of 4 nearest quarter of HPG in Q3 2023
+
+SELECT 
+    stock_code,
+    year,
+    quarter,
+    ratio_code,
+    data
+FROM 
+    financial_ratio
+WHERE 
+    stock_code = 'HPG'
+    AND year = 2023
+    AND quarter = 3
+    AND ratio_code = 'ROATTM' -- ROA Trailing Twelve Month
+LIMIT 10;
+
+-- 74. Total Revenue of 4 nearest quarter of MSN in Q3 2023
+SELECT 
+    stock_code,
+    year,
+    quarter,
+    category_code ,
+    data
+FROM 
+    financial_statement fs2 
+WHERE 
+    stock_code = 'MSN'
+    AND year = 2023
+    AND quarter = 3
+    AND category_code = 'IS_001_TTM' -- ROA Trailing Twelve Month
+LIMIT 10;
+
+-- 75. ROE trailing twelve month (TTM) of HPG in Q3 2023
+
+SELECT 
+    stock_code,
+    year,
+    quarter,
+    ratio_code,
+    data
+FROM 
+    financial_ratio
+WHERE 
+    stock_code = 'HPG'
+    AND year = 2023
+    AND quarter = 3
+    AND ratio_code = 'ROETTM' -- ROE Trailing Twelve Month
+LIMIT 10;
+
+-- 76. Gross Profit Growth QoQ of HPG in Q3 2024
+
+SELECT 
+    stock_code,
+    year,
+    quarter,
+    ratio_code,
+    data
+FROM 
+    financial_ratio
+WHERE 
+    stock_code = 'HPG'
+    AND year = 2024
+    AND quarter = 3
+    AND ratio_code = 'GPGQoQ'
+LIMIT 10;
+
+-- 77. Gross Revenue of HPG from Q1 2022 to Q3 2023
+SELECT 
+    stock_code,
+    year,
+    quarter,
+    category_code,
+    data
+FROM 
+    financial_statement
+WHERE 
+    stock_code = 'NLG' -- Gross Revenue
+    AND category_code = 'IS_001'
+    AND date_added BETWEEN '2022-01-01' AND '2023-09-30'
+    AND quarter != 0
+LIMIT 10;
+
+// -- 78. Total Accrued expenses of HPG in 2019
+
+-- 79. Bad debt coverage ratio of banks in 2019
+-- ### industry_nplcr_banks_2019
+SELECT 
+    industry,
+    year,
+    quarter,
+    ratio_code,
+    data_mean
+FROM industry_financial_ratio
+WHERE ratio_code = 'NPLCR'  -- Non-Performing Loan Coverage Ratio
+  AND industry = 'Banking'
+  AND year = 2019
+  AND quarter = 0
+LIMIT 100;
+
+-- 80. Total Inventory and Provision for Inventory of HPG in 2022
+SELECT 
+    stock_code,
+    year,
+    quarter,
+    category_code,
+    data
+FROM financial_statement
+WHERE 
+    stock_code = 
+    AND category_code IN ('BS_161', 'BS_162') -- Current Inventories, Provision for decline in value of inventories
+    AND year = 2022
+LIMIT 100;

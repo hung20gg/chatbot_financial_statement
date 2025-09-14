@@ -38,12 +38,14 @@ def initialize_text2sql(text2sql_config, prompt_config, version = 'v3', message 
 
     embedding_server = os.getenv('EMBEDDING_SERVER_URL')
     
+    if version == 'v3.2':
+        text2sql_config.account_top_k = int(text2sql_config.account_top_k * 1.25)
 
     # Setup db
     if check_embedding_server(embedding_server):
         logging.info('Using remote embedding server')
         db_config = DBConfig(**TEI_VERTICAL_UNIVERSAL_CONFIG)
-    elif os.path.exists('data/vector_db_vertical_openai'):
+    elif os.path.exists(f'data/vector_db_vertical_openai_{version}'):
         logging.info('Using openai embedding')
         db_config = DBConfig(**OPENAI_VERTICAL_UNIVERSAL_CONFIG)
     
@@ -51,7 +53,13 @@ def initialize_text2sql(text2sql_config, prompt_config, version = 'v3', message 
         import torch
     
         db_config = DBConfig(**BGE_VERTICAL_UNIVERSAL_CONFIG)
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')    
+        if torch.backends.mps.is_available():
+            device = torch.device("mps")  # Use Metal on macOS
+        elif torch.cuda.is_available():
+            device = torch.device("cuda")  # Use CUDA if available
+        else:
+            device = torch.device("cpu")
+        
         embedding_model = HuggingFaceEmbeddings(model_name='BAAI/bge-base-en-v1.5', model_kwargs = {'device': device})
         db_config.embedding = embedding_model
     

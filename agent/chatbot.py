@@ -150,6 +150,7 @@ class Chatbot(BaseAgent):
             )
             
             response = self.routing_llm(routing_log)
+            print("ROUTING RESPONSE")
             print(response)
 
             # Beautiful response

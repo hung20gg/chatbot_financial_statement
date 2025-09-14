@@ -25,6 +25,10 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
+
+INDUSTRY_METHOD = 'similarity'
+
+
 def steps_to_strings(steps):
     steps_string = "\nBreak down the task into steps:\n\n"
     for i, step in enumerate(steps):
@@ -80,6 +84,7 @@ class Text2SQL(BaseAgent):
     max_debug_round: int = 3 # The maximum number of debugging rounds
     max_solution_cache: int = 10 # The maximum number of solutions to cache
     current_solution_cache: int = 0 # The current number of solutions cached
+    temperature: float = 0.4
 
     def __init__(self, config: Text2SQLConfig, prompt_config: PromptConfig, db, max_steps: int = 2, **kwargs):
         super().__init__(config=config, db = db, max_steps = max_steps, prompt_config = prompt_config)
@@ -135,7 +140,7 @@ class Text2SQL(BaseAgent):
         ]
     
         logging.info("Simplify branch reasoning response")
-        response = self.llm(messages)
+        response = self.llm(messages, temperature=self.temperature)
         if self.config.verbose:
             print("Branch reasoning response: ")
             print(response)
@@ -162,7 +167,7 @@ class Text2SQL(BaseAgent):
         
         
         logging.info("Get stock code based on company name response")
-        response = self.llm(messages)
+        response = self.llm(messages, temperature=self.temperature)
         messages.append(
             {
                 "role": "assistant",
@@ -227,7 +232,8 @@ class Text2SQL(BaseAgent):
                                                 stock_code = stock_code, 
                                                 top_k =self.config.account_top_k, 
                                                 get_all_tables=self.config.get_all_acount,
-                                                mix_account = mix_account)    
+                                                mix_account = mix_account,
+                                                industry_selection = INDUSTRY_METHOD)    
         
         # Return data
         
@@ -244,7 +250,7 @@ class Text2SQL(BaseAgent):
 
     
     @staticmethod 
-    def __flatten_list(list_of_str, prefix = "error"):
+    def _flatten_list(list_of_str, prefix = "error"):
         if isinstance(list_of_str, str):
             list_of_str = [list_of_str]
 
@@ -256,7 +262,7 @@ class Text2SQL(BaseAgent):
     
     def __debug_sql(self, history, error_messages: List[str], prefix = "Debug"):
         
-        error_message = self.__flatten_list(error_messages, prefix="Error")
+        error_message = self._flatten_list(error_messages, prefix="Error")
         
         new_query = f"You have some error in the previous SQL query:\n\n <log>\n\n{error_message}\n\n</log>\n\nPlease analyze to fix the error and try again."
         history.append(
@@ -266,7 +272,7 @@ class Text2SQL(BaseAgent):
             }
         )
         
-        response = self.sql_llm(history)
+        response = self.sql_llm(history, temperature=self.temperature)
 
         history.append({
                 "role": "assistant",
@@ -498,7 +504,7 @@ You are an expert in financial statement and database management. You will be as
         if inject_reasoning is not None: # Inject reasoning
             response = inject_reasoning
         else:
-            response = self.sql_llm(self.history)
+            response = self.sql_llm(self.history, temperature=self.temperature)
 
         if self.config.verbose:
             print(response)
@@ -620,7 +626,7 @@ Return in the following format (### SQL Query is optional):
             "content": correction_prompt
         })
 
-        response = self.sql_llm(self.history)
+        response = self.sql_llm(self.history, temperature=self.temperature)
 
         if self.config.verbose:
             print(response)
@@ -689,7 +695,7 @@ Only return new, detailed task. Do not return the SQL. Return in the following f
             "content": reflection_prompt
         })
 
-        reflection_response = self.sql_llm(self.history)
+        reflection_response = self.sql_llm(self.history, temperature=self.temperature)
 
         if self.config.verbose:
             print(reflection_response)
@@ -831,7 +837,7 @@ Only return new, detailed task. Do not return the SQL. Return in the following f
                     "content": f"The previous result of is \n\n<result>\n\n{previous_result}\n\n<result>\n\n <instruction>\n\nThink step-by-step and do the {step}\n\n</instruction>\n\nHere are the samples SQL you might need\n\n{self.db.find_sql_query(step, top_k=self.config.sql_example_top_k)}\n\n"
                 })
             
-            response = self.sql_llm(self.history)
+            response = self.sql_llm(self.history, temperature=self.temperature)
             if self.config.verbose:
                 print(response)
             
@@ -1082,7 +1088,7 @@ class Text2SQLMessage(Text2SQL):
 
         # =========== Generate SQL query =============
         response = ""
-        yield "### ===== Text2SQL Solver ====="
+        yield "### ===== Text2SQL Solver =====\n"
         generator = self.sql_llm.stream(self.history)
         for text in generator:
             if text: # OpenAI model may return None
@@ -1211,7 +1217,7 @@ class Text2SQLMessage(Text2SQL):
         # First time solving
         response = ""
         if len(error_messages) > 0:
-            response += "### Initial Error:\n"+self.__flatten_list(error_messages, prefix="Error") +"\n\n"
+            response += "### Initial Error:\n"+self._flatten_list(error_messages, prefix="Error") +"\n\n"
         if len(execution_tables) > 0:
             response += "### Initial Execution Tables:\n"+utils.table_to_markdown(execution_tables, adjust=adjust_table)
 
@@ -1250,7 +1256,7 @@ class Text2SQLMessage(Text2SQL):
 
         error_message, execution_table = utils.TIR_reasoning(self.history[-1]['content'], self.db, verbose=self.config.verbose)
         if len(error_message) > 0:
-            yield "### Final Error:\n"+self.__flatten_list(error_message, prefix="Error") +"\n\n"
+            yield "### Final Error:\n"+self._flatten_list(error_message, prefix="Error") +"\n\n"
         if len(execution_table) > 0:
             yield "### Final Execution Tables:\n"+utils.table_to_markdown(execution_table, adjust=adjust_table)
         
