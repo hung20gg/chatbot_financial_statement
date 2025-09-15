@@ -382,7 +382,10 @@ You will be given a multiple-choice question with 5 choices, a SQL-related task 
 
 You will be asked to choose the correct answer for the MCQs based on the SQL task and the reference tables provided.
 Notice that there is only one correct answer. If you cannot derive the answer, return choice E.
-You will loss 1 point for each wrong answer and gain 1 point for correct answer, however, you will not be penalized if you choose choice E.
+
+This test is designed to evaluate the accuracy of the table, so if the information is not present in the table, you should choose choice E.
+
+You will lose 1 point for each wrong answer and gain 1 point for correct answer, however, you will not be penalized if you choose choice E.
 So, you can choose to skip the question if you are not sure about the answer.
 
 Analyze carefully and return your choice (A, B, C, D, E) in JSON format. For example:

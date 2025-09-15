@@ -61,7 +61,7 @@ BGE_HORIZONTAL_UNIVERSAL_CONFIG = {
 }
 
 TEI_VERTICAL_UNIVERSAL_CONFIG = {
-    "embedding": 'http://localhost:8080',
+    "embedding": 'http://localhost:8083',
     "database_choice": 'vertical_universal'
 }
 

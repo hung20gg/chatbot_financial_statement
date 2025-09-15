@@ -1,10 +1,5 @@
 # Chatbot_financial_statement
 
-#### Update 23-02-2025: EVF is a bank
-
-#### Update 22-02-2025: New Text2SQL UI + add new db
-
-#### Update 17-02-2025: Just need the evaluation dataset
 
 ## File structures
 
@@ -34,38 +29,6 @@ This is the codebase for database setup and DB utils for Text2SQL solver and Cha
 - Generate SQL query based on the given question
 - Evaluate the quality of the SQL generated
 
-### Page
-
-- Host the Chatbot via steamlit
-
-### Trainer
-
-- GPRO Trainer
-
-## LLM Available
-
-### Gemini:
-
-- Gemini 2.0 Flash
-- Gemini 2.0 Flash Thinking Exp
-
-### GPT
-
-- GPT 4o mini (Local test: 0.65)
-- GPT 4o
-
-### Deepseek
-
-- Deepseek-chat
-
-### Qwen
-
-- Qwen2.5-Coder-3B-SFT (Local test: 0.72)
-- Qwen2.5-Coder-3B-KTO
-- Qwen2.5-Coder-3B-DPO
-- Qwen2.5-Coder-1.5B-SFT
-- Qwen2.5-Coder-1.5B-KTO
-- Qwen2.5-Coder-1.5B-DPO
 
 ## Database design
 
@@ -78,34 +41,12 @@ This is the codebase for database setup and DB utils for Text2SQL solver and Cha
 - Reasoning: After having snapshot, ask LLM to generate SQL directly to solve the problem
 - Include debugging
 
-## Setup guide
-<details>
-<summary>Ignore</summary>
-- Make `run.sh` file executable
-```bash
-chmod +x run.sh
-```
 
-- For CPU (Using OpenAI Embedding)
-```bash
-./run.sh --openai True
-```
-
-- For GPU (Self-hosted Embedding Server)
-```bash
-./run.sh local-embedding --local True
-```
-- For GPU, Including Reranker 
-```bash
-./run.sh local-server --local True 
-```
-</details>
-
-### Setup maunally
+### Setup
 
 
 
-Clone the reporitoty and create environment
+Clone the repositoty and create environment
 
 ```bash
 git clone https://github.com/hung20gg/chatbot_financial_statement.git
@@ -227,7 +168,6 @@ Using [LLaMA-Factory CLI](https://github.com/hiyouga/LLaMA-Factory) for LoRA tun
 
 ### MCQ evaluation
 
-- v1: 1 SQL → 1 MCQ
 - v2: 1 SQL → multiple MCQs. Average them, or get int(avg(scores))
 
 ## Versioning v1 (training) and v2 (testing) database
@@ -241,11 +181,3 @@ Changes of training and testing dataset:
 - Changes in industry average
 
 Change the `DB_NAME` in `.env` file to another version to load
-
-## TO DO
-- [x] Add new v3.2 companies into the database
-- [x] Text2SQL UI
-- [ ] Evaluation dataset
-- [ ] Moving logging & vectordb to Elastic Search 
-- [ ] FastAPI backend 
-- [ ] Write unit tests  
