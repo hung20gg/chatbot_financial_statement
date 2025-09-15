@@ -46,20 +46,11 @@ template=simplify
 python generate.py --llm $llm --version $version --path $path --template $template --enhance correction
 ```
 
+Generate SQL code for evaluation dataset `sql_v0.jsonl` (Evaluation dataset)
 ```bash
-llm=gemini-2.0-flash-thinking-exp-01-21
-version=hard_v0_4
-path=../data/hard_questions_v0_4.jsonl
-template=simplify
-
-python generate.py --llm $llm --version $version --path $path --template $template --enhance correction --multi_thread True --max_workers 2
-```
-
-Generate SQL code for evaluation dataset `sql_v0.jsonl`
-```bash
-llm=qwen2.5-coder-1.5b-sft
+llm=qwen2.5-coder-3b-dpo
 multi_thread=True 
-version=take1-8000
+version=take2
 path=../data/sql_v3.jsonl
 
 python generate.py --llm $llm --version $version --multi_thread $multi_thread --path $path --batch_size 1 --template openai --max_workers 1 --enhance correction --rotate_api
@@ -123,10 +114,10 @@ Answer the MCQ question corresponding to the SQL question
 llm=gemini-2.0-flash
 multi_thread=True 
 task=evaluate
-path=../data/gemini-2.0-flash__take3.jsonl
+path=../data/qwen2.5-coder-3b-dpo__take2.jsonl
 mcq_path=../data/mcq_sql_v3_v2.jsonl
 
-python validate.py --llm $llm --task $task  --path $path --mcq_path $mcq_path --max_workers 8 --multi_thread $multi_thread --rotate_api
+python validate.py --llm $llm --task $task  --path $path --mcq_path $mcq_path --max_workers 10 --multi_thread $multi_thread --rotate_api
 ```
 
 **Note:** The scoring function is current have some bug. Use the scoring under cell *Grade Cell* in `check.ipynb`

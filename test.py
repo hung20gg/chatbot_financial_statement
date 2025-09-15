@@ -45,7 +45,7 @@ logging.basicConfig(
 def test(version = 'v3'):
 
     chat_config = ChatConfig(**GPT4O_MINI_CONFIG)
-    text2sql_config = TEXT2SQL_THINKING_GEMINI_CONFIG
+    text2sql_config = TEXT2SQL_FAST_OPENAI_CONFIG
     # text2sql_config['sql_llm'] = 'meta/llama-3.3-70b-instruct'
     # text2sql_config['llm'] = 'qwen2.5-3b-coder-test-v3/sft/v2.1'
     # text2sql_config['sql_example_top_k'] = 0
