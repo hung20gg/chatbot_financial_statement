@@ -6,26 +6,13 @@ chromadb.api.client.SharedSystemClient.clear_system_cache()
 from agent import Chatbot, Text2SQL
 from agent.const import (
     ChatConfig,
-    GEMINI_FAST_CONFIG,
-    GPT4O_MINI_CONFIG,
-    GPT4O_CONFIG,
-    TEXT2SQL_MEDIUM_GEMINI_CONFIG,
-    TEXT2SQL_FASTEST_CONFIG,
-    TEXT2SQL_FAST_OPENAI_CONFIG,
-    TEXT2SQL_FAST_GEMINI_CONFIG,
-    TEXT2SQL_DEEPSEEK_V3_CONFIG,
-    TEXT2SQL_EXP_GEMINI_CONFIG,
-    TEXT2SQL_THINKING_GEMINI_CONFIG
+    TEXT2SQL_QWEN_CONFIG,
+    TEXT2SQL_FAST_OPENAI_CONFIG
 
 )
 
 from agent.prompt.prompt_controller import ( 
-    VERTICAL_PROMPT_BASE, 
-    VERTICAL_PROMPT_UNIVERSAL,
-    HORIZONTAL_PROMPT_BASE,
-    HORIZONTAL_PROMPT_UNIVERSAL,
-    FIIN_VERTICAL_PROMPT_UNIVERSAL,
-    FIIN_VERTICAL_PROMPT_UNIVERSAL_SIMPLIFY_EXTEND,
+
     FIIN_VERTICAL_PROMPT_UNIVERSAL_OPENAI_EXTEND,
     FIIN_VERTICAL_PROMPT_UNIVERSAL_SHORT
 )
@@ -42,9 +29,8 @@ logging.basicConfig(
 
 
 
-def test(version = 'v3'):
+def test(version = 'v4.0'):
 
-    chat_config = ChatConfig(**GPT4O_MINI_CONFIG)
     text2sql_config = TEXT2SQL_FAST_OPENAI_CONFIG
     # text2sql_config['sql_llm'] = 'meta/llama-3.3-70b-instruct'
     # text2sql_config['llm'] = 'qwen2.5-3b-coder-test-v3/sft/v2.1'
@@ -57,9 +43,6 @@ def test(version = 'v3'):
     # try:
     if True:
         text2sql = initialize_text2sql(text2sql_config, prompt_config, version=version)
-        
-        chatbot = Chatbot(config = chat_config, text2sql = text2sql)
-        logging.info('Finish setup chatbot')
         
         
         logging.info('Test find stock code similarity')
@@ -90,5 +73,5 @@ def test(version = 'v3'):
 
 if __name__ == "__main__":
     
-    version = 'v3.2'
+    version = 'v4.0'
     test(version)

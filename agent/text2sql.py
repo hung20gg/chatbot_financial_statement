@@ -7,6 +7,7 @@ sys.path.append('..')
 from ETL.dbmanager import BaseDBHUB
 from llm.llm.abstract import LLM
 from llm.llm_utils import get_json_from_text_response, get_code_from_text_response
+from llm import get_llm_wrapper
 from .const import Text2SQLConfig, Config
 from . import const
 from .prompt.prompt_controller import PromptConfig, VERTICAL_PROMPT_BASE, VERTICAL_PROMPT_UNIVERSAL
@@ -94,9 +95,9 @@ class Text2SQL(BaseAgent):
         self.prompt_config = prompt_config
         
         # LLM
-        self.llm = utils.get_llm_wrapper(model_name=config.llm, **kwargs)
+        self.llm = get_llm_wrapper(model_name=config.llm, **kwargs)
         if hasattr(config, 'sql_llm'):
-            self.sql_llm = utils.get_llm_wrapper(model_name=config.sql_llm, **kwargs)
+            self.sql_llm = get_llm_wrapper(model_name=config.sql_llm, **kwargs)
         else:
             logging.warning("SQL LLM is not provided. Use the same LLM model for SQL")
             self.sql_llm = self.sql_llm

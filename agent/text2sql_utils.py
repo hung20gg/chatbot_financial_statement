@@ -6,9 +6,6 @@ import json
 import sys 
 sys.path.append('..')
 
-from llm.llm.chatgpt import ChatGPT, OpenAIWrapper
-from llm.llm.gemini import Gemini, RotateGemini
-
 from llm.llm_utils import get_code_from_text_response
 from pydantic import BaseModel, ConfigDict
 from typing import Union
@@ -104,37 +101,6 @@ def join_and_get_difference(df1, df2):
     df1 = pd.concat([df1, diff])
     return df1, diff
 
-
-def get_llm_wrapper(model_name, rotate_key=False, **kwargs):
-
-    host = None 
-    api_key = None
-
-    if '/' not in model_name: # Direct provider
-
-        if 'gpt' in model_name:
-            logging.info(f"Using ChatGPT with model {model_name}")
-            return ChatGPT(model_name=model_name, **kwargs)
-        
-        elif 'gemini' in model_name:
-            logging.info(f"Using Gemini with model {model_name}")
-            if rotate_key:
-                return RotateGemini(model_name=model_name, **kwargs)
-            return Gemini(model_name=model_name, random_key='exp' in model_name, **kwargs)
-        
-        elif 'deepseek' in model_name:
-            logging.info(f"Found DeepSeek endpoint: {model_name}")
-            host = os.getenv('DEEPSEEK_HOST')
-            api_key = os.getenv('DEEPSEEK_API_KEY')
-
-    if not host: # Huggingface LLM
-        host = os.getenv('LLM_HOST')
-        api_key = os.getenv('LLM_API_KEY')
-
-    logging.info(f"Using OpenAI Wrapper model: {model_name}  with host {host}")
-
-    return OpenAIWrapper(host=host, api_key=api_key, model_name=model_name, **kwargs)
-    
 
 
 def read_file_without_comments(file_path, start=["#", "//"]):
@@ -646,19 +612,3 @@ if __name__ == '__main__':
 
     from dotenv import load_dotenv
     load_dotenv()
-
-    print(os.getenv('LLM_HOST'))
-
-    llm = get_llm_wrapper('deepseek-chat')
-    
-    message = [
-        {
-            'role': 'user',
-            'content': "What is the revenue of Apple in Q2 2023"
-        }
-    ]
-
-    generator = llm.stream(message)
-    for text in generator:
-        print(text, sep=" ")
-

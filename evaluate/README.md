@@ -48,12 +48,12 @@ python generate.py --llm $llm --version $version --path $path --template $templa
 
 Generate SQL code for evaluation dataset `sql_v0.jsonl` (Evaluation dataset)
 ```bash
-llm=qwen2.5-coder-3b-dpo
+llm=qwen2.5-coder-1.5b-dpo
 multi_thread=True 
-version=take2
+version=take1
 path=../data/sql_v3.jsonl
 
-python generate.py --llm $llm --version $version --multi_thread $multi_thread --path $path --batch_size 1 --template openai --max_workers 1 --enhance correction --rotate_api
+python generate.py --llm $llm --version $version --multi_thread $multi_thread --path $path --batch_size 1 --template openai --max_workers 2 --enhance correction --rotate_api
 ```
 
 

@@ -112,8 +112,8 @@ TEXT2SQL_4O_CONFIG = {
 }
 
 TEXT2SQL_GEMINI_PRO_CONFIG = {
-    "llm": 'gemini-1.5-pro',
-    "sql_llm": 'gemini-1.5-pro',
+    "llm": 'gemini-2.5-pro',
+    "sql_llm": 'gemini-2.5-pro',
     "self_debug": True,
 
     "account_top_k": 7,
@@ -132,9 +132,9 @@ TEXT2SQL_GEMINI_PRO_EXP_CONFIG = {
 }
 
 
-TEXT2SQL_SWEET_SPOT_CONFIG = {
-    "llm": 'gemini-1.5-flash-8b',
-    "sql_llm": 'gpt-4o-mini',
+TEXT2SQL_QWEN_CONFIG = {
+    "llm": 'openrouter:qwen/qwen3.5-122b-a10b',
+    "sql_llm": 'openrouter:qwen/qwen3.5-122b-a10b',
     "reasoning": False,
     "branch_reasoning": False,
 
@@ -142,219 +142,13 @@ TEXT2SQL_SWEET_SPOT_CONFIG = {
 }
 
 TEXT2SQL_FAST_OPENAI_CONFIG = {
-    "llm": 'gpt-4o-mini',
-    "sql_llm": 'gpt-4o-mini',
-    "reasoning": False,
-    "branch_reasoning": False,
-
-    'self_debug': True
-}
-
-TEXT2SQL_FAST_SQL_OPENAI_CONFIG = {
-    "llm": 'gemini-2.0-flash-lite',
-    "sql_llm": 'gpt-4o-mini',
-    "reasoning": False,
-    "branch_reasoning": False,
-
-    'self_debug': True
-}
-
-TEXT2SQL_FAST_GEMINI_CONFIG = {
-    "llm": 'gemini-2.0-flash',
-    "sql_llm": 'gemini-2.0-flash',
-    "reasoning": False,
-    "branch_reasoning": False,
-
-    'self_debug': True
-}
-
-TEXT2SQL_DEEPSEEK_V3_CONFIG = {
-    "llm": 'deepseek-chat',
-    "sql_llm": 'deepseek-chat',
-    "reasoning": False,
-    "branch_reasoning": False,
-
-    'self_debug': True
-}
-
-TEXT2SQL_DEEPSEEK_V3_FAST_CONFIG = {
-    "llm": 'gemini-2.0-flash',
-    "sql_llm": 'deepseek-chat',
-    "reasoning": False,
-    "branch_reasoning": False,
-
-    'self_debug': False
-}
-
-TEXT2SQL_DEEPSEEK_REASONING_CONFIG = {
-    "llm": 'deepseek-chat',
-    "sql_llm": 'deepseek-reasoner',
-    "reasoning": True,
-    "branch_reasoning": False,
-    "company_top_k": 2,
-    "sql_example_top_k": 4,
-    "account_top_k": 8,
-    'self_debug': True
-}
-
-TEXT2SQL_MEDIUM_OPENAI_CONFIG = {
-    "llm": 'gpt-4o-mini',
-    "sql_llm": 'gpt-4o-mini',
+    "llm": 'openrouter:openai/gpt-oss-120b',
+    "sql_llm": 'openrouter:openai/gpt-oss-120b',
     "reasoning": True,
     "branch_reasoning": False,
 
     'self_debug': True
 }
-
-TEXT2SQL_MEDIUM_GEMINI_CONFIG = {
-    "llm": 'gemini-2.0-flash',
-    "sql_llm": 'gemini-2.0-flash',
-    "reasoning": True,
-    "branch_reasoning": False,
-
-    'self_debug': True
-}
-
-TEXT2SQL_EXP_GEMINI_CONFIG = {
-    "llm": 'gemini-2.0-flash',
-    "sql_llm": 'gemini-2.0-pro-exp-02-05',
-    "reasoning": True,
-    "branch_reasoning": False,
-
-    'self_debug': True
-}
-
-TEXT2SQL_THINKING_GEMINI_CONFIG = {
-    "llm": 'gemini-2.0-flash',
-    'sql_llm': 'gemini-2.0-flash-thinking-exp-01-21',
-    "reasoning": False,
-    "branch_reasoning": False,
-     "max_solution_cache": 5,
-
-    'self_debug': True
-}
-
-
-TEXT2SQL_FASTEST_CONFIG = {
-    "llm": 'gemini-1.5-flash-8b',
-    "sql_llm": 'gemini-1.5-flash-002',
-    "reasoning": False,
-    "branch_reasoning": False,
-
-    'self_debug': False
-}
-
-
-## ====== LOCAL CONFIGS ====== ##
-
-TEXT2SQL_QWEN25_CODER_7B_SFT_CONFIG = {
-    "llm": 'qwen2.5-coder-7b-sft',
-    "sql_llm": 'qwen2.5-coder-7b-sft',
-    "reasoning": False,
-    "branch_reasoning": False,
-    'account_top_k': 4,
-    'sql_example_top_k': 1,
-
-    "max_solution_cache": 1,
-
-    "verbose": False,
-    'get_all_acount': False,
-    'self_debug': True
-}
-
-
-
-TEXT2SQL_QWEN25_CODER_3B_SFT_CONFIG = {
-    "llm": 'qwen2.5-coder-3b-sft',
-    "sql_llm": 'qwen2.5-coder-3b-sft',
-    "reasoning": False,
-    "branch_reasoning": False,
-    'account_top_k': 4,
-    'sql_example_top_k': 1,
-
-    "max_solution_cache": 1,
-
-    "verbose": False,
-    'get_all_acount': False,
-    'self_debug': True
-}
-
-TEXT2SQL_QWEN25_CODER_3B_DPO_CONFIG = {
-    "llm": 'qwen2.5-coder-3b-dpo',
-    "sql_llm": 'qwen2.5-coder-3b-dpo',
-    "reasoning": False,
-    "branch_reasoning": False,
-    'account_top_k': 4,
-    'sql_example_top_k': 1,
-
-    "max_solution_cache": 1,
-
-    "verbose": False,
-    'get_all_acount': False,
-    'self_debug': True
-}
-
-
-TEXT2SQL_QWEN25_CODER_3B_KTO_CONFIG = {
-    "llm": 'qwen2.5-coder-3b-kto',
-    "sql_llm": 'qwen2.5-coder-3b-kto',
-    "reasoning": False,
-    "branch_reasoning": False,
-    'account_top_k': 4,
-    'sql_example_top_k': 1,
-
-    "max_solution_cache": 1,
-
-    "verbose": False,
-    'get_all_acount': False,
-    'self_debug': True
-}
-
-
-TEXT2SQL_QWEN25_CODER_1B_SFT_CONFIG = {
-    "llm": 'qwen2.5-coder-1.5b-sft',
-    "sql_llm": 'qwen2.5-coder-1.5b-sft',
-    "reasoning": False,
-    "branch_reasoning": False,
-    'account_top_k': 4,
-    'sql_example_top_k': 1,
-
-    "max_solution_cache": 1,
-    "verbose": False,
-    'get_all_acount': False,
-    'self_debug': True
-}
-
-
-TEXT2SQL_QWEN25_CODER_1B_DPO_CONFIG = {
-    "llm": 'qwen2.5-coder-1.5b-dpo',
-    "sql_llm": 'qwen2.5-coder-1.5b-dpo',
-    "reasoning": False,
-    "branch_reasoning": False,
-    'account_top_k': 4,
-    'sql_example_top_k': 1,
-
-    "max_solution_cache": 1,
-    "verbose": False,
-    'get_all_acount': False,
-    'self_debug': True
-}
-
-
-TEXT2SQL_QWEN25_CODER_1B_KTO_CONFIG = {
-    "llm": 'qwen2.5-coder-1.5b-kto',
-    "sql_llm": 'qwen2.5-coder-1.5b-kto',
-    "reasoning": False,
-    "branch_reasoning": False,
-    'account_top_k': 4,
-    'sql_example_top_k': 1,
-
-    "max_solution_cache": 1,
-    "verbose": False,
-    'get_all_acount': False,
-    'self_debug': True
-}
-
 
 
 
